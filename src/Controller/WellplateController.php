@@ -4,9 +4,7 @@
 namespace App\Controller;
 
 
-use App\Entity\Sample;
 use App\Entity\Wellplate;
-use App\Form\SampleType;
 use App\Form\WellplateType;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,12 +13,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class SampleController
+ * Class WellplateController
  * @package App\Controller
  *
- * @Route(path="/samples")
+ * @Route(path="/wellplates")
  */
-class SampleController extends AbstractController
+class WellplateController extends AbstractController
 {
 
     /**
@@ -28,11 +26,11 @@ class SampleController extends AbstractController
      */
     public function list()
     {
-        $samples = $this->getDoctrine()->getRepository(Sample::class)->findAll();
+        $wellplates = $this->getDoctrine()->getRepository(Wellplate::class)->findAll();
 
-        return $this->render('sample/sample-list.html.twig', [
+        return $this->render('wellplate/wellplate-list.html.twig', [
             'headers' => ['ID', 'Title'],
-            'samples' => $samples,
+            'wellplates' => $wellplates,
         ]);
     }
 
@@ -41,23 +39,23 @@ class SampleController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $sample = new Sample();
+        $wellplate = new Wellplate();
 
-        $form = $this->createForm(SampleType::class, $sample);
+        $form = $this->createForm(WellplateType::class, $wellplate);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sample = $form->getData();
+            $wellplate = $form->getData();
 
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($sample);
+            $entityManager->persist($wellplate);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_sample_list');
+            return $this->redirectToRoute('app_wellplate_list');
         }
 
-        return $this->render('sample/sample-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
+        return $this->render('wellplate/wellplate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
     }
 
     /**
@@ -65,9 +63,9 @@ class SampleController extends AbstractController
      */
     public function update(int $id, Request $request) : Response
     {
-        $sample = $this->getDoctrine()->getRepository(Sample::class)->find($id);
+        $wellplate = $this->getDoctrine()->getRepository(Wellplate::class)->find($id);
         
-        $form = $this->createForm(SampleType::class, $sample);
+        $form = $this->createForm(WellplateType::class, $wellplate);
 
         $form->handleRequest($request);
 
@@ -75,15 +73,15 @@ class SampleController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_sample_list');
+            return $this->redirectToRoute('app_wellplate_list');
         }
 
-        $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($sample);
+        $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($wellplate);
 
-        return $this->render('sample/sample-form.html.twig', [
+        return $this->render('wellplate/wellplate-form.html.twig', [
             'new' => false,
             'form'=>$form->createView(),
-            'sample'=>$sample,
+            'wellplate'=>$wellplate,
             'revisions'=>$revisions
         ]);
     }

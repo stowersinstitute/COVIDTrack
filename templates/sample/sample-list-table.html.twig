@@ -1,0 +1,32 @@
+{% block body %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 2em;">ID</th>
+            <th>Title</th>
+            <th>Wellplate</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Last Modified</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for sample in samples %}
+        <tr>
+            <td>
+                <a href="{{ path('app_sample_update', {id: sample.id}) }}">{{ sample.id }}</a>
+            </td>
+            <td>{{ sample.title }}</td>
+            <td>
+                {% if sample.wellplate is not empty %}
+                <a href="{{ path('app_wellplate_update', {id: sample.wellplate.id}) }}"> {{ sample.wellplate.barcode }} </a>
+                {% endif %}
+            </td>
+            <td>{{ sample.status | replace({'_': " "}) | title }}</td>
+            <td>{{ sample.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ sample.updatedAt | date("Y-m-d H:i:s") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

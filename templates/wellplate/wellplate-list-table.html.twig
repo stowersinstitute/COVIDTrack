@@ -1,0 +1,24 @@
+{% block body %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Barcode</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Last Modified</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for wellplate in wellplates %}
+        <tr>
+            <td>
+                <a href="{{ path('app_wellplate_update', {id: wellplate.id}) }}">{{ wellplate.barcode }}</a>
+            </td>
+            <td>{{ wellplate.status | replace({'_': " "}) | title }}</td>
+            <td>{{ wellplate.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ wellplate.updatedAt | date("Y-m-d H:i:s") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

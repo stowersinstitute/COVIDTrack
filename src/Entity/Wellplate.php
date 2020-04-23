@@ -4,19 +4,20 @@
 namespace App\Entity;
 
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Class Sample
+ * Class Wellplate
  * @package App\Entity
  *
  * @ORM\Entity
  * @Gedmo\Loggable
  */
-class Sample
+class Wellplate
 {
     use TimestampableEntity, SoftDeleteableEntity;
 
@@ -38,7 +39,7 @@ class Sample
      * @ORM\Column(type="string")
      * @Gedmo\Versioned
      */
-    private $title;
+    private $barcode;
 
     /**
      * @var string
@@ -48,15 +49,20 @@ class Sample
     private $status;
 
     /**
-     * @var Wellplate
-     * @ORM\ManyToOne(targetEntity="App\Entity\Wellplate", inversedBy="samples")
-     * @Gedmo\Versioned
+     * @var Sample[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellpate")
      */
-    private $wellplate;
+    private $samples;
 
     public function __construct()
     {
         $this->status = self::STATUS_PENDING;
+        $this->samples = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->barcode;
     }
 
     /**
@@ -70,17 +76,17 @@ class Sample
     /**
      * @return string
      */
-    public function getTitle(): ?string
+    public function getBarcode(): ?string
     {
-        return $this->title;
+        return $this->barcode;
     }
 
     /**
-     * @param string $title
+     * @param string $barcode
      */
-    public function setTitle(string $title): void
+    public function setBarcode(string $barcode): void
     {
-        $this->title = $title;
+        $this->barcode = $barcode;
     }
 
     /**
@@ -99,22 +105,6 @@ class Sample
         $this->status = $status;
     }
 
-    /**
-     * @return Wellplate
-     */
-    public function getWellplate(): ?Wellplate
-    {
-        return $this->wellplate;
-    }
-
-    /**
-     * @param Wellplate $wellplate
-     */
-    public function setWellplate(?Wellplate $wellplate): void
-    {
-        $this->wellplate = $wellplate;
-    }
-
     public static function getFormStatuses()
     {
         return [
@@ -123,5 +113,13 @@ class Sample
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
         ];
+    }
+
+    /**
+     * @return Sample[]|ArrayCollection
+     */
+    public function getSamples()
+    {
+        return $this->samples;
     }
 }

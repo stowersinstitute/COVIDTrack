@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block page_title %}Samples{% endblock %}
+{% block page_title %}Wellplates{% endblock %}
 
 {% block body %}
 <div class="row">
     <div class="col-xs-12">
-        <a href="{{ path('app_sample_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> New Sample</a>
+        <a href="{{ path('app_wellplate_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> New Wellplate</a>
     </div>
 </div>
 
@@ -13,7 +13,7 @@
     <div class="col-xs-12">
         <div class="box">
             <div class="box-body">
-                {% include('sample-list-table.html.twig') %}
+                {% include('wellplate/wellplate-list-table.html.twig') %}
             </div>
         </div>
     </div>

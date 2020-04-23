@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+    {% if new %} New Wellplate {% else %} Edit Wellplate {{ wellplate.barcode }} {% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">General</h3>
+            </div>
+            <div class="box-body">
+                {{ form(form) }}
+            </div>
+        </div>
+    </div>
+    {% if wellplate is defined %}
+    <div class="col-md-6">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Readonly Stuff</h3>
+            </div>
+            <div class="box-body">
+                <div class="form-horizontal">
+                    <div class="field-group">
+                        <label>Created</label>
+                        <span>{{ wellplate.createdAt | date('Y-m-d H:i:s') }}</span>
+                    </div>
+                    <div class="field-group">
+                        <label>Last Modified</label>
+                        <span>{{ wellplate.updatedAt | date('Y-m-d H:i:s') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if revisions is defined %}
+    <div class="col-md-6">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Revisions</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Action</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for revision in revisions %}
+                    <tr>
+                        <td>{{ revision.version }}</td>
+                        <td>{{ revision.action }}</td>
+                        <td>{{ revision.loggedAt | date('Y-m-d H:i:s') }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
