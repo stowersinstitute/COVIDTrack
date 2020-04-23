@@ -7,6 +7,7 @@ services:
             dockerfile: Dockerfile
         volumes:
             - ./:/app
+#            - var:/app/var
         depends_on:
             - db
     nginx:
@@ -30,3 +31,4 @@ services:
 
 volumes:
     db_data:
+#    var:
