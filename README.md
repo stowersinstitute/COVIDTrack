@@ -2,6 +2,7 @@
 
 ## Development Environment Install
 
+### Docker
 1. `cp .env.docker .env.local`
 1. `docker-compose up -d`
 1. `docker-compose exec app /bin/bash` This puts you in the docker container.
