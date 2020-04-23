@@ -37,6 +37,37 @@
         </div>
     </div>
     {% endif %}
+    {% if wellplate.samples is defined and wellplate.samples is not empty %}
+        <div class="col-md-6">
+            <div class="box box-success">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Samples</h3>
+                </div>
+                <div class="box-body">
+                    <table class="table table-condensed">
+                        <thead>
+                        <tr>
+                            <th>Sample ID</th>
+                            <th>Sample Title</th>
+                            <th>Row</th>
+                            <th>Column</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for sample in wellplate.samples %}
+                            <tr>
+                                <td>{{ sample.id }}</td>
+                                <td>{{ sample.title }}</td>
+                                <td>{{ sample.wellplateRow }}</td>
+                                <td>{{ sample.wellplateColumn }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% endif %}
     {% if revisions is defined %}
     <div class="col-md-6">
         <div class="box box-success">

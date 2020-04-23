@@ -31,7 +31,6 @@ class SampleController extends AbstractController
         $samples = $this->getDoctrine()->getRepository(Sample::class)->findAll();
 
         return $this->render('sample/sample-list.html.twig', [
-            'headers' => ['ID', 'Title'],
             'samples' => $samples,
         ]);
     }

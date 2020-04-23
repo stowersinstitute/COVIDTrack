@@ -29,6 +29,8 @@ class SampleType extends AbstractType
                 'empty_data' => "",
                 'placeholder' => '- None -',
             ])
+            ->add('wellplateRow', TextType::class)
+            ->add('wellplateColumn', TextType::class)
             ->add('save', SubmitType::class)
             ->getForm();
 
