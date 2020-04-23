@@ -54,6 +54,18 @@ class Sample
      */
     private $wellplate;
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=3, nullable=true)
+     */
+    private $wellplateRow;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=3, nullable=true)
+     */
+    private $wellplatecolumn;
+
     public function __construct()
     {
         $this->status = self::STATUS_PENDING;
@@ -113,6 +125,38 @@ class Sample
     public function setWellplate(?Wellplate $wellplate): void
     {
         $this->wellplate = $wellplate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWellplateRow(): ?string
+    {
+        return $this->wellplateRow;
+    }
+
+    /**
+     * @param string $wellplateRow
+     */
+    public function setWellplateRow(?string $wellplateRow): void
+    {
+        $this->wellplateRow = $wellplateRow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWellplatecolumn(): ?string
+    {
+        return $this->wellplatecolumn;
+    }
+
+    /**
+     * @param string $wellplatecolumn
+     */
+    public function setWellplatecolumn(?string $wellplatecolumn): void
+    {
+        $this->wellplatecolumn = $wellplatecolumn;
     }
 
     public static function getFormStatuses()

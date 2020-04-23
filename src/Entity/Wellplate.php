@@ -50,7 +50,7 @@ class Wellplate
 
     /**
      * @var Sample[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellpate")
+     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellplate")
      */
     private $samples;
 
