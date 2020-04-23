@@ -64,7 +64,7 @@ class Sample
      * @var string
      * @ORM\Column(type="string", length=3, nullable=true)
      */
-    private $wellplatecolumn;
+    private $wellplateColumn;
 
     public function __construct()
     {
@@ -146,17 +146,17 @@ class Sample
     /**
      * @return string
      */
-    public function getWellplatecolumn(): ?string
+    public function getWellplateColumn(): ?string
     {
-        return $this->wellplatecolumn;
+        return $this->wellplateColumn;
     }
 
     /**
-     * @param string $wellplatecolumn
+     * @param string $wellplateColumn
      */
-    public function setWellplatecolumn(?string $wellplatecolumn): void
+    public function setWellplateColumn(?string $wellplateColumn): void
     {
-        $this->wellplatecolumn = $wellplatecolumn;
+        $this->wellplateColumn = $wellplateColumn;
     }
 
     public static function getFormStatuses()
