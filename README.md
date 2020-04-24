@@ -42,9 +42,15 @@ Requirements:
     yarn install
     yarn dev
     ```
+    
+4. Create database
+
+	```
+    bin/console doctrine:schema:create
+    ```
    
-4. Start the Symfony web server
+5. Start the Symfony web server
 
     `symfony serve`
     
-5. Access at http://localhost:8080/ (or wherever `symfony serve` indicates)
+6. Access at http://localhost:8080/ (or wherever `symfony serve` indicates)
