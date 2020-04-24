@@ -60,11 +60,14 @@ class CollectionEvent
 
     public function __toString()
     {
-        if (null !== $this->title) {
-            return $this->title;
-        }
+        // Collected On date can be null, have a guaranteed fallback
+        $date = $this->collectedOn ?: $this->createdAt;
+        $printDate = $date->format('Y-m-d');
 
-        return $this->title ?: 'Created at ' . $this->createdAt->format("Y-m-d H:i:s");
+        // Title can be null, have a fallback
+        $printTitle = $this->title ?: $this->id;
+
+        return sprintf("%s %s", $printDate, $printTitle);
     }
 
     public function getId(): int
