@@ -28,7 +28,7 @@ class WellPlateController extends AbstractController
     {
         $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
 
-        return $this->render('well_plate/well_plate-list.html.twig', [
+        return $this->render('well-plate/well-plate-list.html.twig', [
             'headers' => ['ID', 'Title'],
             'wellPlates' => $wellPlates,
         ]);
@@ -55,7 +55,7 @@ class WellPlateController extends AbstractController
             return $this->redirectToRoute('app_wellplate_list');
         }
 
-        return $this->render('well_plate/well_plate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
+        return $this->render('well-plate/well-plate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
     }
 
     /**
@@ -78,7 +78,7 @@ class WellPlateController extends AbstractController
 
         $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($wellPlate);
 
-        return $this->render('well_plate/well_plate-form.html.twig', [
+        return $this->render('well-plate/well-plate-form.html.twig', [
             'new' => false,
             'form'=>$form->createView(),
             'wellPlate'=>$wellPlate,

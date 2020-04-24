@@ -5,9 +5,7 @@ namespace App\Controller;
 
 
 use App\Entity\Sample;
-use App\Entity\WellPlate;
 use App\Form\SampleType;
-use App\Form\WellPlateType;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
