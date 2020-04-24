@@ -4,7 +4,7 @@ namespace App\Form;
 
 
 use App\Entity\Sample;
-use App\Entity\Wellplate;
+use App\Entity\WellPlate;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -22,15 +22,15 @@ class SampleType extends AbstractType
             ->add('status', ChoiceType::class, [
                 'choices' => Sample::getFormStatuses()
             ])
-            ->add('wellplate', EntityType::class, [
-                'class' => Wellplate::class,
+            ->add('wellPlate', EntityType::class, [
+                'class' => WellPlate::class,
                 'choice_name' => 'barcode',
                 'required' => false,
                 'empty_data' => "",
                 'placeholder' => '- None -',
             ])
-            ->add('wellplateRow', TextType::class)
-            ->add('wellplateColumn', TextType::class)
+            ->add('wellPlateRow', TextType::class)
+            ->add('wellPlateColumn', TextType::class)
             ->add('save', SubmitType::class)
             ->getForm();
 

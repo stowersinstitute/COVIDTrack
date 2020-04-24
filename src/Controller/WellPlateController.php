@@ -4,8 +4,8 @@
 namespace App\Controller;
 
 
-use App\Entity\Wellplate;
-use App\Form\WellplateType;
+use App\Entity\WellPlate;
+use App\Form\WellPlateType;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,12 +13,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class WellplateController
+ * Class WellPlateController
  * @package App\Controller
  *
- * @Route(path="/wellplates")
+ * @Route(path="/well-plates")
  */
-class WellplateController extends AbstractController
+class WellPlateController extends AbstractController
 {
 
     /**
@@ -26,11 +26,11 @@ class WellplateController extends AbstractController
      */
     public function list()
     {
-        $wellplates = $this->getDoctrine()->getRepository(Wellplate::class)->findAll();
+        $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
 
-        return $this->render('wellplate/wellplate-list.html.twig', [
+        return $this->render('well-plate/well-plate-list.html.twig', [
             'headers' => ['ID', 'Title'],
-            'wellplates' => $wellplates,
+            'wellPlates' => $wellPlates,
         ]);
     }
 
@@ -39,23 +39,23 @@ class WellplateController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $wellplate = new Wellplate();
+        $wellPlate = new WellPlate();
 
-        $form = $this->createForm(WellplateType::class, $wellplate);
+        $form = $this->createForm(WellPlateType::class, $wellPlate);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $wellplate = $form->getData();
+            $wellPlate = $form->getData();
 
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($wellplate);
+            $entityManager->persist($wellPlate);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_wellplate_list');
         }
 
-        return $this->render('wellplate/wellplate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
+        return $this->render('well-plate/well-plate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
     }
 
     /**
@@ -63,9 +63,9 @@ class WellplateController extends AbstractController
      */
     public function update(int $id, Request $request) : Response
     {
-        $wellplate = $this->getDoctrine()->getRepository(Wellplate::class)->find($id);
+        $wellPlate = $this->getDoctrine()->getRepository(WellPlate::class)->find($id);
         
-        $form = $this->createForm(WellplateType::class, $wellplate);
+        $form = $this->createForm(WellPlateType::class, $wellPlate);
 
         $form->handleRequest($request);
 
@@ -76,12 +76,12 @@ class WellplateController extends AbstractController
             return $this->redirectToRoute('app_wellplate_list');
         }
 
-        $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($wellplate);
+        $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($wellPlate);
 
-        return $this->render('wellplate/wellplate-form.html.twig', [
+        return $this->render('well-plate/well-plate-form.html.twig', [
             'new' => false,
             'form'=>$form->createView(),
-            'wellplate'=>$wellplate,
+            'wellPlate'=>$wellPlate,
             'revisions'=>$revisions
         ]);
     }

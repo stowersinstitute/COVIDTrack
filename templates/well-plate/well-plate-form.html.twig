@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Wellplate {% else %} Edit Wellplate {{ wellplate.barcode }} {% endif %}
+    {% if new %} New Well Plate {% else %} Edit Well Plate {{ wellPlate.barcode }} {% endif %}
 {% endblock %}
 
 {% block body %}
@@ -16,7 +16,7 @@
             </div>
         </div>
     </div>
-    {% if wellplate is defined %}
+    {% if wellPlate is defined %}
     <div class="col-md-6">
         <div class="box box-success">
             <div class="box-header with-border">
@@ -26,18 +26,18 @@
                 <div class="form-horizontal">
                     <div class="field-group">
                         <label>Created</label>
-                        <span>{{ wellplate.createdAt | date('Y-m-d H:i:s') }}</span>
+                        <span>{{ wellPlate.createdAt | date('Y-m-d H:i:s') }}</span>
                     </div>
                     <div class="field-group">
                         <label>Last Modified</label>
-                        <span>{{ wellplate.updatedAt | date('Y-m-d H:i:s') }}</span>
+                        <span>{{ wellPlate.updatedAt | date('Y-m-d H:i:s') }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
-    {% if wellplate.samples is defined and wellplate.samples is not empty %}
+    {% if wellPlate.samples is defined and wellPlate.samples is not empty %}
         <div class="col-md-6">
             <div class="box box-success">
                 <div class="box-header with-border">
@@ -54,12 +54,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for sample in wellplate.samples %}
+                        {% for sample in wellPlate.samples %}
                             <tr>
                                 <td>{{ sample.id }}</td>
                                 <td>{{ sample.title }}</td>
-                                <td>{{ sample.wellplateRow }}</td>
-                                <td>{{ sample.wellplateColumn }}</td>
+                                <td>{{ sample.wellPlateRow }}</td>
+                                <td>{{ sample.wellPlateColumn }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

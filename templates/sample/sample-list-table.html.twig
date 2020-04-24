@@ -4,7 +4,7 @@
         <tr>
             <th style="width: 2em;">ID</th>
             <th>Title</th>
-            <th>Wellplate</th>
+            <th>Well Plate</th>
             <th>Row</th>
             <th>Column</th>
             <th>Status</th>
@@ -20,12 +20,12 @@
             </td>
             <td>{{ sample.title }}</td>
             <td>
-                {% if sample.wellplate is not empty %}
-                <a href="{{ path('app_wellplate_update', {id: sample.wellplate.id}) }}"> {{ sample.wellplate.barcode }} </a>
+                {% if sample.wellPlate is not empty %}
+                <a href="{{ path('app_wellplate_update', {id: sample.wellPlate.id}) }}"> {{ sample.wellPlate.barcode }} </a>
                 {% endif %}
             </td>
-            <td>{{ sample.wellplateRow }}</td>
-            <td>{{ sample.wellplateColumn }}</td>
+            <td>{{ sample.wellPlateRow }}</td>
+            <td>{{ sample.wellPlateColumn }}</td>
             <td>{{ sample.status | replace({'_': " "}) | title }}</td>
             <td>{{ sample.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ sample.updatedAt | date("Y-m-d H:i:s") }}</td>
