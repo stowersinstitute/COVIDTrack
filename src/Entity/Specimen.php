@@ -151,7 +151,7 @@ class Specimen
 
     public function getCollectedAt(): ?\DateTime
     {
-        return $this->collectedAt;
+        return $this->collectedAt ? clone $this->collectedAt : null;
     }
 
     public function setCollectedAt(?\DateTime $collectedAt): void

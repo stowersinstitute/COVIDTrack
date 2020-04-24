@@ -87,7 +87,7 @@ class CollectionEvent
 
     public function getCollectedOn(): ?\DateTime
     {
-        return $this->collectedOn;
+        return $this->collectedOn ? clone $this->collectedOn : null;
     }
 
     public function setCollectedOn(?\DateTime $collectedOn): void
