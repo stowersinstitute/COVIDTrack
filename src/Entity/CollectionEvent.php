@@ -39,10 +39,10 @@ class CollectionEvent
      * Date when Specimens will be collected from Participants.
      *
      * @var \DateTime
-     * @ORM\Column(name="collectionDate", type="date", nullable=true)
+     * @ORM\Column(name="collectedOn", type="date", nullable=true)
      * @Gedmo\Versioned
      */
-    private $collectionDate;
+    private $collectedOn;
 
     /**
      * Specimens anticipated to be collected.
@@ -70,6 +70,16 @@ class CollectionEvent
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getCollectedOn(): ?\DateTime
+    {
+        return $this->collectedOn;
+    }
+
+    public function setCollectedOn(?\DateTime $collectedOn): void
+    {
+        $this->collectedOn = $collectedOn ? clone $collectedOn : null;
     }
 
     /**
