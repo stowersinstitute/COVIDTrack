@@ -90,9 +90,11 @@ class Sample
     /**
      * @param string $title
      */
-    public function setTitle(string $title): void
+    public function setTitle(string $title): self
     {
         $this->title = $title;
+
+        return $this;
     }
 
     /**
@@ -106,9 +108,11 @@ class Sample
     /**
      * @param string $status
      */
-    public function setStatus(string $status): void
+    public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
     }
 
     /**
@@ -122,9 +126,11 @@ class Sample
     /**
      * @param WellPlate $wellPlate
      */
-    public function setWellPlate(?WellPlate $wellPlate): void
+    public function setWellPlate(?WellPlate $wellPlate): self
     {
         $this->wellPlate = $wellPlate;
+
+        return $this;
     }
 
     /**
@@ -138,9 +144,11 @@ class Sample
     /**
      * @param string $wellPlateRow
      */
-    public function setWellPlateRow(?string $wellPlateRow): void
+    public function setWellPlateRow(?string $wellPlateRow): self
     {
         $this->wellPlateRow = $wellPlateRow;
+
+        return $this;
     }
 
     /**
@@ -154,9 +162,11 @@ class Sample
     /**
      * @param string $wellPlateColumn
      */
-    public function setWellPlateColumn(?string $wellPlateColumn): void
+    public function setWellPlateColumn(?string $wellPlateColumn): self
     {
         $this->wellPlateColumn = $wellPlateColumn;
+
+        return $this;
     }
 
     public static function getFormStatuses()
