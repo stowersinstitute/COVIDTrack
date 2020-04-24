@@ -48,23 +48,23 @@ class Sample
     private $status;
 
     /**
-     * @var Wellplate
-     * @ORM\ManyToOne(targetEntity="App\Entity\Wellplate", inversedBy="samples")
+     * @var WellPlate
+     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="samples")
      * @Gedmo\Versioned
      */
-    private $wellplate;
+    private $wellPlate;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    private $wellplateRow;
+    private $wellPlateRow;
 
     /**
      * @var string
      * @ORM\Column(type="string", nullable=true)
      */
-    private $wellplateColumn;
+    private $wellPlateColumn;
 
     public function __construct()
     {
@@ -112,51 +112,51 @@ class Sample
     }
 
     /**
-     * @return Wellplate
+     * @return WellPlate
      */
-    public function getWellplate(): ?Wellplate
+    public function getWellPlate(): ?WellPlate
     {
-        return $this->wellplate;
+        return $this->wellPlate;
     }
 
     /**
-     * @param Wellplate $wellplate
+     * @param WellPlate $wellPlate
      */
-    public function setWellplate(?Wellplate $wellplate): void
+    public function setWellPlate(?WellPlate $wellPlate): void
     {
-        $this->wellplate = $wellplate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getWellplateRow(): ?string
-    {
-        return $this->wellplateRow;
-    }
-
-    /**
-     * @param string $wellplateRow
-     */
-    public function setWellplateRow(?string $wellplateRow): void
-    {
-        $this->wellplateRow = $wellplateRow;
+        $this->wellPlate = $wellPlate;
     }
 
     /**
      * @return string
      */
-    public function getWellplateColumn(): ?string
+    public function getWellPlateRow(): ?string
     {
-        return $this->wellplateColumn;
+        return $this->wellPlateRow;
     }
 
     /**
-     * @param string $wellplateColumn
+     * @param string $wellPlateRow
      */
-    public function setWellplateColumn(?string $wellplateColumn): void
+    public function setWellPlateRow(?string $wellPlateRow): void
     {
-        $this->wellplateColumn = $wellplateColumn;
+        $this->wellPlateRow = $wellPlateRow;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWellPlateColumn(): ?string
+    {
+        return $this->wellPlateColumn;
+    }
+
+    /**
+     * @param string $wellPlateColumn
+     */
+    public function setWellPlateColumn(?string $wellPlateColumn): void
+    {
+        $this->wellPlateColumn = $wellPlateColumn;
     }
 
     public static function getFormStatuses()

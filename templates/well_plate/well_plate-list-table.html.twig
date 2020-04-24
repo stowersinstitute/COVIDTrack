@@ -9,14 +9,14 @@
         </tr>
     </thead>
     <tbody>
-    {% for wellplate in wellplates %}
+    {% for wellPlate in wellPlates %}
         <tr>
             <td>
-                <a href="{{ path('app_wellplate_update', {id: wellplate.id}) }}">{{ wellplate.barcode }}</a>
+                <a href="{{ path('app_wellplate_update', {id: wellPlate.id}) }}">{{ wellPlate.barcode }}</a>
             </td>
-            <td>{{ wellplate.status | replace({'_': " "}) | title }}</td>
-            <td>{{ wellplate.createdAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ wellplate.updatedAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ wellPlate.status | replace({'_': " "}) | title }}</td>
+            <td>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>
     {% endfor %}
     </tbody>

@@ -11,13 +11,13 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Class Wellplate
+ * Class WellPlate
  * @package App\Entity
  *
  * @ORM\Entity
  * @Gedmo\Loggable
  */
-class Wellplate
+class WellPlate
 {
     use TimestampableEntity, SoftDeleteableEntity;
 
@@ -50,7 +50,7 @@ class Wellplate
 
     /**
      * @var Sample[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellplate")
+     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellPlate")
      */
     private $samples;
 
