@@ -72,6 +72,16 @@ class CollectionEvent
         return $this->id;
     }
 
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
     public function getCollectedOn(): ?\DateTime
     {
         return $this->collectedOn;
