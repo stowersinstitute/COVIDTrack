@@ -19,6 +19,8 @@ Just remember if you need to run php or yarn commands jump in to the container f
 docker-compose exec app /bin/bash
 ``` 
 
+Docker Application URL: <http://localhost:8880/samples/>
+
 ### Local Development with Symfony Server and sqlite
 
 Requirements:
