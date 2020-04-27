@@ -19,6 +19,8 @@ Just remember if you need to run php or yarn commands jump in to the container f
 docker-compose exec app /bin/bash
 ``` 
 
+Docker Application URL: <http://localhost:8880/samples/>
+
 ### Local Development with Symfony Server and sqlite
 
 Requirements:
@@ -54,3 +56,17 @@ Requirements:
     `symfony serve`
     
 6. Access at http://localhost:8080/ (or wherever `symfony serve` indicates)
+
+### Data Fixtures
+
+Fake data is managed by [DoctrineFixturesBundle](https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html).
+
+To load fake data and clear out all existing database data:
+
+    $ php bin/console doctrine:fixtures:load -n
+
+Or add the `--append` flag to keep existing database data and append fake data:
+
+    $ php bin/console doctrine:fixtures:load -n --append
+
+Create new fixtures in `src/DataFixtures/AppFixtures.php`
