@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Form\SpecimenFormData;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -12,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Each Participant belongs to a Participant Group. The Specimen is associated
  * to the group instead of the participant to maintain some anonymity.
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
  * @Gedmo\Loggable
  */
 class Specimen
@@ -86,6 +87,33 @@ class Specimen
         $this->createdAt = new \DateTime();
     }
 
+    public static function createFromForm(string $accessionId, SpecimenFormData $data): Specimen
+    {
+        $group = $data->participantGroup;
+        $event = $data->collectionEvent;
+        $s = new static($accessionId, $group, $event);
+        $s->setStatus($data->status);
+
+        return $s;
+    }
+
+    public function getUpdateFormData(): SpecimenFormData
+    {
+        $d = new SpecimenFormData();
+        $d->participantGroup = $this->getParticipantGroup();
+        $d->collectionEvent = $this->getCollectionEvent();
+        $d->status = $this->getStatus();
+
+        return $d;
+    }
+
+    public function updateFromFormData(SpecimenFormData $d): void
+    {
+        $this->setParticipantGroup($d->participantGroup);
+        $this->setCollectionEvent($d->collectionEvent);
+        $this->setStatus($d->status);
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -147,6 +175,13 @@ class Specimen
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
         ];
+    }
+
+    public function getStatusText(): string
+    {
+        $statuses = array_flip(self::getFormStatuses());
+
+        return $statuses[$this->status];
     }
 
     public function getCollectedAt(): ?\DateTime
