@@ -29,7 +29,6 @@ class AppUserFixtures extends Fixture
 
         // Technician
         $techUser = new AppUser('tech');
-        $techUser->addRole('ROLE_TECHNICIAN');
         $techUser->setPassword($this->passwordEncoder->encodePassword(
             $techUser,
             'tech'
