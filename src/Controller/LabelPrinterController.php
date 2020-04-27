@@ -5,14 +5,18 @@ namespace App\Controller;
 
 
 use App\Entity\LabelPrinter;
+use App\Entity\ParticipantGroup;
 use App\Form\LabelPrinterType;
+use App\Label\ZplPrinting;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class SampleController
+ * Class LabelPrinterController
  * @package App\Controller
  *
  * @Route(path="/label-printer")
@@ -57,7 +61,7 @@ class LabelPrinterController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", methods={"GET", "POST"})
+     * @Route("/{id<\d+>}", methods={"GET", "POST"})
      */
     public function update(int $id, Request $request) : Response
     {
@@ -81,4 +85,38 @@ class LabelPrinterController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/test"   , methods={"GET", "POST"})
+     */
+    public function testPrint(Request $request, ZplPrinting $zpl)
+    {
+        $form = $this->createFormBuilder()
+            ->add('group', EntityType::class, [
+                'class' => ParticipantGroup::class,
+                'choice_name' => 'accessionId',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -',
+            ])
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -'
+            ])
+            ->add('send', SubmitType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+
+            // TODO: Print out the labels here!
+        }
+
+        return $this->render('label-printer/label-printer-test-print.html.twig', ['form' => $form->createView()]);
+    }
 }

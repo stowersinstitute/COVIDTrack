@@ -25,3 +25,11 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Label Printing service
+    App\Label\ZplPrinting:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%env(LABEL_PRINTER_TYPE)%'
+            - '%env(LABEL_PRINTER_CACHE_DIR)%'
+            - '@router'
