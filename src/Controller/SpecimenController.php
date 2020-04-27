@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Form\SpecimenForm;
-use App\Form\SpecimenFormData;
-use App\Form\SpecimenType;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -66,12 +64,10 @@ class SpecimenController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $accessionId = 'CID'.time(); // TODO: CVDLS-30 Replace with real accession ID prefix
-            $s = Specimen::createFromForm($accessionId, $data);
+            $specimen = $form->getData();
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($s);
+            $em->persist($specimen);
             $em->flush();
 
             return $this->redirectToRoute('app_specimen_list');
@@ -93,14 +89,13 @@ class SpecimenController extends AbstractController
     {
         $specimen = $this->findSpecimen($accessionId);
 
-        $form = $this->createForm(SpecimenForm::class, $specimen->getUpdateFormData());
+        $form = $this->createForm(SpecimenForm::class, $specimen);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $d = $form->getData();
-            $specimen->updateFromFormData($d);
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
+            $specimen = $form->getData();
+            $em = $this->getDoctrine()->getManager();
+            $em->flush();
 
             return $this->redirectToRoute('app_specimen_list');
         }

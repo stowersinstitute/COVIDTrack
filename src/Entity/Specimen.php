@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Form\SpecimenFormData;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -85,33 +84,6 @@ class Specimen
 
         $this->status = self::STATUS_CREATED;
         $this->createdAt = new \DateTime();
-    }
-
-    public static function createFromForm(string $accessionId, SpecimenFormData $data): Specimen
-    {
-        $group = $data->participantGroup;
-        $event = $data->collectionEvent;
-        $s = new static($accessionId, $group, $event);
-        $s->setStatus($data->status);
-
-        return $s;
-    }
-
-    public function getUpdateFormData(): SpecimenFormData
-    {
-        $d = new SpecimenFormData();
-        $d->participantGroup = $this->getParticipantGroup();
-        $d->collectionEvent = $this->getCollectionEvent();
-        $d->status = $this->getStatus();
-
-        return $d;
-    }
-
-    public function updateFromFormData(SpecimenFormData $d): void
-    {
-        $this->setParticipantGroup($d->participantGroup);
-        $this->setCollectionEvent($d->collectionEvent);
-        $this->setStatus($d->status);
     }
 
     public function getId(): int

@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SpecimenForm extends AbstractType
@@ -37,7 +38,15 @@ class SpecimenForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => SpecimenFormData::class,
+            'data_class' => Specimen::class,
+            'empty_data' => function(FormInterface $form) {
+                $accessionId = 'CID'.time(); // TODO: CVDLS-30 Replace with real accession ID prefix
+                $group = $form->get('participantGroup')->getData();
+                $event = $form->get('collectionEvent')->getData();
+                $s = new Specimen($accessionId, $group, $event);
+
+                return $s;
+            }
         ]);
     }
 }
