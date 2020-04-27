@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Each Participant belongs to a Participant Group. The Specimen is associated
  * to the group instead of the participant to maintain some anonymity.
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
  * @Gedmo\Loggable
  */
 class Specimen
@@ -147,6 +147,13 @@ class Specimen
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
         ];
+    }
+
+    public function getStatusText(): string
+    {
+        $statuses = array_flip(self::getFormStatuses());
+
+        return $statuses[$this->status];
     }
 
     public function getCollectedAt(): ?\DateTime

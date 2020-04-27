@@ -73,6 +73,7 @@ class AppFixtures extends Fixture
      */
     private function addPrintedSpecimens(ObjectManager $em, array $groups, array $events)
     {
+        // TODO: CVDLS-30 Support creating unique accession ID when creating
         // Invoke to get next Specimen accession id
         $nextSpecimenId = function() {
             if (!isset($seq)) {

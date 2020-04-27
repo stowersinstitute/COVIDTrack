@@ -70,3 +70,7 @@ Or add the `--append` flag to keep existing database data and append fake data:
     $ php bin/console doctrine:fixtures:load -n --append
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
+
+### CSS Framework
+
+[Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components.
