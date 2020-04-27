@@ -76,9 +76,11 @@ class AppFixtures extends Fixture
         // Invoke to get next Specimen accession id
         $nextSpecimenId = function() {
             if (!isset($seq)) {
-                static $seq = 1;
+                static $seq = 0;
             }
             $prefix = 'CID';
+
+            $seq++;
 
             return sprintf("%s%s", $prefix, $seq);
         };
