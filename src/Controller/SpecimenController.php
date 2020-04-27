@@ -37,7 +37,7 @@ class SpecimenController extends AbstractController
      * View a single Specimen.
      *
      * TODO: CVDLS-30 Replace requirements below with real accession ID prefix
-     * @Route("/{accessionId}", methods={"GET", "POST"}, requirements={"accessionId"="CID\d+"})
+     * @Route("/{accessionId<CID\d+>}", methods={"GET", "POST"})
      */
     public function view(string $accessionId)
     {
@@ -83,7 +83,7 @@ class SpecimenController extends AbstractController
      * Edit a single Specimen.
      *
      * TODO: CVDLS-30 Replace requirements below with real accession ID prefix
-     * @Route("/{accessionId}/edit", methods={"GET", "POST"}, requirements={"accessionId"="CID\d+"})
+     * @Route("/{accessionId<CID\d+>}/edit", methods={"GET", "POST"})
      */
     public function edit(string $accessionId, Request $request) : Response
     {
