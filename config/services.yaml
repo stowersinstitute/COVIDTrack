@@ -27,9 +27,8 @@ services:
 
     App\Command\DebugLdapUserCommand:
         arguments:
-            # todo: hint by class name instead of argument name
-            # Cannot autowire based on LdapUserProvider so much use the concrete service
-            $ldapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
+            # Cannot autowire based on LdapUserProvider so must use the concrete service
+            Symfony\Component\Ldap\Security\LdapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
