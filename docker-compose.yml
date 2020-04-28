@@ -5,6 +5,8 @@ services:
         build:
             context: ./docker
             dockerfile: Dockerfile
+        environment:
+            SFAPP_NOT_PRODUCTION: "true"
         volumes:
             - ./:/app
 #            - var:/app/var
