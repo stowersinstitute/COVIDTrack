@@ -28,10 +28,16 @@ class AppUser implements UserInterface
     private $roles = [];
 
     /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
+     * @var string The hashed password (will be null if this user came from LDAP)
+     * @ORM\Column(type="string", nullable=true)
      */
     private $password;
+
+    /**
+     * @var bool If true, this user is managed by LDAP and should be authenticated against it
+     * @ORM\Column(type="boolean", name="isLdapUser")
+     */
+    private $isLdapUser = false;
 
     public function __construct(string $username)
     {
@@ -117,5 +123,15 @@ class AppUser implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function isLdapUser(): bool
+    {
+        return $this->isLdapUser;
+    }
+
+    public function setIsLdapUser(bool $isLdapUser): void
+    {
+        $this->isLdapUser = $isLdapUser;
     }
 }
