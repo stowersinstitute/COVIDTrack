@@ -33,14 +33,13 @@ class CollectionEventRepository extends EntityRepository
      */
     public function findCountsIndexedByGroupAccessionId(): array
     {
-        $results = $this->getEntityManager()->createQuery("
-            SELECT COUNT(DISTINCT event.id) as numGroups, pg.accessionId
-            FROM App\Entity\CollectionEvent event
-            JOIN event.specimens sp
-            JOIN sp.participantGroup pg
-            GROUP BY pg.accessionId
-        ")
-        ->execute();
+        $results = $this->createQueryBuilder('e')
+            ->select('count(DISTINCT e.id) as numGroups, pg.accessionId')
+            ->join('e.specimens', 'sp')
+            ->join('sp.participantGroup', 'pg')
+            ->addGroupBy('pg.accessionId')
+            ->getQuery()
+            ->execute();
 
         $counts = [];
         foreach ($results as $result) {
