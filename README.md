@@ -1,5 +1,30 @@
 # Symfony Based COVID Sample Tracker
 
+## Configuration
+
+### Enabling LDAP / Active Directory Authentication
+
+The following environment variables are available:
+
+ * `LDAP_HOST` (required) LDAP server hostname
+ * `LDAP_PORT` (default 389) port to communicate on
+ * `LDAP_ENCRYPTION` (default none) Valid values are none, ssl, tls
+ * `LDAP_PROTOCOL_VERSION` (default 3)
+ * `LDAP_REFERRALS` (default false)
+ * `LDAP_AUTH_BASE_DN` DN to use when searching for users
+ * `LDAP_AUTH_SEARCH_DN` User to log in as when checking if a user or their credentials are valid (eg. "user@EXAMPLE.COM" or "cn=read-only-admin,dc=example,dc=com")
+ * `LDAP_AUTH_SEARCH_PASSWORD` Password to use when authenticating as `LDAP_AUTH_SEARCH_DN` 
+ 
+**Active Directory Example**
+
+```
+LDAP_HOST=directory.contoso.com
+LDAP_AUTH_BASE_DN=DC=contoso,DC=com
+LDAP_AUTH_SEARCH_DN=serviceaccount@CONTOSO.COM
+LDAP_AUTH_SEARCH_PASSWORD=hunter2
+```
+
+
 ## Development Environment Install
 
 ### Docker
