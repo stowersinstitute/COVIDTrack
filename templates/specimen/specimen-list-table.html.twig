@@ -1,0 +1,32 @@
+{% block body %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Accession ID</th>
+            <th>Participant Group</th>
+            <th>Collection Event</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Last Modified</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for specimen in specimens %}
+        <tr>
+            <td>
+                <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}">Edit</a>
+            </td>
+            <td>
+                <a href="{{ path('app_specimen_view', {accessionId: specimen.accessionId}) }}">{{ specimen.accessionId }}</a>
+            </td>
+            <td>{{ specimen.participantGroup }}</td>
+            <td>{{ specimen.collectionEvent }}</td>
+            <td>{{ specimen.statusText }}</td>
+            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ specimen.updatedAt | date("Y-m-d H:i:s") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
