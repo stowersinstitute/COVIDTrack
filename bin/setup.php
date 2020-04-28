@@ -35,6 +35,7 @@ $cliOpts = getopt(
         // Specify the file to copy to .env.local (relative to project root)
         'local-env-from:',
         'create-database',
+        'rebuild-database',
         'sync-database',
         'fixtures',
         // If true, production web assets will be compiled
@@ -73,6 +74,13 @@ $stages = [
 ];
 
 // Aliases
+
+if (isset($cliOpts['rebuild-database'])) {
+    $stages['drop-database'] = true;
+    $stages['create-database'] = true;
+    $stages['fixtures'] = true;
+}
+
 if (isset($cliOpts['for-local-development'])) {
     $I_SAY_ITS_NOT_PROD = true;
     $stages['create-local-env'] = true;
@@ -116,6 +124,12 @@ if ($stages['create-local-env']) {
 if ($stages['composer-install']) {
     writelnf('Installing dependencies with composer');
     print mustRunCommand("composer install");
+}
+
+if ($stages['drop-database']) {
+    writelnf('Dropping database');
+    requireNotProduction();
+    print mustRunSfCommand('doctrine:schema:drop', [ '--force' ]);
 }
 
 if ($stages['create-database']) {
