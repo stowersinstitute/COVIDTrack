@@ -20,7 +20,7 @@ class AppUserFixtures extends Fixture
     {
         // Administrator
         $adminUser = new AppUser('ctadmin');
-        $adminUser->addRole('ROLE_SYSTEM_ADMINISTRATOR');
+        $adminUser->addRole('ROLE_ADMIN');
         $adminUser->setPassword($this->passwordEncoder->encodePassword(
             $adminUser,
             'ctadmin'
