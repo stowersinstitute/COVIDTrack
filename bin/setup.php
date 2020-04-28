@@ -7,23 +7,7 @@
  *  - composer install
  *  - web asset installation (dev unless --web-assets-prod is specified)
  *
- * Examples:
- *
- * Initial setup of a brand new development environment (sqlite database)
- *
- *      php setup.php --local-env-from .env.sqlite.dist --create-database --fixtures
- *
- * This common scenario has an alias:
- *
- *      php setup.php --for-local-development
- *
- * Synchronizing everything after updating your branch
- *
- *      php setup.php --sync-database
- *
- * Or the alias
- *
- *      php setup.php --post-update
+ * See help text below for example usage
  */
 
 // ---------------------------------------------------------------------------
@@ -53,9 +37,43 @@ $cliOpts = getopt(
 $I_SAY_ITS_NOT_PROD = false;
 
 if (isset($cliOpts['help'])) {
-    // todo: usage
-    print "to do!\n";
-    exit(0);
+    $helpText = <<<HELP_TEXT
+Usage
+------------------------------
+
+php bin/setup.php [options...]
+
+Available Options
+------------------------------
+
+    --local-env-from=<environment file>     Copy specified file to .env.local
+    --create-database                       Create a copy of the database (cannot already be created)
+    --rebuild-database                      Drop and then create the database
+    --sync-database                         Synchronize database with schema specified by the source code
+    --fixtures                              Load fixtures
+    --web-assets-prod                       When compiling web assets configure them for production use
+    
+    --for-local-development                 Alias to perform first-time setup for local development
+    
+Examples
+------------------------------
+
+First-time project setup (Docker):
+
+    docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --create-database --fixtures
+    
+First-time project setup (Symfony Server):
+
+    bin/setup.php --for-local-development
+    
+After updating from source control:
+
+    bin/setup.php --post-update
+
+
+HELP_TEXT;
+    print $helpText;
+    exit();
 }
 
 // ---------------------------------------------------------------------------
