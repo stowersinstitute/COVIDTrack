@@ -38,12 +38,22 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
     /** @var Ldap  */
     private $ldap;
 
+    /**
+     * String representing how to look up a user to authenticate them
+     *
+     * For example, "{username}@CONTOSO.COM" would be replaced by jdoe@CONTOSO.COM before attempting to bind()
+     *
+     * @var string
+     */
+    private $ldapAuthUserDnFormat = '';
+
     public function __construct(
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         UserPasswordEncoderInterface $passwordEncoder,
-        Ldap $ldap
+        Ldap $ldap,
+        $ldapAuthUserDnFormat = ''
     ) {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
@@ -138,7 +148,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 
         // LDAP password is valid if we can bind as the user
         // See LdapBindAuthenicationProvider for the official Symfony implementation
-        $dn = str_replace('{username}', $username, '{username}@SGC.LOC'); // todo: configurable
+        $dn = str_replace('{username}', $username, $this->ldapAuthUserDnFormat);
 
         try {
             // Throws an exception if password is invalid

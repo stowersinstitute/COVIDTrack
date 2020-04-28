@@ -12,6 +12,7 @@ parameters:
     default_ldap_auth_base_dn: ''
     default_ldap_auth_search_dn: ''
     default_ldap_auth_search_password: ''
+    default_ldap_auth_user_dn_format: ''
 
 services:
     # default configuration for services in *this* file
@@ -35,6 +36,10 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    App\Security\LoginFormAuthenticator:
+        arguments:
+            $ldapAuthUserDnFormat: '%env(default:default_ldap_auth_user_dn_format:LDAP_AUTH_USER_DN_FORMAT)%'
 
     App\Security\OptionalLdapUserProvider:
         arguments:

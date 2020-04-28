@@ -14,6 +14,7 @@ The following environment variables are available:
  * `LDAP_AUTH_BASE_DN` DN to use when searching for users
  * `LDAP_AUTH_SEARCH_DN` User to log in as when checking if a user or their credentials are valid (eg. "user@EXAMPLE.COM" or "cn=read-only-admin,dc=example,dc=com")
  * `LDAP_AUTH_SEARCH_PASSWORD` Password to use when authenticating as `LDAP_AUTH_SEARCH_DN` 
+ * `LDAP_AUTH_USER_DN_FORMAT` DN to use when looking up a user to authenticate. For example: `{username}@company.com` 
  
 **Active Directory Example**
 
@@ -22,6 +23,7 @@ LDAP_HOST=directory.contoso.com
 LDAP_AUTH_BASE_DN=DC=contoso,DC=com
 LDAP_AUTH_SEARCH_DN=serviceaccount@CONTOSO.COM
 LDAP_AUTH_SEARCH_PASSWORD=hunter2
+LDAP_AUTH_USER_DN_FORMAT={username}@CONTOSO.COM
 ```
 
 
