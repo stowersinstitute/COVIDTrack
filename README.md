@@ -3,14 +3,9 @@
 ## Development Environment - Docker
 
 1. [Download and install Docker](https://www.docker.com/)
-1. `cp .env.docker .env.local`
 1. `docker-compose up -d`
-1. `docker-compose exec app /bin/bash` This puts you in the docker container.
-    1. `composer install`
-    1. `bin/console doctrine:schema:build --force`
-    1. `yarn install`
-    1. `yarn dev`
-    1. Open Docker Application URL <http://localhost:8880/samples/>
+1. `docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --rebuild-database` – This configures .env, creates database, loads fake data
+1. Open Docker Application URL <http://localhost:8880/samples/>
 
 Enter the container before running any PHP, Symfony, or yarn commands:
 
