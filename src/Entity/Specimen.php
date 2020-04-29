@@ -34,7 +34,7 @@ class Specimen
     private $id;
 
     /**
-     * Unique public ID for referencing this sample.
+     * Unique public ID for referencing this specimen.
      *
      * @var string
      * @ORM\Column(name="accessionId", type="string")
@@ -50,6 +50,13 @@ class Specimen
      * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id")
      */
     private $participantGroup;
+
+    /**
+     * @var WellPlate
+     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
+     * @Gedmo\Versioned
+     */
+    private $wellPlate;
 
     /**
      * Time when collected or received.
@@ -134,6 +141,16 @@ class Specimen
         $statuses = array_flip(self::getFormStatuses());
 
         return $statuses[$this->status];
+    }
+
+    public function getWellPlate(): ?WellPlate
+    {
+        return $this->wellPlate;
+    }
+
+    public function setWellPlate(?WellPlate $wellPlate): void
+    {
+        $this->wellPlate = $wellPlate;
     }
 
     public function getCollectedAt(): ?\DateTime

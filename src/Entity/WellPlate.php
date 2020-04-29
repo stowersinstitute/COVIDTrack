@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Entity;
-
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -49,15 +47,15 @@ class WellPlate
     private $status;
 
     /**
-     * @var Sample[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\Sample", mappedBy="wellPlate")
+     * @var Specimen[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\Specimen", mappedBy="wellPlate")
      */
-    private $samples;
+    private $specimens;
 
     public function __construct()
     {
         $this->status = self::STATUS_PENDING;
-        $this->samples = new ArrayCollection();
+        $this->specimens = new ArrayCollection();
     }
 
     public function __toString()
@@ -116,10 +114,10 @@ class WellPlate
     }
 
     /**
-     * @return Sample[]|ArrayCollection
+     * @return Specimen[]
      */
-    public function getSamples()
+    public function getSpecimens(): array
     {
-        return $this->samples;
+        return $this->specimens->getValues();
     }
 }

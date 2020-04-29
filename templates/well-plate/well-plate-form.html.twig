@@ -37,29 +37,26 @@
         </div>
     </div>
     {% endif %}
-    {% if wellPlate.samples is defined and wellPlate.samples is not empty %}
         <div class="col-md-6">
             <div class="box box-success">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Samples</h3>
+                    <h3 class="box-title">Specimens</h3>
                 </div>
                 <div class="box-body">
                     <table class="table table-condensed">
                         <thead>
                         <tr>
-                            <th>Sample ID</th>
-                            <th>Sample Title</th>
-                            <th>Row</th>
-                            <th>Column</th>
+                            <th>Accession ID</th>
+                            <th>Group</th>
+                            <th>Status</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for sample in wellPlate.samples %}
+                        {% for specimen in wellPlate.specimens %}
                             <tr>
-                                <td>{{ sample.id }}</td>
-                                <td>{{ sample.title }}</td>
-                                <td>{{ sample.wellPlateRow }}</td>
-                                <td>{{ sample.wellPlateColumn }}</td>
+                                <td>{{ specimen.accessionId }}</td>
+                                <td>{{ specimen.participantGroup }}</td>
+                                <td>{{ specimen.status }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -67,7 +64,6 @@
                 </div>
             </div>
         </div>
-    {% endif %}
     {% if revisions is defined %}
     <div class="col-md-6">
         <div class="box box-success">

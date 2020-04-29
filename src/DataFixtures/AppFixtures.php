@@ -63,5 +63,13 @@ class AppFixtures extends Fixture
 
             return sprintf("%s%s", $prefix, $seq);
         };
+
+        foreach ($groups as $group) {
+            for ($i=1; $i<=$group->getParticipantCount(); $i++) {
+                $s = new Specimen($nextSpecimenId(), $group);
+
+                $em->persist($s);
+            }
+        }
     }
 }
