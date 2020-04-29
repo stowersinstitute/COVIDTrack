@@ -28,7 +28,7 @@ class LabelPrinter
     /**
      * @var string
      *
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", name="title")
      */
     private $title;
 
@@ -37,28 +37,28 @@ class LabelPrinter
      *
      * @var string
      *
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", name="host")
      */
     private $host;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="text", name="description", nullable=true)
      */
     private $description;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="integer", name="dpi", nullable=true)
      */
     private $dpi;
 
     /**
      * @var bool
      *
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", name="isActive")
      */
     private $isActive;
 
@@ -95,11 +95,9 @@ class LabelPrinter
     /**
      * @param string $title
      */
-    public function setTitle(string $title): self
+    public function setTitle(string $title): void
     {
         $this->title = $title;
-
-        return $this;
     }
 
     /**
@@ -113,11 +111,9 @@ class LabelPrinter
     /**
      * @param string $host
      */
-    public function setHost(string $host): self
+    public function setHost(string $host): void
     {
         $this->host = $host;
-
-        return $this;
     }
 
     /**
@@ -131,11 +127,9 @@ class LabelPrinter
     /**
      * @param string $description
      */
-    public function setDescription(string $description): self
+    public function setDescription(string $description): void
     {
         $this->description = $description;
-
-        return $this;
     }
 
     public function getDpi(): int
@@ -143,11 +137,9 @@ class LabelPrinter
         return $this->dpi;
     }
 
-    public function setDpi(int $dpi): self
+    public function setDpi(int $dpi): void
     {
         $this->dpi = $dpi;
-
-        return $this;
     }
 
     /**
