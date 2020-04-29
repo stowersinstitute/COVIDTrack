@@ -64,13 +64,16 @@ class SpecimenController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Specimen $specimen */
             $specimen = $form->getData();
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($specimen);
             $em->flush();
 
-            return $this->redirectToRoute('app_specimen_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('specimen/specimen-form.html.twig', [
@@ -93,11 +96,12 @@ class SpecimenController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $specimen = $form->getData();
             $em = $this->getDoctrine()->getManager();
             $em->flush();
 
-            return $this->redirectToRoute('app_specimen_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('specimen/specimen-form.html.twig', [

@@ -32,9 +32,10 @@ class AppFixtures extends Fixture
     {
         $groups = [];
         $numToCreate = 10;
+        $participantCount = 5;
         for ($i=1; $i<=$numToCreate; $i++) {
             $accessionId = 'GRP-'.$i;
-            $g = new ParticipantGroup($accessionId);
+            $g = new ParticipantGroup($accessionId, $participantCount++);
 
             $groups[] = $g;
 

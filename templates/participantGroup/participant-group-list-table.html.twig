@@ -1,0 +1,30 @@
+{% block body %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Accession ID</th>
+            <th>Collection Events</th>
+            <th>Participants</th>
+            <th>Created</th>
+            <th>Last Modified</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for group in groups %}
+        <tr>
+            <td>
+                <a href="{{ path('app_participant_group_edit', {accessionId: group.accessionId}) }}">Edit</a>
+            </td>
+            <td>
+                <a href="{{ path('app_participant_group_view', {accessionId: group.accessionId}) }}">{{ group.accessionId }}</a>
+            </td>
+            <td>{{ collectionEventCounts[group.accessionId] ?? 0 }}</td>
+            <td>{{ group.participantCount }}</td>
+            <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

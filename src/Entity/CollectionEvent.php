@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Date and Place when Group Participants will provide a new Specimen.
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\CollectionEventRepository")
  * @Gedmo\Loggable
  */
 class CollectionEvent
