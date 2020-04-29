@@ -96,6 +96,7 @@ $stages = [
 if (isset($cliOpts['rebuild-database'])) {
     $stages['drop-database'] = true;
     $stages['create-database'] = true;
+    $stages['sync-database'] = true;
     $stages['fixtures'] = true;
 }
 
