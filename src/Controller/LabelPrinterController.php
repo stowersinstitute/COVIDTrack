@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class LabelPrinterController
  * @package App\Controller
  *
- * @Route(path="/label-printer")
+ * @Route(path="/label-printers")
  */
 class LabelPrinterController extends AbstractController
 {
