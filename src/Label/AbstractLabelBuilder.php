@@ -15,12 +15,6 @@ use Zpl\ZplBuilder;
 abstract class AbstractLabelBuilder
 {
     /**
-     * @var ZplBuilder
-     * @deprecated Instead use method getZplBuilder()
-     */
-    protected $zpl;
-
-    /**
      * @var LabelPrinter
      */
     protected $printer;
@@ -49,7 +43,8 @@ abstract class AbstractLabelBuilder
     protected function getZplBuilder(): ZplBuilder
     {
         $zpl = new ZplBuilder(ZplBuilder::UNIT_MM, $this->printer->getDpi());
-        $zpl->setMediaWidth($this->printer->getMedia()->getWidth());
+//        $zpl->setMediaWidth($this->printer->getMedia()->getWidth());
+        $zpl->setMediaWidth(4);
         $zpl->setFontMapper(new ZD420());
 
         return $zpl;

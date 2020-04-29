@@ -5,8 +5,9 @@ namespace App\Controller;
 
 
 use App\Entity\LabelPrinter;
-use App\Entity\ParticipantGroup;
+use App\Entity\Specimen;
 use App\Form\LabelPrinterType;
+use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -91,8 +92,8 @@ class LabelPrinterController extends AbstractController
     public function testPrint(Request $request, ZplPrinting $zpl)
     {
         $form = $this->createFormBuilder()
-            ->add('group', EntityType::class, [
-                'class' => ParticipantGroup::class,
+            ->add('specimen', EntityType::class, [
+                'class' => Specimen::class,
                 'choice_name' => 'accessionId',
                 'required' => true,
                 'empty_data' => "",
@@ -113,8 +114,12 @@ class LabelPrinterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            $specimen = $this->getDoctrine()->getRepository(Specimen::class)->find($data['specimen']);
 
-            // TODO: Print out the labels here!
+            $labelBuilder = new SpecimenIntakeLabelBuilder($printer);
+            $labelBuilder->setParticipantGroup($specimen->getParticipantGroup());
+            $labelBuilder->setSpecimen($specimen);
+            $zpl->printBuilder($labelBuilder);
         }
 
         return $this->render('label-printer/label-printer-test-print.html.twig', ['form' => $form->createView()]);
