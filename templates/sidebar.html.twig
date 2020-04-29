@@ -31,7 +31,7 @@
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         <li class="header">MAIN NAVIGATION</li>
-        <li class="treeview menu-open {{ _self.activeClass('app_specimen_list') }}{{ _self.activeClass('app_specimen_new') }}">
+        <li class="treeview {{ _self.activeClass('app_specimen_list') }}{{ _self.activeClass('app_specimen_new') }}">
             <a href="#">
                 <i class="fa fa-flask"></i> <span>Specimens</span>
                 <span class="pull-right-container">
@@ -43,7 +43,7 @@
                 <li class="{{ _self.activeClass('app_specimen_new') }}"><a href="{{ path('app_specimen_new') }}"><i class="fa fa-plus"></i> New</a></li>
             </ul>
         </li>
-        <li class="active treeview menu-open">
+        <li class="treeview" {{ _self.activeClass('app_wellplate_list') }}{{ _self.activeClass('app_wellplate_new') }}>
             <a href="#">
                 <i class="fa fa-th"></i> <span>Well Plates</span>
                 <span class="pull-right-container">
