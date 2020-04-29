@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a703d50ac2e1ce008a6674c6838aaaa7",
+    "content-hash": "ae282c44e357c2fd9651ed0b2709e35e",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -2050,6 +2050,51 @@
                 "tree"
             ],
             "time": "2020-03-30T09:00:40+00:00"
+        },
+        {
+            "name": "stowers-lims/zpl",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Stowers-LIMS/zpl.git",
+                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Stowers-LIMS/zpl/zipball/4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
+                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
+                "shasum": ""
+            },
+            "require": {
+                "ext-sockets": "*",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zpl\\": "src/"
+                },
+                "psr-0": {
+                    "Zpl\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Koebbe",
+                    "email": "abk@stowers.org"
+                }
+            ],
+            "description": " This library is a php wrapper for the ZPL Programming Language.",
+            "homepage": "https://github.com/Stowers-LIMS/zpl",
+            "keywords": [
+                "php-wrapper",
+                "zpl"
+            ],
+            "time": "2020-04-24T17:59:52+00:00"
         },
         {
             "name": "symfony/asset",
@@ -6353,6 +6398,20 @@
                 "Fixture",
                 "persistence"
             ],
+            "funding": [
+                {
+                    "url": "https://www.doctrine-project.org/sponsorship.html",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.patreon.com/phpdoctrine",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Fdoctrine-fixtures-bundle",
+                    "type": "tidelift"
+                }
+            ],
             "time": "2020-04-02T16:40:37+00:00"
         },
         {
@@ -6933,7 +6992,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "stowers-lims/zpl": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6941,5 +7002,6 @@
         "ext-ctype": "*",
         "ext-iconv": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }
