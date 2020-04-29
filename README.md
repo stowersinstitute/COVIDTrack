@@ -1,8 +1,8 @@
-# Symfony Based COVID Sample Tracker
+# COVID Sample Tracker
 
-## Development Environment Install
+## Development Environment - Docker
 
-### Docker
+1. [Download and install Docker](https://www.docker.com/)
 1. `cp .env.docker .env.local`
 1. `docker-compose up -d`
 1. `docker-compose exec app /bin/bash` This puts you in the docker container.
@@ -10,24 +10,38 @@
     1. `bin/console doctrine:schema:build --force`
     1. `yarn install`
     1. `yarn dev`
-    
-This will initialize the environment. After that you only need to run yarn if you add a library to `package.json` (or vie `yarn add`) or update CSS. Within the app docker container you can run `yarn dev` to update the compiled CSS and JS. Alternatively you can run `yarn watch` for auto recompiling.
+    1. Open Docker Application URL <http://localhost:8880/samples/>
 
-Just remember if you need to run php or yarn commands jump in to the container first by doing the following command.
+Enter the container before running any PHP, Symfony, or yarn commands:
 
 ```bash
 docker-compose exec app /bin/bash
 ``` 
 
-Docker Application URL: <http://localhost:8880/samples/>
+If changing `Dockerfile`, rebuild the containers:
 
-### Local Development with Symfony Server and sqlite
+```bash
+docker-compose up --build -d
+```
 
-Requirements:
+#### Docker JS and CSS assets
 
+Recompile frontend assets after changing `package.json`, using `yarn add`, or changing CSS.
+
+1. `docker-compose exec app /bin/bash` This puts you in the docker container.
+1. `yarn dev`
+
+Alternatively you can run `yarn watch` for automatic recompiling.
+
+
+## Development Environment - Symfony Server
+
+Instead of using Docker, develop with tools installed directly on the host machine:
+
+ * [PHP 7.4+](https://www.php.net/) configured with support for sqlite
  * [Composer](https://getcomposer.org/)
  * [Symfony CLI application](https://symfony.com/download)
- * PHP configured with support for sqlite
+ * [SQLite](https://www.sqlite.org/download.html)
  * [`yarn` command](https://yarnpkg.com/getting-started/install)
 
 1. Copy `.env.sqlite.dist` to `.env.local`
@@ -57,7 +71,7 @@ Requirements:
     
 6. Access at http://localhost:8080/ (or wherever `symfony serve` indicates)
 
-### Data Fixtures
+## Data Fixtures
 
 Fake data is managed by [DoctrineFixturesBundle](https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html).
 
