@@ -11,11 +11,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Population of Participants being studied.
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
  * @Gedmo\Loggable
  */
 class ParticipantGroup
 {
+    public const MIN_PARTICIPANT_COUNT = 1;
+    public const MAX_PARTICIPANT_COUNT = 65000;
+
     use TimestampableEntity, SoftDeleteableEntity;
 
     /**
@@ -36,6 +39,15 @@ class ParticipantGroup
     private $accessionId;
 
     /**
+     * Number of Participants in this group.
+     *
+     * @var integer
+     * @ORM\Column(name="participantCount", type="smallint", options={"unsigned":true}, nullable=false)
+     * @Gedmo\Versioned
+     */
+    private $participantCount;
+
+    /**
      * Specimens collected belonging to members of this group. Specimens are
      * not associated with individual Participants, only the group.
      *
@@ -44,9 +56,10 @@ class ParticipantGroup
      */
     private $specimens;
 
-    public function __construct(string $accessionId)
+    public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
+        $this->participantCount = $participantCount;
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
@@ -66,6 +79,18 @@ class ParticipantGroup
         return $this->accessionId;
     }
 
+    public function getParticipantCount(): int
+    {
+        return $this->participantCount;
+    }
+
+    public function setParticipantCount(int $participantCount): void
+    {
+        $this->validateParticipantCount($participantCount);
+
+        $this->participantCount = $participantCount;
+    }
+
     /**
      * List of current Specimens.
      *
@@ -80,5 +105,21 @@ class ParticipantGroup
     {
         // TODO: Add de-duplicating logic
         $this->specimens->add($specimen);
+    }
+
+    /**
+     * Ensure participantCount within acceptable range, else throw exception.
+     */
+    private function validateParticipantCount(int $count): void
+    {
+        $min = self::MIN_PARTICIPANT_COUNT;
+        $max = self::MAX_PARTICIPANT_COUNT;
+
+        if ($count <= $max && $count >= $min) {
+            // Everything ok
+            return;
+        }
+
+        throw new \OutOfBoundsException(sprintf('participantCount must be between %d and %d', $min, $max));
     }
 }

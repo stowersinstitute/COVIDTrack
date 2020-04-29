@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+    {% if new %} New Participant Group {% else %} Edit Participant Group {{ group.accessionId }} {% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">General</h3>
+            </div>
+            <div class="box-body">
+                {{ form(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

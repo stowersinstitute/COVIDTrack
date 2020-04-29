@@ -71,6 +71,7 @@ Or add the `--append` flag to keep existing database data and append fake data:
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
 
-### CSS Framework
+### Frontend Frameworks
 
-[Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components.
+* [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
+* [Font Awesome 4.7.0](https://fontawesome.com/v4.7.0/) for extra icons
