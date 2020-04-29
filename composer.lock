@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cdb56b3bafc7947b4f294705a75795cd",
+    "content-hash": "2c9494315f8c028817a5399bc45ee99a",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -2050,6 +2050,51 @@
                 "tree"
             ],
             "time": "2020-03-30T09:00:40+00:00"
+        },
+        {
+            "name": "stowers-lims/zpl",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Stowers-LIMS/zpl.git",
+                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Stowers-LIMS/zpl/zipball/4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
+                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
+                "shasum": ""
+            },
+            "require": {
+                "ext-sockets": "*",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Zpl\\": "src/"
+                },
+                "psr-0": {
+                    "Zpl\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Andrew Koebbe",
+                    "email": "abk@stowers.org"
+                }
+            ],
+            "description": " This library is a php wrapper for the ZPL Programming Language.",
+            "homepage": "https://github.com/Stowers-LIMS/zpl",
+            "keywords": [
+                "php-wrapper",
+                "zpl"
+            ],
+            "time": "2020-04-24T17:59:52+00:00"
         },
         {
             "name": "symfony/asset",
@@ -6933,7 +6978,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "stowers-lims/zpl": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

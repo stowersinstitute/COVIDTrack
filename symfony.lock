@@ -162,6 +162,9 @@
             "config/packages/stof_doctrine_extensions.yaml"
         ]
     },
+    "stowers-lims/zpl": {
+        "version": "dev-master"
+    },
     "symfony/asset": {
         "version": "v4.4.7"
     },
