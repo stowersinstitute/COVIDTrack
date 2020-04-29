@@ -72,11 +72,11 @@ Fake data is managed by [DoctrineFixturesBundle](https://symfony.com/doc/master/
 
 To load fake data and clear out all existing database data:
 
-    $ php bin/console doctrine:fixtures:load -n
+    $ bin/console doctrine:fixtures:load -n
 
 Or add the `--append` flag to keep existing database data and append fake data:
 
-    $ php bin/console doctrine:fixtures:load -n --append
+    $ bin/console doctrine:fixtures:load -n --append
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
 
