@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\CollectionEvent;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -14,8 +13,7 @@ class AppFixtures extends Fixture
     {
         $users = $this->addUsers($em);
         $groups = $this->addParticipantGroups($em);
-        $events = $this->addCollectionEvents($em);
-        $specimens = $this->addPrintedSpecimens($em, $groups, $events);
+        $specimens = $this->addPrintedSpecimens($em, $groups);
 
         $em->flush();
     }
@@ -45,34 +43,13 @@ class AppFixtures extends Fixture
         return $groups;
     }
 
-    private function addCollectionEvents(ObjectManager $em)
-    {
-        $events = [];
-        $numToCreate = 5;
-        for ($i=1; $i<=$numToCreate; $i++) {
-            $e = new CollectionEvent();
-
-            $e->setTitle('Event '.$i);
-
-            $collectedOn = new \DateTime(sprintf('-%d days 11:00am', $numToCreate-$i));
-            $e->setCollectedOn($collectedOn);
-
-            $events[] = $e;
-
-            $em->persist($e);
-        }
-
-        return $events;
-    }
-
     /**
      * Add Specimens that have had labels printed, but not imported with results.
      *
      * @param ObjectManager $em
      * @param ParticipantGroup[] $groups
-     * @param CollectionEvent[] $events
      */
-    private function addPrintedSpecimens(ObjectManager $em, array $groups, array $events)
+    private function addPrintedSpecimens(ObjectManager $em, array $groups)
     {
         // TODO: CVDLS-30 Support creating unique accession ID when creating
         // Invoke to get next Specimen accession id
@@ -86,16 +63,5 @@ class AppFixtures extends Fixture
 
             return sprintf("%s%s", $prefix, $seq);
         };
-
-        $numPerGroupPerEvent = 10;
-        foreach ($events as $event) {
-            foreach ($groups as $group) {
-                for ($i=1; $i<=$numPerGroupPerEvent; $i++) {
-                    $s = new Specimen($nextSpecimenId(), $group, $event);
-
-                    $em->persist($s);
-                }
-            }
-        }
     }
 }
