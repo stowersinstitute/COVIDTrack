@@ -60,7 +60,7 @@ Examples
 
 First-time project setup (Docker):
 
-    docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --create-database --fixtures
+    docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --rebuild-database
     
 First-time project setup (Symfony Server):
 
@@ -147,13 +147,13 @@ if ($stages['composer-install']) {
 if ($stages['drop-database']) {
     writelnf('Dropping database');
     requireNotProduction();
-    print mustRunSfCommand('doctrine:schema:drop', [ '--force' ]);
+    print mustRunSfCommand('doctrine:database:drop', [ '--force', '--if-exists' ]);
 }
 
 if ($stages['create-database']) {
     writelnf('Creating database');
     requireNotProduction();
-    print mustRunSfCommand('doctrine:schema:create');
+    print mustRunSfCommand('doctrine:database:create', [ '--if-not-exists' ]);
 }
 
 if ($stages['sync-database']) {
