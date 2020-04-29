@@ -32,7 +32,7 @@ Alternatively you can run `yarn watch` for automatic recompiling.
 
 Instead of using Docker, develop with tools installed directly on the host machine:
 
- * [PHP 7.1.10+](https://www.php.net/) configured with support for sqlite
+ * [PHP 7.1.3+](https://www.php.net/) configured with support for sqlite
  * [Composer](https://getcomposer.org/)
  * [Symfony CLI application](https://symfony.com/download)
  * [SQLite](https://www.sqlite.org/download.html)
