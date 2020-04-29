@@ -21,10 +21,9 @@ docker-compose up --build -d
 
 #### Docker JS and CSS assets
 
-Recompile frontend assets after changing `package.json`, using `yarn add`, or changing CSS.
+Recompile frontend assets after changing `package.json`, using `yarn add`, or changing CSS:
 
-1. `docker-compose exec app /bin/bash` This puts you in the docker container.
-1. `yarn dev`
+    $ docker-compose exec app yarn dev
 
 Alternatively you can run `yarn watch` for automatic recompiling.
 
