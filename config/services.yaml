@@ -31,5 +31,5 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '%env(LABEL_PRINTER_TYPE)%'
-            - '%env(LABEL_PRINTER_CACHE_DIR)%'
+            - '%kernel.cache_dir%/label-images/'
             - '@router'
