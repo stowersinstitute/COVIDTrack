@@ -27,7 +27,7 @@ LDAP_AUTH_USER_DN_FORMAT={username}@CONTOSO.COM
 ```
 
 
-## Development Environment Install
+## Development Environment - Docker
 
 ### Docker
 1. `cp .env.docker .env.local`
