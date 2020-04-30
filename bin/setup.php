@@ -157,12 +157,12 @@ if ($stages['composer-install']) {
 }
 
 if ($stages['drop-database']) {
-    writelnf('Dropping database');
+    writelnf('Dropping database %s', getenv('DATABASE_URL'));
     requireNotProduction();
 
     // (Adapted from vendor/symfony/maker-bundle/src/Test/MakerTestDetails.php:149)
     // sqlite does not support the --if-exists flag (but this succeeds if the DB does not exist)
-    if (0 === strpos(getenv('TEST_DATABASE_DSN'), 'sqlite://')) {
+    if (0 === strpos(getenv('DATABASE_URL'), 'sqlite://')) {
         print mustRunSfCommand('doctrine:database:drop', [ '--force' ]);
     }
     else {
@@ -171,12 +171,12 @@ if ($stages['drop-database']) {
 }
 
 if ($stages['create-database']) {
-    writelnf('Creating database');
+    writelnf('Creating database %s', getenv('DATABASE_URL'));
     requireNotProduction();
 
     // (Adapted from vendor/symfony/maker-bundle/src/Test/MakerTestDetails.php:149)
     // sqlite does not support the --if-not-exists flag (but this succeeds if the DB already exists)
-    if (0 === strpos(getenv('TEST_DATABASE_DSN'), 'sqlite://')) {
+    if (0 === strpos(getenv('DATABASE_URL'), 'sqlite://')) {
         print mustRunSfCommand('doctrine:database:create');
     }
     else {
