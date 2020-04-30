@@ -84,6 +84,7 @@ $stages = [
     // Should a .env.local file be created?
     'create-local-env' => isset($cliOpts['local-env-from']) ? true : false,
     'composer-install' => true,
+    'drop-database' => false,
     'create-database' => isset($cliOpts['create-database']) ? true : false,
     'sync-database' => isset($cliOpts['sync-database']) ? true : false,
     'fixtures' => isset($cliOpts['fixtures']) ? true : false,
@@ -143,18 +144,44 @@ if ($stages['create-local-env']) {
 if ($stages['composer-install']) {
     writelnf('Installing dependencies with composer');
     print mustRunCommand("composer install");
+
+    // Once composer is executed we can parse .env files
+    require_once(__DIR__ . '/../vendor/autoload.php');
+    $dotEnv = new \Symfony\Component\Dotenv\Dotenv();
+    $dotEnv->load(__DIR__ . '/../.env');
+
+    $localEnvPath = __DIR__ . '/../.env.local';
+    if (file_exists($localEnvPath)) {
+        $dotEnv->load($localEnvPath);
+    }
 }
 
 if ($stages['drop-database']) {
-    writelnf('Dropping database');
+    writelnf('Dropping database %s', getenv('DATABASE_URL'));
     requireNotProduction();
-    print mustRunSfCommand('doctrine:database:drop', [ '--force', '--if-exists' ]);
+
+    // (Adapted from vendor/symfony/maker-bundle/src/Test/MakerTestDetails.php:149)
+    // sqlite does not support the --if-exists flag (but this succeeds if the DB does not exist)
+    if (0 === strpos(getenv('DATABASE_URL'), 'sqlite://')) {
+        print mustRunSfCommand('doctrine:database:drop', [ '--force' ]);
+    }
+    else {
+        print mustRunSfCommand('doctrine:database:drop', [ '--force', '--if-exists' ]);
+    }
 }
 
 if ($stages['create-database']) {
-    writelnf('Creating database');
+    writelnf('Creating database %s', getenv('DATABASE_URL'));
     requireNotProduction();
-    print mustRunSfCommand('doctrine:database:create', [ '--if-not-exists' ]);
+
+    // (Adapted from vendor/symfony/maker-bundle/src/Test/MakerTestDetails.php:149)
+    // sqlite does not support the --if-not-exists flag (but this succeeds if the DB already exists)
+    if (0 === strpos(getenv('DATABASE_URL'), 'sqlite://')) {
+        print mustRunSfCommand('doctrine:database:create');
+    }
+    else {
+        print mustRunSfCommand('doctrine:database:create', [ '--if-not-exists' ]);
+    }
 }
 
 if ($stages['sync-database']) {
