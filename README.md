@@ -56,6 +56,16 @@ Recompile frontend assets after changing `package.json`, using `yarn add`, or ch
 
 Alternatively you can run `yarn watch` for automatic recompiling.
 
+#### Docker Environment Variables
+
+Such as configuring for LDAP or setup.php script. Edit `docker-compose.yml` in each service's environment section:
+
+    # docker-compose.yml
+    services:
+        app:
+            environment:
+                SFAPP_NOT_PRODUCTION: "true"
+
 
 ## Development Environment - Symfony Server
 
