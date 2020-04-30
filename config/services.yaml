@@ -4,6 +4,15 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    default_ldap_host: ~
+    default_ldap_port: 389
+    default_ldap_encryption: none
+    default_ldap_protocol_version: 3
+    default_ldap_referrals: false
+    default_ldap_auth_base_dn: ''
+    default_ldap_auth_search_dn: ''
+    default_ldap_auth_search_password: ''
+    default_ldap_auth_user_dn_format: ''
 
 services:
     # default configuration for services in *this* file
@@ -17,11 +26,39 @@ services:
         resource: '../src/*'
         exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
+    App\Command\DebugLdapUserCommand:
+        arguments:
+            # Cannot autowire based on LdapUserProvider so must use the concrete service
+            Symfony\Component\Ldap\Security\LdapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
+
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
+    App\Security\LoginFormAuthenticator:
+        arguments:
+            $ldapAuthUserDnFormat: '%env(default:default_ldap_auth_user_dn_format:LDAP_AUTH_USER_DN_FORMAT)%'
+
+    App\Security\OptionalLdapUserProvider:
+        arguments:
+            Symfony\Component\Ldap\LdapInterface: '@Symfony\Component\Ldap\Ldap'
+            $baseDn: '%env(default:default_ldap_auth_base_dn:LDAP_AUTH_BASE_DN)%'
+            $searchDn: '%env(default:default_ldap_auth_search_dn:LDAP_AUTH_SEARCH_DN)%'
+            $searchPassword: '%env(default:default_ldap_auth_search_password:LDAP_AUTH_SEARCH_PASSWORD)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    Symfony\Component\Ldap\Ldap:
+        arguments: ['@Symfony\Component\Ldap\Adapter\ExtLdap\Adapter']
+
+    Symfony\Component\Ldap\Adapter\ExtLdap\Adapter:
+        arguments:
+            - host: '%env(default:default_ldap_host:LDAP_HOST)%'
+              port: '%env(default:default_ldap_port:int:LDAP_PORT)%'
+              # Valid values are: none, ssl, tls
+              encryption: '%env(default:default_ldap_encryption:int:LDAP_ENCRYPTION)%'
+              options:
+                  protocol_version: '%env(default:default_ldap_protocol_version:int:LDAP_PROTOCOL_VERSION)%'
+                  referrals: '%env(default:default_ldap_referrals:bool:LDAP_REFERRALS)%'
