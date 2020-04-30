@@ -144,6 +144,16 @@ if ($stages['create-local-env']) {
 if ($stages['composer-install']) {
     writelnf('Installing dependencies with composer');
     print mustRunCommand("composer install");
+
+    // Once composer is executed we can parse .env files
+    require_once(__DIR__ . '/../vendor/autoload.php');
+    $dotEnv = new \Symfony\Component\Dotenv\Dotenv();
+    $dotEnv->load(__DIR__ . '/../.env');
+
+    $localEnvPath = __DIR__ . '/../.env.local';
+    if (file_exists($localEnvPath)) {
+        $dotEnv->load($localEnvPath);
+    }
 }
 
 if ($stages['drop-database']) {
