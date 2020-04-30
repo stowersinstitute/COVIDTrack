@@ -19,21 +19,9 @@
     </form>
     <!-- /.search form -->
     <!-- sidebar menu: : style can be found in sidebar.less -->
-    <ul class="sidebar-menu" data-widget="tree">
+    <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         <li class="header">MAIN NAVIGATION</li>
-        <li class="active treeview menu-open">
-            <a href="#">
-                <i class="fa fa-flask"></i> <span>Samples</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_sample_list') }}"><a href="{{ path('app_sample_list') }}"><i class="fa fa-list"></i> Sample List</a></li>
-                <li class="{{ _self.activeClass('app_sample_new') }}"><a href="{{ path('app_sample_new') }}"><i class="fa fa-plus"></i> New Sample</a></li>
-            </ul>
-        </li>
-        <li class="treeview menu-open {{ _self.activeClass('app_specimen_list') }}{{ _self.activeClass('app_specimen_new') }}">
+        <li class="treeview {{ _self.activeClass('app_specimen_list') }}{{ _self.activeClass('app_specimen_new') }}">
             <a href="#">
                 <i class="fa fa-flask"></i> <span>Specimens</span>
                 <span class="pull-right-container">
@@ -45,7 +33,7 @@
                 <li class="{{ _self.activeClass('app_specimen_new') }}"><a href="{{ path('app_specimen_new') }}"><i class="fa fa-plus"></i> New</a></li>
             </ul>
         </li>
-        <li class="active treeview menu-open">
+        <li class="treeview" {{ _self.activeClass('app_wellplate_list') }}{{ _self.activeClass('app_wellplate_new') }}>
             <a href="#">
                 <i class="fa fa-th"></i> <span>Well Plates</span>
                 <span class="pull-right-container">
@@ -53,8 +41,8 @@
             </span>
             </a>
             <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_wellplate_list') }}"><a href="{{ path('app_wellplate_list') }}"><i class="fa fa-list"></i> Well Plate List</a></li>
-                <li class="{{ _self.activeClass('app_wellplate_new') }}"><a href="{{ path('app_wellplate_new') }}"><i class="fa fa-plus"></i> New Well Plate</a></li>
+                <li class="{{ _self.activeClass('app_wellplate_list') }}"><a href="{{ path('app_wellplate_list') }}"><i class="fa fa-list"></i> List</a></li>
+                <li class="{{ _self.activeClass('app_wellplate_new') }}"><a href="{{ path('app_wellplate_new') }}"><i class="fa fa-plus"></i> New</a></li>
             </ul>
         </li>
         <li class="treeview {{ _self.activeClass('app_participant_group_list') }}{{ _self.activeClass('app_participant_group_new') }}">

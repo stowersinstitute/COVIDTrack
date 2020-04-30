@@ -8,7 +8,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Biological material collected from a study Participant during a Collection Event.
+ * Biological material collected from a study Participant.
  * Each Participant belongs to a Participant Group. The Specimen is associated
  * to the group instead of the participant to maintain some anonymity.
  *
@@ -34,7 +34,7 @@ class Specimen
     private $id;
 
     /**
-     * Unique public ID for referencing this sample.
+     * Unique public ID for referencing this specimen.
      *
      * @var string
      * @ORM\Column(name="accessionId", type="string")
@@ -52,13 +52,11 @@ class Specimen
     private $participantGroup;
 
     /**
-     * Collection Event during which this Specimen was collected.
-     *
-     * @var CollectionEvent
-     * @ORM\ManyToOne(targetEntity="App\Entity\CollectionEvent", inversedBy="specimens")
-     * @ORM\JoinColumn(name="collectionEventId", referencedColumnName="id")
+     * @var WellPlate
+     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
+     * @Gedmo\Versioned
      */
-    private $collectionEvent;
+    private $wellPlate;
 
     /**
      * Time when collected or received.
@@ -76,11 +74,10 @@ class Specimen
      */
     private $status;
 
-    public function __construct(string $accessionId, ParticipantGroup $group, CollectionEvent $event)
+    public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
-        $this->collectionEvent = $event;
 
         $this->status = self::STATUS_CREATED;
         $this->createdAt = new \DateTime();
@@ -109,16 +106,6 @@ class Specimen
     public function setParticipantGroup(ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
-    }
-
-    public function getCollectionEvent(): CollectionEvent
-    {
-        return $this->collectionEvent;
-    }
-
-    public function setCollectionEvent(CollectionEvent $event): void
-    {
-        $this->collectionEvent = $event;
     }
 
     public function getStatus(): string
@@ -154,6 +141,16 @@ class Specimen
         $statuses = array_flip(self::getFormStatuses());
 
         return $statuses[$this->status];
+    }
+
+    public function getWellPlate(): ?WellPlate
+    {
+        return $this->wellPlate;
+    }
+
+    public function setWellPlate(?WellPlate $wellPlate): void
+    {
+        $this->wellPlate = $wellPlate;
     }
 
     public function getCollectedAt(): ?\DateTime
