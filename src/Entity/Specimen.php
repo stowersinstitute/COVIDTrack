@@ -25,6 +25,10 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const TYPE_BUCCAL = "BUCCAL";
+    const TYPE_NASAL = "NASAL";
+    const TYPE_BLOOD = "BLOOD";
+
     /**
      * @var int
      * @ORM\Id()
@@ -41,6 +45,14 @@ class Specimen
      * @Gedmo\Versioned
      */
     private $accessionId;
+
+    /**
+     * Saliva, Blood, etc.
+     *
+     * @var string
+     * @ORM\Column(name="type", type="string", nullable=true)
+     */
+    private $type;
 
     /**
      * Participant offering this specimen belongs to this Participant Group.
@@ -96,6 +108,51 @@ class Specimen
     public function setAccessionId(string $id): void
     {
         $this->accessionId = $id;
+    }
+
+    /**
+     * Return Specimen::TYPE_* constant used.
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): void
+    {
+        $this->ensureValidType($type);
+        $this->type = $type;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getFormTypes(): array
+    {
+        return [
+            '' => null,
+            'Blood' => self::TYPE_BLOOD,
+            'Buccal' => self::TYPE_BUCCAL,
+            'Nasal' => self::TYPE_NASAL,
+        ];
+    }
+
+    /**
+     * Get human-readable text of selected Type
+     */
+    public function getTypeText(): string
+    {
+        if ($this->type === null) {
+            return '';
+        }
+
+        // Remove empty/null choice
+        $types = array_filter(self::getFormTypes());
+
+        // Key by TYPE_* constant
+        $types = array_flip($types);
+
+        return $types[$this->type];
     }
 
     public function getParticipantGroup(): ParticipantGroup
@@ -161,5 +218,14 @@ class Specimen
     public function setCollectedAt(?\DateTime $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    private function ensureValidType(?string $type): void
+    {
+        $valid = array_values(self::getFormTypes());
+
+        if (!in_array($type, $valid, true)) {
+            throw new \InvalidArgumentException('Unknown Specimen type');
+        }
     }
 }

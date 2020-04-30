@@ -67,9 +67,17 @@ class AppFixtures extends Fixture
         foreach ($groups as $group) {
             for ($i=1; $i<=$group->getParticipantCount(); $i++) {
                 $s = new Specimen($nextSpecimenId(), $group);
+                $s->setType($this->getSpecimenType($i));
 
                 $em->persist($s);
             }
         }
+    }
+
+    private function getSpecimenType(int $i)
+    {
+        $types = array_values(Specimen::getFormTypes());
+
+        return $types[$i % count($types)];
     }
 }
