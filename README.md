@@ -18,6 +18,8 @@ The following environment variables are available:
  
 **Active Directory Example**
 
+Add to `.env.local` or otherwise define them in the environment.
+
 ```
 LDAP_HOST=directory.contoso.com
 LDAP_AUTH_BASE_DN=DC=contoso,DC=com
