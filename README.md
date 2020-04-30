@@ -1,5 +1,34 @@
 # COVID Sample Tracker
 
+## Configuration
+
+### Enabling LDAP / Active Directory Authentication
+
+The following environment variables are available:
+
+ * `LDAP_HOST` (required) LDAP server hostname
+ * `LDAP_PORT` (default 389) port to communicate on
+ * `LDAP_ENCRYPTION` (default none) Valid values are none, ssl, tls
+ * `LDAP_PROTOCOL_VERSION` (default 3)
+ * `LDAP_REFERRALS` (default false)
+ * `LDAP_AUTH_BASE_DN` DN to use when searching for users
+ * `LDAP_AUTH_SEARCH_DN` User to log in as when checking if a user or their credentials are valid (eg. "user@EXAMPLE.COM" or "cn=read-only-admin,dc=example,dc=com")
+ * `LDAP_AUTH_SEARCH_PASSWORD` Password to use when authenticating as `LDAP_AUTH_SEARCH_DN` 
+ * `LDAP_AUTH_USER_DN_FORMAT` DN to use when looking up a user to authenticate. For example: `{username}@company.com` 
+ 
+**Active Directory Example**
+
+Add to `.env.local` or otherwise define them in the environment.
+
+```
+LDAP_HOST=directory.contoso.com
+LDAP_AUTH_BASE_DN=DC=contoso,DC=com
+LDAP_AUTH_SEARCH_DN=serviceaccount@CONTOSO.COM
+LDAP_AUTH_SEARCH_PASSWORD=hunter2
+LDAP_AUTH_USER_DN_FORMAT={username}@CONTOSO.COM
+```
+
+
 ## Development Environment - Docker
 
 1. [Download and install Docker](https://www.docker.com/)
@@ -32,7 +61,7 @@ Alternatively you can run `yarn watch` for automatic recompiling.
 
 Instead of using Docker, develop with tools installed directly on the host machine:
 
- * [PHP 7.1.10+](https://www.php.net/) configured with support for sqlite
+ * [PHP 7.1.3+](https://www.php.net/) configured with support for sqlite
  * [Composer](https://getcomposer.org/)
  * [Symfony CLI application](https://symfony.com/download)
  * [SQLite](https://www.sqlite.org/download.html)

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae282c44e357c2fd9651ed0b2709e35e",
+    "content-hash": "2c9494315f8c028817a5399bc45ee99a",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -6398,20 +6398,6 @@
                 "Fixture",
                 "persistence"
             ],
-            "funding": [
-                {
-                    "url": "https://www.doctrine-project.org/sponsorship.html",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://www.patreon.com/phpdoctrine",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Fdoctrine-fixtures-bundle",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-04-02T16:40:37+00:00"
         },
         {
@@ -7003,5 +6989,8 @@
         "ext-iconv": "*"
     },
     "platform-dev": [],
+    "platform-overrides": {
+        "php": "7.1.3"
+    },
     "plugin-api-version": "1.1.0"
 }
