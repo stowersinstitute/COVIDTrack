@@ -80,7 +80,7 @@ class ZplImagePrinter extends Printer implements ZplPrinterInterface
         $this->receivedZpl = $zpl;
         $this->lastReceivedImage = null; // Reset last cache image path
 
-        $density = $this->getDpiToDpmm($this->printer->getDpi()) . 'dpmm'; // AbstractBuilder::UNIT_DOTS . AbstractBuilder::UNIT_MM;
+        $density = $this->getDpiToDpmm($this->printer->getDpi()) . 'dpmm';
         $width = $this->printer->getMedia()->getWidth(); // inches
         $height = $this->printer->getMedia()->getHeight(); // inches
         $index = 0;
