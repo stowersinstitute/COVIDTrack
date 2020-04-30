@@ -84,6 +84,7 @@ $stages = [
     // Should a .env.local file be created?
     'create-local-env' => isset($cliOpts['local-env-from']) ? true : false,
     'composer-install' => true,
+    'drop-database' => false,
     'create-database' => isset($cliOpts['create-database']) ? true : false,
     'sync-database' => isset($cliOpts['sync-database']) ? true : false,
     'fixtures' => isset($cliOpts['fixtures']) ? true : false,
