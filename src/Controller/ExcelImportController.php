@@ -4,8 +4,8 @@
 namespace App\Controller;
 
 
+use App\Entity\ExcelImportWorkbook;
 use App\Form\GenericExcelImportType;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +18,7 @@ class ExcelImportController extends AbstractController
      */
     public function chooseFile(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
 
         $form->handleRequest($request);
@@ -26,9 +27,13 @@ class ExcelImportController extends AbstractController
             /** @var UploadedFile $excelFile */
             $excelFile = $form->get('excelFile')->getData();
 
-            // Create directly from the excel file, can use this if we're processing in the controller
-            $reader = new Xlsx();
-            $spreadsheet = $reader->load($excelFile->getRealPath());
+            $workbook = ExcelImportWorkbook::createFromUpload($excelFile);
+            $em->persist($workbook);
+            $em->flush();
+
+            return $this->redirectToRoute($request->get('previewRoute'), [
+                'importId' => $workbook->getId(),
+            ]);
         }
 
         return $this->render('excel-import/wizard-start.html.twig', [
