@@ -91,13 +91,27 @@ class ZplImagePrinter extends Printer implements ZplPrinterInterface
         curl_setopt($curl, CURLOPT_POST, TRUE);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $zpl);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
-//        curl_setopt($curl, CURLOPT_HTTPHEADER, array("Accept: application/pdf")); // Uncomment this line to get PDF back from API
+        curl_setopt($curl, CURLOPT_FAILONERROR, false);
+        //        curl_setopt($curl, CURLOPT_HTTPHEADER, array("Accept: application/pdf")); // Uncomment this line to get PDF back from API
         $result = curl_exec($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
-        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) == 200) {
+        if ($httpCode == 200) {
             $this->writeZplImage($zpl, $result);
         } else {
-            throw new \RuntimeException("ZPL API Error: " . $result);
+            // May be a low-level error like a failed DNS lookup
+            $curlError = curl_error($curl);
+            $curlErrorNo = curl_errno($curl);
+            if ($curlError) {
+                throw new \ErrorException(sprintf('curl error %s:%s', $curlErrorNo, $curlError));
+            }
+
+            // Or a standard HTTP problem like a 500 bad request
+            throw new \RuntimeException(sprintf(
+                "ZPL API Error: HTTP %s %s",
+                $httpCode,
+                $result
+            ));
         }
 
         curl_close($curl);
