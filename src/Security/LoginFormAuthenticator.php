@@ -60,6 +60,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->ldap = $ldap;
+        $this->ldapAuthUserDnFormat = $ldapAuthUserDnFormat;
     }
 
     public function supports(Request $request)
