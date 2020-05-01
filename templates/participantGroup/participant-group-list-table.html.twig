@@ -5,12 +5,17 @@
             <th>&nbsp;</th>
             <th>Accession ID</th>
             <th>Participants</th>
+            <th>Has Positive<br>Specimen?</th>
             <th>Created</th>
             <th>Last Modified</th>
         </tr>
     </thead>
     <tbody>
     {% for group in groups %}
+        {% set positiveCount = 0 %}
+        {% if results[group.accessionId]['Positive'] is defined %}
+            {% set positiveCount = results[group.accessionId]['Positive'] %}
+        {% endif %}
         <tr>
             <td>
                 <a href="{{ path('app_participant_group_edit', {accessionId: group.accessionId}) }}">Edit</a>
@@ -19,6 +24,7 @@
                 <a href="{{ path('app_participant_group_view', {accessionId: group.accessionId}) }}">{{ group.accessionId }}</a>
             </td>
             <td>{{ group.participantCount }}</td>
+            <td>{{ positiveCount >= 1 ? 'Yes' : 'No' }}</td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>
