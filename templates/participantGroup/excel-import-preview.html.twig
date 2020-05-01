@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Import Preview{% endblock %}
+
+{% block body %}
+
+    Importing from: {{ importingWorkbook.filename }}
+
+    <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}">
+        <input type="submit" value="Commit Import" />
+    </form>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                        <tr>
+                            <th>Accession ID</th>
+                            <th># Participants</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for group in importer.participantGroups  %}
+                            <tr>
+                                <td>{{ group.accessionId }}</td>
+                                <td>{{ group.participantCount }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

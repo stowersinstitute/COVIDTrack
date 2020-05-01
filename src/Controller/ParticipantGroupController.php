@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\ExcelImportWorkbook;
 use App\Entity\ParticipantGroup;
+use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\ParticipantGroupForm;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -105,6 +107,61 @@ class ParticipantGroupController extends AbstractController
             'revisions' => $revisions,
         ]);
     }
+
+    /**
+     * @Route("/excel-import/start", name="group_excel_import")
+     */
+    public function excelImport()
+    {
+        return $this->redirectToRoute('excel_import_choose_file', [
+            'previewRoute' => 'group_excel_import_preview',
+        ]);
+    }
+
+    /**
+     * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
+     */
+    public function excelImportPreview(int $importId)
+    {
+        $importingWorkbook = $this->getDoctrine()
+            ->getManager()
+            ->find(ExcelImportWorkbook::class, $importId);
+
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+
+        return $this->render('participantGroup/excel-import-preview.html.twig', [
+            'importId' => $importId,
+            'importingWorkbook' => $importingWorkbook,
+            'importer' => $importer,
+        ]);
+    }
+
+    /**
+     * @Route("/excel-import/commit/{importId<\d+>}", methods={"POST"}, name="group_excel_import_commit")
+     */
+    public function excelImportCommit(int $importId)
+    {
+        $em = $this->getDoctrine()
+            ->getManager();
+
+        $importingWorkbook = $em
+            ->find(ExcelImportWorkbook::class, $importId);
+
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+
+        $groups = $importer->getParticipantGroups();
+        foreach ($groups as $group) {
+            $em->persist($group);
+        }
+
+        // Clean up workbook from the database
+        $em->remove($importingWorkbook);
+
+        $em->flush();
+
+        return $this->redirectToRoute('app_participant_group_list');
+    }
+
 
     private function findGroup($id): ParticipantGroup
     {

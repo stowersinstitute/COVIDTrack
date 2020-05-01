@@ -3,9 +3,12 @@
 {% block page_title %}Participant Groups{% endblock %}
 
 {% block body %}
-<div class="row">
-    <div class="col-xs-12">
-        <a href="{{ path('app_participant_group_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> New Participant Group</a>
+<div class="row margin-bottom">
+    <div class="col">
+        <div class="pull-right">
+            <a href="{{ path('app_participant_group_new') }}" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i> New Participant Group</a>
+            <a href="{{ path('group_excel_import') }}" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i> Import from Excel</a>
+        </div>
     </div>
 </div>
 
