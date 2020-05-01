@@ -22,14 +22,16 @@ services:
         depends_on:
             - app
     db:
-        image: postgres
+        image: mariadb:10.4
         environment:
-            POSTGRES_PASSWORD: covid
-            POSTGRES_DB: covid
+            MYSQL_ROOT_PASSWORD: covid
+            MYSQL_DATABASE: covid
+            MYSQL_USER: ctdbuser
+            MYSQL_PASSWORD: covid
         volumes:
-            - db_data:/var/lib/postgresql/data
+            - db_data:/var/lib/mysql
         ports:
-            - 5433:5432
+            - 3306:3306
 
 volumes:
     db_data:
