@@ -56,6 +56,16 @@ Recompile frontend assets after changing `package.json`, using `yarn add`, or ch
 
 Alternatively you can run `yarn watch` for automatic recompiling.
 
+#### Docker Environment Variables
+
+Such as configuring for LDAP or setup.php script. Edit `docker-compose.yml` in each service's environment section:
+
+    # docker-compose.yml
+    services:
+        app:
+            environment:
+                SFAPP_NOT_PRODUCTION: "true"
+
 
 ## Development Environment - Symfony Server
 
@@ -110,5 +120,6 @@ Create new fixtures in `src/DataFixtures/AppFixtures.php`
 
 ### Frontend Frameworks
 
+* [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
 * [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
 * [Font Awesome 4.7.0](https://fontawesome.com/v4.7.0/) for extra icons

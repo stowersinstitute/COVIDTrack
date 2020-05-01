@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\CollectionEvent;
 use App\Entity\ParticipantGroup;
 use App\Form\ParticipantGroupForm;
 use Gedmo\Loggable\Entity\LogEntry;
@@ -29,13 +28,8 @@ class ParticipantGroupController extends AbstractController
             ->getRepository(ParticipantGroup::class)
             ->findAll();
 
-        $collectionEventCounts = $this->getDoctrine()
-            ->getRepository(CollectionEvent::class)
-            ->findCountsIndexedByGroupAccessionId();
-
         return $this->render('participantGroup/participant-group-list.html.twig', [
             'groups' => $groups,
-            'collectionEventCounts' => $collectionEventCounts,
         ]);
     }
 
@@ -102,17 +96,12 @@ class ParticipantGroupController extends AbstractController
     {
         $group = $this->findGroup($accessionId);
 
-        $collectionEvents = $this->getDoctrine()
-            ->getRepository(CollectionEvent::class)
-            ->findByParticipantGroup($group);
-
         $revisions = $this->getDoctrine()
             ->getRepository(LogEntry::class)
             ->getLogEntries($group);
 
         return $this->render('participantGroup/participant-group-view.html.twig', [
             'group' => $group,
-            'collectionEvents' => $collectionEvents,
             'revisions' => $revisions,
         ]);
     }

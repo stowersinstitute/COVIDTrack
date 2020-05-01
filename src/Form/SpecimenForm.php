@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\CollectionEvent;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -23,11 +22,6 @@ class SpecimenForm extends AbstractType
                 'required' => true,
                 'placeholder' => '- Select -',
             ])
-            ->add('collectionEvent', EntityType::class, [
-                'class' => CollectionEvent::class,
-                'required' => true,
-                'placeholder' => '- Select -',
-            ])
             ->add('status', ChoiceType::class, [
                 'choices' => Specimen::getFormStatuses(),
             ])
@@ -42,8 +36,7 @@ class SpecimenForm extends AbstractType
             'empty_data' => function(FormInterface $form) {
                 $accessionId = 'CID'.time(); // TODO: CVDLS-30 Replace with real accession ID prefix
                 $group = $form->get('participantGroup')->getData();
-                $event = $form->get('collectionEvent')->getData();
-                $s = new Specimen($accessionId, $group, $event);
+                $s = new Specimen($accessionId, $group);
 
                 return $s;
             }

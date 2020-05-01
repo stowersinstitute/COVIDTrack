@@ -3,7 +3,6 @@
 namespace App\Form;
 
 
-use App\Entity\Sample;
 use App\Entity\WellPlate;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -19,7 +18,7 @@ class WellPlateType extends AbstractType
         $builder
             ->add('barcode', TextType::class)
             ->add('status', ChoiceType::class, [
-                'choices' => Sample::getFormStatuses()
+                'choices' => WellPlate::getFormStatuses()
             ])
             ->add('save', SubmitType::class)
             ->getForm();
