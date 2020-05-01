@@ -156,7 +156,7 @@ class LabelPrinter
         $this->dpi = $dpi;
     }
 
-    public function getMediaWidth(): float
+    public function getMediaWidth(): ?float
     {
         return $this->mediaWidth;
     }
@@ -166,7 +166,7 @@ class LabelPrinter
         $this->mediaWidth = $mediaWidth;
     }
 
-    public function getMediaHeight(): float
+    public function getMediaHeight(): ?float
     {
         return $this->mediaHeight;
     }
