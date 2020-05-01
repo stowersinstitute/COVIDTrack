@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\CollectionEvent;
+use App\Entity\LabelPrinter;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,6 +17,7 @@ class AppFixtures extends Fixture
         $groups = $this->addParticipantGroups($em);
         $events = $this->addCollectionEvents($em);
         $specimens = $this->addPrintedSpecimens($em, $groups, $events);
+        $printer = $this->addLabelPrinters($em);
 
         $em->flush();
     }
@@ -97,5 +99,26 @@ class AppFixtures extends Fixture
                 }
             }
         }
+    }
+
+    /**
+     * Adds a dummy label printer for use with the default image printing setup
+     *
+     * @param ObjectManager $em
+     * @return LabelPrinter
+     */
+    private function addLabelPrinters(ObjectManager $em): LabelPrinter
+    {
+        $printer = new LabelPrinter();
+        $printer->setTitle('Dummy Printer');
+        $printer->setDpi('203');
+        $printer->setDescription('Dummy Printer for Image Previewing');
+        $printer->setHost('none');
+        $printer->setMediaWidth(4);
+        $printer->setMediaHeight(1);
+
+        $em->persist($printer);
+
+        return $printer;
     }
 }

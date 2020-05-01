@@ -8,12 +8,17 @@ use App\Entity\LabelPrinter;
 use App\Entity\Specimen;
 use App\Form\LabelPrinterType;
 use App\Label\SpecimenIntakeLabelBuilder;
+use App\Label\ZplImage;
+use App\Label\ZplPrinterResponse;
 use App\Label\ZplPrinting;
+use App\Label\ZplTextPrinter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -87,7 +92,7 @@ class LabelPrinterController extends AbstractController
     }
 
     /**
-     * @Route("/test"   , methods={"GET", "POST"})
+     * @Route("/test", methods={"GET", "POST"})
      */
     public function testPrint(Request $request, ZplPrinting $zpl)
     {
@@ -111,6 +116,9 @@ class LabelPrinterController extends AbstractController
 
         $form->handleRequest($request);
 
+        $b64Image = null;
+        $zplText = null;
+
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
@@ -120,8 +128,23 @@ class LabelPrinterController extends AbstractController
             $labelBuilder->setParticipantGroup($specimen->getParticipantGroup());
             $labelBuilder->setSpecimen($specimen);
             $zpl->printBuilder($labelBuilder);
+
+            $result = $zpl->getLastPrinterResponse();
+
+            if($result->getPrinterType() === 'image') {
+                /** @var ZplImage $data */
+                $data = $result->getData();
+                $image = file_get_contents($data->serverPath);
+                $b64Image = base64_encode($image);
+            } else if ($result->getPrinterType() === 'text') {
+                $zplText = $result->getData();
+            }
         }
 
-        return $this->render('label-printer/label-printer-test-print.html.twig', ['form' => $form->createView()]);
+        return $this->render('label-printer/label-printer-test-print.html.twig', [
+            'form' => $form->createView(),
+            'b64_image' => $b64Image,
+            'zpl_text' => $zplText,
+        ]);
     }
 }

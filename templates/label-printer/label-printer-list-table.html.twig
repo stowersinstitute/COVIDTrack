@@ -7,6 +7,8 @@
             <th>Host</th>
             <th>Description</th>
             <th>DPI</th>
+            <th>Media Width</th>
+            <th>Media Height</th>
             <th>Active</th>
         </tr>
     </thead>
@@ -20,6 +22,8 @@
             <td>{{ printer.host }}</td>
             <td>{{ printer.description }}</td>
             <td>{{ printer.dpi }}</td>
+            <td>{{ printer.mediaWidth }}in</td>
+            <td>{{ printer.mediaHeight }}in</td>
             <td>{{ printer.isActive }}</td>
         </tr>
     {% endfor %}

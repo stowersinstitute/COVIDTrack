@@ -56,6 +56,20 @@ class LabelPrinter
     private $dpi;
 
     /**
+     * @var float
+     *
+     * @ORM\Column(type="float", name="mediaWidth")
+     */
+    private $mediaWidth;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", name="mediaHeight")
+     */
+    private $mediaHeight;
+
+    /**
      * @var bool
      *
      * @ORM\Column(type="boolean", name="isActive")
@@ -140,6 +154,26 @@ class LabelPrinter
     public function setDpi(int $dpi): void
     {
         $this->dpi = $dpi;
+    }
+
+    public function getMediaWidth(): float
+    {
+        return $this->mediaWidth;
+    }
+
+    public function setMediaWidth(float $mediaWidth): void
+    {
+        $this->mediaWidth = $mediaWidth;
+    }
+
+    public function getMediaHeight(): float
+    {
+        return $this->mediaHeight;
+    }
+
+    public function setMediaHeight(float $mediaHeight): void
+    {
+        $this->mediaHeight = $mediaHeight;
     }
 
     /**

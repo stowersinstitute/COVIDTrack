@@ -16,4 +16,24 @@
         </div>
     </div>
 
+    {% if b64_image is not empty %}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="callout callout-info">
+                    <h4><i class="icon fa fa-print"></i> Label Preview</h4>
+                    <img class="label-preview center-block img-responsive" src="data:image/png;base64,{{ b64_image }}">
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if zpl_text is not empty %}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="callout callout-info">
+                    <h4><i class="icon fa fa-code"></i> ZPL Preview</h4>
+                    <pre>{{ zpl_text }}</pre>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

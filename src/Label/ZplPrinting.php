@@ -82,17 +82,6 @@ class ZplPrinting
         return $status;
     }
 
-    public function testPrint(LabelPrinter $printer)
-    {
-        $this->lastPrinterResponse = null;
-
-        $client = $this->getPrinterClient($printer);
-        $builderClass = $printer->getMedia()->getTestLabelTemplate()->getZplBuilderClass();
-        $client->send($builderClass::testLabelZpl($printer));
-
-        $this->lastPrinterResponse = $client->getResponse();
-    }
-
     public function printZpl(LabelPrinter $printer, string $zplCode, int $copies = 1)
     {
         $this->lastPrinterResponse = null;
