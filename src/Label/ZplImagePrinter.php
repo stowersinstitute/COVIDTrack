@@ -81,8 +81,8 @@ class ZplImagePrinter extends Printer implements ZplPrinterInterface
         $this->lastReceivedImage = null; // Reset last cache image path
 
         $density = $this->getDpiToDpmm($this->printer->getDpi()) . 'dpmm';
-        $width = $this->printer->getMediaWidth(); // inches
-        $height = $this->printer->getMediaHeight(); // inches
+        $width = $this->printer->getMediaWidthIn(); // inches
+        $height = $this->printer->getMediaHeightIn(); // inches
         $index = 0;
         $url = sprintf("http://api.labelary.com/v1/printers/%s/labels/%Fx%F/%d/", $density, $width, $height, $index);
 

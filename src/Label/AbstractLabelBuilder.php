@@ -44,7 +44,7 @@ abstract class AbstractLabelBuilder
     {
         $zpl = new ZplBuilder(ZplBuilder::UNIT_MM, $this->printer->getDpi());
 //        $zpl->setMediaWidth($this->printer->getMedia()->getWidth());
-        $zpl->setMediaWidth($this->printer->getMediaWidth());
+        $zpl->setMediaWidth($this->printer->getMediaWidthIn());
         $zpl->setFontMapper(new ZD420());
 
         return $zpl;

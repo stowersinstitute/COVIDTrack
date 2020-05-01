@@ -23,8 +23,8 @@ class AppLabelPrinterFixtures extends Fixture
         $printer->setDpi('203');
         $printer->setDescription('Dummy Printer for Image Previewing');
         $printer->setHost('none');
-        $printer->setMediaWidth(4);
-        $printer->setMediaHeight(1);
+        $printer->setMediaWidthIn(4);
+        $printer->setMediaHeightIn(1);
 
         $manager->persist($printer);
 

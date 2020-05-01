@@ -25,8 +25,8 @@ class LabelPrinterType extends AbstractType
             ->add('host', TextType::class)
             ->add('description', TextType::class)
             ->add('dpi', NumberType::class)
-            ->add('mediaWidth', NumberType::class)
-            ->add('mediaHeight', NumberType::class)
+            ->add('mediaWidthIn', NumberType::class)
+            ->add('mediaHeightIn', NumberType::class)
             ->add('save', SubmitType::class)
             ->getForm();
 
