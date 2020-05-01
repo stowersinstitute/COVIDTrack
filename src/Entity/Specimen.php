@@ -25,6 +25,11 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const RESULT_NEGATIVE = "NEGATIVE";
+    const RESULT_INCONCLUSIVE = "INCONCLUSIVE";
+    const RESULT_INVALID = "INVALID";
+    const RESULT_POSITIVE = "POSITIVE";
+
     /**
      * @var int
      * @ORM\Id()
@@ -73,6 +78,15 @@ class Specimen
      * @Gedmo\Versioned
      */
     private $status;
+
+    /**
+     * Result of testing.
+     *
+     * @var string
+     * @ORM\Column(name="result", type="string", nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $result;
 
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
@@ -161,5 +175,39 @@ class Specimen
     public function setCollectedAt(?\DateTime $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    public function getResult(): ?string
+    {
+        return $this->result;
+    }
+
+    public function setResult(?string $result): void
+    {
+        if (!in_array($result, self::getFormResults())) {
+            throw new \InvalidArgumentException('Tried setting invalid result value');
+        }
+
+        $this->result = $result;
+    }
+
+    public function getResultText(): string
+    {
+        $results = array_flip(self::getFormResults());
+
+        return $results[$this->result] ?? '';
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getFormResults(): array
+    {
+        return [
+            'Negative' => self::RESULT_NEGATIVE,
+            'Inconclusive' => self::RESULT_INCONCLUSIVE,
+            'Invalid' => self::RESULT_INVALID,
+            'Positive' => self::RESULT_POSITIVE,
+        ];
     }
 }
