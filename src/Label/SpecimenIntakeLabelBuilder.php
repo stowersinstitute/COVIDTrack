@@ -86,9 +86,8 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
     public static function testLabelZpl(LabelPrinter $printer): string
     {
         $builder = new self($printer);
-        $event = new CollectionEvent();
-        $group = new ParticipantGroup('CPG-1');
-        $specimen = new Specimen('CVD-1234567', $group, $event);
+        $group = new ParticipantGroup('CPG-1', 4);
+        $specimen = new Specimen('CVD-1234567', $group);
         $builder->setParticipantGroup($group);
         $builder->setSpecimen($specimen);
 
