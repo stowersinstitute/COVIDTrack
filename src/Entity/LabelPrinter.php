@@ -20,7 +20,7 @@ class LabelPrinter
      * @var integer
      *
      * @ORM\Id
-     * @ORM\Column()
+     * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
