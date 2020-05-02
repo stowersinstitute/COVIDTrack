@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Label Test Page{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Label Test</h3>
+                </div>
+                <div class="box-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if b64_image is not empty %}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="callout callout-info">
+                    <h4><i class="icon fa fa-print"></i> Label Preview</h4>
+                    <img class="label-preview center-block img-responsive margin-bottom" src="data:image/png;base64,{{ b64_image }}">
+                    <p>
+                        <i>Set the <code>LABEL_PRINTER_TYPE</code> environment variable to <code>network</code> to print to a network ZPL printer.</i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if zpl_text is not empty %}
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="callout callout-info">
+                    <h4><i class="icon fa fa-code"></i> ZPL Preview</h4>
+                    <pre>{{ zpl_text }}</pre>
+                    <p>
+                        <i>Set the <code>LABEL_PRINTER_TYPE</code> environment variable to <code>network</code> to print to a network ZPL printer.</i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -82,6 +82,11 @@ class Specimen
         $this->createdAt = new \DateTime();
     }
 
+    public function __toString()
+    {
+        return $this->getAccessionId();
+    }
+
     /**
      * Convert audit log field changes from internal format to human-readable format.
      *
