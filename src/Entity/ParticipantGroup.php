@@ -44,6 +44,7 @@ class ParticipantGroup
      *
      * @var string
      * @ORM\Column(name="title", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $title;
 
