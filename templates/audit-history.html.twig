@@ -11,14 +11,15 @@ Required params:
     </div>
     <div class="box-body" style="max-height:300px;overflow:hidden;overflow-y:scroll;">
         {% for log in auditLogs %}
-            {{ log.loggedAt | date('M j, Y g:ia') }} {{ log.username ? ' – '~log.username }} – {{ log.action|capitalize }}<br>
-            <br>
-            <dl class="dl-horizontal">
-                {% for field, value in log.fieldChanges %}
-                    <dt>{{ field }}</dt><dd>{{ value is null ? '(empty)' : value }}</dd>
-                {% endfor %}
-            </dl>
-            <hr/>
+            <div style="padding-top:1em; border-bottom: 1px solid rgb(244, 244, 244);">
+                {{ log.loggedAt | date('M j, Y g:ia') }} {{ log.username ? ' – '~log.username }} – {{ log.action|capitalize }}<br>
+                <br>
+                <dl class="dl-horizontal">
+                    {% for field, value in log.fieldChanges %}
+                        <dt>{{ field }}</dt><dd>{{ value is null ? '(empty)' : value }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
         {% endfor %}
     </div>
 </div>
