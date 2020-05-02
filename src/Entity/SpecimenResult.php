@@ -37,7 +37,7 @@ abstract class SpecimenResult
      *
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="results")
-     * @ORM\JoinColumn(name="specimenId", referencedColumnName="id")
+     * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="CASCADE")
      */
     private $specimen;
 
