@@ -62,3 +62,11 @@ services:
               options:
                   protocol_version: '%env(default:default_ldap_protocol_version:int:LDAP_PROTOCOL_VERSION)%'
                   referrals: '%env(default:default_ldap_referrals:bool:LDAP_REFERRALS)%'
+
+    # Label Printing service
+    App\Label\ZplPrinting:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '%env(LABEL_PRINTER_TYPE)%'
+            - '%kernel.cache_dir%/label-images/'
+            - '@router'
