@@ -93,11 +93,6 @@ class Specimen
         return $this->accessionId;
     }
 
-    public function setAccessionId(string $id): void
-    {
-        $this->accessionId = $id;
-    }
-
     public function getParticipantGroup(): ParticipantGroup
     {
         return $this->participantGroup;
