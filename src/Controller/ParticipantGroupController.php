@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
 use App\Form\ParticipantGroupForm;
 use Gedmo\Loggable\Entity\LogEntry;
@@ -100,9 +101,11 @@ class ParticipantGroupController extends AbstractController
             ->getRepository(LogEntry::class)
             ->getLogEntries($group);
 
+        $auditLogs = AuditLog::createManyFromLogEntry($revisions);
+
         return $this->render('participantGroup/participant-group-view.html.twig', [
             'group' => $group,
-            'revisions' => $revisions,
+            'auditLogs' => $auditLogs,
         ]);
     }
 
