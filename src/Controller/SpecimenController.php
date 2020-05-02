@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\Specimen;
 use App\Form\SpecimenForm;
 use Gedmo\Loggable\Entity\LogEntry;
@@ -47,9 +48,11 @@ class SpecimenController extends AbstractController
             ->getRepository(LogEntry::class)
             ->getLogEntries($specimen);
 
+        $auditLogs = AuditLog::createManyFromLogEntry($revisions);
+
         return $this->render('specimen/specimen-view.html.twig', [
             'specimen' => $specimen,
-            'revisions' => $revisions,
+            'auditLogs' => $auditLogs,
         ]);
     }
 

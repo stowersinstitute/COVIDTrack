@@ -28,35 +28,26 @@
             </div>
         </div>
     </div>
-    {% if revisions is defined %}
+
     <div class="col-md-6">
         <div class="box box-success">
             <div class="box-header with-border">
-                <h3 class="box-title">Revisions</h3>
+                <h3 class="box-title">History</h3>
             </div>
             <div class="box-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-                        <th>Version</th>
-                        <th>Action</th>
-                        <th>Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for revision in revisions %}
-                    <tr>
-                        <td>{{ revision.version }}</td>
-                        <td>{{ revision.action }}</td>
-                        <td>{{ revision.loggedAt | date('Y-m-d H:i:s') }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {% for log in auditLogs %}
+                    {{ log.loggedAt | date('M j, Y g:ia') }} {{ log.username }} – {{ log.action|capitalize }}<br>
+                    <br>
+                    <dl class="dl-horizontal">
+                        {% for field, value in log.fieldChanges %}
+                            <dt>{{ field }}</dt><dd>{{ value is null ? '(empty)' : value }}</dd>
+                        {% endfor %}
+                    </dl>
+                <hr/>
+                {% endfor %}
             </div>
         </div>
     </div>
-    {% endif %}
 
 </div>
 
