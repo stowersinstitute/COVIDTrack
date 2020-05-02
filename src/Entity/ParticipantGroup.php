@@ -39,6 +39,15 @@ class ParticipantGroup
     private $accessionId;
 
     /**
+     * Human-readable title to identify this group. Used instead of accessionId
+     * so participants don't need to remember a number.
+     *
+     * @var string
+     * @ORM\Column(name="title", type="string", nullable=true)
+     */
+    private $title;
+
+    /**
      * Number of Participants in this group.
      *
      * @var integer
@@ -77,6 +86,16 @@ class ParticipantGroup
     public function getAccessionId(): string
     {
         return $this->accessionId;
+    }
+
+    public function getTitle(): string
+    {
+        return (string) $this->title;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
     }
 
     public function getParticipantCount(): int
