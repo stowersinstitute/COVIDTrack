@@ -54,7 +54,6 @@ class Specimen
     /**
      * @var WellPlate
      * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
-     * @Gedmo\Versioned
      */
     private $wellPlate;
 
