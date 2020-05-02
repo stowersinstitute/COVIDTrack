@@ -4,7 +4,6 @@
 namespace App\Label;
 
 use App\Entity\LabelPrinter;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Zpl\Fonts\Zebra\ZD420;
 use Zpl\ZplBuilder;
 
@@ -21,8 +20,6 @@ abstract class AbstractLabelBuilder
 
     public function __construct(?LabelPrinter $printer = null)
     {
-        $this->parameters = new ParameterBag();
-
         if ($printer) {
             $this->setPrinter($printer);
         }
@@ -31,8 +28,6 @@ abstract class AbstractLabelBuilder
     public function setPrinter(LabelPrinter $printer): void
     {
         $this->printer = $printer;
-
-        $this->zpl = $this->getZplBuilder();
     }
 
     /**
@@ -43,7 +38,6 @@ abstract class AbstractLabelBuilder
     protected function getZplBuilder(): ZplBuilder
     {
         $zpl = new ZplBuilder(ZplBuilder::UNIT_MM, $this->printer->getDpi());
-//        $zpl->setMediaWidth($this->printer->getMedia()->getWidth());
         $zpl->setMediaWidth($this->printer->getMediaWidthIn());
         $zpl->setFontMapper(new ZD420());
 
@@ -61,22 +55,6 @@ abstract class AbstractLabelBuilder
     public function getItemDisplayString(): string
     {
         return '';
-    }
-
-    /**
-     * @return ParameterBag
-     */
-    public function getParameters(): ParameterBag
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * @param ParameterBag $parameters
-     */
-    public function setParameters(ParameterBag $parameters): void
-    {
-        $this->parameters = $parameters;
     }
 
     /**
