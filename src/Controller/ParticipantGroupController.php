@@ -28,7 +28,6 @@ class ParticipantGroupController extends AbstractController
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
             'groups' => $groupRepo->findAll(),
-            'results' => $groupRepo->findResultsMap(),
         ]);
     }
 

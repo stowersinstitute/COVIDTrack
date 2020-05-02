@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -24,11 +25,6 @@ class Specimen
     const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
-
-    const RESULT_NEGATIVE = "NEGATIVE";
-    const RESULT_INCONCLUSIVE = "INCONCLUSIVE";
-    const RESULT_INVALID = "INVALID";
-    const RESULT_POSITIVE = "POSITIVE";
 
     /**
      * @var int
@@ -80,13 +76,13 @@ class Specimen
     private $status;
 
     /**
-     * Result of testing.
+     * Results of analyzing a Specimen.
      *
-     * @var string
-     * @ORM\Column(name="result", type="string", nullable=true)
-     * @Gedmo\Versioned
+     * @var SpecimenResult[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
+     * @ORM\OrderBy({"createdAt" = "DESC"})
      */
-    private $result;
+    private $results;
 
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
@@ -94,6 +90,7 @@ class Specimen
         $this->participantGroup = $group;
 
         $this->status = self::STATUS_CREATED;
+        $this->results = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
 
@@ -177,37 +174,52 @@ class Specimen
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
     }
 
-    public function getResult(): ?string
+    /**
+     * List of all Results collected on this Specimen.
+     *
+     * @return SpecimenResult[]
+     */
+    public function getResults(): array
     {
-        return $this->result;
-    }
-
-    public function setResult(?string $result): void
-    {
-        if (!in_array($result, self::getFormResults())) {
-            throw new \InvalidArgumentException('Tried setting invalid result value');
-        }
-
-        $this->result = $result;
-    }
-
-    public function getResultText(): string
-    {
-        $results = array_flip(self::getFormResults());
-
-        return $results[$this->result] ?? '';
+        return $this->results->getValues();
     }
 
     /**
-     * @return string[]
+     * @internal Call new SpecimenResults($specimen) to associate
      */
-    public static function getFormResults(): array
+    public function addResult(SpecimenResult $result): void
     {
-        return [
-            'Negative' => self::RESULT_NEGATIVE,
-            'Inconclusive' => self::RESULT_INCONCLUSIVE,
-            'Invalid' => self::RESULT_INVALID,
-            'Positive' => self::RESULT_POSITIVE,
-        ];
+        // TODO: Add de-duplicating logic
+        $this->results->add($result);
+    }
+
+    /**
+     * @return SpecimenResultQPCR[]
+     */
+    public function getQPCRResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultQPCR);
+        })->getValues();
+    }
+
+    /**
+     * @return SpecimenResultDDPCR[]
+     */
+    public function getDDPCRResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultDDPCR);
+        })->getValues();
+    }
+
+    /**
+     * @return SpecimenResultSequencing[]
+     */
+    public function getSequencingResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultSequencing);
+        })->getValues();
     }
 }

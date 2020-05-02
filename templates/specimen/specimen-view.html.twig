@@ -21,7 +21,6 @@
                 <dl class="dl-horizontal">
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
-                    <dt>Result</dt><dd>{{ specimen.resultText }}</dd>
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
                     <dt>Created At</dt><dd>{{ specimen.createdAt | date('Y-m-d H:i:s') }}</dd>
                     <dt>Updated At</dt><dd>{{ specimen.updatedAt | date('Y-m-d H:i:s') }}</dd>
@@ -31,7 +30,7 @@
     </div>
     {% if revisions is defined %}
     <div class="col-md-6">
-        <div class="box box-success">
+        <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">Revisions</h3>
             </div>
@@ -60,5 +59,109 @@
     {% endif %}
 
 </div>
+
+{% if specimen.QPCRResults|length > 0 %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">qPCR</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+{#                        <th>&nbsp;</th>#}
+                        <th>Conclusion</th>
+                        <th>Failure?</th>
+                        <th>Created At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in specimen.QPCRResults %}
+                        <tr>
+{#                            <td>#}
+{#                                <a href="{{ path('app_qpcr_edit', {id: result.id}) }}">Edit</a>#}
+{#                            </td>#}
+                            <td>{{ result.conclusionText }}</td>
+                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
+                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if specimen.DDPCRResults|length > 0 %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">ddPCR</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+{#                        <th>&nbsp;</th>#}
+                        <th>Failure?</th>
+                        <th>Created At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in specimen.ddpcrResults %}
+                        <tr>
+{#                            <td>#}
+{#                                <a href="{{ path('app_ddpcr_edit', {id: result.id}) }}">Edit</a>#}
+{#                            </td>#}
+                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
+                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if specimen.sequencingResults|length > 0 %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">Sequencing</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+{#                        <th>&nbsp;</th>#}
+                        <th>Failure?</th>
+                        <th>Created At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in specimen.sequencingResults %}
+                        <tr>
+{#                            <td>#}
+{#                                <a href="{{ path('app_sequencing_edit', {id: result.id}) }}">Edit</a>#}
+{#                            </td>#}
+                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
+                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}
