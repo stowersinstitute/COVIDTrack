@@ -21,7 +21,10 @@
             <div class="col-md-6 col-md-offset-3">
                 <div class="callout callout-info">
                     <h4><i class="icon fa fa-print"></i> Label Preview</h4>
-                    <img class="label-preview center-block img-responsive" src="data:image/png;base64,{{ b64_image }}">
+                    <img class="label-preview center-block img-responsive margin-bottom" src="data:image/png;base64,{{ b64_image }}">
+                    <p>
+                        <i>Set the <code>LABEL_PRINTER_TYPE</code> environment variable to <code>network</code> to print to a network ZPL printer.</i>
+                    </p>
                 </div>
             </div>
         </div>
@@ -32,6 +35,9 @@
                 <div class="callout callout-info">
                     <h4><i class="icon fa fa-code"></i> ZPL Preview</h4>
                     <pre>{{ zpl_text }}</pre>
+                    <p>
+                        <i>Set the <code>LABEL_PRINTER_TYPE</code> environment variable to <code>network</code> to print to a network ZPL printer.</i>
+                    </p>
                 </div>
             </div>
         </div>
