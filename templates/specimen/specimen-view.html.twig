@@ -34,7 +34,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">History</h3>
             </div>
-            <div class="box-body">
+            <div class="box-body" style="max-height:300px;overflow:hidden;overflow-y:scroll;">
                 {% for log in auditLogs %}
                     {{ log.loggedAt | date('M j, Y g:ia') }} {{ log.username ? ' – '~log.username }} – {{ log.action|capitalize }}<br>
                     <br>
