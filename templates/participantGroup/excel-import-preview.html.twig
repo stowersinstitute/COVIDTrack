@@ -4,10 +4,13 @@
 
 {% block body %}
 
-    Importing from: {{ importingWorkbook.filename }}
+    <dl>
+        <dt>Importing From</dt>
+        <dd>{{ importingWorkbook.filename }}</dd>
+    </dl>
 
-    <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}">
-        <input type="submit" value="Commit Import" />
+    <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}" class="margin-bottom">
+        <input type="submit" value="Create Participant Groups" class="btn btn-primary"/>
     </form>
 
     <div class="row">
@@ -19,7 +22,6 @@
                         <thead>
                         <tr>
                             <th>Accession ID</th>
-                            <th># Participants</th>
                         </tr>
                         </thead>
 
@@ -27,7 +29,6 @@
                         {% for group in importer.participantGroups  %}
                             <tr>
                                 <td>{{ group.accessionId }}</td>
-                                <td>{{ group.participantCount }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -37,4 +38,8 @@
             </div>
         </div>
     </div>
+
+    <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}" class="margin-top">
+        <input type="submit" value="Create Participant Groups" class="btn btn-primary"/>
+    </form>
 {% endblock %}

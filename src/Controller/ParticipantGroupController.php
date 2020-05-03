@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ParticipantGroup;
 use App\ExcelImport\ParticipantGroupImporter;
+use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
 use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -111,10 +113,29 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport()
+    public function excelImport(Request $request)
     {
-        return $this->redirectToRoute('excel_import_choose_file', [
-            'previewRoute' => 'group_excel_import_preview',
+        $em = $this->getDoctrine()->getManager();
+        $form = $this->createForm(GenericExcelImportType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $excelFile */
+            $excelFile = $form->get('excelFile')->getData();
+
+            $workbook = ExcelImportWorkbook::createFromUpload($excelFile);
+            $em->persist($workbook);
+            $em->flush();
+
+            return $this->redirectToRoute('group_excel_import_preview', [
+                'importId' => $workbook->getId(),
+            ]);
+        }
+
+        return $this->render('excel-import/base-excel-import-start.twig', [
+            'itemLabel' => 'Participant Groups',
+            'importForm' => $form->createView(),
         ]);
     }
 
@@ -150,8 +171,17 @@ class ParticipantGroupController extends AbstractController
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
 
         $groups = $importer->getParticipantGroups();
-        foreach ($groups as $group) {
-            $em->persist($group);
+        foreach ($groups as $uploadedGroup) {
+            $exists = $em->getRepository(ParticipantGroup::class)
+                ->findOneBy(['accessionId' => $uploadedGroup->getAccessionId()]);
+
+            // Group already exists in the system
+            // todo: any properties we need to update? Maybe an isActive flag?
+            if ($exists) {
+                continue;
+            }
+
+            $em->persist($uploadedGroup);
         }
 
         // Clean up workbook from the database

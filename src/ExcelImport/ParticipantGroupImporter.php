@@ -24,19 +24,21 @@ class ParticipantGroupImporter
         $this->worksheet = $worksheet;
 
         $this->columnMap = [
-            'accessionId' => 'D',
-            'participantCount' => 'E',
+            'accessionId' => 'A',
         ];
     }
 
-    public function getParticipantGroups()
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function getParticipantGroups() : array
     {
         $participantGroups = [];
 
         for ($i=$this->startingRow; $i <= $this->worksheet->getNumRows(); $i++) {
             $participantGroups[] = new ParticipantGroup(
                 $this->worksheet->getCellValue($i, $this->columnMap['accessionId']),
-                $this->worksheet->getCellValue($i, $this->columnMap['participantCount'])
+                0
             );
         }
 
