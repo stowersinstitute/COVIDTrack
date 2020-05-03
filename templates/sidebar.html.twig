@@ -45,7 +45,7 @@
                 <li class="{{ _self.activeClass('app_wellplate_new') }}"><a href="{{ path('app_wellplate_new') }}"><i class="fa fa-plus"></i> New</a></li>
             </ul>
         </li>
-        <li class="treeview {{ _self.activeClass('app_participant_group_list') }}{{ _self.activeClass('app_participant_group_new') }}">
+        <li class="treeview {{ _self.activeClass('app_participant_group_list') }}{{ _self.activeClass('app_participant_group_new') }}{{ _self.activeClass('group_excel_import') }}">
             <a href="#">
                 <i class="fa fa-users"></i> <span>Participant Groups</span>
                 <span class="pull-right-container">
@@ -55,6 +55,7 @@
             <ul class="treeview-menu">
                 <li class="{{ _self.activeClass('app_participant_group_list') }}"><a href="{{ path('app_participant_group_list') }}"><i class="fa fa-list"></i> List</a></li>
                 <li class="{{ _self.activeClass('app_participant_group_new') }}"><a href="{{ path('app_participant_group_new') }}"><i class="fa fa-plus"></i> New</a></li>
+                <li class="{{ _self.activeClass('results_upload') }}"><a href="{{ path('group_excel_import') }}"><i class="fa fa-upload"></i> Bulk Import</a></li>
             </ul>
         </li>
         <li class="active treeview menu-open">
