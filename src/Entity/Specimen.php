@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * to the group instead of the participant to maintain some anonymity.
  *
  * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Specimen
 {

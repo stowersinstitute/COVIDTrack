@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\AuditLog;
 use App\Entity\Specimen;
 use App\Form\SpecimenForm;
-use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,11 +43,9 @@ class SpecimenController extends AbstractController
     {
         $specimen = $this->findSpecimen($accessionId);
 
-        $revisions = $this->getDoctrine()
-            ->getRepository(LogEntry::class)
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
             ->getLogEntries($specimen);
-
-        $auditLogs = AuditLog::createManyFromLogEntry($revisions);
 
         return $this->render('specimen/specimen-view.html.twig', [
             'specimen' => $specimen,

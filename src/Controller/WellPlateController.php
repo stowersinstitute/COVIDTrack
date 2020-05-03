@@ -4,9 +4,9 @@
 namespace App\Controller;
 
 
+use App\Entity\AuditLog;
 use App\Entity\WellPlate;
 use App\Form\WellPlateType;
-use Gedmo\Loggable\Entity\LogEntry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -76,7 +76,7 @@ class WellPlateController extends AbstractController
             return $this->redirectToRoute('app_wellplate_list');
         }
 
-        $revisions = $this->getDoctrine()->getRepository(LogEntry::class)->getLogEntries($wellPlate);
+        $revisions = $this->getDoctrine()->getRepository(AuditLog::class)->getLogEntries($wellPlate);
 
         return $this->render('well-plate/well-plate-form.html.twig', [
             'new' => false,

@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
 {

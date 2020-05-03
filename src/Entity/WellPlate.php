@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @package App\Entity
  *
  * @ORM\Entity
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class WellPlate
 {

@@ -2,65 +2,42 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Loggable\Entity\LogEntry;
 
 /**
- * Audit Log entry for a single operation.
+ * Audit Log entry for a single operation performed on an entity with logging enabled.
+ *
+ * NOTE: (a)ORM\Table defined on parent class \Gedmo\Loggable\Entity\LogEntry
+ * @ORM\Entity(repositoryClass="App\Entity\AuditLogRepository")
  */
-class AuditLog
+class AuditLog extends LogEntry
 {
     /**
-     * @var LogEntry
-     */
-    private $log;
-
-    public function __construct(LogEntry $log)
-    {
-        $this->log = $log;
-    }
-
-    /**
-     * Create array of AuditLog records using Gedmo Loggable LogEntry
+     * Return human-readable fields and values for each entity property change
+     * recorded in this log.
      *
-     * @param LogEntry[] $logEntries
-     * @return AuditLog[]
+     * For example:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @return array
      */
-    public static function createManyFromLogEntry(array $logEntries): array
-    {
-        $created = [];
-        foreach ($logEntries as $log) {
-            $created[] = new static($log);
-        }
-
-        return $created;
-    }
-
     public function getFieldChanges(): array
     {
-        $changes = $this->log->getData();
+        // By default use the raw property names and values
+        $changes = $this->getData();
 
-        // Try invoking static method on logged entity
-        $class = $this->log->getObjectClass();
+        // Try invoking static method on logged entity to convert to human-readable
+        $class = $this->getObjectClass();
         $method = 'makeHumanReadableAuditLogFieldChanges';
         if (method_exists($class, $method)) {
             $changes = call_user_func([$class, $method], $changes);
         }
 
         return $changes;
-    }
-
-    public function getAction(): string
-    {
-        return (string) $this->log->getAction();
-    }
-
-    public function getUsername(): string
-    {
-        return (string) $this->log->getUsername();
-    }
-
-    public function getLoggedAt(): \DateTimeInterface
-    {
-        return $this->log->getLoggedAt();
     }
 }
