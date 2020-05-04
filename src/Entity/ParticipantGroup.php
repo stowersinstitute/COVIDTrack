@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
 {
@@ -44,6 +44,7 @@ class ParticipantGroup
      *
      * @var string
      * @ORM\Column(name="title", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $title;
 
@@ -76,6 +77,60 @@ class ParticipantGroup
     public function __toString()
     {
         return $this->accessionId;
+    }
+
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * Audit Logging tracks field/value changes using entity property names
+     * and values like this:
+     *
+     *     [
+     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable values
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $keyConverter = [
+            // Specimen.propertyNameHere => Human-Readable Description
+            'accessionId' => 'Accession ID',
+            'title' => 'Title',
+            'participantCount' => 'Participants',
+            'createdAt' => 'Created At',
+        ];
+
+        /**
+         * Keys are array key from $changes
+         * Values are callbacks to convert $changes[$key] value
+         */
+        $valueConverter = [
+        ];
+
+        $return = [];
+        foreach ($changes as $fieldId => $value) {
+            // If mapping fieldId to human-readable string, use it
+            // Else fallback to original fieldId
+            $key = $keyConverter[$fieldId] ?? $fieldId;
+
+            // If mapping callback defined for fieldId, use it
+            // Else fallback to current value
+            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
+
+            $return[$key] = $value;
+        }
+
+        return $return;
     }
 
     public function getId(): int

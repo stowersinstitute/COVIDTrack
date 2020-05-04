@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @package App\Entity
  *
  * @ORM\Entity
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class WellPlate
 {
@@ -82,9 +82,11 @@ class WellPlate
     /**
      * @param string $barcode
      */
-    public function setBarcode(string $barcode): void
+    public function setBarcode(string $barcode): self
     {
         $this->barcode = $barcode;
+
+        return $this;
     }
 
     /**
@@ -98,9 +100,11 @@ class WellPlate
     /**
      * @param string $status
      */
-    public function setStatus(string $status): void
+    public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
     }
 
     public static function getFormStatuses()

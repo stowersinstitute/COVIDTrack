@@ -6,57 +6,24 @@
 
 {% block body %}
 <div class="row">
-    <div class="col-xs-12">
-        <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}" class="btn btn-primary"><i class="fa fa-fw fa-edit"></i> Edit</a>
-    </div>
-</div>
-
-<div class="row">
     <div class="col-md-6">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">General</h3>
+                <h3 class="box-title">General <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}" class="btn btn-primary btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-edit"></i> Edit</a></h3>
             </div>
             <div class="box-body">
                 <dl class="dl-horizontal">
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
-                    <dt>Created At</dt><dd>{{ specimen.createdAt | date('Y-m-d H:i:s') }}</dd>
-                    <dt>Updated At</dt><dd>{{ specimen.updatedAt | date('Y-m-d H:i:s') }}</dd>
                 </dl>
             </div>
         </div>
     </div>
-    {% if revisions is defined %}
+
     <div class="col-md-6">
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Revisions</h3>
-            </div>
-            <div class="box-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-                        <th>Version</th>
-                        <th>Action</th>
-                        <th>Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for revision in revisions %}
-                    <tr>
-                        <td>{{ revision.version }}</td>
-                        <td>{{ revision.action }}</td>
-                        <td>{{ revision.loggedAt | date('Y-m-d H:i:s') }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        {% include 'audit-history.html.twig' with {auditLogs: auditLogs} %}
     </div>
-    {% endif %}
 
 </div>
 
