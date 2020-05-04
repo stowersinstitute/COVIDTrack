@@ -25,9 +25,10 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
     const TYPE_NASAL = "NASAL";
-    const TYPE_BLOOD = "BLOOD";
+    const TYPE_SALIVA = "SALIVA";
 
     /**
      * @var int
@@ -191,6 +192,7 @@ class Specimen
             'Blood' => self::TYPE_BLOOD,
             'Buccal' => self::TYPE_BUCCAL,
             'Nasal' => self::TYPE_NASAL,
+            'Saliva' => self::TYPE_SALIVA,
         ];
     }
 
