@@ -51,6 +51,7 @@ class Specimen
      *
      * @var string
      * @ORM\Column(name="type", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $type;
 
