@@ -4,12 +4,18 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 /**
  * @ORM\Entity
  */
 class ExcelImportCell
 {
+    const VALUE_TYPE_SCALAR     = 'SCALAR';
+    const VALUE_TYPE_DATETIME   = 'DATETIME';
+
     /**
      * @var integer
      *
@@ -41,6 +47,17 @@ class ExcelImportCell
     protected $value;
 
     /**
+     * One of:
+     *  VALUE_TYPE_SCALAR       a string, integer, etc.
+     *  VALUE_TYPE_DATETIME     a native PHP \DateTimeImmutable object
+     *
+     * @var string
+     *
+     * @ORM\Column(name="valueType", type="string", length=255, nullable=true)
+     */
+    protected $valueType;
+
+    /**
      * @var ExcelImportWorksheet Worksheet this cell belongs to
      *
      * @ORM\ManyToOne(targetEntity="ExcelImportWorksheet", inversedBy="cells")
@@ -52,6 +69,46 @@ class ExcelImportCell
     {
         $this->worksheet = $worksheet;
         $this->worksheet->addCell($this);
+
+        $this->valueType = self::VALUE_TYPE_SCALAR;
+    }
+
+    /**
+     * Sets the value of this cell to match what's in the Excel cell
+     */
+    public function setValueFromExcelCell(Cell $cell)
+    {
+        // Typical value is just the string displayed in Excel
+        $internalDataType = self::VALUE_TYPE_SCALAR;
+        $storeValue = $cell->getFormattedValue();
+
+        // Resolve formulas
+        // todo: not actually sure what happens when a formula resolves to a date...
+        if ($cell->getDataType() === DataType::TYPE_FORMULA) {
+            $storeValue = $cell->getCalculatedValue();
+        }
+
+        // Convert dates to native PHP format
+        if (Date::isDateTime($cell)) {
+            $internalDataType = self::VALUE_TYPE_DATETIME;
+            $storeValue = Date::excelToDateTimeObject($cell->getValue());
+            $storeValue = $storeValue->format(DATE_ATOM);
+        }
+
+        $this->valueType = $internalDataType;
+        $this->value = $storeValue;
+    }
+
+    /**
+     * @return string|\DateTimeImmutable
+     */
+    public function getValue()
+    {
+        if ($this->valueType === self::VALUE_TYPE_DATETIME) {
+            return \DateTimeImmutable::createFromFormat(DATE_ATOM, $this->value);
+        }
+
+        return $this->value;
     }
 
     /**
@@ -100,14 +157,6 @@ class ExcelImportCell
     public function setColIndex(string $colIndex): void
     {
         $this->colIndex = $colIndex;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
     }
 
     /**

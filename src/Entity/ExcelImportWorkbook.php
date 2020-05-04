@@ -68,7 +68,7 @@ class ExcelImportWorkbook
                     $importCell->setRowIndex($row->getRowIndex());
                     $importCell->setColIndex($cell->getColumn());
 
-                    $importCell->setValue($cell->getFormattedValue());
+                    $importCell->setValueFromExcelCell($cell);
                 }
             }
         }
