@@ -47,7 +47,7 @@ class Specimen
     private $accessionId;
 
     /**
-     * Saliva, Blood, etc.
+     * Saliva, Blood, etc. Uses TYPE_* constants.
      *
      * @var string
      * @ORM\Column(name="type", type="string", nullable=true)
