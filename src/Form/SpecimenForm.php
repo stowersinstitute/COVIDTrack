@@ -25,6 +25,7 @@ class SpecimenForm extends AbstractType
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
                 'placeholder' => '- Select -',
+                'required' => false,
             ])
             ->add('status', ChoiceType::class, [
                 'choices' => Specimen::getFormStatuses(),
