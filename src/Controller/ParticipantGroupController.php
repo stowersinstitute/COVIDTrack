@@ -171,17 +171,26 @@ class ParticipantGroupController extends AbstractController
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
 
         $groups = $importer->getParticipantGroups();
+        $affectedGroups = [];
         foreach ($groups as $uploadedGroup) {
-            $exists = $em->getRepository(ParticipantGroup::class)
+            /** @var ParticipantGroup $existingGroup */
+            $existingGroup = $em->getRepository(ParticipantGroup::class)
                 ->findOneBy(['accessionId' => $uploadedGroup->getAccessionId()]);
 
             // Group already exists in the system
             // todo: any properties we need to update? Maybe an isActive flag?
-            if ($exists) {
-                continue;
-            }
+            if ($existingGroup) {
+                $existingGroup->setTitle($uploadedGroup->getTitle());
+                $existingGroup->setParticipantCount($uploadedGroup->getParticipantCount());
 
-            $em->persist($uploadedGroup);
+                $affectedGroups[] = $existingGroup;
+            }
+            // New group, persist it
+            else {
+                $em->persist($uploadedGroup);
+
+                $affectedGroups[] = $uploadedGroup;
+            }
         }
 
         // Clean up workbook from the database
@@ -189,7 +198,9 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        return $this->redirectToRoute('app_participant_group_list');
+        return $this->render('participantGroup/excel-import-confirm.html.twig', [
+            'groups' => $affectedGroups,
+        ]);
     }
 
 

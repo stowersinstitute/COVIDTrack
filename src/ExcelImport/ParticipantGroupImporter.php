@@ -25,6 +25,8 @@ class ParticipantGroupImporter
 
         $this->columnMap = [
             'accessionId' => 'A',
+            'title' => 'B',
+            'participantCount' => 'C',
         ];
     }
 
@@ -36,10 +38,15 @@ class ParticipantGroupImporter
         $participantGroups = [];
 
         for ($i=$this->startingRow; $i <= $this->worksheet->getNumRows(); $i++) {
-            $participantGroups[] = new ParticipantGroup(
+            $group = new ParticipantGroup(
                 $this->worksheet->getCellValue($i, $this->columnMap['accessionId']),
                 0
             );
+
+            $group->setTitle($this->worksheet->getCellValue($i, $this->columnMap['title']));
+            $group->setParticipantCount($this->worksheet->getCellValue($i, $this->columnMap['participantCount']));
+
+            $participantGroups[] = $group;
         }
 
         return $participantGroups;
