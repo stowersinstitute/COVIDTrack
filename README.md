@@ -34,7 +34,7 @@ LDAP_AUTH_USER_DN_FORMAT={username}@CONTOSO.COM
 1. [Download and install Docker](https://www.docker.com/)
 1. `docker-compose up -d`
 1. `docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --rebuild-database` – This configures .env, creates database, loads fake data
-1. Open Docker Application URL <http://localhost:8880/samples/>
+1. Open Docker Application URL <http://localhost:8880/specimens/>
 
 Enter the container before running any PHP, Symfony, or yarn commands:
 
