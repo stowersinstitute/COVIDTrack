@@ -4,10 +4,13 @@
 namespace App\Entity;
 
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Represents an excel worksheet associated with a workbook
+ *
  * @ORM\Entity
  */
 class ExcelImportWorksheet
@@ -22,11 +25,11 @@ class ExcelImportWorksheet
     protected $id;
 
     /**
-     * @var string Name of the worksheet tab in the workbook
+     * @var string Title of the worksheet tab in the workbook
      *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     * @ORM\Column(name="title", type="string", length=255)
      */
-    protected $name;
+    protected $title;
 
     /**
      * @var ExcelImportWorkbook The workbook this sheet belongs to
@@ -45,10 +48,12 @@ class ExcelImportWorksheet
      */
     protected $cells;
 
-    public function __construct(ExcelImportWorkbook $workbook)
+    public function __construct(ExcelImportWorkbook $workbook, $title)
     {
         $this->workbook = $workbook;
         $this->workbook->addWorksheet($this);
+
+        $this->title = $title;
 
         $this->cells = new ArrayCollection();
     }
@@ -73,6 +78,9 @@ class ExcelImportWorksheet
         return array_unique($rowIndexes);
     }
 
+    /**
+     * @return \DateTimeImmutable|string|null
+     */
     public function getCellValue($rowIndex, $column)
     {
         $cell = $this->getCell($rowIndex, $column);
@@ -81,7 +89,7 @@ class ExcelImportWorksheet
         return $cell->getValue();
     }
 
-    public function getCell($rowIndex, $column) : ExcelImportCell
+    public function getCell($rowIndex, $column) : ?ExcelImportCell
     {
         foreach ($this->cells as $cell) {
             if ($cell->getRowIndex() === $rowIndex && $cell->getColIndex() === $column) {
@@ -92,60 +100,6 @@ class ExcelImportWorksheet
         return null;
     }
 
-    public function addCell(ExcelImportCell $cell)
-    {
-        $cell->setWorksheet($this);
-        $this->cells->add($cell);
-    }
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param int $id
-     */
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param string $name
-     */
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return ExcelImportWorkbook
-     */
-    public function getWorkbook(): ExcelImportWorkbook
-    {
-        return $this->workbook;
-    }
-
-    /**
-     * @param ExcelImportWorkbook $workbook
-     */
-    public function setWorkbook(ExcelImportWorkbook $workbook): void
-    {
-        $this->workbook = $workbook;
-    }
-
     /**
      * @return ExcelImportCell[]
      */
@@ -154,11 +108,45 @@ class ExcelImportWorksheet
         return $this->cells;
     }
 
-    /**
-     * @param ExcelImportCell[] $cells
-     */
-    public function setCells(array $cells): void
+    public function addCell(ExcelImportCell $cell)
     {
-        $this->cells = $cells;
+        $cell->setWorksheet($this);
+        if (!$this->hasCell($cell)) {
+            $this->cells->add($cell);
+        }
+    }
+
+    public function hasCell(ExcelImportCell $cell) : bool
+    {
+        foreach ($this->cells as $currCell) {
+            if (EntityUtils::isSameEntity($currCell, $cell)) return true;
+        }
+
+        return false;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function getWorkbook(): ExcelImportWorkbook
+    {
+        return $this->workbook;
+    }
+
+    public function setWorkbook(ExcelImportWorkbook $workbook): void
+    {
+        $this->workbook = $workbook;
     }
 }

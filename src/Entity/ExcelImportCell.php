@@ -9,6 +9,8 @@ use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 /**
+ * A cell within an ExcelImportWorksheet
+ *
  * @ORM\Entity
  */
 class ExcelImportCell
@@ -41,6 +43,7 @@ class ExcelImportCell
 
     /**
      * @var string Cell value
+     * @see setValueFromExcelCell
      *
      * @ORM\Column(name="value", type="string", length=255, nullable=true)
      */
@@ -52,6 +55,7 @@ class ExcelImportCell
      *  VALUE_TYPE_DATETIME     a native PHP \DateTimeImmutable object
      *
      * @var string
+     * @see setValueFromExcelCell
      *
      * @ORM\Column(name="valueType", type="string", length=255, nullable=true)
      */
@@ -111,73 +115,44 @@ class ExcelImportCell
         return $this->value;
     }
 
-    /**
-     * @return int
-     */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     */
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return int
-     */
     public function getRowIndex(): int
     {
         return $this->rowIndex;
     }
 
-    /**
-     * @param int $rowIndex
-     */
     public function setRowIndex(int $rowIndex): void
     {
         $this->rowIndex = $rowIndex;
     }
 
-    /**
-     * @return string
-     */
     public function getColIndex(): string
     {
         return $this->colIndex;
     }
 
-    /**
-     * @param string $colIndex
-     */
     public function setColIndex(string $colIndex): void
     {
         $this->colIndex = $colIndex;
     }
 
     /**
-     * @param string $value
+     * @deprecated You probably want setValueFromExcelCell
      */
-    public function setValue(string $value): void
+    public function setValue($value): void
     {
         $this->value = $value;
     }
 
-    /**
-     * @return ExcelImportWorksheet
-     */
     public function getWorksheet(): ExcelImportWorksheet
     {
         return $this->worksheet;
     }
 
-    /**
-     * @param ExcelImportWorksheet $worksheet
-     */
     public function setWorksheet(ExcelImportWorksheet $worksheet): void
     {
         $this->worksheet = $worksheet;

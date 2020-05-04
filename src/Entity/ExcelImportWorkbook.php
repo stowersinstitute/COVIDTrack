@@ -4,12 +4,15 @@
 namespace App\Entity;
 
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
+ * A workbook created by parsing an uploaded Excel file
+ *
  * @ORM\Entity
  */
 class ExcelImportWorkbook
@@ -32,9 +35,9 @@ class ExcelImportWorkbook
 
     /**
      * When the file was uploaded
-     * @var \DateTime
+     * @var \DateTimeImmutable
      *
-     * @ORM\Column(name="uploadedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="uploadedAt", type="datetime_immutable", nullable=true)
      */
     protected $uploadedAt;
 
@@ -59,8 +62,7 @@ class ExcelImportWorkbook
         $importWorkbook->setFilename($file->getClientOriginalName());
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook);
-            $importWorksheet->setName($sheet->getTitle());
+            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
 
             foreach ($sheet->getRowIterator() as $row) {
                 foreach ($row->getCellIterator() as $cell) {
@@ -78,7 +80,7 @@ class ExcelImportWorkbook
 
     public function __construct()
     {
-        $this->uploadedAt = new \DateTime();
+        $this->uploadedAt = new \DateTimeImmutable();
         $this->worksheets = new ArrayCollection();
     }
 
@@ -87,57 +89,45 @@ class ExcelImportWorkbook
         return $this->worksheets->first();
     }
 
-    /**
-     * @return int
-     */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     */
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFilename(): string
+    public function getFilename(): ?string
     {
         return $this->filename;
     }
 
-    /**
-     * @param string $filename
-     */
-    public function setFilename(string $filename): void
+    public function setFilename(?string $filename): void
     {
         $this->filename = $filename;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getUploadedAt(): \DateTime
+    public function getUploadedAt(): ?\DateTimeImmutable
     {
         return $this->uploadedAt;
     }
 
-    /**
-     * @param \DateTime $uploadedAt
-     */
-    public function setUploadedAt(\DateTime $uploadedAt): void
+    public function setUploadedAt(?\DateTimeImmutable $uploadedAt): void
     {
         $this->uploadedAt = $uploadedAt;
     }
 
     public function addWorksheet(ExcelImportWorksheet $worksheet)
     {
+        if ($this->hasWorksheet($worksheet)) return;
+
         $this->worksheets->add($worksheet);
         $worksheet->setWorkbook($this);
+    }
+
+    public function hasWorksheet(ExcelImportWorksheet $worksheet) : bool
+    {
+        foreach ($this->worksheets as $currWorksheet) {
+            if (EntityUtils::isSameEntity($currWorksheet, $worksheet)) return true;
+        }
+
+        return false;
     }
 }
