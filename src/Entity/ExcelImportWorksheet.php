@@ -105,7 +105,7 @@ class ExcelImportWorksheet
      */
     public function getCells(): array
     {
-        return $this->cells;
+        return $this->cells->getValues();
     }
 
     public function addCell(ExcelImportCell $cell)
