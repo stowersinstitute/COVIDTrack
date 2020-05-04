@@ -188,7 +188,6 @@ class Specimen
     public static function getFormTypes(): array
     {
         return [
-            '' => null,
             'Blood' => self::TYPE_BLOOD,
             'Buccal' => self::TYPE_BUCCAL,
             'Nasal' => self::TYPE_NASAL,
@@ -285,6 +284,9 @@ class Specimen
 
     private function ensureValidType(?string $type): void
     {
+        // NULL is ok
+        if ($type === null) return;
+
         $valid = array_values(self::getFormTypes());
 
         if (!in_array($type, $valid, true)) {
