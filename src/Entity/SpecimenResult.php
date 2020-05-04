@@ -11,7 +11,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Result of analyzing a Specimen. Subclass and specify unique fields.
  *
  * @ORM\Entity
- * @Gedmo\Loggable
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
