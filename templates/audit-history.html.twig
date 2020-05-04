@@ -1,0 +1,25 @@
+{#
+Renders grid of audit history for a single entity.
+
+Required params:
+
+- auditLogs App\Entity\AuditLog[]
+#}
+<div class="box box-success">
+    <div class="box-header with-border">
+        <h3 class="box-title">History</h3>
+    </div>
+    <div class="box-body" style="max-height:300px;overflow:hidden;overflow-y:scroll;">
+        {% for log in auditLogs %}
+            <div style="margin-bottom:1em; border-bottom: 1px solid rgb(244, 244, 244);">
+                {{ log.loggedAt | date('M j, Y g:ia') }} {{ log.username ? ' – '~log.username }} – {{ log.action|capitalize }}<br>
+                <br>
+                <dl class="dl-horizontal">
+                    {% for field, value in log.fieldChanges %}
+                        <dt>{{ field }}</dt><dd>{{ value is null ? '(empty)' : value }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
+        {% endfor %}
+    </div>
+</div>

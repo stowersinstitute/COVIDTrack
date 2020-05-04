@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * to the group instead of the participant to maintain some anonymity.
  *
  * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
- * @Gedmo\Loggable
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Specimen
 {
@@ -54,7 +54,6 @@ class Specimen
     /**
      * @var WellPlate
      * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
-     * @Gedmo\Versioned
      */
     private $wellPlate;
 
@@ -88,6 +87,64 @@ class Specimen
         return $this->getAccessionId();
     }
 
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * Audit Logging tracks field/value changes using entity property names
+     * and values like this:
+     *
+     *     [
+     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable values
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $keyConverter = [
+            // Specimen.propertyNameHere => Human-Readable Description
+            'accessionId' => 'Accession ID',
+            'collectedAt' => 'Collected At',
+            'status' => 'Status',
+            'createdAt' => 'Created At',
+        ];
+
+        /**
+         * Keys are array key from $changes
+         * Values are callbacks to convert $changes[$key] value
+         */
+        $valueConverter = [
+            // Convert STATUS_* constants into human-readable text
+            'status' => function($value) {
+                return self::lookupStatusText($value);
+            }
+        ];
+
+        $return = [];
+        foreach ($changes as $fieldId => $value) {
+            // If mapping fieldId to human-readable string, use it
+            // Else fallback to original fieldId
+            $key = $keyConverter[$fieldId] ?? $fieldId;
+
+            // If mapping callback defined for fieldId, use it
+            // Else fallback to current value
+            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
+
+            $return[$key] = $value;
+        }
+
+        return $return;
+    }
+
     public function getId(): int
     {
         return $this->id;
@@ -96,11 +153,6 @@ class Specimen
     public function getAccessionId(): string
     {
         return $this->accessionId;
-    }
-
-    public function setAccessionId(string $id): void
-    {
-        $this->accessionId = $id;
     }
 
     public function getParticipantGroup(): ParticipantGroup
@@ -143,9 +195,14 @@ class Specimen
 
     public function getStatusText(): string
     {
-        $statuses = array_flip(self::getFormStatuses());
+        return self::lookupStatusText($this->status);
+    }
 
-        return $statuses[$this->status];
+    public static function lookupStatusText(string $statusConstant): string
+    {
+        $statuses = array_flip(static::getFormStatuses());
+
+        return $statuses[$statusConstant];
     }
 
     public function getWellPlate(): ?WellPlate
