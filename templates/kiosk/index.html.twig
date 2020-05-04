@@ -95,7 +95,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
             }
 
             function notifySuccessfulScan() {
-                console.trace("🔔 BEEP 🔔");
+                console.log("🔔 BEEP 🔔");
                 document.getElementById("audioScanSuccess").muted = false;
                 document.getElementById("audioScanSuccess").play();
             }
@@ -151,8 +151,11 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
                         outputData.parentElement.hidden = false;
                         outputData.innerText = code.data;
 
-                        if (code.data.indexOf("SPEC:") === 0) {
-                            sawSpecimenId(code.data.substring(5));
+                        var specimenPrefix = 'CID';
+                        if (code.data.indexOf(specimenPrefix) === 0) {
+                            // todo: only necessary if we have a hidden specimen prefix
+                            //sawSpecimenId(code.data.substring(specimenPrefix.length));
+                            sawSpecimenId(code.data);
                         }
                         if (code.data.indexOf("GID:") === 0) {
                             sawGroupId(code.data.substring(4));
