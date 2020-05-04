@@ -38,13 +38,21 @@ class KioskController extends AbstractController
         /** @var ParticipantGroup $group */
         $group = $em->getRepository(ParticipantGroup::class)
             ->findOneBy(['accessionId' => $groupId]);
-
-
-        if (!$specimen) {
-            // todo: should be an error, ignoring for testing purposes
-            $error = 'Specimen not found!';
+        // Try searching by title
+        if (!$group) {
+            $group = $em->getRepository(ParticipantGroup::class)
+                ->findOneBy(['title' => $groupId]);
         }
-        else {
+
+        // todo: better handling of multiple errors
+        if (!$group) {
+            $error .= 'Group not found';
+        }
+        if (!$specimen) {
+            $error .= 'Specimen not found!';
+        }
+
+        if (!$error) {
             $specimen->setParticipantGroup($group);
             $specimen->setCollectedAt(new \DateTime());
             $specimen->setStatus(Specimen::STATUS_IN_PROCESS);
