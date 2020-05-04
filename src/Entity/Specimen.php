@@ -41,7 +41,7 @@ class Specimen
      * Unique public ID for referencing this specimen.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string")
+     * @ORM\Column(name="accessionId", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
