@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Result of analyzing a Specimen. Subclass and specify unique fields.
  *
  * @ORM\Entity
- * @ORM\InheritanceType("JOINED")
+ * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
  *     "qpcr" = "SpecimenResultQPCR",
