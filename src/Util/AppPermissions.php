@@ -15,6 +15,9 @@ class AppPermissions
      *
      * See also:
      *  - security.yaml for the hierarchy
+     *  - UserType.php for the user edit form to assign permissions
+     *  - user/user-table.html.twig for the table that displays permissions for all users
+     *
      * @var string[]
      */
     public const AVAILABLE_ROLES = [
