@@ -20,7 +20,10 @@ class SpecimenResultQPCR extends SpecimenResult
 
     // When result indicates Participant should obtain CLIA-based COVID test.
     // Likely because viral RNA was present in their Specimen.
-    const CONCLUSION_RECOMMENDED = "RECOMMENDED";
+    const CONCLUSION_POSITIVE = "RECOMMENDED";
+
+    // When result are not positive or negative
+    const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
 
     /**
      * Conclusion about presence of virus SARS-CoV-2 in specimen.
@@ -67,7 +70,8 @@ class SpecimenResultQPCR extends SpecimenResult
         return [
             'Awaiting Results' => self::CONCLUSION_PENDING,
             'Negative' => self::CONCLUSION_NEGATIVE,
-            'Recommended' => self::CONCLUSION_RECOMMENDED,
+            'Positive' => self::CONCLUSION_POSITIVE,
+            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
         ];
     }
 }

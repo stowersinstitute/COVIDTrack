@@ -99,6 +99,16 @@ class Specimen
     }
 
     /**
+     * Build for tests.
+     */
+    public static function buildExample(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $group = $group ?: ParticipantGroup::buildExample('G100');
+
+        return new static($accessionId, $group);
+    }
+
+    /**
      * Convert audit log field changes from internal format to human-readable format.
      *
      * Audit Logging tracks field/value changes using entity property names
@@ -218,11 +228,17 @@ class Specimen
 
     public function getRecommendCliaTestingText(): string
     {
-        // One Specimen can have more than one result
-        // Get the newest
-        $results = $this->getQPCRResults(1);
+        // One Specimen can have more than one result. Get the newest
+        $result = $this->getMostRecentQPCRResult();
 
-        return $text;
+        $mapping = [
+            SpecimenResultQPCR::CONCLUSION_POSITIVE => 'Yes',
+            SpecimenResultQPCR::CONCLUSION_NEGATIVE => 'No',
+            SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => 'Awaiting Results',
+            SpecimenResultQPCR::CONCLUSION_PENDING => 'Awaiting Results',
+        ];
+
+        return $result ? $mapping[$result->getConclusion()] : '';
     }
 
     public function getWellPlate(): ?WellPlate
@@ -265,15 +281,32 @@ class Specimen
     }
 
     /**
+     * Get qPCR Results for this Specimen.
+     *
      * @param int $take Max number of results to return
      * @return SpecimenResultQPCR[]
      */
     public function getQPCRResults(int $take = null): array
     {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultQPCR);
-        })->getValues();
+        $results = $this->results
+            ->filter(function(SpecimenResult $r) {
+                return ($r instanceof SpecimenResultQPCR);
+            })->getValues();
+
+        // Sort most recent createdAt first
+        uasort($results, function (SpecimenResult $a, SpecimenResult $b) {
+            return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
+        });
+
+        // Can return only X most recent
+        return $take ? array_slice($results, 0, $take) : $results;
+    }
+
+    public function getMostRecentQPCRResult(): ?SpecimenResultQPCR
+    {
+        $results = $this->getQPCRResults(1);
+
+        return array_shift($results);
     }
 
     /**
