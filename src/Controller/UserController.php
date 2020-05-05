@@ -122,16 +122,6 @@ class UserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN', 'Access Denied', 'You must be a system administrator to access this page');
     }
 
-    protected function userHasInheritedRole(AppUser $user, $role)
-    {
-        $token = new UsernamePasswordToken($user->getUsername(), '', 'main', $user->getRoles());
-
-        //$adm = $this->get('security.access.decision_manager');
-        $adm = $this->accessDecisionManager;
-
-        return $adm->decide($token, [ $role ]);
-    }
-
     /**
      * The output of this is an array that looks like:
      *
