@@ -7,6 +7,9 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+/**
+ * For permissions information see security.yaml
+ */
 class AppUserFixtures extends Fixture
 {
     private $passwordEncoder;
@@ -18,24 +21,38 @@ class AppUserFixtures extends Fixture
 
     public function load(ObjectManager $manager)
     {
-        // Administrator
-        $adminUser = new AppUser('ctadmin');
-        $adminUser->addRole('ROLE_ADMIN');
-        $adminUser->setPassword($this->passwordEncoder->encodePassword(
-            $adminUser,
-            'ctadmin'
-        ));
-        $manager->persist($adminUser);
+        // System Administrator
+        $this->buildUser($manager, 'ctadmin', ['ROLE_ADMIN']);
+
+        // Regulatory manager
+        $this->buildUser($manager, 'regulatory', ['ROLE_PARTICIPANT_GROUP_EDIT']);
 
         // Technician
-        $techUser = new AppUser('tech');
-        $techUser->setPassword($this->passwordEncoder->encodePassword(
-            $techUser,
-            'tech'
-        ));
-        $manager->persist($techUser);
+        $this->buildUser($manager, 'tech');
 
         $manager->flush();;
     }
 
+    /**
+     * Builds and persists a new AppUser
+     *
+     * If null, $password is set to $username
+     */
+    protected function buildUser($em, $username, $roles = [], $password = null)
+    {
+        if ($password === null) $password = $username;
+
+        $user = new AppUser($username);
+
+        if ($roles) {
+            $user->setRoles($roles);
+        }
+
+        $user->setPassword($this->passwordEncoder->encodePassword(
+            $user,
+            $password
+        ));
+
+        $em->persist($user);
+    }
 }
