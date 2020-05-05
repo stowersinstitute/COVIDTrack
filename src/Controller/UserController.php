@@ -106,11 +106,19 @@ class UserController extends AbstractController
     {
         $newUserRoles = [];
 
-        if ($form->get('hasRoleSysAdmin')->getData()) {
-            $newUserRoles[] = 'ROLE_ADMIN';
-        }
-        if ($form->get('hasRoleParticipantGroupEdit')->getData()) {
-            $newUserRoles[] = 'ROLE_PARTICIPANT_GROUP_EDIT';
+        $permissionsFieldKey = 'hasRole_';
+        foreach ($form->all() as $field) {
+            $fieldName = $field->getName();
+
+            // Skip fields that don't start with 'hasRole_'
+            if (substr($fieldName, 0, strlen($permissionsFieldKey)) != $permissionsFieldKey) continue;
+
+            // Skip fields that are not checked
+            $formField = $form->get($fieldName);
+            if (!$formField->getData() || $formField->isDisabled()) continue;
+
+            $roleStr = substr($fieldName, strlen($permissionsFieldKey));
+            $newUserRoles[] = $roleStr;
         }
 
         $user->setRoles($newUserRoles);
