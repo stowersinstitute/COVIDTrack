@@ -216,6 +216,15 @@ class Specimen
         return $statuses[$statusConstant];
     }
 
+    public function getRecommendCliaTestingText(): string
+    {
+        // One Specimen can have more than one result
+        // Get the newest
+        $results = $this->getQPCRResults(1);
+
+        return $text;
+    }
+
     public function getWellPlate(): ?WellPlate
     {
         return $this->wellPlate;
@@ -256,30 +265,36 @@ class Specimen
     }
 
     /**
+     * @param int $take Max number of results to return
      * @return SpecimenResultQPCR[]
      */
-    public function getQPCRResults(): array
+    public function getQPCRResults(int $take = null): array
     {
+        // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultQPCR);
         })->getValues();
     }
 
     /**
+     * @param int $take Max number of results to return
      * @return SpecimenResultDDPCR[]
      */
-    public function getDDPCRResults(): array
+    public function getDDPCRResults(int $take = null): array
     {
+        // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultDDPCR);
         })->getValues();
     }
 
     /**
+     * @param int $take Max number of results to return
      * @return SpecimenResultSequencing[]
      */
-    public function getSequencingResults(): array
+    public function getSequencingResults(int $take = null): array
     {
+        // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultSequencing);
         })->getValues();

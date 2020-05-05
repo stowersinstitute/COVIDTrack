@@ -11,10 +11,16 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenResultQPCR extends SpecimenResult
 {
-    const CONCLUSION_POSITIVE = "POSITIVE";
+    // When results are not yet available. Could be because no results entered
+    // or Specimen required re-testing.
+    const CONCLUSION_PENDING = "PENDING";
+
+    // When result did not find evidence of viral DNA in Specimen.
     const CONCLUSION_NEGATIVE = "NEGATIVE";
-    const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
-    const CONCLUSION_INVALID = "INVALID";
+
+    // When result indicates Participant should obtain CLIA-based COVID test.
+    // Likely because viral RNA was present in their Specimen.
+    const CONCLUSION_RECOMMENDED = "RECOMMENDED";
 
     /**
      * Conclusion about presence of virus SARS-CoV-2 in specimen.
@@ -23,6 +29,14 @@ class SpecimenResultQPCR extends SpecimenResult
      * @ORM\Column(name="conclusion", type="string")
      */
     private $conclusion;
+
+    public function __construct(Specimen $specimen)
+    {
+        parent::__construct($specimen);
+
+        $this->conclusion = self::CONCLUSION_PENDING;
+    }
+
 
     public function getConclusion(): string
     {
@@ -51,10 +65,9 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
+            'Awaiting Results' => self::CONCLUSION_PENDING,
             'Negative' => self::CONCLUSION_NEGATIVE,
-            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
-            'Invalid' => self::CONCLUSION_INVALID,
-            'Positive' => self::CONCLUSION_POSITIVE,
+            'Recommended' => self::CONCLUSION_RECOMMENDED,
         ];
     }
 }
