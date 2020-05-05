@@ -72,6 +72,16 @@ class Specimen
     private $collectedAt;
 
     /**
+     * Whether test results yield a recommendation Specimen Participant Group
+     * should undergo CLIA-based testing.
+     *
+     * @var string
+     * @ORM\Column(name="cliaTestingRecommendation", type="string")
+     * @Gedmo\Versioned
+     */
+    private $cliaTestingRecommendation;
+
+    /**
      * @var string
      * @ORM\Column(type="string")
      * @Gedmo\Versioned
@@ -86,15 +96,6 @@ class Specimen
      * @ORM\OrderBy({"createdAt" = "DESC"})
      */
     private $results;
-
-    /**
-     * Whether test results yield a recommendation Specimen Participant Group
-     * should undergo CLIA-based testing.
-     *
-     * @var string
-     * @ORM\Column(name="cliaTestingRecommendation", type="string")
-     */
-    private $cliaTestingRecommendation;
 
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
@@ -149,6 +150,7 @@ class Specimen
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'collectedAt' => 'Collected At',
+            'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
         ];
@@ -158,10 +160,14 @@ class Specimen
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            // Convert CLIA_REC_* constants into human-readable text
+            'cliaTestingRecommendation' => function($value) {
+                return self::lookupCliaTestingRecommendationText($value);
+            },
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
                 return self::lookupStatusText($value);
-            }
+            },
         ];
 
         $return = [];
@@ -240,7 +246,12 @@ class Specimen
         return $statuses[$statusConstant];
     }
 
-    public function getRecommendCliaTestingText(): string
+    public function getCliaTestingRecommendedText(): string
+    {
+        return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
+    }
+
+    public static function lookupCliaTestingRecommendationText(string $rec): string
     {
         $map = [
             self::CLIA_REC_PENDING => 'Awaiting Results',
@@ -248,7 +259,7 @@ class Specimen
             self::CLIA_REC_NO => 'No',
         ];
 
-        return $map[$this->cliaTestingRecommendation];
+        return $map[$rec] ?? '';
     }
 
     public function getWellPlate(): ?WellPlate

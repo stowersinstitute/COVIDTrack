@@ -43,22 +43,22 @@ class SpecimenTest extends TestCase
         $s = Specimen::buildExample('C100');
 
         // Default when no results yet
-        $this->assertSame('Awaiting Results', $s->getRecommendCliaTestingText());
+        $this->assertSame('Awaiting Results', $s->getCliaTestingRecommendedText());
 
         // Pending
         $r1 = new SpecimenResultQPCR($s);
         $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_PENDING);
-        $this->assertSame('Awaiting Results', $s->getRecommendCliaTestingText());
+        $this->assertSame('Awaiting Results', $s->getCliaTestingRecommendedText());
 
         // Add Negative Result
         $r2 = new SpecimenResultQPCR($s);
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
-        $this->assertSame('No', $s->getRecommendCliaTestingText());
+        $this->assertSame('No', $s->getCliaTestingRecommendedText());
 
 
         // Add Positive Result
         $r3 = new SpecimenResultQPCR($s);
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
-        $this->assertSame('Yes', $s->getRecommendCliaTestingText());
+        $this->assertSame('Yes', $s->getCliaTestingRecommendedText());
     }
 }
