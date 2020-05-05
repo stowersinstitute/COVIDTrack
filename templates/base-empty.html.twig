@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <title>{% block title %}COVIDTrack Login{% endblock %}</title>
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+</head>
+<body class="hold-transition skin-blue">
+
+<div class="wrapper">
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                {% block page_title %}{% endblock %}
+            </h1>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            {% block body %}{% endblock %}
+        </section>
+    </div>
+</div>
+{% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
+</body>
+</html>
