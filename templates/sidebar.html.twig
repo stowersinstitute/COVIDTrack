@@ -69,5 +69,20 @@
                 <li class="{{ _self.activeClass('app_labelprinter_testprint') }}"><a href="{{ path('app_labelprinter_testprint') }}"><i class="fa fa-print"></i> Print Test</a></li>
             </ul>
         </li>
+
+        {# User Management #}
+        {% if is_granted('ROLE_ADMIN') %}
+            <li class="treeview {{ _self.activeClass('user_list') }}{{ _self.activeClass('user_list') }}">
+                <a href="#">
+                    <i class="fa fa-users"></i> <span>Users</span>
+                    <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li class="{{ _self.activeClass('user_list') }}"><a href="{{ path('user_list') }}"><i class="fa fa-list"></i> View Users</a></li>
+                </ul>
+            </li>
+        {% endif %}
     </ul>
 </section>
