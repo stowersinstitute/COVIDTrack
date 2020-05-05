@@ -1,0 +1,30 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>&nbsp;</th>
+        <th>&nbsp;{# System Admin #}</th>
+        <th colspan="2" class="text-center">Participant Groups</th>
+    </tr>
+    <tr>
+        <th>Username</th>
+        <th class="text-center">System Admin</th>
+        {# Participant Groups #}
+        <th class="text-center">Edit</th>
+        <th class="text-center">View</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td>
+                <a href="{{ path('user_edit', {username: user.username}) }}">{{ user.username}}</a>
+            </td>
+            {# System Admin #}
+            <td class="text-center">{% if 'ROLE_ADMIN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Participant Groups #}
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Users{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-xs-12">
+            <a href="{{ path('user_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> Add User</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    {% include 'user/user-table.html.twig' with { users: users, rolesByUser: rolesByUser } %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
