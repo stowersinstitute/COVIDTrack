@@ -26,6 +26,10 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const CLIA_REC_PENDING = "PENDING";
+    const CLIA_REC_RECOMMENDED = "RECOMMENDED";
+    const CLIA_REC_NO = "NO";
+
     /**
      * @var int
      * @ORM\Id()
@@ -83,6 +87,15 @@ class Specimen
      */
     private $results;
 
+    /**
+     * Whether test results yield a recommendation Specimen Participant Group
+     * should undergo CLIA-based testing.
+     *
+     * @var string
+     * @ORM\Column(name="cliaTestingRecommendation", type="string")
+     */
+    private $cliaTestingRecommendation;
+
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
@@ -90,6 +103,7 @@ class Specimen
 
         $this->status = self::STATUS_CREATED;
         $this->results = new ArrayCollection();
+        $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTime();
     }
 
@@ -228,17 +242,13 @@ class Specimen
 
     public function getRecommendCliaTestingText(): string
     {
-        // One Specimen can have more than one result. Get the newest
-        $result = $this->getMostRecentQPCRResult();
-
-        $mapping = [
-            SpecimenResultQPCR::CONCLUSION_POSITIVE => 'Yes',
-            SpecimenResultQPCR::CONCLUSION_NEGATIVE => 'No',
-            SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => 'Awaiting Results',
-            SpecimenResultQPCR::CONCLUSION_PENDING => 'Awaiting Results',
+        $map = [
+            self::CLIA_REC_PENDING => 'Awaiting Results',
+            self::CLIA_REC_RECOMMENDED => 'Yes',
+            self::CLIA_REC_NO => 'No',
         ];
 
-        return $result ? $mapping[$result->getConclusion()] : '';
+        return $map[$this->cliaTestingRecommendation];
     }
 
     public function getWellPlate(): ?WellPlate
@@ -278,6 +288,8 @@ class Specimen
     {
         // TODO: Add de-duplicating logic
         $this->results->add($result);
+
+        $this->recalculateCliaTestingRecommendation();
     }
 
     /**
@@ -331,5 +343,44 @@ class Specimen
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultSequencing);
         })->getValues();
+    }
+
+    /**
+     * Calculate CLIA testing recommendation given current state of Specimen.
+     *
+     * @return string CLIA_REC_* constant
+     */
+    public function recalculateCliaTestingRecommendation(): string
+    {
+        // Current recommendation
+        $rec = $this->cliaTestingRecommendation;
+
+        // Latest qPCR result
+        $qpcr = $this->getMostRecentQPCRResult();
+
+        // When qPCR result available
+        if ($qpcr) {
+            // Get the qPCR conclusion
+            $result = $qpcr->getConclusion();
+
+            // qPCR conclusion ==> CLIA Recommendation
+            $map = [
+                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_RECOMMENDED,
+                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_PENDING,
+                SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
+            ];
+
+            // Use mapped recommendation value, else keep existing rec
+            if ($result && isset($map[$result])) {
+                $rec = $map[$result];
+            }
+        }
+
+        // Update recommendation
+        $this->cliaTestingRecommendation = $rec;
+
+        // Caller given latest rec
+        return $this->cliaTestingRecommendation;
     }
 }

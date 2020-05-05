@@ -42,8 +42,8 @@ class SpecimenTest extends TestCase
     {
         $s = Specimen::buildExample('C100');
 
-        // Default
-        $this->assertSame('', $s->getRecommendCliaTestingText());
+        // Default when no results yet
+        $this->assertSame('Awaiting Results', $s->getRecommendCliaTestingText());
 
         // Pending
         $r1 = new SpecimenResultQPCR($s);

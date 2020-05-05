@@ -35,11 +35,10 @@ class SpecimenResultQPCR extends SpecimenResult
 
     public function __construct(Specimen $specimen)
     {
-        parent::__construct($specimen);
-
         $this->conclusion = self::CONCLUSION_PENDING;
-    }
 
+        parent::__construct($specimen);
+    }
 
     public function getConclusion(): string
     {
@@ -53,6 +52,9 @@ class SpecimenResultQPCR extends SpecimenResult
         }
 
         $this->conclusion = $conclusion;
+
+        // Specimen recommendation depends on conclusion
+        $this->getSpecimen()->recalculateCliaTestingRecommendation();
     }
 
     public function getConclusionText(): string
