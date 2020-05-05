@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
+use App\ExcelImport\ParticipantGroupImporter;
+use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -103,6 +107,100 @@ class ParticipantGroupController extends AbstractController
             'auditLogs' => $auditLogs,
         ]);
     }
+
+    /**
+     * @Route("/excel-import/start", name="group_excel_import")
+     */
+    public function excelImport(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $form = $this->createForm(GenericExcelImportType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $excelFile */
+            $excelFile = $form->get('excelFile')->getData();
+
+            $workbook = ExcelImportWorkbook::createFromUpload($excelFile);
+            $em->persist($workbook);
+            $em->flush();
+
+            return $this->redirectToRoute('group_excel_import_preview', [
+                'importId' => $workbook->getId(),
+            ]);
+        }
+
+        return $this->render('excel-import/base-excel-import-start.twig', [
+            'itemLabel' => 'Participant Groups',
+            'importForm' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
+     */
+    public function excelImportPreview(int $importId)
+    {
+        $importingWorkbook = $this->getDoctrine()
+            ->getManager()
+            ->find(ExcelImportWorkbook::class, $importId);
+
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+
+        return $this->render('participantGroup/excel-import-preview.html.twig', [
+            'importId' => $importId,
+            'importingWorkbook' => $importingWorkbook,
+            'importer' => $importer,
+        ]);
+    }
+
+    /**
+     * @Route("/excel-import/commit/{importId<\d+>}", methods={"POST"}, name="group_excel_import_commit")
+     */
+    public function excelImportCommit(int $importId)
+    {
+        $em = $this->getDoctrine()
+            ->getManager();
+
+        $importingWorkbook = $em
+            ->find(ExcelImportWorkbook::class, $importId);
+
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+
+        $groups = $importer->getParticipantGroups();
+        $affectedGroups = [];
+        foreach ($groups as $uploadedGroup) {
+            /** @var ParticipantGroup $existingGroup */
+            $existingGroup = $em->getRepository(ParticipantGroup::class)
+                ->findOneBy(['accessionId' => $uploadedGroup->getAccessionId()]);
+
+            // Group already exists in the system
+            // todo: any properties we need to update? Maybe an isActive flag?
+            if ($existingGroup) {
+                $existingGroup->setTitle($uploadedGroup->getTitle());
+                $existingGroup->setParticipantCount($uploadedGroup->getParticipantCount());
+
+                $affectedGroups[] = $existingGroup;
+            }
+            // New group, persist it
+            else {
+                $em->persist($uploadedGroup);
+
+                $affectedGroups[] = $uploadedGroup;
+            }
+        }
+
+        // Clean up workbook from the database
+        $em->remove($importingWorkbook);
+
+        $em->flush();
+
+        return $this->render('participantGroup/excel-import-confirm.html.twig', [
+            'groups' => $affectedGroups,
+        ]);
+    }
+
 
     private function findGroup($id): ParticipantGroup
     {
