@@ -39,13 +39,6 @@ class UserController extends AbstractController
             ->getRepository(AppUser::class)
             ->findAll();
 
-        dump($this->getRolesByUserArray($users));
-
-        // Couldn't find a way to check if a user has an inherited role from within twig, so exporting
-        // it as a map here
-
-
-
         return $this->render(
             'user/list.html.twig',
             [
