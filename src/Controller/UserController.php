@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\AppUser;
 use App\Form\UserType;
+use App\Util\AppPermissions;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,19 +21,6 @@ class UserController extends AbstractController
 {
     /** @var AccessDecisionManagerInterface */
     private $accessDecisionManager;
-
-    /**
-     * Roles that a user could potentially be assigned
-     *
-     * See also:
-     *  - security.yaml for the hierarchy
-     * @var string[]
-     */
-    const AVAILABLE_ROLES = [
-        'ROLE_ADMIN',
-        'ROLE_PARTICIPANT_GROUP_EDIT',
-        'ROLE_PARTICIPANT_GROUP_VIEW'
-    ];
 
     public function __construct(AccessDecisionManagerInterface $accessDecisionManager)
     {
@@ -158,8 +146,10 @@ class UserController extends AbstractController
         $rolesByUser = [];
         foreach ($users as $user) {
             $inheritedUserRoles = [];
-            foreach (self::AVAILABLE_ROLES as $roleStr) {
-                if ($this->userHasInheritedRole($user, $roleStr)) $inheritedUserRoles[] = $roleStr;
+            foreach (AppPermissions::AVAILABLE_ROLES as $roleStr) {
+                if (AppPermissions::userHasInheritedRole($this->accessDecisionManager, $user, $roleStr)) {
+                    $inheritedUserRoles[] = $roleStr;
+                }
             }
 
             $rolesByUser[$user->getUsername()] = $inheritedUserRoles;
