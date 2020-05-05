@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -73,12 +74,22 @@ class Specimen
      */
     private $status;
 
+    /**
+     * Results of analyzing a Specimen.
+     *
+     * @var SpecimenResult[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $results;
+
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
 
         $this->status = self::STATUS_CREATED;
+        $this->results = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
 
@@ -223,5 +234,54 @@ class Specimen
     public function setCollectedAt(?\DateTime $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    /**
+     * List of all Results collected on this Specimen.
+     *
+     * @return SpecimenResult[]
+     */
+    public function getResults(): array
+    {
+        return $this->results->getValues();
+    }
+
+    /**
+     * @internal Call new SpecimenResults($specimen) to associate
+     */
+    public function addResult(SpecimenResult $result): void
+    {
+        // TODO: Add de-duplicating logic
+        $this->results->add($result);
+    }
+
+    /**
+     * @return SpecimenResultQPCR[]
+     */
+    public function getQPCRResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultQPCR);
+        })->getValues();
+    }
+
+    /**
+     * @return SpecimenResultDDPCR[]
+     */
+    public function getDDPCRResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultDDPCR);
+        })->getValues();
+    }
+
+    /**
+     * @return SpecimenResultSequencing[]
+     */
+    public function getSequencingResults(): array
+    {
+        return $this->results->filter(function(SpecimenResult $r) {
+            return ($r instanceof SpecimenResultSequencing);
+        })->getValues();
     }
 }

@@ -28,12 +28,10 @@ class ParticipantGroupController extends AbstractController
      */
     public function list()
     {
-        $groups = $this->getDoctrine()
-            ->getRepository(ParticipantGroup::class)
-            ->findAll();
+        $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
-            'groups' => $groups,
+            'groups' => $groupRepo->findAll(),
         ]);
     }
 
