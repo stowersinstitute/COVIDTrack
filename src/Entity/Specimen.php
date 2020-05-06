@@ -26,6 +26,10 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const CLIA_REC_PENDING = "PENDING";
+    const CLIA_REC_RECOMMENDED = "RECOMMENDED";
+    const CLIA_REC_NO = "NO";
+
     /**
      * @var int
      * @ORM\Id()
@@ -68,6 +72,16 @@ class Specimen
     private $collectedAt;
 
     /**
+     * Whether test results yield a recommendation Specimen Participant Group
+     * should undergo CLIA-based testing.
+     *
+     * @var string
+     * @ORM\Column(name="cliaTestingRecommendation", type="string")
+     * @Gedmo\Versioned
+     */
+    private $cliaTestingRecommendation;
+
+    /**
      * @var string
      * @ORM\Column(type="string")
      * @Gedmo\Versioned
@@ -90,12 +104,23 @@ class Specimen
 
         $this->status = self::STATUS_CREATED;
         $this->results = new ArrayCollection();
+        $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTime();
     }
 
     public function __toString()
     {
         return $this->getAccessionId();
+    }
+
+    /**
+     * Build for tests.
+     */
+    public static function buildExample(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $group = $group ?: ParticipantGroup::buildExample('G100');
+
+        return new static($accessionId, $group);
     }
 
     /**
@@ -125,6 +150,7 @@ class Specimen
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'collectedAt' => 'Collected At',
+            'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
         ];
@@ -134,10 +160,14 @@ class Specimen
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            // Convert CLIA_REC_* constants into human-readable text
+            'cliaTestingRecommendation' => function($value) {
+                return self::lookupCliaTestingRecommendationText($value);
+            },
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
                 return self::lookupStatusText($value);
-            }
+            },
         ];
 
         $return = [];
@@ -216,6 +246,22 @@ class Specimen
         return $statuses[$statusConstant];
     }
 
+    public function getCliaTestingRecommendedText(): string
+    {
+        return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
+    }
+
+    public static function lookupCliaTestingRecommendationText(string $rec): string
+    {
+        $map = [
+            self::CLIA_REC_PENDING => 'Awaiting Results',
+            self::CLIA_REC_RECOMMENDED => 'Yes',
+            self::CLIA_REC_NO => 'No',
+        ];
+
+        return $map[$rec] ?? '';
+    }
+
     public function getWellPlate(): ?WellPlate
     {
         return $this->wellPlate;
@@ -253,16 +299,37 @@ class Specimen
     {
         // TODO: Add de-duplicating logic
         $this->results->add($result);
+
+        $this->recalculateCliaTestingRecommendation();
     }
 
     /**
+     * Get qPCR Results for this Specimen.
+     *
+     * @param int $limit Max number of results to return
      * @return SpecimenResultQPCR[]
      */
-    public function getQPCRResults(): array
+    public function getQPCRResults(int $limit = null): array
     {
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultQPCR);
-        })->getValues();
+        $results = $this->results
+            ->filter(function(SpecimenResult $r) {
+                return ($r instanceof SpecimenResultQPCR);
+            })->getValues();
+
+        // Sort most recent createdAt first
+        uasort($results, function (SpecimenResult $a, SpecimenResult $b) {
+            return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
+        });
+
+        // Can return only X most recent
+        return $limit ? array_slice($results, 0, $limit) : $results;
+    }
+
+    public function getMostRecentQPCRResult(): ?SpecimenResultQPCR
+    {
+        $results = $this->getQPCRResults(1);
+
+        return array_shift($results);
     }
 
     /**
@@ -270,6 +337,7 @@ class Specimen
      */
     public function getDDPCRResults(): array
     {
+        // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultDDPCR);
         })->getValues();
@@ -280,8 +348,48 @@ class Specimen
      */
     public function getSequencingResults(): array
     {
+        // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
             return ($r instanceof SpecimenResultSequencing);
         })->getValues();
+    }
+
+    /**
+     * Calculate CLIA testing recommendation given current state of Specimen.
+     *
+     * @return string CLIA_REC_* constant
+     */
+    public function recalculateCliaTestingRecommendation(): string
+    {
+        // Current recommendation
+        $rec = $this->cliaTestingRecommendation;
+
+        // Latest qPCR result
+        $qpcr = $this->getMostRecentQPCRResult();
+
+        // When qPCR result available
+        if ($qpcr) {
+            // Get the qPCR conclusion
+            $result = $qpcr->getConclusion();
+
+            // qPCR conclusion ==> CLIA Recommendation
+            $map = [
+                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_RECOMMENDED,
+                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_PENDING,
+                SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
+            ];
+
+            // Use mapped recommendation value, else keep existing rec
+            if ($result && isset($map[$result])) {
+                $rec = $map[$result];
+            }
+        }
+
+        // Update recommendation
+        $this->cliaTestingRecommendation = $rec;
+
+        // Caller given latest rec
+        return $this->cliaTestingRecommendation;
     }
 }

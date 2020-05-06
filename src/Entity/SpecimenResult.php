@@ -52,6 +52,7 @@ abstract class SpecimenResult
     {
         $specimen->addResult($this);
         $this->specimen = $specimen;
+        $this->createdAt = new \DateTime();
     }
 
     public function getSpecimen(): Specimen
