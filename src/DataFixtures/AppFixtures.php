@@ -77,6 +77,8 @@ class AppFixtures extends Fixture
         foreach ($groups as $group) {
             for ($i=1; $i<=$group->getParticipantCount(); $i++) {
                 $s = new Specimen($this->getNextSpecimenId(), $group);
+                $s->setType($this->getSpecimenType($i));
+
                 $em->persist($s);
 
                 // Add many qPCR results, which test for presence of virus
@@ -107,6 +109,13 @@ class AppFixtures extends Fixture
                 $em->persist($r3);
             }
         }
+    }
+
+    private function getSpecimenType(int $i)
+    {
+        $types = array_values(Specimen::getFormTypes());
+
+        return $types[$i % count($types)];
     }
 
     /**

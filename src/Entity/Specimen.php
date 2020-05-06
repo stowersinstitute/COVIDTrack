@@ -26,6 +26,11 @@ class Specimen
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
 
+    const TYPE_BLOOD = "BLOOD";
+    const TYPE_BUCCAL = "BUCCAL";
+    const TYPE_NASAL = "NASAL";
+    const TYPE_SALIVA = "SALIVA";
+
     const CLIA_REC_PENDING = "PENDING";
     const CLIA_REC_RECOMMENDED = "RECOMMENDED";
     const CLIA_REC_NO = "NO";
@@ -42,10 +47,19 @@ class Specimen
      * Unique public ID for referencing this specimen.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string")
+     * @ORM\Column(name="accessionId", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
+
+    /**
+     * Saliva, Blood, etc. Uses TYPE_* constants.
+     *
+     * @var string
+     * @ORM\Column(name="type", type="string", nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $type;
 
     /**
      * Participant offering this specimen belongs to this Participant Group.
@@ -196,6 +210,51 @@ class Specimen
         return $this->accessionId;
     }
 
+    /**
+     * Return Specimen::TYPE_* constant used.
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): void
+    {
+        $this->ensureValidType($type);
+        $this->type = $type;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getFormTypes(): array
+    {
+        return [
+            'Blood' => self::TYPE_BLOOD,
+            'Buccal' => self::TYPE_BUCCAL,
+            'Nasal' => self::TYPE_NASAL,
+            'Saliva' => self::TYPE_SALIVA,
+        ];
+    }
+
+    /**
+     * Get human-readable text of selected Type
+     */
+    public function getTypeText(): string
+    {
+        if ($this->type === null) {
+            return '';
+        }
+
+        // Remove empty/null choice
+        $types = array_filter(self::getFormTypes());
+
+        // Key by TYPE_* constant
+        $types = array_flip($types);
+
+        return $types[$this->type];
+    }
+
     public function getParticipantGroup(): ParticipantGroup
     {
         return $this->participantGroup;
@@ -280,6 +339,18 @@ class Specimen
     public function setCollectedAt(?\DateTime $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    private function ensureValidType(?string $type): void
+    {
+        // NULL is ok
+        if ($type === null) return;
+
+        $valid = array_values(self::getFormTypes());
+
+        if (!in_array($type, $valid, true)) {
+            throw new \InvalidArgumentException('Unknown Specimen type');
+        }
     }
 
     /**
