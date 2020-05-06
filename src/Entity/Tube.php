@@ -58,7 +58,7 @@ class Tube
      * Current status of tube.
      *
      * @var string
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="status", type="string")
      */
     private $status;
 
