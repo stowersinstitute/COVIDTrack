@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Physical container that holds a Specimen.
