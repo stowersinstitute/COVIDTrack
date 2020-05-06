@@ -69,7 +69,7 @@ class ParticipantGroup
     public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
-        $this->participantCount = $participantCount;
+        $this->setParticipantCount($participantCount);
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
