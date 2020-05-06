@@ -176,7 +176,7 @@ class Specimen
          */
         $valueConverter = [
             'type' => function($value) {
-                return self::lookupTypeText($value);
+                return $value ? self::lookupTypeText($value) : null;
             },
             // Convert CLIA_REC_* constants into human-readable text
             'cliaTestingRecommendation' => function($value) {
