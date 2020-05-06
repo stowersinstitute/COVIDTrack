@@ -41,7 +41,7 @@ class AppTubeFixtures extends Fixture
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
-            $T->setReturnedAt(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
 
             $em->persist($T);
         }

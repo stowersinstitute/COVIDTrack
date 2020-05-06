@@ -16,9 +16,9 @@ class Tube
 {
     use SoftDeleteableEntity;
 
-    const STATUS_CREATED = "CREATED";
+    const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
-    const STATUS_PROCESSED = "PROCESSED";
+    const STATUS_CHECKEDIN = "CHECKEDIN";
 
     /**
      * @var int
@@ -78,7 +78,7 @@ class Tube
     public function __construct(string $accessionId)
     {
         $this->accessionId = $accessionId;
-        $this->status = self::STATUS_CREATED;
+        $this->status = self::STATUS_PRINTED;
     }
 
     public function __toString()
@@ -137,6 +137,18 @@ class Tube
         return $this->specimen;
     }
 
+    /**
+     * When a Participant has returned this Tube with their Specimen inside.
+     */
+    public function markReturned(\DateTimeImmutable $returnedAt)
+    {
+        $this->setStatus(self::STATUS_RETURNED);
+        $this->setReturnedAt($returnedAt);
+    }
+
+    /**
+     * @see markReturned() and other status methods
+     */
     private function setStatus(string $status): void
     {
         if (!in_array($status, self::getValidStatuses())) {
@@ -152,9 +164,9 @@ class Tube
     private static function getValidStatuses(): array
     {
         return [
-            'Label Printed' => self::STATUS_CREATED,
+            'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
-            'Processed' => self::STATUS_PROCESSED,
+            'Checked-In' => self::STATUS_CHECKEDIN,
         ];
     }
 
