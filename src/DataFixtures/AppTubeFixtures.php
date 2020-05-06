@@ -14,6 +14,8 @@ class AppTubeFixtures extends Fixture
         $this->returnedTubes($em);
         $this->checkedInTubes($em);
         $this->rejectedTubes($em);
+
+        $em->flush();
     }
 
     /**
