@@ -306,10 +306,10 @@ class Specimen
     /**
      * Get qPCR Results for this Specimen.
      *
-     * @param int $take Max number of results to return
+     * @param int $limit Max number of results to return
      * @return SpecimenResultQPCR[]
      */
-    public function getQPCRResults(int $take = null): array
+    public function getQPCRResults(int $limit = null): array
     {
         $results = $this->results
             ->filter(function(SpecimenResult $r) {
@@ -322,7 +322,7 @@ class Specimen
         });
 
         // Can return only X most recent
-        return $take ? array_slice($results, 0, $take) : $results;
+        return $limit ? array_slice($results, 0, $limit) : $results;
     }
 
     public function getMostRecentQPCRResult(): ?SpecimenResultQPCR
