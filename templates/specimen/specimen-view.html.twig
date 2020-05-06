@@ -29,12 +29,11 @@
 
 </div>
 
-{% if specimen.QPCRResults|length > 0 %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
             <div class="box-header with-border">
-                <h3 class="box-title">qPCR</h3>
+                <h3 class="box-title">qPCR <a href="{{ path('app_results_qpcr_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a></h3>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
@@ -61,7 +60,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 {% if specimen.DDPCRResults|length > 0 %}
 <div class="row">

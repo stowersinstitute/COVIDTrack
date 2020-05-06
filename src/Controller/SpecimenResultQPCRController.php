@@ -39,11 +39,23 @@ class SpecimenResultQPCRController extends AbstractController
     /**
      * Create a single new qPCR Result
      *
+     * Optional query string params:
+     *
+     * - accessionId (string) Specimen.accessionId to create results for
+     *
      * @Route(path="/new", methods={"GET", "POST"}, name="app_results_qpcr_new")
      */
     public function new(Request $request) : Response
     {
-        $form = $this->createForm(SpecimenResultQPCRForm::class);
+        $result = null;
+
+        // Query string params may indicate desired Specimen
+        if ($request->query->has('accessionId')) {
+            $specimen = $this->mustFindSpecimen($request->query->get('accessionId'));
+            $result = new SpecimenResultQPCR($specimen);
+        }
+
+        $form = $this->createForm(SpecimenResultQPCRForm::class, $result);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -53,6 +65,12 @@ class SpecimenResultQPCRController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($result);
             $em->flush();
+
+            if ($request->query->has('accessionId')) {
+                return $this->redirectToRoute('app_specimen_view', [
+                    'accessionId' => $request->query->get('accessionId'),
+                ]);
+            }
 
             return $this->redirectToRoute('app_results_qpcr_list');
         }
@@ -100,5 +118,18 @@ class SpecimenResultQPCRController extends AbstractController
         }
 
         return $q;
+    }
+
+    private function mustFindSpecimen(string $accessionId): Specimen
+    {
+        $s = $this->getDoctrine()
+            ->getRepository(Specimen::class)
+            ->findOneByAnyId($accessionId);
+
+        if (!$s) {
+            throw new \InvalidArgumentException('Cannot find Specimen');
+        }
+
+        return $s;
     }
 }
