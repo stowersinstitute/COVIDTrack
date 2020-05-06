@@ -42,7 +42,6 @@
                     <tr>
                         <th>&nbsp;</th>
                         <th>Conclusion</th>
-                        <th>Failure?</th>
                         <th>Created At</th>
                     </tr>
                     </thead>
@@ -53,7 +52,6 @@
                                 <a href="{{ path('app_results_qpcr_edit', {id: result.id}) }}">Edit</a>
                             </td>
                             <td>{{ result.conclusionText }}</td>
-                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
                             <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
                         </tr>
                     {% endfor %}
