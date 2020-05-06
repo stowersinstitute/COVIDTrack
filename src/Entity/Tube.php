@@ -18,7 +18,7 @@ class Tube
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_CHECKEDIN = "CHECKEDIN";
-    const STATUS_REJCETED = "REJECTED";
+    const STATUS_REJECTED = "REJECTED";
 
     /**
      * @var int
@@ -194,7 +194,7 @@ class Tube
      */
     public function markRejected(): void
     {
-        $this->setStatus(self::STATUS_REJCETED);
+        $this->setStatus(self::STATUS_REJECTED);
     }
 
     /**
@@ -218,7 +218,7 @@ class Tube
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'Checked-In' => self::STATUS_CHECKEDIN,
-            'Rejected' => self::STATUS_REJCETED,
+            'Rejected' => self::STATUS_REJECTED,
         ];
     }
 
