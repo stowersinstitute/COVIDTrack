@@ -12,6 +12,8 @@ class AppTubeFixtures extends Fixture
     {
         $this->distributedTubes($em);
         $this->returnedTubes($em);
+        $this->checkedInTubes($em);
+        $this->rejectedTubes($em);
     }
 
     /**
@@ -42,6 +44,48 @@ class AppTubeFixtures extends Fixture
 
             $T = new Tube($accessionId);
             $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+
+            $em->persist($T);
+        }
+    }
+
+    /**
+     * Tubes that have been checked in by a tech.
+     */
+    private function checkedInTubes(ObjectManager $em)
+    {
+        $startAccession = 300;
+
+        $numToCreate = 20;
+        $checkedInBy = 'test-checkin-user';
+        for ($i=1; $i<= $numToCreate; $i++) {
+            $accessionId = 'TUBE-' . ($i+$startAccession);
+
+            $T = new Tube($accessionId);
+            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+            // TODO: CVDLS-39 This probably needs a Specimen but John will work that out later
+            $T->markCheckedIn(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)), $checkedInBy);
+
+            $em->persist($T);
+        }
+    }
+
+    /**
+     * Tubes that have been rejected.
+     */
+    private function rejectedTubes(ObjectManager $em)
+    {
+        $startAccession = 400;
+
+        $numToCreate = 10;
+        $checkedInBy = 'test-checkin-user';
+        for ($i=1; $i<= $numToCreate; $i++) {
+            $accessionId = 'TUBE-' . ($i+$startAccession);
+
+            $T = new Tube($accessionId);
+            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+            $T->markCheckedIn(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)), $checkedInBy);
+            $T->markRejected();
 
             $em->persist($T);
         }

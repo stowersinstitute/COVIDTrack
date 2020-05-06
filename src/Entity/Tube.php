@@ -19,6 +19,7 @@ class Tube
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_CHECKEDIN = "CHECKEDIN";
+    const STATUS_REJCETED = "REJECTED";
 
     /**
      * @var int
@@ -72,8 +73,17 @@ class Tube
      * Date/Time when Tube was processed for check-in by Check-in Technician.
      *
      * @var \DateTimeImmutable
+     * @ORM\Column(name="checkedInAt", type="datetime_immutable", nullable=true)
      */
-    private $processedAt;
+    private $checkedInAt;
+
+    /**
+     * Check-in Tech that processed this Tube during Check-In.
+     *
+     * @var string
+     * @ORM\Column(name="checkedInBy", type="string", nullable=true)
+     */
+    private $checkedInBy;
 
     public function __construct(string $accessionId)
     {
@@ -127,6 +137,29 @@ class Tube
         return $this->returnedAt;
     }
 
+    /**
+     * Set when Check-in Tech processed the returned Tube.
+     */
+    public function setCheckedInAt(?\DateTimeImmutable $checkedInAt): void
+    {
+        $this->checkedInAt = $checkedInAt;
+    }
+
+    public function getCheckedInAt(): ?\DateTimeImmutable
+    {
+        return $this->checkedInAt;
+    }
+
+    public function getCheckedInBy(): ?string
+    {
+        return $this->checkedInBy;
+    }
+
+    public function setCheckedInBy(?string $checkedInBy): void
+    {
+        $this->checkedInBy = $checkedInBy;
+    }
+
     public function setSpecimen(Specimen $specimen): void
     {
         $this->specimen = $specimen;
@@ -144,6 +177,24 @@ class Tube
     {
         $this->setStatus(self::STATUS_RETURNED);
         $this->setReturnedAt($returnedAt);
+    }
+
+    /**
+     * When a Participant has returned this Tube with their Specimen inside.
+     */
+    public function markCheckedIn(\DateTimeImmutable $checkedInAt, string $checkedInBy): void
+    {
+        $this->setStatus(self::STATUS_CHECKEDIN);
+        $this->setCheckedInAt($checkedInAt);
+        $this->setCheckedInBy($checkedInBy);
+    }
+
+    /**
+     * When an issue was observed making this Tube's Specimen unviable for further research.
+     */
+    public function markRejected(): void
+    {
+        $this->setStatus(self::STATUS_REJCETED);
     }
 
     /**
@@ -167,6 +218,7 @@ class Tube
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'Checked-In' => self::STATUS_CHECKEDIN,
+            'Rejected' => self::STATUS_REJCETED,
         ];
     }
 
