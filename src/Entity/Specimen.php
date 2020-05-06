@@ -163,6 +163,7 @@ class Specimen
         $keyConverter = [
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
+            'type' => 'Type',
             'collectedAt' => 'Collected At',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
