@@ -65,6 +65,7 @@ class Tube
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
+     * @ORM\Column(name="returnedAt", type="datetime_immutable", nullable=true)
      */
     private $returnedAt;
 
