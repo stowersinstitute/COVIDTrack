@@ -40,7 +40,7 @@
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-{#                        <th>&nbsp;</th>#}
+                        <th>&nbsp;</th>
                         <th>Conclusion</th>
                         <th>Failure?</th>
                         <th>Created At</th>
@@ -49,9 +49,9 @@
                     <tbody>
                     {% for result in specimen.QPCRResults %}
                         <tr>
-{#                            <td>#}
-{#                                <a href="{{ path('app_qpcr_edit', {id: result.id}) }}">Edit</a>#}
-{#                            </td>#}
+                            <td>
+                                <a href="{{ path('app_results_qpcr_edit', {id: result.id}) }}">Edit</a>
+                            </td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.isFailure ? 'Yes' : '' }}</td>
                             <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
