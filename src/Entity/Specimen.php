@@ -266,7 +266,7 @@ class Specimen
     {
         $types = array_flip(static::getFormTypes());
 
-        return $types[$typeConstant];
+        return $types[$typeConstant] ?? '';
     }
 
     public function getParticipantGroup(): ParticipantGroup
@@ -316,7 +316,7 @@ class Specimen
     {
         $statuses = array_flip(static::getFormStatuses());
 
-        return $statuses[$statusConstant];
+        return $statuses[$statusConstant] ?? '';
     }
 
     /**
