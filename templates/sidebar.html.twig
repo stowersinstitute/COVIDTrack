@@ -70,6 +70,19 @@
                 <li class="{{ _self.activeClass('app_labelprinter_testprint') }}"><a href="{{ path('app_labelprinter_testprint') }}"><i class="fa fa-print"></i> Print Test</a></li>
             </ul>
         </li>
+{#        {% if is_granted('ROLE_ADMIN') %}#}
+        <li class="treeview {{ _self.activeClass('app_results_qpcr_list') }}">
+            <a href="#">
+                <i class="fa fa-th"></i> <span>Results</span>
+                <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+            </a>
+            <ul class="treeview-menu">
+                <li class="{{ _self.activeClass('app_results_qpcr_list') }}"><a href="{{ path('app_results_qpcr_list') }}"><i class="fa fa-list"></i> qPCR</a></li>
+            </ul>
+        </li>
+{#        {% endif %}#}
         <li class="treeview {{ _self.activeClass('app_report_group_results') }}">
             <a href="#">
                 <i class="fa fa-bar-chart"></i> <span>Reports</span>
