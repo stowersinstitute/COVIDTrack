@@ -175,6 +175,9 @@ class Specimen
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            'type' => function($value) {
+                return self::lookupTypeText($value);
+            },
             // Convert CLIA_REC_* constants into human-readable text
             'cliaTestingRecommendation' => function($value) {
                 return self::lookupCliaTestingRecommendationText($value);
@@ -257,6 +260,13 @@ class Specimen
         $types = array_flip($types);
 
         return $types[$this->type];
+    }
+
+    public static function lookupTypeText(string $typeConstant): string
+    {
+        $types = array_flip(static::getFormTypes());
+
+        return $types[$typeConstant];
     }
 
     public function getParticipantGroup(): ParticipantGroup
