@@ -84,6 +84,10 @@ class SpecimenResultQPCRController extends AbstractController
     /**
      * Edit a single qPCR Result.
      *
+     * Optional query string params:
+     *
+     * - accessionId (string) Redirect to this Specimen's page after edit is complete
+     *
      * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_qpcr_edit")
      */
     public function edit(string $id, Request $request) : Response
@@ -96,6 +100,14 @@ class SpecimenResultQPCRController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->flush();
+
+            // When given Specimen accessionId query string param,
+            // redirect there after edit complete
+            if ($request->query->has('accessionId')) {
+                return $this->redirectToRoute('app_specimen_view', [
+                    'accessionId' => $request->query->get('accessionId'),
+                ]);
+            }
 
             return $this->redirectToRoute('app_results_qpcr_list');
         }
