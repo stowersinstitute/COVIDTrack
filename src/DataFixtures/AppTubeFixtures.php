@@ -86,8 +86,7 @@ class AppTubeFixtures extends Fixture
 
             $T = new Tube($accessionId);
             $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
-            $T->markCheckedIn(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)), $checkedInBy);
-            $T->markRejected();
+            $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
 
             $em->persist($T);
         }
