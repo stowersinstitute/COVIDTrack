@@ -5,7 +5,8 @@
             <th>&nbsp;</th>
             <th>Accession ID</th>
             <th>Participant Group</th>
-            <th>Results</th>
+            <th>Type</th>
+            <th>CLIA Testing Recommended?</th>
             <th>Status</th>
             <th>Created</th>
             <th>Last Modified</th>
@@ -21,7 +22,8 @@
                 <a href="{{ path('app_specimen_view', {accessionId: specimen.accessionId}) }}">{{ specimen.accessionId }}</a>
             </td>
             <td>{{ specimen.participantGroup }}</td>
-            <td>{{ specimen.results | length }}</td>
+            <td>{{ specimen.typeText }}</td>
+            <td>{{ specimen.cliaTestingRecommendedText }}</td>
             <td>{{ specimen.statusText }}</td>
             <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ specimen.updatedAt | date("Y-m-d H:i:s") }}</td>
