@@ -305,11 +305,23 @@ class Specimen
         return $statuses[$statusConstant];
     }
 
+    /**
+     * @return string CLIA_REC_* constant
+     */
+    public function getCliaTestingRecommendation(): string
+    {
+        return $this->cliaTestingRecommendation;
+    }
+
     public function getCliaTestingRecommendedText(): string
     {
         return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
     }
 
+    /**
+     * @param string $rec CLIA_REC_* constant
+     * @return string
+     */
     public static function lookupCliaTestingRecommendationText(string $rec): string
     {
         $map = [
