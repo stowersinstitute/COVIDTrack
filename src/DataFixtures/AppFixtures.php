@@ -75,38 +75,46 @@ class AppFixtures extends Fixture
     private function addResultedSpecimens(ObjectManager $em, array $groups)
     {
         foreach ($groups as $group) {
-            for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                $s = new Specimen($this->getNextSpecimenId(), $group);
-                $s->setType($this->getSpecimenType($i));
+            // Generate Resulted Specimens for all Group Participants
+            // for this many days worth of testing
+            $daysWorthResults = 3;
 
-                $em->persist($s);
+            for ($day=1; $day<=$daysWorthResults; $day++) {
+                for ($i=1; $i<=$group->getParticipantCount(); $i++) {
+                    $s = new Specimen($this->getNextSpecimenId(), $group);
+                    $s->setType($this->getSpecimenType($i));
+                    $s->setCollectedAt(new \DateTime(sprintf('-%d days 5:00pm', $day)));
+                    $s->setStatus(Specimen::STATUS_RESULTS);
 
-                // Add many qPCR results, which test for presence of virus
-                $maxQPCR = rand(2,4);
-                for ($j=0; $j<$maxQPCR; $j++) {
-                    $r1 = new SpecimenResultQPCR($s);
+                    $em->persist($s);
 
-                    // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
-                    $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
+                    // Add many qPCR results, which test for presence of virus
+                    $maxQPCR = rand(2,4);
+                    for ($j=0; $j<$maxQPCR; $j++) {
+                        $r1 = new SpecimenResultQPCR($s);
 
-                    // Set a random conclusion
-                    $conclusions = SpecimenResultQPCR::getFormConclusions();
-                    $r1->setConclusion($conclusions[array_rand($conclusions)]);
+                        // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
+                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
 
-                    $em->persist($r1);
+                        // Set a random conclusion
+                        $conclusions = SpecimenResultQPCR::getFormConclusions();
+                        $r1->setConclusion($conclusions[array_rand($conclusions)]);
+
+                        $em->persist($r1);
+                    }
+
+                    // ddPCR Result
+                    $r2 = new SpecimenResultDDPCR($s);
+                    $r2->setIsFailure(rand(0,1));
+                    $s->addResult($r2);
+                    $em->persist($r2);
+
+                    // Sequencing Result
+                    $r3 = new SpecimenResultSequencing($s);
+                    $r3->setIsFailure(rand(0,1));
+                    $s->addResult($r3);
+                    $em->persist($r3);
                 }
-
-                // ddPCR Result
-                $r2 = new SpecimenResultDDPCR($s);
-                $r2->setIsFailure(rand(0,1));
-                $s->addResult($r2);
-                $em->persist($r2);
-
-                // Sequencing Result
-                $r3 = new SpecimenResultSequencing($s);
-                $r3->setIsFailure(rand(0,1));
-                $s->addResult($r3);
-                $em->persist($r3);
             }
         }
     }
