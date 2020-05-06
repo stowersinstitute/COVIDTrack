@@ -333,10 +333,9 @@ class Specimen
     }
 
     /**
-     * @param int $take Max number of results to return
      * @return SpecimenResultDDPCR[]
      */
-    public function getDDPCRResults(int $take = null): array
+    public function getDDPCRResults(): array
     {
         // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
@@ -345,10 +344,9 @@ class Specimen
     }
 
     /**
-     * @param int $take Max number of results to return
      * @return SpecimenResultSequencing[]
      */
-    public function getSequencingResults(int $take = null): array
+    public function getSequencingResults(): array
     {
         // TODO: This needs to sort by createdAt with newest first
         return $this->results->filter(function(SpecimenResult $r) {
