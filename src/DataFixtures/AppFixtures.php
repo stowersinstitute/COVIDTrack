@@ -93,11 +93,6 @@ class AppFixtures extends Fixture
                     $conclusions = SpecimenResultQPCR::getFormConclusions();
                     $r1->setConclusion($conclusions[array_rand($conclusions)]);
 
-                    // Set failure if conclusion was invalid
-                    if ($r1->getConclusion() === SpecimenResultQPCR::CONCLUSION_INVALID) {
-                        $r1->setIsFailure(rand(0,1));
-                    }
-
                     $em->persist($r1);
                 }
 

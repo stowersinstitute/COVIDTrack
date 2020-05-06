@@ -74,6 +74,14 @@ class ParticipantGroup
         $this->createdAt = new \DateTime();
     }
 
+    /**
+     * Build for tests.
+     */
+    public static function buildExample(string $accessionId, int $participantCount = 5): self
+    {
+        return new static($accessionId, $participantCount);
+    }
+
     public function __toString()
     {
         return $this->accessionId;
