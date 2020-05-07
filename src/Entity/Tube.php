@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
@@ -183,12 +184,13 @@ class Tube
     /**
      * Call when a Tube is being dropped off by a Participant at a Kiosk.
      *
+     * @param SpecimenAccessionIdGenerator $gen
      * @param DropOff            $drop
      * @param ParticipantGroup   $gropu
      * @param string             $tubeType Tube::TYPE_* constant
      * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
      */
-    public function kioskDropoff(DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
+    public function kioskDropoff(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
         $this->dropOff = $drop;
         $drop->addTube($this);
@@ -198,7 +200,7 @@ class Tube
         $this->setCollectedAt($collectedAt);
 
         // Create Specimen
-        $this->specimen = Specimen::createFromTube($this);
+        $this->specimen = Specimen::createFromTube($this, $gen);
     }
 
     /**

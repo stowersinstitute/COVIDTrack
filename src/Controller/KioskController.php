@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
@@ -18,6 +19,16 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class KioskController extends AbstractController
 {
+    /**
+     * @var SpecimenAccessionIdGenerator
+     */
+    private $specimenIdGen;
+
+    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
+    {
+        $this->specimenIdGen = $specimenIdGen;
+    }
+
     /**
      * @Route(path="/", name="kiosk_index", methods={"GET", "POST"})
      */

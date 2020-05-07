@@ -2,11 +2,13 @@
 
 namespace App\Tests\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\Tube;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use App\Util\EntityUtils;
 
@@ -69,16 +71,37 @@ class SpecimenTest extends TestCase
     {
         $tube = new Tube('TUBE-100');
 
+        $accessionId = 'SPEC-200';
+        $gen = $this->getMockAccessionIdGenerator($accessionId);
+
         $drop = new DropOff();
         $group = ParticipantGroup::buildExample('GRP-1');
         $tubeType = Tube::TYPE_BLOOD;
         $collectedAt = new \DateTime('2020-05-20 15:22:44');
-        $tube->kioskDropoff($drop, $group, $tubeType, $collectedAt);
+        $tube->kioskDropoff($gen, $drop, $group, $tubeType, $collectedAt);
 
-        $specimen = Specimen::createFromTube($tube);
+        $specimen = Specimen::createFromTube($tube, $gen);
 
+        $this->assertSame($accessionId, $tube->getSpecimen()->getAccessionId());
+        $this->assertSame($group, $tube->getParticipantGroup());
         $this->assertSame(Specimen::TYPE_BLOOD, $specimen->getType());
         $this->assertEquals($collectedAt, $specimen->getCollectedAt());
         $this->assertTrue(EntityUtils::isSameEntity($tube->getParticipantGroup(), $specimen->getParticipantGroup()));
+    }
+
+    /**
+     * @param string $accessionId Accession ID to return when calling ->generate() on the mock
+     * @return MockObject|SpecimenAccessionIdGenerator
+     */
+    private function getMockAccessionIdGenerator(string $accessionId): MockObject
+    {
+        $mock = $this->getMockBuilder(SpecimenAccessionIdGenerator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mock->method('generate')
+            ->willReturn($accessionId);
+
+        return $mock;
     }
 }

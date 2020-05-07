@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
@@ -122,7 +123,7 @@ class Specimen
         $this->createdAt = new \DateTime();
     }
 
-    public static function createFromTube(Tube $tube): self
+    public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
     {
         // Use Tube's Participant Group
         $group = $tube->getParticipantGroup();
@@ -131,7 +132,7 @@ class Specimen
         }
 
         // Specimen Accession ID
-        $accessionId = 'SPEC1234';
+        $accessionId = $gen->generate();
 
         // New Specimen
         $s = new static($accessionId, $group);
