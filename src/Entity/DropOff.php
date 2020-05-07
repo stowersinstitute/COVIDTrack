@@ -80,12 +80,14 @@ class DropOff
         return $this->tubes->getValues();
     }
 
+    /**
+     * @internal Use Tube->kioskDropoff(...) to establish relationship.
+     */
     public function addTube(Tube $tube)
     {
         if ($this->hasTube($tube)) return;
 
         $this->tubes->add($tube);
-        $tube->setDropOff($this);
     }
 
     public function hasTube(Tube $tube): bool

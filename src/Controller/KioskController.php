@@ -83,9 +83,8 @@ class KioskController extends AbstractController
                 throw new \InvalidArgumentException('Tube ID does not exist');
             }
 
-            $tube->setCollectedAt($temp_tube->getCollectedAt());
-            $tube->setParticipantGroup($dropOff->getGroup());
-            $dropOff->addTube($tube);
+            // Also creates Specimen
+            $tube->kioskDropoff($dropOff, $dropOff->getGroup(), $temp_tube->getTubeType(), $temp_tube->getCollectedAt());
 
             if($form->get('done')->isClicked()) {
                 print_r("was clicked");

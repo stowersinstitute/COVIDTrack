@@ -180,9 +180,25 @@ class Tube
         return $this->dropOff;
     }
 
-    public function setDropOff(?DropOff $dropOff): void
+    /**
+     * Call when a Tube is being dropped off by a Participant at a Kiosk.
+     *
+     * @param DropOff            $drop
+     * @param ParticipantGroup   $gropu
+     * @param string             $tubeType Tube::TYPE_* constant
+     * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
+     */
+    public function kioskDropoff(DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
-        $this->dropOff = $dropOff;
+        $this->dropOff = $drop;
+        $drop->addTube($this);
+
+        $this->setParticipantGroup($group);
+        $this->setTubeType($tubeType);
+        $this->setCollectedAt($collectedAt);
+
+        // Create Specimen
+        $this->specimen = Specimen::createFromTube($this);
     }
 
     /**

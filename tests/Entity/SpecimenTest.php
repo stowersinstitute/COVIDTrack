@@ -2,10 +2,13 @@
 
 namespace App\Tests\Entity;
 
+use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\Tube;
 use PHPUnit\Framework\TestCase;
+use App\Util\EntityUtils;
 
 class SpecimenTest extends TestCase
 {
@@ -60,5 +63,22 @@ class SpecimenTest extends TestCase
         $r3 = new SpecimenResultQPCR($s);
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $this->assertSame('Yes', $s->getCliaTestingRecommendedText());
+    }
+
+    public function testCreateFromTube()
+    {
+        $tube = new Tube('TUBE-100');
+
+        $drop = new DropOff();
+        $group = ParticipantGroup::buildExample('GRP-1');
+        $tubeType = Tube::TYPE_BLOOD;
+        $collectedAt = new \DateTime('2020-05-20 15:22:44');
+        $tube->kioskDropoff($drop, $group, $tubeType, $collectedAt);
+
+        $specimen = Specimen::createFromTube($tube);
+
+        $this->assertSame(Specimen::TYPE_BLOOD, $specimen->getType());
+        $this->assertEquals($collectedAt, $specimen->getCollectedAt());
+        $this->assertTrue(EntityUtils::isSameEntity($tube->getParticipantGroup(), $specimen->getParticipantGroup()));
     }
 }

@@ -122,6 +122,37 @@ class Specimen
         $this->createdAt = new \DateTime();
     }
 
+    public static function createFromTube(Tube $tube): self
+    {
+        // Use Tube's Participant Group
+        $group = $tube->getParticipantGroup();
+        if (!$group) {
+            throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
+        }
+
+        // Specimen Accession ID
+        $accessionId = 'SPEC1234';
+
+        // New Specimen
+        $s = new static($accessionId, $group);
+
+        // Specimen Type
+        // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
+        $typeMap = [
+            Tube::TYPE_BLOOD => Specimen::TYPE_BLOOD,
+            Tube::TYPE_SALIVA => Specimen::TYPE_SALIVA,
+            Tube::TYPE_SWAB => Specimen::TYPE_NASAL,
+        ];
+        $tubeType = $tube->getTubeType();
+        if (!isset($typeMap[$tubeType])) {
+            throw new \RuntimeException('Tube type does not map to Specimen type');
+        }
+        $s->setType($typeMap[$tubeType]);
+
+        $s->setCollectedAt($tube->getCollectedAt());
+        return $s;
+    }
+
     public function __toString()
     {
         return $this->getAccessionId();
