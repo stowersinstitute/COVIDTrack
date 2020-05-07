@@ -4,95 +4,99 @@
     {% if currentUrl == checkUrl %}active{% endif %}
 {% endmacro %}
 
+{#
+Renders a top-level navigation node in the tree navigation.
+
+@param parentText (string) Top-level navigation item's text
+@param parentIconClass (string) CSS class for Font Awesome class icon (i.e. fa-list)
+@param children (array) Array of hashes. See childrenItem params below.
+@param childrenItem.text (string) Navigation link text
+@param childrenItem.iconClass (string) CSS classes for Font Awesome icon next to nav item (i.e. fa-list)
+@param childrenItem.route (string) Name of Controller route linked to
+#}
+{% macro treenode(parentText, parentIconClass, children) %}
+    <li class="treeview {% for child in children %}{{ _self.activeClass(child.route) }}{% endfor %}">
+        <a href="#">
+            <i class="fa {{ parentIconClass }}"></i> <span>{{ parentText }}</span>
+            <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+        </a>
+        <ul class="treeview-menu">
+            {% for child in children %}
+            <li class="{{ _self.activeClass(child.route) }}"><a href="{{ path(child.route) }}"><i class="fa {{ child.iconClass }}"></i> {{ child.text }}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+{% endmacro %}
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
-    <!-- search form -->
-    <form action="#" method="get" class="sidebar-form">
-        <div class="input-group">
-            <input type="text" name="q" class="form-control" placeholder="Search...">
-            <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat">
-                  <i class="fa fa-search"></i>
-                </button>
-              </span>
-        </div>
-    </form>
-    <!-- /.search form -->
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
-        <li class="header">MAIN NAVIGATION</li>
-        <li class="treeview {{ _self.activeClass('app_specimen_list') }}{{ _self.activeClass('app_specimen_new') }}">
-            <a href="#">
-                <i class="fa fa-flask"></i> <span>Specimens</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_specimen_list') }}"><a href="{{ path('app_specimen_list') }}"><i class="fa fa-list"></i> List</a></li>
-                <li class="{{ _self.activeClass('app_specimen_new') }}"><a href="{{ path('app_specimen_new') }}"><i class="fa fa-plus"></i> New</a></li>
-            </ul>
-        </li>
-        <li class="treeview" {{ _self.activeClass('app_wellplate_list') }}{{ _self.activeClass('app_wellplate_new') }}>
-            <a href="#">
-                <i class="fa fa-th"></i> <span>Well Plates</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_wellplate_list') }}"><a href="{{ path('app_wellplate_list') }}"><i class="fa fa-list"></i> List</a></li>
-                <li class="{{ _self.activeClass('app_wellplate_new') }}"><a href="{{ path('app_wellplate_new') }}"><i class="fa fa-plus"></i> New</a></li>
-            </ul>
-        </li>
-        <li class="treeview {{ _self.activeClass('app_participant_group_list') }}{{ _self.activeClass('app_participant_group_new') }}{{ _self.activeClass('group_excel_import') }}">
-            <a href="#">
-                <i class="fa fa-users"></i> <span>Participant Groups</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_participant_group_list') }}"><a href="{{ path('app_participant_group_list') }}"><i class="fa fa-list"></i> List</a></li>
-                <li class="{{ _self.activeClass('app_participant_group_new') }}"><a href="{{ path('app_participant_group_new') }}"><i class="fa fa-plus"></i> New</a></li>
-                <li class="{{ _self.activeClass('group_excel_import') }}"><a href="{{ path('group_excel_import') }}"><i class="fa fa-upload"></i> Bulk Import</a></li>
-            </ul>
-        </li>
-        <li class="treeview">
-            <a href="#">
-                <i class="fa fa-print"></i> <span>Label Printers</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_labelprinter_list') }}"><a href="{{ path('app_labelprinter_list') }}"><i class="fa fa-list"></i> List</a></li>
-                <li class="{{ _self.activeClass('app_labelprinter_testprint') }}"><a href="{{ path('app_labelprinter_testprint') }}"><i class="fa fa-print"></i> Print Test</a></li>
-            </ul>
-        </li>
-{#        {% if is_granted('ROLE_ADMIN') %}#}
-        <li class="treeview {{ _self.activeClass('app_results_qpcr_list') }}">
-            <a href="#">
-                <i class="fa fa-th"></i> <span>Results</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_results_qpcr_list') }}"><a href="{{ path('app_results_qpcr_list') }}"><i class="fa fa-list"></i> qPCR</a></li>
-            </ul>
-        </li>
-{#        {% endif %}#}
-        <li class="treeview {{ _self.activeClass('app_report_group_results') }}">
-            <a href="#">
-                <i class="fa fa-bar-chart"></i> <span>Reports</span>
-                <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-            </a>
-            <ul class="treeview-menu">
-                <li class="{{ _self.activeClass('app_report_group_results') }}"><a href="{{ path('app_report_group_results') }}"><i class="fa fa-list"></i> Group Results</a></li>
-            </ul>
-        </li>
+        {{
+            _self.treenode('Specimens', 'fa-flask', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_specimen_list'
+                },
+                {
+                    text: 'New',
+                    iconClass: 'fa-plus',
+                    route: 'app_specimen_new'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Participant Groups', 'fa-users', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_participant_group_list'
+                },
+                {
+                    text: 'New',
+                    iconClass: 'fa-plus',
+                    route: 'app_participant_group_new'
+                },
+                {
+                    text: 'Bulk Import',
+                    iconClass: 'fa-upload',
+                    route: 'group_excel_import'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Label Printers', 'fa-print', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_labelprinter_list'
+                },
+                {
+                    text: 'Test Print',
+                    iconClass: 'fa-plus',
+                    route: 'app_labelprinter_testprint'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Results', 'fa-th', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_results_qpcr_list'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Reports', 'fa-bar-chart', [
+                {
+                    text: 'Group Results',
+                    iconClass: 'fa-list',
+                    route: 'app_report_group_results'
+                },
+            ])
+        }}
     </ul>
 </section>
