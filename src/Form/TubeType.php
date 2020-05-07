@@ -22,6 +22,13 @@ class TubeType extends AbstractType
             $days[$date->format('M d')] = $date->format('Y-m-d');
         }
 
+        $times = [];
+        foreach (range(6, 22) as $hour) {
+            $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
+            $date = \DateTime::createFromFormat('H:i', $H.':00');
+            $times[$date->format('H:i')] = $date->format('g:ia');
+        }
+
         $builder
             ->add('accessionId', TextType::class, [
                 'label' => 'Tube Label ID'
@@ -34,9 +41,17 @@ class TubeType extends AbstractType
                 ],
                 'required' => true
             ])
-            ->add('collectedAt', RadioButtonGroupType::class, [
+            ->add('collectedAtDate', RadioButtonGroupType::class, [
                 'choices' => $days,
-                'layout' => 'vertical'
+                'layout' => 'vertical',
+                'label' => 'Collection Date',
+                'required' => true,
+            ])
+            ->add('collectedAtTime', RadioButtonGroupType::class, [
+                'choices' => $times,
+                'layout' => 'vertical',
+                'label' => 'Approximate Collection Time',
+                'required' => true,
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Save Tube and Add Another'
@@ -46,12 +61,5 @@ class TubeType extends AbstractType
             ])
             ->getForm();
 
-    }
-
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults([
-            'data_class' => Tube::class
-        ]);
     }
 }
