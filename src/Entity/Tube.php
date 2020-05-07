@@ -8,7 +8,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 /**
  * Physical container that holds a Specimen.
  *
- * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\TubeRepository")
  * @ORM\Table(name="tubes")
  */
 class Tube
