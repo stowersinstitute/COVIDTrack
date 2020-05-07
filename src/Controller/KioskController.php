@@ -100,7 +100,6 @@ class KioskController extends AbstractController
             $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
 
             if($form->get('done')->isClicked()) {
-                print_r("was clicked");
                 $dropOff->markCompleted();
             }
 
