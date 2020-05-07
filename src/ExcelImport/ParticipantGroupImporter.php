@@ -39,8 +39,6 @@ class ParticipantGroupImporter
         // TODO: TEMPORARY, GENERATE REAL VALUE
         $groupIdx = date('ymdhis');
 
-        dump("Starting~");
-        dump($this->worksheet->getNumRows());
         for ($i=$this->startingRow; $i <= $this->worksheet->getNumRows(); $i++) {
             $rawParticipantCount = $this->worksheet->getCellValue($i, $this->columnMap['participantCount']);
 
