@@ -219,7 +219,7 @@ class Specimen
                 return self::lookupStatusText($value);
             },
             'collectedAt' => function(?\DateTimeInterface $value) {
-                return $value ? $value->format('Y-m-d H:i:s') : null;
+                return $value ? $value->format('Y-m-d g:ia') : null;
             },
         ];
 
