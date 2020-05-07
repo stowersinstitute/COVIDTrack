@@ -82,20 +82,21 @@ class KioskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
 
-            /** @var Tube $temp_tube */
-            $temp_tube = $form->getData();
+            $formData = $form->getData();
 
             /** @var Tube $tube */
             $tube = $this->getDoctrine()
                 ->getRepository(Tube::class)
-                ->findOneByAnyId($temp_tube->getAccessionId());
+                ->findOneByAnyId($formData['accessionId']);
             if (!$tube) {
                 // TODO: Need a user-friendly error
                 throw new \InvalidArgumentException('Tube ID does not exist');
             }
 
+            $collectedAt = new \DateTime($formData['collectedAtDate'] . $formData['collectedAtTime']);
+
             // Also creates Specimen
-            $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $temp_tube->getTubeType(), $temp_tube->getCollectedAt());
+            $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
 
             if($form->get('done')->isClicked()) {
                 print_r("was clicked");
