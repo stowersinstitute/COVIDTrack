@@ -15,6 +15,7 @@ use App\Label\ZplTextPrinter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +30,49 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LabelPrinterController extends AbstractController
 {
+
+    /**
+     * @Route("/print-specimen-labels", name="app_label_printer_print_specimen_labels")
+     */
+    public function printSpecimenLabels(Request $request, ZplPrinting $zpl)
+    {
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -'
+            ])
+            ->add('numToPrint', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => 1,
+                'attr' => [
+                    'min' => 1,
+                    'max' => 100, // todo: max # per roll? reasonable batch size?
+                ],
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $b64Image = null;
+        $zplText = null;
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+
+            // todo: rest of the owl
+        }
+
+        return $this->render('label-printer/print-specimen-labels.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
 
     /**
      * @Route(path="/", methods={"GET"})
