@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class SpecimenIntakeController extends AbstractController
 {
     /**
-     * @route(path="/upload/start")
+     * @route(path="/upload/start", name="specimen_intake_start")
      */
     public function startUpload(Request $request)
     {
