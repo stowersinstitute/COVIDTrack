@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
@@ -25,6 +26,7 @@ class Specimen
     const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
+    const STATUS_DROPPED_OFF = "DROPPEDOFF";
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
@@ -122,6 +124,37 @@ class Specimen
         $this->createdAt = new \DateTime();
     }
 
+    public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
+    {
+        // Use Tube's Participant Group
+        $group = $tube->getParticipantGroup();
+        if (!$group) {
+            throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
+        }
+
+        // Specimen Accession ID
+        $accessionId = $gen->generate();
+
+        // New Specimen
+        $s = new static($accessionId, $group);
+
+        // Specimen Type
+        // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
+        $typeMap = [
+            Tube::TYPE_BLOOD => Specimen::TYPE_BLOOD,
+            Tube::TYPE_SALIVA => Specimen::TYPE_SALIVA,
+            Tube::TYPE_SWAB => Specimen::TYPE_NASAL,
+        ];
+        $tubeType = $tube->getTubeType();
+        if (!isset($typeMap[$tubeType])) {
+            throw new \RuntimeException('Tube type does not map to Specimen type');
+        }
+        $s->setType($typeMap[$tubeType]);
+
+        $s->setCollectedAt($tube->getCollectedAt());
+        return $s;
+    }
+
     public function __toString()
     {
         return $this->getAccessionId();
@@ -187,7 +220,7 @@ class Specimen
                 return self::lookupStatusText($value);
             },
             'collectedAt' => function(?\DateTimeInterface $value) {
-                return $value ? $value->format('Y-m-d H:i:s') : null;
+                return $value ? $value->format('Y-m-d g:ia') : null;
             },
         ];
 
@@ -301,6 +334,7 @@ class Specimen
         return [
             'Created' => self::STATUS_CREATED,
             'Pending' => self::STATUS_PENDING,
+            'Dropped Off' => self::STATUS_DROPPED_OFF,
             'In Process' => self::STATUS_IN_PROCESS,
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
@@ -357,12 +391,12 @@ class Specimen
         $this->wellPlate = $wellPlate;
     }
 
-    public function getCollectedAt(): ?\DateTime
+    public function getCollectedAt(): ?\DateTimeInterface
     {
         return $this->collectedAt ? clone $this->collectedAt : null;
     }
 
-    public function setCollectedAt(?\DateTime $collectedAt): void
+    public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
     }

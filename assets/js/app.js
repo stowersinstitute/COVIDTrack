@@ -12,11 +12,16 @@ require('admin-lte/dist/css/skins/skin-blue.css');
 require('font-awesome/css/font-awesome.css');
 require('../css/app.css');
 
-
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
 
 import $ from 'jquery';
-import 'bootstrap/js/dropdown'
-import 'admin-lte/dist/js/adminlte'
+global.$ = global.jQuery = $;
+import 'bootstrap/js/dropdown';
+import 'bootstrap/js/modal';
+import 'admin-lte/dist/js/adminlte';
+
+import jsQR from 'jsqr';
+// There is probably a better way to do this by putting the template JS code in a file that gets compiled, but this works for now.
+global.jsQR = jsQR;
 
 console.log('Hello Webpack Encore! Edit me in assets/js/app.js');

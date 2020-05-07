@@ -41,14 +41,14 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_specimen_list'
                 },
                 {
+                    text: 'Check-in',
+                    iconClass: 'fa-check-square',
+                    route: 'specimen_intake_start'
+                },
+                {
                     text: 'New',
                     iconClass: 'fa-plus',
                     route: 'app_specimen_new'
-                },
-                {
-                    text: 'Intake Checkin',
-                    iconClass: 'fa-check-square',
-                    route: 'specimen_intake_start'
                 },
             ])
         }}
@@ -65,23 +65,9 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_participant_group_new'
                 },
                 {
-                    text: 'Bulk Import',
+                    text: 'Import',
                     iconClass: 'fa-upload',
                     route: 'group_excel_import'
-                },
-            ])
-        }}
-        {{
-            _self.treenode('Label Printers', 'fa-print', [
-                {
-                    text: 'List',
-                    iconClass: 'fa-list',
-                    route: 'app_labelprinter_list'
-                },
-                {
-                    text: 'Test Print',
-                    iconClass: 'fa-plus',
-                    route: 'app_labelprinter_testprint'
                 },
             ])
         }}
@@ -100,6 +86,25 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'Group Results',
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Label Printers', 'fa-print', [
+                {
+                    text: 'Print Specimen Labels',
+                    iconClass: 'fa-print',
+                    route: 'app_label_printer_print_specimen_labels'
+                },
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_labelprinter_list'
+                },
+                {
+                    text: 'Test',
+                    iconClass: 'fa-plus',
+                    route: 'app_labelprinter_testprint'
                 },
             ])
         }}
