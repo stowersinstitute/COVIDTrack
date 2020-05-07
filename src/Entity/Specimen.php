@@ -26,6 +26,7 @@ class Specimen
     const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
+    const STATUS_DROPPED_OFF = "DROPPEDOFF";
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
@@ -333,6 +334,7 @@ class Specimen
         return [
             'Created' => self::STATUS_CREATED,
             'Pending' => self::STATUS_PENDING,
+            'Dropped Off' => self::STATUS_DROPPED_OFF,
             'In Process' => self::STATUS_IN_PROCESS,
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
