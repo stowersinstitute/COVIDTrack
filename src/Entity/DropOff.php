@@ -34,6 +34,7 @@ class DropOff
     /**
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
+     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id")
      */
     private $group;
 
