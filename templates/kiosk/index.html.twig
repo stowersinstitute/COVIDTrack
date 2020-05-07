@@ -8,46 +8,32 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 
 {% block page_title %}COVIDTrack Kiosk{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        #canvas {
-        }
-    </style>
-{% endblock %}
-
 {% block body %}
-    <table class="table large" style="font-size: 2.5em;">
-        <thead class="thead-dark">
-        <tr>
-            <th>Group ID</th>
-            <th>Specimen ID</th>
-        </tr>
-        </thead>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table large" style="font-size: 2.5em;">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Group ID</th>
+                    <th>Tube ID</th>
+                </tr>
+                </thead>
 
-        <tr>
-            <td><span id="groupId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>
-            <td><span id="specimenId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>
-        </tr>
-    </table>
+                <tr>
+                    <td><span id="groupId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>
+                    <td><span id="specimenId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>
+                </tr>
+            </table>
+            {{ form(form) }}
 
-    <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div>
 
-    <div style="width: 100%;">
-        <canvas id="canvas" hidden></canvas>
-        <div id="output" hidden>
-            <div id="outputMessage">No QR code detected.</div>
-            <div hidden><b>Data:</b> <span id="outputData"></span></div>
+        <input type="text" id="raw-scanner" name="raw-scanner" style="opacity: 0.1; width:10px;"/>
         </div>
     </div>
-
-    <!-- start muted to work around random beeps on page load in chrome (??) -->
-    <audio id="audioScanSuccess" src="/audio/scanner-beep.wav" autoplay="0" muted="muted"></audio>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="/jsQR.js"></script>
 
     <script>
         function drawLine(canvas, begin, end, color) {
@@ -121,12 +107,12 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
                     }
                 })
                 .then(function(stream) {
-                    video.srcObject = stream;
-                    video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-                    video.play();
-                    requestAnimationFrame(tick);
-                }
-            );
+                        video.srcObject = stream;
+                        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                        video.play();
+                        requestAnimationFrame(tick);
+                    }
+                );
 
             function tick() {
                 loadingMessage.innerText = "⌛ Loading video...";

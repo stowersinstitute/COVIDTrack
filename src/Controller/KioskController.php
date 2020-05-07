@@ -3,9 +3,14 @@
 
 namespace App\Controller;
 
+use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
-use App\Entity\Specimen;
+use App\Entity\Tube;
+use App\Form\TubeType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -14,55 +19,90 @@ use Symfony\Component\Routing\Annotation\Route;
 class KioskController extends AbstractController
 {
     /**
-     * @Route(path="/", name="kiosk_index", methods={"GET"})
+     * @Route(path="/", name="kiosk_index", methods={"GET", "POST"})
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->render('kiosk/index.html.twig', [
+        $dropOff = new DropOff();
 
+        $form = $this->createFormBuilder($dropOff)
+            ->add('group', EntityType::class, [
+                'class' => ParticipantGroup::class,
+                'choice_name' => 'title',
+                'required' => false,
+                'empty_data' => "",
+                'placeholder' => '- None -',
+                'attr' => ['class' => 'input-lg'],
+            ])
+            ->add('submit', SubmitType::class)
+            ->getForm();
+
+        $dropOff = $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var DropOff $dropOff */
+            $dropOff = $form->getData();
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($dropOff);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_kiosk_tubeinput', ['id' => $dropOff->getId()]);
+        }
+
+        return $this->render('kiosk/index.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route(path="/specimen-dropoff/{groupId}/{specimenId}", name="kiosk_specimen_dropoff", methods={"GET"})
+     * @Route(path="/{id}/add-tube", methods={"GET", "POST"})
      */
-    public function recordSpecimenDropoff($groupId, $specimenId)
+    public function tubeInput(int $id, Request $request)
     {
-        $error = '';
-        $em = $this->getDoctrine()->getManager();
+        $dropOff = $this->getDoctrine()->getRepository(DropOff::class)->find($id);
 
-        /** @var Specimen $specimen */
-        $specimen = $em->getRepository(Specimen::class)
-            ->findOneBy(['accessionId' => $specimenId]);
+        $form = $this->createForm(TubeType::class);
 
-        /** @var ParticipantGroup $group */
-        $group = $em->getRepository(ParticipantGroup::class)
-            ->findOneBy(['accessionId' => $groupId]);
-        // Try searching by title
-        if (!$group) {
-            $group = $em->getRepository(ParticipantGroup::class)
-                ->findOneBy(['title' => $groupId]);
+        $form = $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+
+            /** @var Tube $temp_tube */
+            $temp_tube = $form->getData();
+
+            /** @var Tube $tube */
+            $tube = $this->getDoctrine()->getRepository(Tube::class)->findOneBy(['accessionId' => $temp_tube->getAccessionId()]);
+
+            $tube->setCollectedAt($temp_tube->getCollectedAt());
+            $tube->setParticipantGroup($dropOff->getGroup());
+            $dropOff->addTube($tube);
+
+            if($form->get('done')->isClicked()) {
+                print_r("was clicked");
+                $dropOff->markCompleted();
+            }
+
+            $entityManager->flush();
+
+            if ($form->get('save')->isClicked()) {
+                return $this->redirectToRoute('app_kiosk_tubeinput', ['id' => $dropOff->getId()]);
+            } else if($form->get('done')->isClicked()) {
+                return $this->redirectToRoute('app_kiosk_completedropoff', ['id' => $dropOff->getId()]);
+            }
         }
 
-        // todo: better handling of multiple errors
-        if (!$group) {
-            $error .= 'Group not found';
-        }
-        if (!$specimen) {
-            $error .= 'Specimen not found!';
-        }
-
-        if (!$error) {
-            $specimen->setParticipantGroup($group);
-            $specimen->setCollectedAt(new \DateTime());
-            $specimen->setStatus(Specimen::STATUS_IN_PROCESS);
-        }
-
-        $em->flush();
-        return $this->render('kiosk/specimen-dropoff.html.twig', [
-            'groupId' => $groupId,
-            'specimenId' => $specimenId,
-            'error' => $error,
+        return $this->render('kiosk/index.html.twig', [
+            'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route(path="/{id}/complete", methods={"GET"})
+     */
+    public function completeDropOff(int $id, Request $request)
+    {
+        return $this->render('kiosk/complete.html.twig');
     }
 }

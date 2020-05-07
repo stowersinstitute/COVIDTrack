@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Form;
+
+
+use App\Entity\Tube;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+class TubeType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+            ->add('accessionId', TextType::class, [
+                'label' => 'Tube Label ID'
+            ])
+            ->add('tubeType', ChoiceType::class, [
+                'choices' => [
+                    'Saliva' => Tube::TYPE_SALIVA,
+                    'Swab' => Tube::TYPE_SWAB,
+                    'Blood' => Tube::TYPE_BLOOD,
+                ]
+            ])
+            ->add('collectedAt', DateTimeType::class)
+            ->add('save', SubmitType::class, [
+                'label' => 'Save Tube and Add Another'
+            ])
+            ->add('done', SubmitType::class, [
+                'label' => 'Save Tube and Complete Drop Off'
+            ])
+            ->getForm();
+
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'data_class' => Tube::class
+        ]);
+    }
+}

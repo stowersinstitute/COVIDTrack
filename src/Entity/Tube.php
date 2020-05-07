@@ -20,6 +20,10 @@ class Tube
     const STATUS_CHECKEDIN = "CHECKEDIN";
     const STATUS_REJECTED = "REJECTED";
 
+    const TYPE_BLOOD = "BLOOD";
+    const TYPE_SALIVA = "SALIVA";
+    const TYPE_SWAB = "SWAB";
+
     /**
      * @var int
      * @ORM\Id()
@@ -62,12 +66,25 @@ class Tube
     private $status;
 
     /**
+     * @var string
+     * @ORM\Column(name="tubeType", type="string", nullable=true)
+     */
+    private $tubeType;
+
+    /**
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
      * @ORM\Column(name="returnedAt", type="datetime_immutable", nullable=true)
      */
     private $returnedAt;
+
+    /**
+     * @var DropOff
+     * @ORM\ManyToOne(targetEntity="App\Entity\DropOff", inversedBy="tubes")
+     * @ORM\JoinColumn(name="dropOffId", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $dropOff;
 
     /**
      * Date/Time when Tube was processed for check-in by Check-in Technician.
@@ -85,7 +102,13 @@ class Tube
      */
     private $checkedInBy;
 
-    public function __construct(string $accessionId)
+    /**
+     * @var \DateTimeImmutable
+     * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
+     */
+    private $collectedAt;
+
+    public function __construct(?string $accessionId = null)
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_PRINTED;
@@ -101,14 +124,38 @@ class Tube
         return $this->id;
     }
 
-    public function getAccessionId(): string
+    public function getAccessionId(): ?string
     {
         return $this->accessionId;
+    }
+
+    /**
+     * @param string $accessionId
+     */
+    public function setAccessionId(?string $accessionId): void
+    {
+        $this->accessionId = $accessionId;
     }
 
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTubeType(): ?string
+    {
+        return $this->tubeType;
+    }
+
+    /**
+     * @param string $tubeType
+     */
+    public function setTubeType(?string $tubeType): void
+    {
+        $this->tubeType = $tubeType;
     }
 
     public function getParticipantGroup(): ?ParticipantGroup
@@ -135,6 +182,19 @@ class Tube
     public function getReturnedAt(): ?\DateTimeImmutable
     {
         return $this->returnedAt;
+    }
+
+    public function getDropOff(): ?DropOff
+    {
+        return $this->dropOff;
+    }
+
+    /**
+     * @param DropOff $dropOff
+     */
+    public function setDropOff(?DropOff $dropOff): void
+    {
+        $this->dropOff = $dropOff;
     }
 
     /**
@@ -168,6 +228,16 @@ class Tube
     public function getSpecimen(): ?Specimen
     {
         return $this->specimen;
+    }
+
+    public function getCollectedAt(): ?\DateTimeInterface
+    {
+        return $this->collectedAt;
+    }
+
+    public function setCollectedAt(?\DateTimeInterface $collectedAt): void
+    {
+        $this->collectedAt = $collectedAt;
     }
 
     /**
