@@ -55,10 +55,12 @@ class TubeType extends AbstractType
                 'required' => true,
             ])
             ->add('save', SubmitType::class, [
-                'label' => 'Save Tube and Add Another'
+                'label' => '+ Save and Add Another',
+                'attr' => ['class' => 'btn-lg btn-primary'],
             ])
             ->add('done', SubmitType::class, [
-                'label' => 'Save Tube and Complete Drop Off'
+                'label' => '√ Save and Complete Drop Off',
+                'attr' => ['class' => 'btn-lg btn-success'],
             ])
             ->getForm();
 

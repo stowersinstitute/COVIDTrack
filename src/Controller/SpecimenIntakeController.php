@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class SpecimenIntakeController extends AbstractController
 {
     /**
-     * @route(path="/upload/start")
+     * @route(path="/upload/start", name="specimen_intake_start")
      */
     public function startUpload(Request $request)
     {
@@ -44,7 +44,7 @@ class SpecimenIntakeController extends AbstractController
         }
 
         return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Specimen Intake Data',
+            'itemLabel' => 'Specimens Check-in',
             'importForm' => $form->createView(),
         ]);
     }

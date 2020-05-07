@@ -84,6 +84,11 @@ class ParticipantGroup
 
     public function __toString()
     {
+        $title = $this->getTitle();
+        if ($title) {
+            return $title;
+        }
+
         return $this->accessionId;
     }
 
