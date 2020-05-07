@@ -72,25 +72,6 @@ Renders a top-level navigation node in the tree navigation.
             ])
         }}
         {{
-            _self.treenode('Label Printers', 'fa-print', [
-                {
-                    text: 'Print Specimen Labels',
-                    iconClass: 'fa-print',
-                    route: 'app_label_printer_print_specimen_labels'
-                },
-                {
-                    text: 'List',
-                    iconClass: 'fa-list',
-                    route: 'app_labelprinter_list'
-                },
-                {
-                    text: 'Test Print',
-                    iconClass: 'fa-plus',
-                    route: 'app_labelprinter_testprint'
-                },
-            ])
-        }}
-        {{
             _self.treenode('Results', 'fa-th', [
                 {
                     text: 'List',
@@ -105,6 +86,25 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'Group Results',
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Label Printers', 'fa-print', [
+                {
+                    text: 'Print Specimen Labels',
+                    iconClass: 'fa-print',
+                    route: 'app_label_printer_print_specimen_labels'
+                },
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_labelprinter_list'
+                },
+                {
+                    text: 'Test',
+                    iconClass: 'fa-plus',
+                    route: 'app_labelprinter_testprint'
                 },
             ])
         }}
