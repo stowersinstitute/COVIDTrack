@@ -20,7 +20,7 @@ class RadioButtonGroupType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['choices'] = $options['choices'];
-        $view->vars['layout'] = $options['layout'] === 'vertical' ? 'btn-group-vertical' : 'btn-group-justified';
+        $view->vars['layout'] = $options['layout'] === 'vertical' ? 'btn-group-vertical' : 'btn-group btn-group-justified';
     }
 
     public function getParent()

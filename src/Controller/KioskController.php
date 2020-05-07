@@ -112,7 +112,7 @@ class KioskController extends AbstractController
             }
         }
 
-        return $this->render('kiosk/index.html.twig', [
+        return $this->render('kiosk/tube-input.html.twig', [
             'form' => $form->createView(),
         ]);
     }

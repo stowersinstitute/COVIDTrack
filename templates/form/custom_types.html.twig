@@ -2,13 +2,13 @@
     <div class="form-group">
         {{- form_label(form) -}}
         <div class="input-group">
-            <div class="btn-group btn-group-radio {{ layout }}">
+            <div class="btn-group-radio {{ layout }}">
                 {% for title, value in choices %}
                     <a class="btn btn-primary btn-lg not-active" data-toggle="{{ id }}" data-title="{{ value }}">
                         <i class="fa fa-fw fa-check"></i>{{ title }}</a>
                 {% endfor %}
-                {{- form_widget(form) -}}
             </div>
+            {{- form_widget(form) -}}
         </div>
     </div>
 
