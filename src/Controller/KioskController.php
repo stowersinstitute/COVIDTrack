@@ -34,7 +34,9 @@ class KioskController extends AbstractController
                 'placeholder' => '- None -',
                 'attr' => ['class' => 'input-lg'],
             ])
-            ->add('submit', SubmitType::class)
+            ->add('submit', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
 
         $dropOff = $form->handleRequest($request);
