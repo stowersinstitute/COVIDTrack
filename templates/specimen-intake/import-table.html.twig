@@ -20,7 +20,7 @@
             <td>{{ tube.accessionId }}</td>
             <td class="text-center">{{ statusContent|raw }}</td>
             <td>{{ tube.checkedInBy }}</td>
-            <td>{{ tube.checkedInAt|date('m/d/Y h:i:sa') }}</td>
+            <td>{{ tube.checkedInAt|date('m/d/Y g:i:sa') }}</td>
         </tr>
     {% endfor %}
     </tbody>
