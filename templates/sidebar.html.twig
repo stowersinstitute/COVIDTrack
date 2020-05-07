@@ -46,7 +46,6 @@ Renders a top-level navigation node in the tree navigation.
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         <li class="header">MAIN NAVIGATION</li>
-
         {{
             _self.treenode('Specimens', 'fa-flask', [
                 {
@@ -105,6 +104,24 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'Test Print',
                     iconClass: 'fa-plus',
                     route: 'app_labelprinter_testprint'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Results', 'fa-th', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_results_qpcr_list'
+                },
+            ])
+        }}
+        {{
+            _self.treenode('Reports', 'fa-bar-chart', [
+                {
+                    text: 'Group Results',
+                    iconClass: 'fa-list',
+                    route: 'app_report_group_results'
                 },
             ])
         }}
