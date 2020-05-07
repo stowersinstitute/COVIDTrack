@@ -75,7 +75,9 @@ class KioskController extends AbstractController
             $temp_tube = $form->getData();
 
             /** @var Tube $tube */
-            $tube = $this->getDoctrine()->getRepository(Tube::class)->findOneBy(['accessionId' => $temp_tube->getAccessionId()]);
+            $tube = $this->getDoctrine()
+                ->getRepository(Tube::class)
+                ->findOneByAnyId($temp_tube->getAccessionId());
 
             $tube->setCollectedAt($temp_tube->getCollectedAt());
             $tube->setParticipantGroup($dropOff->getGroup());
