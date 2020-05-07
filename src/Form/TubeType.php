@@ -17,8 +17,7 @@ class TubeType extends AbstractType
     {
         $days = [];
         foreach (range(3, 0) as $daysAgo) {
-            $date = new \DateTime();
-            $date->sub(new \DateInterval(sprintf('P%dD', $daysAgo)));
+            $date = new \DateTime(sprintf('-%d days', $daysAgo));
             $days[$date->format('M d')] = $date->format('Y-m-d');
         }
 
