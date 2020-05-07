@@ -108,5 +108,16 @@ Renders a top-level navigation node in the tree navigation.
                 },
             ])
         }}
+        {% if is_granted('ROLE_ADMIN') %}
+        {{
+            _self.treenode('Users', 'fa-users', [
+                {
+                    text: 'View Users',
+                    iconClass: 'fa-list',
+                    route: 'user_list'
+                },
+            ])
+        }}
+        {% endif %}
     </ul>
 </section>
