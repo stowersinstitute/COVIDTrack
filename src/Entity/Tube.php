@@ -129,9 +129,6 @@ class Tube
         return $this->accessionId;
     }
 
-    /**
-     * @param string $accessionId
-     */
     public function setAccessionId(?string $accessionId): void
     {
         $this->accessionId = $accessionId;
@@ -142,17 +139,11 @@ class Tube
         return $this->status;
     }
 
-    /**
-     * @return string
-     */
     public function getTubeType(): ?string
     {
         return $this->tubeType;
     }
 
-    /**
-     * @param string $tubeType
-     */
     public function setTubeType(?string $tubeType): void
     {
         $this->tubeType = $tubeType;
@@ -189,9 +180,6 @@ class Tube
         return $this->dropOff;
     }
 
-    /**
-     * @param DropOff $dropOff
-     */
     public function setDropOff(?DropOff $dropOff): void
     {
         $this->dropOff = $dropOff;
