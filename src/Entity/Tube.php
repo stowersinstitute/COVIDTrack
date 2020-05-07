@@ -52,7 +52,7 @@ class Tube
     /**
      * Specimen created as result of Tube being checked in.
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
      * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="SET NULL")
      */
     private $specimen;
