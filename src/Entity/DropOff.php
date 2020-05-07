@@ -6,9 +6,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Specimen Drop Off
+ * Tracks Specimens dropped off by a Participant at a Kiosk.
  *
  * @ORM\Entity
+ * @ORM\Table(name="dropoffs")
  */
 class DropOff
 {
