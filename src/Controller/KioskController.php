@@ -95,7 +95,7 @@ class KioskController extends AbstractController
             }
 
             // Also creates Specimen
-            $tube->kioskDropoff($dropOff, $dropOff->getGroup(), $temp_tube->getTubeType(), $temp_tube->getCollectedAt());
+            $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $temp_tube->getTubeType(), $temp_tube->getCollectedAt());
 
             if($form->get('done')->isClicked()) {
                 print_r("was clicked");
