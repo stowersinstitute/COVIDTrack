@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
@@ -52,7 +53,7 @@ class Tube
     /**
      * Specimen created as result of Tube being checked in.
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
      * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="SET NULL")
      */
     private $specimen;
@@ -180,9 +181,26 @@ class Tube
         return $this->dropOff;
     }
 
-    public function setDropOff(?DropOff $dropOff): void
+    /**
+     * Call when a Tube is being dropped off by a Participant at a Kiosk.
+     *
+     * @param SpecimenAccessionIdGenerator $gen
+     * @param DropOff            $drop
+     * @param ParticipantGroup   $gropu
+     * @param string             $tubeType Tube::TYPE_* constant
+     * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
+     */
+    public function kioskDropoff(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
-        $this->dropOff = $dropOff;
+        $this->dropOff = $drop;
+        $drop->addTube($this);
+
+        $this->setParticipantGroup($group);
+        $this->setTubeType($tubeType);
+        $this->setCollectedAt($collectedAt);
+
+        // Create Specimen
+        $this->specimen = Specimen::createFromTube($this, $gen);
     }
 
     /**

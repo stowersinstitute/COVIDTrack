@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
@@ -18,6 +19,16 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class KioskController extends AbstractController
 {
+    /**
+     * @var SpecimenAccessionIdGenerator
+     */
+    private $specimenIdGen;
+
+    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
+    {
+        $this->specimenIdGen = $specimenIdGen;
+    }
+
     /**
      * @Route(path="/", name="kiosk_index", methods={"GET", "POST"})
      */
@@ -71,21 +82,21 @@ class KioskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
 
-            /** @var Tube $temp_tube */
-            $temp_tube = $form->getData();
+            $formData = $form->getData();
 
             /** @var Tube $tube */
             $tube = $this->getDoctrine()
                 ->getRepository(Tube::class)
-                ->findOneByAnyId($temp_tube->getAccessionId());
+                ->findOneByAnyId($formData['accessionId']);
             if (!$tube) {
                 // TODO: Need a user-friendly error
                 throw new \InvalidArgumentException('Tube ID does not exist');
             }
 
-            $tube->setCollectedAt($temp_tube->getCollectedAt());
-            $tube->setParticipantGroup($dropOff->getGroup());
-            $dropOff->addTube($tube);
+            $collectedAt = new \DateTime($formData['collectedAtDate'] . $formData['collectedAtTime']);
+
+            // Also creates Specimen
+            $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
 
             if($form->get('done')->isClicked()) {
                 print_r("was clicked");

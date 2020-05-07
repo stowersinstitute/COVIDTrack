@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
@@ -120,6 +121,37 @@ class Specimen
         $this->results = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTime();
+    }
+
+    public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
+    {
+        // Use Tube's Participant Group
+        $group = $tube->getParticipantGroup();
+        if (!$group) {
+            throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
+        }
+
+        // Specimen Accession ID
+        $accessionId = $gen->generate();
+
+        // New Specimen
+        $s = new static($accessionId, $group);
+
+        // Specimen Type
+        // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
+        $typeMap = [
+            Tube::TYPE_BLOOD => Specimen::TYPE_BLOOD,
+            Tube::TYPE_SALIVA => Specimen::TYPE_SALIVA,
+            Tube::TYPE_SWAB => Specimen::TYPE_NASAL,
+        ];
+        $tubeType = $tube->getTubeType();
+        if (!isset($typeMap[$tubeType])) {
+            throw new \RuntimeException('Tube type does not map to Specimen type');
+        }
+        $s->setType($typeMap[$tubeType]);
+
+        $s->setCollectedAt($tube->getCollectedAt());
+        return $s;
     }
 
     public function __toString()
@@ -331,12 +363,12 @@ class Specimen
         $this->wellPlate = $wellPlate;
     }
 
-    public function getCollectedAt(): ?\DateTime
+    public function getCollectedAt(): ?\DateTimeInterface
     {
         return $this->collectedAt ? clone $this->collectedAt : null;
     }
 
-    public function setCollectedAt(?\DateTime $collectedAt): void
+    public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
     }
