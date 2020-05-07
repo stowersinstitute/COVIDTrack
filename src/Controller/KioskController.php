@@ -34,7 +34,9 @@ class KioskController extends AbstractController
                 'placeholder' => '- None -',
                 'attr' => ['class' => 'input-lg'],
             ])
-            ->add('submit', SubmitType::class)
+            ->add('submit', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
 
         $dropOff = $form->handleRequest($request);
@@ -73,7 +75,13 @@ class KioskController extends AbstractController
             $temp_tube = $form->getData();
 
             /** @var Tube $tube */
-            $tube = $this->getDoctrine()->getRepository(Tube::class)->findOneBy(['accessionId' => $temp_tube->getAccessionId()]);
+            $tube = $this->getDoctrine()
+                ->getRepository(Tube::class)
+                ->findOneByAnyId($temp_tube->getAccessionId());
+            if (!$tube) {
+                // TODO: Need a user-friendly error
+                throw new \InvalidArgumentException('Tube ID does not exist');
+            }
 
             $tube->setCollectedAt($temp_tube->getCollectedAt());
             $tube->setParticipantGroup($dropOff->getGroup());

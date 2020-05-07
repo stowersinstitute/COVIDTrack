@@ -2,13 +2,15 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Specimen Drop Off
+ * Tracks Specimens dropped off by a Participant at a Kiosk.
  *
  * @ORM\Entity
+ * @ORM\Table(name="dropoffs")
  */
 class DropOff
 {
@@ -33,6 +35,7 @@ class DropOff
     /**
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
+     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
      */
     private $group;
 
@@ -54,63 +57,53 @@ class DropOff
         $this->status = self::STATUS_INPROCESS;
     }
 
-    /**
-     * @return int
-     */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @return ParticipantGroup
-     */
     public function getGroup(): ?ParticipantGroup
     {
         return $this->group;
     }
 
-    /**
-     * @param ParticipantGroup $group
-     */
-    public function setGroup(ParticipantGroup $group): void
+    public function setGroup(?ParticipantGroup $group): void
     {
         $this->group = $group;
     }
 
     /**
-     * @return Tube[]|ArrayCollection
+     * @return Tube[]
      */
-    public function getTubes()
+    public function getTubes(): array
     {
-        return $this->tubes;
+        return $this->tubes->getValues();
     }
 
     public function addTube(Tube $tube)
     {
+        if ($this->hasTube($tube)) return;
+
         $this->tubes->add($tube);
         $tube->setDropOff($this);
     }
 
-    /**
-     * @param Tube[]|ArrayCollection $tubes
-     */
-    public function setTubes($tubes): void
+    public function hasTube(Tube $tube): bool
     {
-        $this->tubes = $tubes;
+        foreach ($this->tubes as $existing) {
+            if (EntityUtils::isSameEntity($existing, $tube)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    /**
-     * @return string
-     */
     public function getKiosk(): ?string
     {
         return $this->kiosk;
     }
 
-    /**
-     * @param string $kiosk
-     */
     public function setKiosk(?string $kiosk): void
     {
         $this->kiosk = $kiosk;

@@ -25,8 +25,13 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
                     <td><span id="specimenId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>
                 </tr>
             </table>
-#}
-            {{ form(form) }}
+            {{
+                form(form, {
+                    'attr': {
+                        'autocomplete': 'off',
+                    }
+                })
+            }}
 
 
         <input type="text" id="raw-scanner" name="raw-scanner" style="opacity: 0.1; width:10px;"/>

@@ -8,7 +8,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 /**
  * Physical container that holds a Specimen.
  *
- * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\TubeRepository")
  * @ORM\Table(name="tubes")
  */
 class Tube
@@ -129,9 +129,6 @@ class Tube
         return $this->accessionId;
     }
 
-    /**
-     * @param string $accessionId
-     */
     public function setAccessionId(?string $accessionId): void
     {
         $this->accessionId = $accessionId;
@@ -142,17 +139,11 @@ class Tube
         return $this->status;
     }
 
-    /**
-     * @return string
-     */
     public function getTubeType(): ?string
     {
         return $this->tubeType;
     }
 
-    /**
-     * @param string $tubeType
-     */
     public function setTubeType(?string $tubeType): void
     {
         $this->tubeType = $tubeType;
@@ -189,9 +180,6 @@ class Tube
         return $this->dropOff;
     }
 
-    /**
-     * @param DropOff $dropOff
-     */
     public function setDropOff(?DropOff $dropOff): void
     {
         $this->dropOff = $dropOff;
