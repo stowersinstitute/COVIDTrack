@@ -47,7 +47,6 @@ class ParticipantGroupImporter
                 $rawParticipantCount
             );
 
-            dump($this->worksheet->getCellValue($i, $this->columnMap['participantCount']));
             $group->setTitle($this->worksheet->getCellValue($i, $this->columnMap['title']));
 
             $participantGroups[] = $group;
