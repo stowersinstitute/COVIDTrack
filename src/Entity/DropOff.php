@@ -57,7 +57,7 @@ class DropOff
         $this->status = self::STATUS_INPROCESS;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
