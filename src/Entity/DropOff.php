@@ -34,7 +34,7 @@ class DropOff
     /**
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id")
+     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
      */
     private $group;
 
