@@ -2,7 +2,9 @@
 
 namespace App\AccessionId;
 
+use App\Entity\Specimen;
 use App\Entity\SpecimenRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * Generates unique Specimen Accession ID
@@ -14,9 +16,9 @@ class SpecimenAccessionIdGenerator
      */
     private $specimenRepo;
 
-    public function __construct(SpecimenRepository $repo)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->specimenRepo = $repo;
+        $this->specimenRepo = $em->getRepository(Specimen::class);
     }
 
     /**
