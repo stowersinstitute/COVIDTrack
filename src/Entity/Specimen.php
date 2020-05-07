@@ -163,6 +163,7 @@ class Specimen
         $keyConverter = [
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
+            'type' => 'Type',
             'collectedAt' => 'Collected At',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
@@ -174,6 +175,9 @@ class Specimen
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            'type' => function($value) {
+                return $value ? self::lookupTypeText($value) : null;
+            },
             // Convert CLIA_REC_* constants into human-readable text
             'cliaTestingRecommendation' => function($value) {
                 return self::lookupCliaTestingRecommendationText($value);
@@ -181,6 +185,9 @@ class Specimen
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
                 return self::lookupStatusText($value);
+            },
+            'collectedAt' => function(?\DateTimeInterface $value) {
+                return $value ? $value->format('Y-m-d H:i:s') : null;
             },
         ];
 
@@ -255,6 +262,13 @@ class Specimen
         return $types[$this->type];
     }
 
+    public static function lookupTypeText(string $typeConstant): string
+    {
+        $types = array_flip(static::getFormTypes());
+
+        return $types[$typeConstant] ?? '';
+    }
+
     public function getParticipantGroup(): ParticipantGroup
     {
         return $this->participantGroup;
@@ -302,7 +316,15 @@ class Specimen
     {
         $statuses = array_flip(static::getFormStatuses());
 
-        return $statuses[$statusConstant];
+        return $statuses[$statusConstant] ?? '';
+    }
+
+    /**
+     * @return string CLIA_REC_* constant
+     */
+    public function getCliaTestingRecommendation(): string
+    {
+        return $this->cliaTestingRecommendation;
     }
 
     public function getCliaTestingRecommendedText(): string
@@ -310,6 +332,10 @@ class Specimen
         return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
     }
 
+    /**
+     * @param string $rec CLIA_REC_* constant
+     * @return string
+     */
     public static function lookupCliaTestingRecommendationText(string $rec): string
     {
         $map = [
