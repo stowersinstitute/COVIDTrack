@@ -81,11 +81,11 @@ class DropOff
     }
 
     /**
-     * @return Tube[]|ArrayCollection
+     * @return Tube[]
      */
-    public function getTubes()
+    public function getTubes(): array
     {
-        return $this->tubes;
+        return $this->tubes->getValues();
     }
 
     public function addTube(Tube $tube)
