@@ -30,7 +30,9 @@ class SpecimenForm extends AbstractType
             ->add('status', ChoiceType::class, [
                 'choices' => Specimen::getFormStatuses(),
             ])
-            ->add('save', SubmitType::class)
+            ->add('save', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
     }
 

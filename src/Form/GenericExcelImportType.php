@@ -32,6 +32,7 @@ class GenericExcelImportType extends AbstractType
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Upload',
+                'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
 

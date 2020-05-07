@@ -27,7 +27,9 @@ class SpecimenResultQPCRForm extends AbstractType
                 'placeholder' => '- Select -',
                 'required' => true,
             ])
-            ->add('save', SubmitType::class)
+            ->add('save', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
     }
 
