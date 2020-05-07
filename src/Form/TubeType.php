@@ -22,10 +22,12 @@ class TubeType extends AbstractType
         }
 
         $times = [];
-        foreach (range(6, 22) as $hour) {
+        foreach (range(6, 22, 2) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
-            $times[$date->format('H:i')] = $date->format('g:ia');
+            // Array Keys: Display value
+            // Array Value: Submit value
+            $times[$date->format('g:ia')] = $date->format('H:i');
         }
 
         $builder
