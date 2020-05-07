@@ -57,25 +57,16 @@ class DropOff
         $this->status = self::STATUS_INPROCESS;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @return ParticipantGroup
-     */
     public function getGroup(): ?ParticipantGroup
     {
         return $this->group;
     }
 
-    /**
-     * @param ParticipantGroup $group
-     */
     public function setGroup(ParticipantGroup $group): void
     {
         $this->group = $group;
@@ -108,17 +99,11 @@ class DropOff
         return false;
     }
 
-    /**
-     * @return string
-     */
     public function getKiosk(): ?string
     {
         return $this->kiosk;
     }
 
-    /**
-     * @param string $kiosk
-     */
     public function setKiosk(?string $kiosk): void
     {
         $this->kiosk = $kiosk;
