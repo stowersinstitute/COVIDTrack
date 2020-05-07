@@ -109,14 +109,6 @@ class DropOff
     }
 
     /**
-     * @param Tube[]|ArrayCollection $tubes
-     */
-    public function setTubes($tubes): void
-    {
-        $this->tubes = $tubes;
-    }
-
-    /**
      * @return string
      */
     public function getKiosk(): ?string
