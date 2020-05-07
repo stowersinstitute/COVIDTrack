@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -90,8 +91,21 @@ class DropOff
 
     public function addTube(Tube $tube)
     {
+        if ($this->hasTube($tube)) return;
+
         $this->tubes->add($tube);
         $tube->setDropOff($this);
+    }
+
+    public function hasTube(Tube $tube): bool
+    {
+        foreach ($this->tubes as $existing) {
+            if (EntityUtils::isSameEntity($existing, $tube)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
