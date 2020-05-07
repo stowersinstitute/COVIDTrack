@@ -1,0 +1,34 @@
+{% block radio_button_group_row %}
+    <div class="form-group">
+        {{- form_label(form) -}}
+        <div class="input-group">
+            <div class="btn-group btn-group-radio {{ layout }}">
+                {% for title, value in choices %}
+                    <a class="btn btn-primary btn-lg not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                        <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                {% endfor %}
+                {{- form_widget(form) -}}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $('.btn-group-radio a').on('click', function(){
+            var sel = $(this).data('title');
+            var tog = $(this).data('toggle');
+            $('#'+tog).prop('value', sel);
+
+            $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('not-active');
+            $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('not-active').addClass('active');
+        })
+    </script>
+
+    <style>
+        .btn-group-radio .not-active i { display: none; }
+        .btn-group-radio .active i { display: inline-block; }
+    </style>
+{% endblock %}
+
+
+
+
