@@ -67,7 +67,7 @@ class DropOff
         return $this->group;
     }
 
-    public function setGroup(ParticipantGroup $group): void
+    public function setGroup(?ParticipantGroup $group): void
     {
         $this->group = $group;
     }
