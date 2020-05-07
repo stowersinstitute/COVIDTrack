@@ -8,8 +8,6 @@
             <th>Type</th>
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
-            <th>Created</th>
-            <th>Last Modified</th>
         </tr>
     </thead>
     <tbody>
@@ -25,8 +23,6 @@
             <td>{{ specimen.typeText }}</td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>
             <td>{{ specimen.statusText }}</td>
-            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ specimen.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>
     {% endfor %}
     </tbody>
