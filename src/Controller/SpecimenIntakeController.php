@@ -44,7 +44,7 @@ class SpecimenIntakeController extends AbstractController
         }
 
         return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Specimen Intake Data',
+            'itemLabel' => 'Specimen Check-in',
             'importForm' => $form->createView(),
         ]);
     }
