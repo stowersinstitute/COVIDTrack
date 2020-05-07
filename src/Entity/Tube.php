@@ -18,7 +18,7 @@ class Tube
 
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
-    const STATUS_CHECKEDIN = "CHECKEDIN";
+    const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED";
 
     const TYPE_BLOOD = "BLOOD";
@@ -256,21 +256,27 @@ class Tube
     }
 
     /**
-     * When a Participant has returned this Tube with their Specimen inside.
+     * Intake technician has confirmed the specimen is acceptable and checked it in
      */
-    public function markCheckedIn(\DateTimeImmutable $checkedInAt, string $checkedInBy): void
+    public function markAccepted(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
     {
-        $this->setStatus(self::STATUS_CHECKEDIN);
+        if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
+
+        $this->setStatus(self::STATUS_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInBy($checkedInBy);
     }
 
     /**
-     * When an issue was observed making this Tube's Specimen unviable for further research.
+     * Intake technician has rejected the specimen
      */
-    public function markRejected(): void
+    public function markRejected(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
     {
+        if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
+
         $this->setStatus(self::STATUS_REJECTED);
+        $this->setCheckedInAt($checkedInAt);
+        $this->setCheckedInBy($checkedInBy);
     }
 
     /**
@@ -293,7 +299,7 @@ class Tube
         return [
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
-            'Checked-In' => self::STATUS_CHECKEDIN,
+            'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
         ];
     }

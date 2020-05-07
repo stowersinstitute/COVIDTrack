@@ -12,7 +12,7 @@ class AppTubeFixtures extends Fixture
     {
         $this->distributedTubes($em);
         $this->returnedTubes($em);
-        $this->checkedInTubes($em);
+        $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
         $em->flush();
@@ -54,7 +54,7 @@ class AppTubeFixtures extends Fixture
     /**
      * Tubes that have been checked in by a tech.
      */
-    private function checkedInTubes(ObjectManager $em)
+    private function acceptedTubes(ObjectManager $em)
     {
         $startAccession = 300;
 
@@ -66,7 +66,7 @@ class AppTubeFixtures extends Fixture
             $T = new Tube($accessionId);
             $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
             // TODO: CVDLS-39 This probably needs a Specimen but John will work that out later
-            $T->markCheckedIn(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)), $checkedInBy);
+            $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
 
             $em->persist($T);
         }
@@ -86,8 +86,7 @@ class AppTubeFixtures extends Fixture
 
             $T = new Tube($accessionId);
             $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
-            $T->markCheckedIn(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)), $checkedInBy);
-            $T->markRejected();
+            $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
 
             $em->persist($T);
         }

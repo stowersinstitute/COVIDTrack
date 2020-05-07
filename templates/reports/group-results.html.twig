@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Group Results{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>Group</th>
+                        {% for collectionDate in collectionDates %}
+                        <th>{{ collectionDate|date("Y-m-d g:ia") }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for group in allGroups %}
+                        {# Not all groups have report data #}
+                        {% if reportData[group.title] is defined %}
+                            {% set groupResults = reportData[group.title] %}
+                            <tr>
+                                <td>{{ group.title }}</td>
+
+                                {% for collectionDate in collectionDates %}
+                                    {% set key = collectionDate|date("Y-m-d g:ia") %}
+                                <td>
+                                    {{ groupResults[key] }}
+                                </td>
+                                {% endfor %}
+
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
