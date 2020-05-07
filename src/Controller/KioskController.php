@@ -78,6 +78,10 @@ class KioskController extends AbstractController
             $tube = $this->getDoctrine()
                 ->getRepository(Tube::class)
                 ->findOneByAnyId($temp_tube->getAccessionId());
+            if (!$tube) {
+                // TODO: Need a user-friendly error
+                throw new \InvalidArgumentException('Tube ID does not exist');
+            }
 
             $tube->setCollectedAt($temp_tube->getCollectedAt());
             $tube->setParticipantGroup($dropOff->getGroup());
