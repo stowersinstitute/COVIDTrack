@@ -42,7 +42,7 @@ class LabelPrinterController extends AbstractController
                 'choice_name' => 'title',
                 'required' => true,
                 'empty_data' => "",
-                'placeholder' => '- None -'
+                'placeholder' => '- Select -'
             ])
             ->add('numToPrint', IntegerType::class, [
                 'label' => 'Number of Labels',
@@ -54,6 +54,7 @@ class LabelPrinterController extends AbstractController
             ])
             ->add('send', SubmitType::class, [
                 'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
 
