@@ -104,6 +104,14 @@ Instead of using Docker, develop with tools installed directly on the host machi
     
 6. Access at http://localhost:8080/ (or wherever `symfony serve` indicates)
 
+## Running Automated Tests
+
+Tests written using [PHPUnit](https://phpunit.de/) and [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
+
+Run test suite from command-line:
+
+    bin/phpunit
+
 ## Data Fixtures
 
 Fake data is managed by [DoctrineFixturesBundle](https://symfony.com/doc/master/bundles/DoctrineFixturesBundle/index.html).

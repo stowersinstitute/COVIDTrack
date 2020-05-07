@@ -69,13 +69,26 @@ class ParticipantGroup
     public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
-        $this->participantCount = $participantCount;
+        $this->setParticipantCount($participantCount);
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTime();
     }
 
+    /**
+     * Build for tests.
+     */
+    public static function buildExample(string $accessionId, int $participantCount = 5): self
+    {
+        return new static($accessionId, $participantCount);
+    }
+
     public function __toString()
     {
+        $title = $this->getTitle();
+        if ($title) {
+            return $title;
+        }
+
         return $this->accessionId;
     }
 

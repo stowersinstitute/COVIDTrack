@@ -7,6 +7,10 @@
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+
     </head>
     <body class="hold-transition skin-blue sidebar-mini">
 
@@ -63,10 +67,6 @@
                 <h1>
                     {% block page_title %}{% endblock %}
                 </h1>
-                <ol class="breadcrumb">
-                    <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-                    <li class="active">Dashboard</li>
-                </ol>
             </section>
 
             <!-- Main content -->
@@ -75,8 +75,5 @@
             </section>
         </div>
     </div>
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-        {% endblock %}
     </body>
 </html>

@@ -29,7 +29,9 @@ class ParticipantGroupForm extends AbstractType
                     'max' => ParticipantGroup::MAX_PARTICIPANT_COUNT,
                 ],
             ])
-            ->add('save', SubmitType::class)
+            ->add('save', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
     }
 

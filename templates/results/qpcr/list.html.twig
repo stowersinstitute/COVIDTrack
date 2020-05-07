@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}qPCR Results{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xs-12">
+        <a href="{{ path('app_results_qpcr_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> New qPCR Result</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body">
+                {% include('results/qpcr/list-table.html.twig') %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

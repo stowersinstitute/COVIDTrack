@@ -22,4 +22,30 @@ class ParticipantGroupRepository extends EntityRepository
             'accessionId' => $id,
         ]);
     }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function findActive()
+    {
+        // todo: implement isActive flag
+        return $this->findBy([], ['accessionId' => 'ASC']);
+    }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function findActiveAlphabetical(): array
+    {
+        return $this->findBy(
+            // Params
+            [],
+            // Sort
+            [
+                // todo: implement isActive flag
+                // 'isActive' => true,
+                'title' => 'ASC',
+            ]
+        );
+    }
 }

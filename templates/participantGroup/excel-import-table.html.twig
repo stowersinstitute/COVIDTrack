@@ -1,0 +1,19 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Accession ID</th>
+        <th>Group Name</th>
+        <th># Participants</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for group in groups  %}
+        <tr>
+            <td>{{ group.accessionId }}</td>
+            <td>{{ group.title }}</td>
+            <td>{{ group.participantCount }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

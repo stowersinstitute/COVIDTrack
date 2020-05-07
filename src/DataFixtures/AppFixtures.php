@@ -4,6 +4,10 @@ namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\SpecimenResult;
+use App\Entity\SpecimenResultDDPCR;
+use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenResultSequencing;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -13,7 +17,8 @@ class AppFixtures extends Fixture
     {
         $users = $this->addUsers($em);
         $groups = $this->addParticipantGroups($em);
-        $specimens = $this->addPrintedSpecimens($em, $groups);
+        $this->addPrintedSpecimens($em, $groups);
+        $this->addResultedSpecimens($em, $groups);
 
         $em->flush();
     }
@@ -52,26 +57,91 @@ class AppFixtures extends Fixture
      */
     private function addPrintedSpecimens(ObjectManager $em, array $groups)
     {
-        // TODO: CVDLS-30 Support creating unique accession ID when creating
-        // Invoke to get next Specimen accession id
-        $nextSpecimenId = function() {
-            if (!isset($seq)) {
-                static $seq = 0;
-            }
-            $prefix = 'CID';
-
-            $seq++;
-
-            return sprintf("%s%s", $prefix, $seq);
-        };
-
         foreach ($groups as $group) {
             for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                $s = new Specimen($nextSpecimenId(), $group);
+                $s = new Specimen($this->getNextSpecimenId(), $group);
 
                 $em->persist($s);
             }
         }
+    }
+
+    /**
+     * Add Specimens that have had labels printed and results.
+     *
+     * @param ObjectManager $em
+     * @param ParticipantGroup[] $groups
+     */
+    private function addResultedSpecimens(ObjectManager $em, array $groups)
+    {
+        foreach ($groups as $group) {
+            // Generate Resulted Specimens for all Group Participants
+            // for this many days worth of testing
+            $daysWorthResults = 3;
+
+            for ($day=1; $day<=$daysWorthResults; $day++) {
+                for ($i=1; $i<=$group->getParticipantCount(); $i++) {
+                    $s = new Specimen($this->getNextSpecimenId(), $group);
+                    $s->setType($this->getSpecimenType($i));
+                    $s->setCollectedAt(new \DateTime(sprintf('-%d days 5:00pm', $day)));
+                    $s->setStatus(Specimen::STATUS_RESULTS);
+
+                    $em->persist($s);
+
+                    // Add many qPCR results, which test for presence of virus
+                    $maxQPCR = rand(2,4);
+                    for ($j=0; $j<$maxQPCR; $j++) {
+                        $r1 = new SpecimenResultQPCR($s);
+
+                        // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
+                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
+
+                        // Set a random conclusion
+                        $conclusions = SpecimenResultQPCR::getFormConclusions();
+                        $r1->setConclusion($conclusions[array_rand($conclusions)]);
+
+                        $em->persist($r1);
+                    }
+
+                    // ddPCR Result
+                    $r2 = new SpecimenResultDDPCR($s);
+                    $r2->setIsFailure(rand(0,1));
+                    $s->addResult($r2);
+                    $em->persist($r2);
+
+                    // Sequencing Result
+                    $r3 = new SpecimenResultSequencing($s);
+                    $r3->setIsFailure(rand(0,1));
+                    $s->addResult($r3);
+                    $em->persist($r3);
+                }
+            }
+        }
+    }
+
+    private function getSpecimenType(int $i)
+    {
+        $types = array_values(Specimen::getFormTypes());
+
+        return $types[$i % count($types)];
+    }
+
+    /**
+     * Invoke to get next Specimen accessionId
+     * TODO: CVDLS-30 Support creating unique accession ID when creating
+     *
+     * @return string
+     */
+    private function getNextSpecimenId(): string
+    {
+        if (!isset($seq)) {
+            static $seq = 0;
+        }
+        $prefix = 'CID';
+
+        $seq++;
+
+        return sprintf("%s%s", $prefix, $seq);
     }
 
     private function getGroupTitle(int $idx): string

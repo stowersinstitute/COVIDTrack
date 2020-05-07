@@ -1,0 +1,35 @@
+{% extends 'kiosk/kiosk-base.html.twig' %}
+
+{% block page_title %}COVIDTrack Kiosk{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-12">
+            {{ form_start(form, {
+                    'attr': {
+                        'autocomplete': 'off',
+                    }
+                })
+            }}
+            {{ form_errors(form) }}
+            {{ form_row(form.accessionId) }}
+            {{ form_row(form.tubeType) }}
+            <div class="row">
+                <div class="col-sm-3 col-sm-offset-3">
+                        {{ form_row(form.collectedAtDate) }}
+                </div>
+                <div class="col-sm-3">
+                    {{ form_row(form.collectedAtTime) }}
+                </div>
+            </div>
+
+            {{ form_row(form.save) }}
+            {{ form_row(form.done) }}
+
+
+            {{ form_end(form) }}
+
+
+        </div>
+    </div>
+{% endblock %}

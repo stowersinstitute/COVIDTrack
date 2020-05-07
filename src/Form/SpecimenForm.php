@@ -20,12 +20,19 @@ class SpecimenForm extends AbstractType
             ->add('participantGroup', EntityType::class, [
                 'class' => ParticipantGroup::class,
                 'required' => true,
+                'placeholder' => '',
+            ])
+            ->add('type', ChoiceType::class, [
+                'choices' => Specimen::getFormTypes(),
                 'placeholder' => '- Select -',
+                'required' => false,
             ])
             ->add('status', ChoiceType::class, [
                 'choices' => Specimen::getFormStatuses(),
             ])
-            ->add('save', SubmitType::class)
+            ->add('save', SubmitType::class, [
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
     }
 

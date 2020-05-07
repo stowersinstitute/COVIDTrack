@@ -1,0 +1,33 @@
+{% extends 'kiosk/kiosk-base.html.twig' %}
+
+{% block page_title %}Kiosk Interface{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #canvas {
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+    {% else %}
+        <p style="font-size: 2.5em;">
+            <b>{{ groupId }}</b> dropped off <b>{{ specimenId }}</b>
+        </p>
+    {% endif %}
+
+    <p>
+        Returning to scan interface...
+    </p>
+
+    <script>
+        setTimeout(function() {
+            location.href = {{ path('kiosk_index') }};
+        }, 2000);
+    </script>
+{% endblock %}
