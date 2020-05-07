@@ -18,12 +18,23 @@ class AppPermissions
      *  - UserType.php for the user edit form to assign permissions
      *  - user/user-table.html.twig for the table that displays permissions for all users
      *
+     * Search for DEPENDS_ON_AVAILABLE_ROLES
+     *
      * @var string[]
      */
     public const AVAILABLE_ROLES = [
         'ROLE_ADMIN',
+
+        // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',
-        'ROLE_PARTICIPANT_GROUP_VIEW'
+        'ROLE_PARTICIPANT_GROUP_VIEW',
+
+        // Kiosk
+        'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
+
+        // Specimens
+        'ROLE_SPECIMEN_DROP_OFF',
+        'ROLE_SPECIMEN_CHECK_IN',
     ];
 
     /**

@@ -19,16 +19,22 @@ class AppUserFixtures extends Fixture
         $this->passwordEncoder = $passwordEncoder;
     }
 
+    /**
+     * Search for DEPENDS_ON_AVAILABLE_ROLES
+     */
     public function load(ObjectManager $manager)
     {
         // System Administrator
         $this->buildUser($manager, 'ctadmin', ['ROLE_ADMIN']);
 
-        // Regulatory manager
-        $this->buildUser($manager, 'regulatory', ['ROLE_PARTICIPANT_GROUP_EDIT']);
+        // Study Coordinator
+        $this->buildUser($manager, 'coordinator', ['ROLE_PARTICIPANT_GROUP_EDIT']);
 
-        // Technician
-        $this->buildUser($manager, 'tech');
+        // Specimen intake technician
+        $this->buildUser($manager, 'intaketech', ['ROLE_SPECIMEN_CHECK_IN']);
+
+        // Kiosk
+        $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);
 
         $manager->flush();;
     }
