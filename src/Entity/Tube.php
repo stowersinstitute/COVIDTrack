@@ -201,6 +201,7 @@ class Tube
 
         // Create Specimen
         $this->specimen = Specimen::createFromTube($this, $gen);
+        $this->specimen->setStatus(Specimen::STATUS_DROPPED_OFF);
     }
 
     /**
