@@ -27,9 +27,10 @@ class SpecimenAccessionIdGenerator
     public function generate(): string
     {
         // TODO: CVDLS-30 Support creating unique accession ID when creating
+        // Generate new ID until finding an unused one
         do {
             $id = 'CID' . mt_rand(100000, 9999999);
-        } while (!$this->specimenRepo->findOneByAnyId($id));
+        } while ($this->specimenRepo->findOneByAnyId($id));
 
         return $id;
     }
