@@ -331,12 +331,12 @@ class Specimen
         $this->wellPlate = $wellPlate;
     }
 
-    public function getCollectedAt(): ?\DateTime
+    public function getCollectedAt(): ?\DateTimeInterface
     {
         return $this->collectedAt ? clone $this->collectedAt : null;
     }
 
-    public function setCollectedAt(?\DateTime $collectedAt): void
+    public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
     }
