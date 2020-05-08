@@ -70,7 +70,6 @@ class UserController extends AbstractController
 
         $form = $this->createFormBuilder()
             ->add('username', TextType::class, [
-                'data_class' => AppUser::class,
                 'constraints' => [
                     new Callback(function($fieldValue, ExecutionContextInterface $context) {
                         $conflictingUser = $this->findUser($fieldValue);
@@ -166,6 +165,52 @@ class UserController extends AbstractController
             'user' => $user,
             'auditLogs' => $auditLogs,
         ]);
+    }
+
+    /**
+     * @Route("/{username}/change-password", methods={"GET", "POST"}, name="user_change_password")
+     */
+    public function changePassword(string $username, Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    {
+        $this->denyAcessUnlessPermissions();
+        $user = $this->mustFindUser($username);
+        if ($user->isLdapUser()) throw new \InvalidArgumentException('Cannot change password for LDAP users');
+
+        $form = $this->createFormBuilder()
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'The password fields must match.',
+                'options' => ['attr' => ['class' => 'password-field']],
+                'required' => true,
+                'first_options'  => ['label' => 'New Password'],
+                'second_options' => ['label' => 'Verify Password'],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Change Password',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPassword($passwordEncoder->encodePassword(
+                $user,
+                $form->get('password')->getData()
+            ));
+
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('user_edit', [
+                'username' => $user->getUsername(),
+            ]);
+        }
+
+        return $this->render('user/change-password.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
+
     }
 
     /**
