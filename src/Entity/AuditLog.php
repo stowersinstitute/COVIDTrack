@@ -26,7 +26,7 @@ class AuditLog extends LogEntry
      *
      * @return array
      */
-    public function getFieldChanges(): array
+    public function getFieldChanges(): ?array
     {
         // By default use the raw property names and values
         $changes = $this->getData();
