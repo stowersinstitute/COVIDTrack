@@ -8,11 +8,17 @@ use App\Entity\AppUser;
 use App\Form\UserType;
 use App\Util\AppPermissions;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * @Route(path="/users")
@@ -51,14 +57,72 @@ class UserController extends AbstractController
     /**
      * @Route(path="/new", methods={"GET", "POST"}, name="user_new")
      */
-    public function new()
+    public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->denyAcessUnlessPermissions();
 
-        return $this->render(
-            'user/list.html.twig'
-        );
+        $form = $this->createFormBuilder()
+            ->add('username', TextType::class, [
+                'data_class' => AppUser::class,
+                'constraints' => [
+                    new Callback(function($fieldValue, ExecutionContextInterface $context) {
+                        $conflictingUser = $this->findUser($fieldValue);
+                        if (!$conflictingUser) return;
+
+                        // There is a conflicting user, build error message
+                        $context->buildViolation('Username already exists')
+                            ->atPath('username')
+                            ->addViolation();
+                    })
+                ]
+            ])
+            ->add('password', RepeatedType::class, [
+                'type' => PasswordType::class,
+                'invalid_message' => 'The password fields must match.',
+                'options' => ['attr' => ['class' => 'password-field']],
+                'required' => true,
+                'first_options'  => ['label' => 'Password'],
+                'second_options' => ['label' => 'Verify Password'],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label' => 'Create user',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $newUser = $this->createLocalUser($passwordEncoder, $data['username'], $data['password']);
+
+            return $this->redirectToRoute('user_edit', [
+                'username' => $newUser->getUsername(),
+            ]);
+        }
+
+        return $this->render('user/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
+
+    protected function createLocalUser(UserPasswordEncoderInterface $passwordEncoder, string $username, string $password) : AppUser
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $user = new AppUser($username);
+        $user->setPassword($passwordEncoder->encodePassword(
+            $user,
+            $password
+        ));
+
+        $em->persist($user);
+        $em->flush();
+
+        return $user;
+    }
+
 
     /**
      * @Route("/{username}/edit", methods={"GET", "POST"}, name="user_edit")
@@ -151,14 +215,18 @@ class UserController extends AbstractController
 
     protected function mustFindUser($username) : AppUser
     {
-        $user = $this->getDoctrine()
-            ->getManager()
-            ->getRepository(AppUser::class)
-            ->findOneByUsername($username);
+        $user = $this->findUser($username);
 
         if (!$user) throw new \InvalidArgumentException(sprintf('User "%s" not found', $username));
 
         return $user;
     }
 
+    protected function findUser($username) : ?AppUser
+    {
+        return $this->getDoctrine()
+            ->getManager()
+            ->getRepository(AppUser::class)
+            ->findOneByUsername($username);
+    }
 }
