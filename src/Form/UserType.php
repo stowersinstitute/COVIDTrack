@@ -8,6 +8,7 @@ use App\Entity\AppUser;
 use App\Util\AppPermissions;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -43,8 +44,26 @@ class UserType extends AbstractType
             throw new \InvalidArgumentException('Form data must be an AppUser');
         }
 
+        $ldapLockedFieldHelp = '';
+        if ($this->user->isLdapUser()) {
+            $ldapLockedFieldHelp = 'This field cannot be changed for LDAP users';
+        }
+
         $builder
-            ->add('username', TextType::class)
+            ->add('username', TextType::class, [
+                'disabled' => $this->user->isLdapUser(),
+                'help' => $ldapLockedFieldHelp,
+            ])
+            ->add('displayName', TextType::class, [
+                'required' => false,
+                'disabled' => $this->user->isLdapUser(),
+                'help' => $ldapLockedFieldHelp,
+            ])
+            ->add('email', EmailType::class, [
+                'required' => false,
+                'disabled' => $this->user->isLdapUser(),
+                'help' => $ldapLockedFieldHelp,
+            ])
         ;
 
         // Permissions
