@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\AppUser;
 use App\Form\UserType;
+use App\Util\AppConfiguration;
 use App\Util\AppPermissions;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -60,6 +61,11 @@ class UserController extends AbstractController
     public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->denyAcessUnlessPermissions();
+
+        // If LDAP is enabled redirect to the LDAP workflow
+        if (AppConfiguration::isLdapEnabled()) {
+            return $this->redirectToRoute('ldap_user_onboarding_start');
+        }
 
         $form = $this->createFormBuilder()
             ->add('username', TextType::class, [
