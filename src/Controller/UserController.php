@@ -173,7 +173,10 @@ class UserController extends AbstractController
      */
     protected function syncPermissions(FormInterface $form, AppUser $user)
     {
-        $newUserRoles = [];
+        $newUserRoles = [
+            // All users should at least have this role
+            'ROLE_USER',
+        ];
 
         $permissionsFieldKey = 'hasRole_';
         foreach ($form->all() as $field) {
