@@ -5,3 +5,8 @@ body {
 .label-preview {
     box-shadow: 0 0 10px rgba(0, 0, 0, .4);
 }
+
+.navbar-custom-menu .navbar-nav > li.text {
+    padding: 15px;
+    line-height: 20px;
+}
