@@ -3,13 +3,19 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\AppUserRepository")
+ *
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class AppUser implements UserInterface
 {
+    use TimestampableEntity;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -19,11 +25,15 @@ class AppUser implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=180, unique=true, nullable=false)
+     *
+     * @Gedmo\Versioned
      */
     private $username;
 
     /**
      * @ORM\Column(type="json")
+     *
+     * @Gedmo\Versioned
      */
     private $roles = [];
 
@@ -36,6 +46,8 @@ class AppUser implements UserInterface
     /**
      * @var bool If true, this user is managed by LDAP and should be authenticated against it
      * @ORM\Column(type="boolean", name="isLdapUser")
+     *
+     * @Gedmo\Versioned
      */
     private $isLdapUser = false;
 
@@ -64,6 +76,8 @@ class AppUser implements UserInterface
      * @var string User's preferred display name
      *
      * @ORM\Column(name="displayName", type="string", length=255, nullable=true)
+     *
+     * @Gedmo\Versioned
      */
     protected $displayName;
 
@@ -71,6 +85,8 @@ class AppUser implements UserInterface
      * @var string Email address for contacting this user
      *
      * @ORM\Column(name="email", type="string", length=255, nullable=true)
+     *
+     * @Gedmo\Versioned
      */
     protected $email;
 
@@ -78,6 +94,8 @@ class AppUser implements UserInterface
      * @var string User's title within the organization
      *
      * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     *
+     * @Gedmo\Versioned
      */
     protected $title;
 

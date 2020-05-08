@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Entity\AppUser;
+use App\Entity\AuditLog;
 use App\Form\UserType;
 use App\Util\AppConfiguration;
 use App\Util\AppPermissions;
@@ -139,6 +140,10 @@ class UserController extends AbstractController
 
         $user = $this->mustFindUser($username);
 
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($user);
+
         /** @var UserType|FormInterface $form */
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
@@ -159,6 +164,7 @@ class UserController extends AbstractController
         return $this->render('user/form.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
+            'auditLogs' => $auditLogs,
         ]);
     }
 
