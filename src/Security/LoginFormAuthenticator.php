@@ -3,6 +3,8 @@
 namespace App\Security;
 
 use App\Entity\AppUser;
+use App\Ldap\AppLdapUser;
+use App\Ldap\AppLdapUserSynchronizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,12 +49,16 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
      */
     private $ldapAuthUserDnFormat = '';
 
+    /** @var AppLdapUserSynchronizer */
+    private $ldapUserSynchronizer;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         UserPasswordEncoderInterface $passwordEncoder,
         Ldap $ldap,
+        AppLdapUserSynchronizer $ldapUserSynchronizer,
         $ldapAuthUserDnFormat = ''
     ) {
         $this->entityManager = $entityManager;
@@ -60,6 +66,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->ldap = $ldap;
+        $this->ldapUserSynchronizer = $ldapUserSynchronizer;
         $this->ldapAuthUserDnFormat = $ldapAuthUserDnFormat;
     }
 
@@ -123,11 +130,26 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // When an LdapUser logs in sync their record in the local database
+        // The object type here is determined by the user provider. It may be an AppUser or an LdapUser
         $authenticatedUser = $token->getUser();
+        // We always want to work with the local AppUser
+        $localUser = null;
+
         if ($authenticatedUser instanceof LdapUser) {
-            $this->syncLocalUserFromLdapUser($authenticatedUser);
+            $localUser = $this->ldapUserSynchronizer->synchronize(AppLdapUser::fromLdapUser($authenticatedUser));
         }
+        if ($authenticatedUser instanceof AppUser) {
+            $localUser = $authenticatedUser;
+        }
+
+        if (!$localUser) throw new \InvalidArgumentException('Unexpected user type ' . get_class($authenticatedUser));
+
+        // Update login tracking fields
+        $localUser->setHasLoggedIn(true);
+        $localUser->setLastLoggedInAt(new \DateTimeImmutable());
+
+        // Commit any changes from the sync and updating last login details
+        $this->entityManager->flush();
 
         // Redirect to where they were going or the home page
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
@@ -159,25 +181,5 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         }
 
         return true;
-    }
-
-    protected function syncLocalUserFromLdapUser(LdapUser $ldapUser)
-    {
-        $localUser = $this->entityManager
-            ->getRepository(AppUser::class)
-            ->findOneBy(['username' => $ldapUser->getUsername()]);
-
-        if (!$localUser) {
-            $localUser = new AppUser($ldapUser->getUsername());
-
-            $localUser->setIsLdapUser(true);
-            $localUser->setRoles($ldapUser->getRoles());
-
-            $this->entityManager->persist($localUser);
-        }
-
-        // Add additional field syncs here
-
-        $this->entityManager->flush();
     }
 }
