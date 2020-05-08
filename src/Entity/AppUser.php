@@ -39,9 +39,55 @@ class AppUser implements UserInterface
      */
     private $isLdapUser = false;
 
+    /**
+     * @var boolean Whether the user has ever logged in
+     *
+     * @ORM\Column(name="hasLoggedIn", type="boolean", nullable=false)
+     */
+    protected $hasLoggedIn;
+
+    /**
+     * @var \DateTimeImmutable The first time the user logged in
+     *
+     * @ORM\Column(name="firstLoggedInAt", type="datetime_immutable", nullable=true)
+     */
+    protected $firstLoggedInAt;
+
+    /**
+     * @var \DateTimeImmutable The most recent time the user logged in
+     *
+     * @ORM\Column(name="lastLoggedInAt", type="datetime_immutable", nullable=true)
+     */
+    protected $lastLoggedInAt;
+
+    /**
+     * @var string User's preferred display name
+     *
+     * @ORM\Column(name="displayName", type="string", length=255, nullable=true)
+     */
+    protected $displayName;
+
+    /**
+     * @var string Email address for contacting this user
+     *
+     * @ORM\Column(name="email", type="string", length=255, nullable=true)
+     */
+    protected $email;
+
+    /**
+     * @var string User's title within the organization
+     *
+     * @ORM\Column(name="title", type="string", length=255, nullable=true)
+     */
+    protected $title;
+
     public function __construct(string $username)
     {
+        $this->hasLoggedIn = false;
         $this->username = $username;
+
+        // All users should at least have ROLE_USER
+        $this->roles = ['ROLE_USER'];
     }
 
     public function getId(): ?int
@@ -133,5 +179,70 @@ class AppUser implements UserInterface
     public function setIsLdapUser(bool $isLdapUser): void
     {
         $this->isLdapUser = $isLdapUser;
+    }
+
+    public function isHasLoggedIn(): bool
+    {
+        return $this->hasLoggedIn;
+    }
+
+    public function setHasLoggedIn(bool $hasLoggedIn): void
+    {
+        // Update firstLoggedInAt if this is the first time they've logged in
+        if ($hasLoggedIn && $this->hasLoggedIn === false && $this->firstLoggedInAt === null) {
+            $this->firstLoggedInAt = new \DateTimeImmutable();
+        }
+
+        $this->hasLoggedIn = $hasLoggedIn;
+    }
+
+    public function getFirstLoggedInAt(): ?\DateTimeImmutable
+    {
+        return $this->firstLoggedInAt;
+    }
+
+    public function setFirstLoggedInAt(?\DateTimeImmutable $firstLoggedInAt): void
+    {
+        $this->firstLoggedInAt = $firstLoggedInAt;
+    }
+
+    public function getLastLoggedInAt(): ?\DateTimeImmutable
+    {
+        return $this->lastLoggedInAt;
+    }
+
+    public function setLastLoggedInAt(?\DateTimeImmutable $lastLoggedInAt): void
+    {
+        $this->lastLoggedInAt = $lastLoggedInAt;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): void
+    {
+        $this->displayName = $displayName;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(?string $title): void
+    {
+        $this->title = $title;
     }
 }
