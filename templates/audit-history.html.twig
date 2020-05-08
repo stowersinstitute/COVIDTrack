@@ -16,7 +16,15 @@ Required params:
                 <br>
                 <dl class="dl-horizontal">
                     {% for field, value in log.fieldChanges %}
-                        <dt>{{ field }}</dt><dd>{{ value is null ? '(empty)' : value }}</dd>
+                        {% set strValue = '' %}
+                        {% if value is null %}
+                            {% set strValue = '(empty)' %}
+                        {% elseif value is iterable %}
+                            {% set strValue = value|join(', ') %}
+                        {% else %}
+                            {% set strValue = value %}
+                        {% endif %}
+                        <dt>{{ field }}</dt><dd>{{ strValue }}</dd>
                     {% endfor %}
                 </dl>
             </div>
