@@ -102,7 +102,7 @@ class ReportController extends AbstractController
             ->getRepository(ParticipantGroup::class)
             ->findAll();
 
-        return $this->render('reports/group-results.html.twig', [
+        return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,
             'collectionDates' => $collectionDates,
             'reportData' => $reportData,
