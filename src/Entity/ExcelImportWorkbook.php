@@ -58,34 +58,6 @@ class ExcelImportWorkbook
      */
     protected $worksheets;
 
-    /**
-     * Populates an ExcelImportWorkbook from data contained within an uploaded file
-     */
-    public static function createFromUpload(UploadedFile $file) : ExcelImportWorkbook
-    {
-        $reader = new Xlsx();
-        $spreadsheet = $reader->load($file->getRealPath());
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
-
-        return $importWorkbook;
-    }
-
     public function __construct()
     {
         $this->uploadedAt = new \DateTimeImmutable();
