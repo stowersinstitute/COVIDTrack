@@ -42,6 +42,14 @@ class ExcelImportWorkbook
     protected $uploadedAt;
 
     /**
+     * @var AppUser The user who uploaded this file
+     *
+     * @ORM\ManyToOne(targetEntity="AppUser")
+     * @ORM\JoinColumn(name="uploadedById", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    protected $uploadedBy;
+
+    /**
      * Worksheets associated with this workbook
      * @var ExcelImportWorksheet[]
      *
@@ -129,5 +137,15 @@ class ExcelImportWorkbook
         }
 
         return false;
+    }
+
+    public function getUploadedBy(): ?AppUser
+    {
+        return $this->uploadedBy;
+    }
+
+    public function setUploadedBy(?AppUser $uploadedBy): void
+    {
+        $this->uploadedBy = $uploadedBy;
     }
 }
