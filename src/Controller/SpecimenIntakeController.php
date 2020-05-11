@@ -45,7 +45,7 @@ class SpecimenIntakeController extends AbstractController
         }
 
         return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Specimens Check-in',
+            'itemLabel' => 'Specimen Check-in Data',
             'importForm' => $form->createView(),
         ]);
     }
@@ -65,11 +65,17 @@ class SpecimenIntakeController extends AbstractController
             $importingWorkbook->getFirstWorksheet(),
             $this->getDoctrine()->getManager()
         );
+        $importer = new SpecimenIntakeImporter($importingWorkbook->getFirstWorksheet());
+        $importer->setEntityManager($this->getDoctrine()->getManager());
 
-        return $this->render('specimen-intake/intake-preview.html.twig', [
+        $importer->process();
+
+        return $this->render('excel-import/base-excel-import-preview.html.twig', [
             'importId' => $importId,
-            'importingWorkbook' => $importingWorkbook,
             'importer' => $importer,
+            'importPreviewTemplate' => 'specimen-intake/import-table.html.twig',
+            'importCommitRoute' => 'specimen_intake_import_commit',
+            'importCommitText' => 'Save Check-in',
         ]);
     }
 
@@ -90,15 +96,19 @@ class SpecimenIntakeController extends AbstractController
             $importingWorkbook->getFirstWorksheet(),
             $em
         );
+        $importer = new SpecimenIntakeImporter($importingWorkbook->getFirstWorksheet());
+        $importer->setEntityManager($em);
 
-        $affectedTubes = $importer->process(true);
+        $importer->process(true);
+
+        $affectedTubes = $importer->getOutput();
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);
 
-        return $this->render('specimen-intake/intake-confirm.html.twig', [
-            'importingWorkbook' => $importingWorkbook,
-            'affectedTubes' => $affectedTubes,
+        return $this->render('excel-import/base-excel-import-result.html.twig', [
+            'importer' => $importer,
+            'importResultTemplate' => 'specimen-intake/import-table.html.twig',
         ]);
     }
 }

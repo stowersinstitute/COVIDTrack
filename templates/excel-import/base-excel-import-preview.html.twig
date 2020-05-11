@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Import Preview{% endblock %}
+
+{% block body %}
+
+    <dl>
+        <dt>Importing From</dt>
+        <dd>{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</dd>
+    </dl>
+
+    {% if importer.hasErrors() %}
+        <div class="callout callout-danger">
+            <p>Cannot import: {{ importer.messages|length }} error(s) found</p>
+            <p>
+                Fix the errors in the Excel file and then <a href="javascript:history.back()">click here to upload the file again</a>.
+            </p>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Import Errors</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th class="text-right" style="width: 16px;">Row</th>
+                        <th style="width: 50px;">Column</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for message in importer.messages %}
+                        <tr>
+                            <td class="text-right">{{ message.rowNumber }}</td>
+                            <td>{{ message.columnLetter }}</td>
+                            <td>{{ message.details }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
+            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
+        </form>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">{{ importer.numImportedItems }} items to import</h3>
+                    </div>
+                    <div class="box-body">
+
+                        {% include importPreviewTemplate %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-top">
+            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
+        </form>
+    {% endif %}
+
+{% endblock %}

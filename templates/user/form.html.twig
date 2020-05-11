@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+    {% if user.id %} Edit User {{ user.username }} {% else %} New User {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="alert alert-warning" role="alert">
+        <b>Warning:</b> Changing a user's permissions will log them out!
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">General</h3>
+                </div>
+                <div class="box-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

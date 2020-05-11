@@ -1,0 +1,42 @@
+{# Search for DEPENDS_ON_AVAILABLE_ROLES for other locations that depend on these permissions #}
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>&nbsp;</th>
+        <th class="text-center">System Admin</th>
+        <th class="text-center">Kiosk Access</th>
+        <th colspan="2" class="text-center">Participant Groups</th>
+        <th colspan="2" class="text-center">Specimens</th>
+    </tr>
+    <tr>
+        <th>Username</th>
+        <th>&nbsp;{# System Admin #}</th>
+        <th>&nbsp;{# Kiosk UI #}</th>
+        {# Participant Groups #}
+        <th class="text-center">Edit</th>
+        <th class="text-center">View</th>
+        {# Specimens #}
+        <th class="text-center">Drop Off</th>
+        <th class="text-center">Check In</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td>
+                <a href="{{ path('user_edit', {username: user.username}) }}">{{ user.username}}</a>
+            </td>
+            {# System Admin #}
+            <td class="text-center">{% if 'ROLE_ADMIN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Kiosk UI #}
+            <td class="text-center">{% if 'ROLE_KIOSK_UI' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Participant Groups #}
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Specimens #}
+            <td class="text-center">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_SPECIMEN_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
