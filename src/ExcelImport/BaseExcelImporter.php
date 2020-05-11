@@ -130,4 +130,12 @@ abstract class BaseExcelImporter
     {
         $this->em = $em;
     }
+
+    /**
+     * @return int The 1-based starting row number (matches what you see in Excel)
+     */
+    public function getStartingRow(): int
+    {
+        return $this->startingRow;
+    }
 }
