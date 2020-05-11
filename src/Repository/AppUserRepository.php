@@ -12,7 +12,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @method AppUser|null find($id, $lockMode = null, $lockVersion = null)
  * @method AppUser|null findOneBy(array $criteria, array $orderBy = null)
- * @method AppUser[]    findAll()
  * @method AppUser[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class AppUserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
@@ -20,6 +19,15 @@ class AppUserRepository extends ServiceEntityRepository implements PasswordUpgra
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, AppUser::class);
+    }
+
+    /**
+     * @return AppUser[]
+     */
+    public function findAll()
+    {
+        return $this->getDefaultQueryBuilder()
+            ->getQuery()->getResult();
     }
 
     /**
@@ -34,5 +42,11 @@ class AppUserRepository extends ServiceEntityRepository implements PasswordUpgra
         $user->setPassword($newEncodedPassword);
         $this->_em->persist($user);
         $this->_em->flush();
+    }
+
+    protected function getDefaultQueryBuilder()
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.username', 'ASC');
     }
 }
