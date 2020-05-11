@@ -11,6 +11,7 @@ use App\Entity\ExcelImportWorksheet;
 use App\Util\EntityUtils;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Security;
 
 class ExcelImporter
@@ -59,7 +60,7 @@ class ExcelImporter
     public function userMustHavePermissions(ExcelImportWorkbook $workbook, AppUser $actor = null) : bool
     {
         if (!$this->security && !$actor) {
-            throw new \InvalidArgumentException('Cannot check permissions: $actor must be specified or a user must be logged in');
+            throw new AccessDeniedException('Cannot check permissions: $actor must be specified or a user must be logged in');
         }
 
         // Default to checking against the logged in user
