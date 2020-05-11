@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
+use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
@@ -111,7 +112,7 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport(Request $request)
+    public function excelImport(Request $request, ExcelImporter $excelImporter)
     {
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
@@ -122,7 +123,7 @@ class ParticipantGroupController extends AbstractController
             /** @var UploadedFile $excelFile */
             $excelFile = $form->get('excelFile')->getData();
 
-            $workbook = ExcelImportWorkbook::createFromUpload($excelFile);
+            $workbook = $excelImporter->createWorkbookFromUpload($excelFile);
             $em->persist($workbook);
             $em->flush();
 
@@ -140,11 +141,13 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
      */
-    public function excelImportPreview(int $importId)
+    public function excelImportPreview(int $importId, ExcelImporter $excelImporter)
     {
         $importingWorkbook = $this->getDoctrine()
             ->getManager()
             ->find(ExcelImportWorkbook::class, $importId);
+
+        $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
         $importer->process();
@@ -161,13 +164,15 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/commit/{importId<\d+>}", methods={"POST"}, name="group_excel_import_commit")
      */
-    public function excelImportCommit(int $importId)
+    public function excelImportCommit(int $importId, ExcelImporter $excelImporter)
     {
         $em = $this->getDoctrine()
             ->getManager();
 
         $importingWorkbook = $em
             ->find(ExcelImportWorkbook::class, $importId);
+
+        $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
         $importer->process();
