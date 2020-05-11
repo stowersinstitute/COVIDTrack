@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * Physical container that holds a Specimen.
@@ -14,7 +15,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
  */
 class Tube
 {
-    use SoftDeleteableEntity;
+    use TimestampableEntity, SoftDeleteableEntity;
 
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
