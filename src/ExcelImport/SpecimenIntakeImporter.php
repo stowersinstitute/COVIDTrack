@@ -82,7 +82,7 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         $this->output = $seenTubes;
     }
 
-    protected function validateTargetTube(Tube $tube, $rowNumber)
+    protected function validateTargetTube(Tube $tube, $rowNumber) : bool
     {
         // todo: not sure any validation applies? If a tube shows up in the results but was never checked in is that really an error
         //          or should we just do our best to check it in and then audit log it?
@@ -103,7 +103,7 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         return true;
     }
 
-    protected function validateAcceptOrReject($raw, $rowNumber)
+    protected function validateAcceptOrReject($raw, $rowNumber) : bool
     {
         // Case-insensitive check to see if a valid accept/result is specified
         $validStatuses = ['accept', 'reject'];
@@ -120,7 +120,7 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         return true;
     }
 
-    protected function validateTechnicianUsername($raw, $rowNumber)
+    protected function validateTechnicianUsername($raw, $rowNumber) : bool
     {
         if (!$raw) {
             $this->messages[] = ImportMessage::newError(
