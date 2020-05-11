@@ -32,9 +32,9 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         $seenTubes = [];
 
         for ($rowNumber=$this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
-            $tubeId = trim($this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']));
-            $rawAcceptedStatus = trim($this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']));
-            $rawTechnicianUsername = trim($this->worksheet->getCellValue($rowNumber, $this->columnMap['technicianUsername']));
+            $tubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
+            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
+            $rawTechnicianUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['technicianUsername']);
 
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
