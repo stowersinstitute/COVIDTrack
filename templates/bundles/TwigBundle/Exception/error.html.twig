@@ -1,0 +1,46 @@
+{% extends 'base-empty.html.twig' %}
+
+{% block title %}COVIDTrack Error{% endblock %}
+
+{% block body %}
+    <div class="row margin">
+        <div class="col-md-12">
+            <div class="box box-danger">
+                <div class="box-header with-border">
+                    <i class="fa fa-warning"></i> <h3 class="box-title">An Error Occurred</h3>
+                </div>
+
+                <div class="box-body">
+                    <div class="callout callout-danger">
+                        <p>Please notify whoever@example.com about this error and include the following information:</p>
+
+                        <dl>
+                            <dt>Location</dt>
+                            <dd><span id="locationStr"></span></dd>
+
+                            <dt>Message</dt>
+                            <dd>{{ status_code }} {{ status_text }}: {{ exception.message }}</dd>
+
+                            <dt>Time</dt>
+                            <dd>{{ now|date('Y-m-d g:ia T') }}</dd>
+                        </dl>
+                    </div>
+
+                    <dl>
+                        <dt>Troubleshooting</dt>
+                        <dd>
+                            <ul>
+                                <li><a href="#" onclick="window.history.back();">Go back to where you were</a></li>
+                                <li><a href="{{ path("app_default_index") }}">Go to the home page</a></li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('locationStr').innerText = location.pathname;
+    </script>
+{% endblock %}
