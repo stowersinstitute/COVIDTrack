@@ -1,6 +1,7 @@
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
+        <th class="text-right" style="width: 75px;">Row #</th>
         <th>Accession ID</th>
         <th class="text-center">Accepted?</th>
         <th>Technician</th>
@@ -17,6 +18,7 @@
             {% set statusContent = '<i class="fa fa-times text-red"></i>' %}
         {% endif %}
         <tr class="{{ trClass }}">
+            <td class="text-right">{{ loop.index0 + importer.startingRow }}</td>
             <td>{{ tube.accessionId }}</td>
             <td class="text-center">{{ statusContent|raw }}</td>
             <td>{{ tube.checkedInByUsername }}</td>
