@@ -44,7 +44,7 @@
             </div>
         </div>
     {% else %}
-        <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}" class="margin-bottom">
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
         </form>
 
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <form method="post" action="{{ path('group_excel_import_commit', { importId: importId }) }}" class="margin-top">
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-top">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
         </form>
     {% endif %}
