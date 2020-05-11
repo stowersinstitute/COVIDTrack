@@ -55,7 +55,7 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
         $fontSize = 6;
         $zpl->setFont($font, $fontSize);
 
-        $date = new \DateTime();
+        $date = $this->tube->getCreatedAt();
 
         $zpl->drawCode128(1, 2, 4, $this->tube->getAccessionId(), 1, false, 'R');
         $zpl->drawText(6, 5, $this->tube->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
