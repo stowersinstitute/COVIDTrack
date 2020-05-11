@@ -200,8 +200,9 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        return $this->render('participantGroup/excel-import-confirm.html.twig', [
+        return $this->render('excel-import/base-excel-import-result.html.twig', [
             'importer' => $importer,
+            'importResultTemplate' => 'participantGroup/excel-import-table.html.twig',
         ]);
     }
 
