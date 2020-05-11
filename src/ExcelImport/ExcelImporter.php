@@ -57,7 +57,7 @@ class ExcelImporter
      *
      * If $actor is null the logged in user is used
      */
-    public function userMustHavePermissions(ExcelImportWorkbook $workbook, AppUser $actor = null) : bool
+    public function userMustHavePermissions(ExcelImportWorkbook $workbook, AppUser $actor = null)
     {
         if (!$this->security && !$actor) {
             throw new AccessDeniedException('Cannot check permissions: $actor must be specified or a user must be logged in');
@@ -66,6 +66,8 @@ class ExcelImporter
         // Default to checking against the logged in user
         if (!$actor) $actor = $this->security->getUser();
 
-        return EntityUtils::isSameEntity($actor, $workbook->getUploadedBy());
+        if (!EntityUtils::isSameEntity($actor, $workbook->getUploadedBy())) {
+            throw new AccessDeniedException('You do not have permission to access this import');
+        }
     }
 }
