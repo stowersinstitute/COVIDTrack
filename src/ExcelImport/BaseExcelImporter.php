@@ -96,6 +96,11 @@ abstract class BaseExcelImporter
      */
     public function getOutput()
     {
+        // Run import logic if it hasn't happened already
+        if ($this->output === null) {
+            $this->process();
+        }
+
         return $this->output;
     }
 
