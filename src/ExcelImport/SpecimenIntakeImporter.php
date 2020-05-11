@@ -27,6 +27,8 @@ class SpecimenIntakeImporter extends BaseExcelImporter
      */
     public function process($commit = false)
     {
+        if ($this->output !== null) return $this->output;
+
         $seenTubes = [];
 
         for ($rowNumber=$this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
