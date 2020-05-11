@@ -147,11 +147,14 @@ class ParticipantGroupController extends AbstractController
             ->find(ExcelImportWorkbook::class, $importId);
 
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $importer->process();
 
-        return $this->render('participantGroup/excel-import-preview.html.twig', [
+        return $this->render('excel-import/base-excel-import-preview.html.twig', [
             'importId' => $importId,
-            'importingWorkbook' => $importingWorkbook,
             'importer' => $importer,
+            'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
+            'importCommitRoute' => 'group_excel_import_commit',
+            'importCommitText' => 'Save Participant Groups',
         ]);
     }
 
@@ -167,8 +170,9 @@ class ParticipantGroupController extends AbstractController
             ->find(ExcelImportWorkbook::class, $importId);
 
         $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $importer->process();
 
-        $groups = $importer->getParticipantGroups();
+        $groups = $importer->getOutput();
         $affectedGroups = [];
         foreach ($groups as $uploadedGroup) {
             /** @var ParticipantGroup $existingGroup */
@@ -197,7 +201,7 @@ class ParticipantGroupController extends AbstractController
         $em->flush();
 
         return $this->render('participantGroup/excel-import-confirm.html.twig', [
-            'groups' => $affectedGroups,
+            'importer' => $importer,
         ]);
     }
 

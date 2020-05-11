@@ -1,6 +1,7 @@
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
+        <th>&nbsp;</th>
         <th>Accession ID</th>
         <th>Group Name</th>
         <th># Participants</th>
@@ -8,8 +9,9 @@
     </thead>
 
     <tbody>
-    {% for group in groups  %}
+    {% for group in importer.output  %}
         <tr>
+            <td>{{ loop.index }}</td>
             <td>{{ group.accessionId }}</td>
             <td>{{ group.title }}</td>
             <td>{{ group.participantCount }}</td>
