@@ -47,10 +47,10 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
         $zpl->setHome(2, 2);
 
         // These dots are only for troubleshooting. These can be removed once labels are working consistently.
-        $zpl->drawDot(0,2);
-        $zpl->drawDot(2,0);
-        $zpl->drawDot(41,13);
-        $zpl->drawDot(38,15);
+//        $zpl->drawDot(0,2);
+//        $zpl->drawDot(2,0);
+//        $zpl->drawDot(41,13);
+//        $zpl->drawDot(38,15);
 
         $fontSize = 6;
         $zpl->setFont($font, $fontSize);
