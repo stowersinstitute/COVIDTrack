@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Util\AuditLogUtils;
+use App\Util\StringUtils;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -106,6 +108,40 @@ class AppUser implements UserInterface
 
         // All users should at least have ROLE_USER
         $this->roles = ['ROLE_USER'];
+    }
+
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * The input to this method will be a map of properties and their raw values
+     *
+     *     [
+     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => AuditLogUtils::getHumanReadableString($value)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable strings
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $return = [];
+
+        foreach ($changes as $fieldId => $value) {
+            $hrProperty = StringUtils::camelCaseToTitleCase($fieldId);
+            $hrValue = AuditLogUtils::getHumanReadableString($value);
+
+            $return[$hrProperty] = $hrValue;
+        }
+
+        return $return;
     }
 
     public function getId(): ?int
