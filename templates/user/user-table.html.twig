@@ -3,6 +3,7 @@
     <thead>
     <tr>
         <th>&nbsp;</th>
+        <th>&nbsp;</th>
         <th class="text-center">System Admin</th>
         <th class="text-center">Kiosk Access</th>
         <th colspan="2" class="text-center">Participant Groups</th>
@@ -10,6 +11,7 @@
     </tr>
     <tr>
         <th>Username</th>
+        <th>Display Name</th>
         <th>&nbsp;{# System Admin #}</th>
         <th>&nbsp;{# Kiosk UI #}</th>
         {# Participant Groups #}
@@ -26,6 +28,7 @@
             <td>
                 <a href="{{ path('user_edit', {username: user.username}) }}">{{ user.username}}</a>
             </td>
+            <td>{{ user.displayName }}</td>
             {# System Admin #}
             <td class="text-center">{% if 'ROLE_ADMIN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Kiosk UI #}

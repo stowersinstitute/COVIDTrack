@@ -5,7 +5,9 @@ namespace App\Controller;
 
 
 use App\Entity\AppUser;
+use App\Entity\AuditLog;
 use App\Form\UserType;
+use App\Util\AppConfiguration;
 use App\Util\AppPermissions;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -60,6 +62,11 @@ class UserController extends AbstractController
     public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->denyAcessUnlessPermissions();
+
+        // If LDAP is enabled redirect to the LDAP workflow
+        if (AppConfiguration::isLdapEnabled()) {
+            return $this->redirectToRoute('ldap_user_onboarding_start');
+        }
 
         $form = $this->createFormBuilder()
             ->add('username', TextType::class, [
@@ -133,6 +140,10 @@ class UserController extends AbstractController
 
         $user = $this->mustFindUser($username);
 
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($user);
+
         /** @var UserType|FormInterface $form */
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
@@ -153,6 +164,7 @@ class UserController extends AbstractController
         return $this->render('user/form.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
+            'auditLogs' => $auditLogs,
         ]);
     }
 
@@ -161,7 +173,10 @@ class UserController extends AbstractController
      */
     protected function syncPermissions(FormInterface $form, AppUser $user)
     {
-        $newUserRoles = [];
+        $newUserRoles = [
+            // All users should at least have this role
+            'ROLE_USER',
+        ];
 
         $permissionsFieldKey = 'hasRole_';
         foreach ($form->all() as $field) {
