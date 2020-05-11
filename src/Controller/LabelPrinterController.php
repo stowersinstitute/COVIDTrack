@@ -5,21 +5,17 @@ namespace App\Controller;
 
 
 use App\Entity\LabelPrinter;
-use App\Entity\Specimen;
+use App\Entity\Tube;
 use App\Form\LabelPrinterType;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplImage;
-use App\Label\ZplPrinterResponse;
 use App\Label\ZplPrinting;
-use App\Label\ZplTextPrinter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -142,8 +138,8 @@ class LabelPrinterController extends AbstractController
     public function testPrint(Request $request, ZplPrinting $zpl)
     {
         $form = $this->createFormBuilder()
-            ->add('specimen', EntityType::class, [
-                'class' => Specimen::class,
+            ->add('tube', EntityType::class, [
+                'class' => Tube::class,
                 'choice_name' => 'accessionId',
                 'required' => true,
                 'empty_data' => "",
@@ -167,11 +163,10 @@ class LabelPrinterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
-            $specimen = $this->getDoctrine()->getRepository(Specimen::class)->find($data['specimen']);
+            $tube = $this->getDoctrine()->getRepository(Tube::class)->find($data['tube']);
 
             $labelBuilder = new SpecimenIntakeLabelBuilder($printer);
-            $labelBuilder->setParticipantGroup($specimen->getParticipantGroup());
-            $labelBuilder->setSpecimen($specimen);
+            $labelBuilder->setTube($tube);
             $zpl->printBuilder($labelBuilder);
 
             $result = $zpl->getLastPrinterResponse();

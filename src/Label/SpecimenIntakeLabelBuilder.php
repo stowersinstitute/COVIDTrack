@@ -4,10 +4,9 @@
 namespace App\Label;
 
 
-use App\Entity\CollectionEvent;
 use App\Entity\LabelPrinter;
-use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\Tube;
 use Zpl\ZplBuilder;
 
 class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
@@ -15,21 +14,11 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
     /**
      * @var Specimen
      */
-    protected $specimen;
+    protected $tube;
 
-    /**
-     * @var ParticipantGroup
-     */
-    protected $participantGroup;
-
-    public function setSpecimen(Specimen $specimen)
+    public function setTube(Tube $tube)
     {
-        $this->specimen = $specimen;
-    }
-
-    public function setParticipantGroup(ParticipantGroup $participantGroup)
-    {
-        $this->participantGroup = $participantGroup;
+        $this->tube = $tube;
     }
 
     public function getBuilderName(): string
@@ -55,7 +44,7 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 
         $zpl = $this->getZplBuilder();
 
-        $zpl->setHome(4, 3);
+        $zpl->setHome(2, 2);
 
         // These dots are only for troubleshooting. These can be removed once labels are working consistently.
         $zpl->drawDot(0,2);
@@ -63,22 +52,16 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
         $zpl->drawDot(41,13);
         $zpl->drawDot(38,15);
 
-        $zpl->setFont($font, $fontSize);
-
-        $writeAtY = $textTopMargin;
-
-        $zpl->drawText($textLeftMargin, $writeAtY, $this->specimen->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 33, $fontSize);
-
-//        $zpl->drawCode128($textLeftMargin, 4, 4, $this->identifier, 1);
-        $zpl->drawQrCode(28, 0, $this->specimen->getAccessionId(), 15);
-
         $fontSize = 6;
         $zpl->setFont($font, $fontSize);
 
-        // Write circle label text
-//        $zpl->drawText(45, 7.5, $this->identifier, 'N', ZplBuilder::JUSTIFY_LEFT, 8, 12);
-        $zpl->drawText(45, 7.5, $this->specimen->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 8, 12);
-//        $zpl->drawText(45, 9.5, str_replace('COV','', $this->specimen->getAccessionId()), 'N', ZplBuilder::JUSTIFY_LEFT, 8, 12);
+        $date = new \DateTime();
+
+        $zpl->drawCode128(1, 2, 4, $this->tube->getAccessionId(), 1, false, 'R');
+        $zpl->drawText(6, 5, $this->tube->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawQrCode(6, 4, $this->tube->getAccessionId(), 11);
+        $zpl->drawText(6, 16, $date->format('Y.m.d'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawText(6, 18, $date->format('H:i:s'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
         return $zpl->toZpl();
     }
@@ -86,10 +69,8 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
     public static function testLabelZpl(LabelPrinter $printer): string
     {
         $builder = new self($printer);
-        $group = new ParticipantGroup('CPG-1', 4);
-        $specimen = new Specimen('CVD-1234567', $group);
-        $builder->setParticipantGroup($group);
-        $builder->setSpecimen($specimen);
+        $tube = new Tube('CVD-1234567');
+        $builder->setTube($tube);
 
         return $builder->build();
     }
