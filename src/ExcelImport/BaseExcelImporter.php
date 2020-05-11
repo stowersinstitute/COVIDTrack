@@ -57,6 +57,23 @@ abstract class BaseExcelImporter
         $this->worksheet = $worksheet;
     }
 
+    /**
+     * Convenience method to help skip empty rows in Excel since these are usually
+     * leftovers from copying and pasting into an existing template and should not
+     * be considered validation errors
+     */
+    public function rowDataBlank($rowNumber) : bool
+    {
+        foreach ($this->columnMap as $columnId => $columnLetter) {
+            $value = $this->worksheet->getCellValue($rowNumber, $columnLetter);
+
+            // Any non-falsy value means the row has content
+            if ($value) return false;
+        }
+
+        return true;
+    }
+
     public function hasErrors() : bool
     {
         foreach ($this->messages as $message) {
