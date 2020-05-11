@@ -67,7 +67,7 @@ abstract class BaseExcelImporter
         foreach ($this->columnMap as $columnId => $columnLetter) {
             $value = $this->worksheet->getCellValue($rowNumber, $columnLetter);
 
-            // Any non-falsy value means the row has content
+            // Any truthy value in a cell means the row has content
             if ($value) return false;
         }
 
