@@ -9,7 +9,7 @@
     </thead>
 
     <tbody>
-    {% for tube in tubes  %}
+    {% for tube in importer.output  %}
         {% set trClass = '' %}
         {% set statusContent = '<i class="fa fa-check text-green"></i>' %}
         {% if tube.status == 'REJECTED' %}
@@ -19,7 +19,7 @@
         <tr class="{{ trClass }}">
             <td>{{ tube.accessionId }}</td>
             <td class="text-center">{{ statusContent|raw }}</td>
-            <td>{{ tube.checkedInBy }}</td>
+            <td>{{ tube.checkedInByUsername }}</td>
             <td>{{ tube.checkedInAt|date('m/d/Y g:i:sa') }}</td>
         </tr>
     {% endfor %}
