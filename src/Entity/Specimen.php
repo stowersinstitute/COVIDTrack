@@ -122,7 +122,7 @@ class Specimen
         $this->status = self::STATUS_CREATED;
         $this->results = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self

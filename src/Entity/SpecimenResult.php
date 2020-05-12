@@ -53,7 +53,7 @@ abstract class SpecimenResult
     {
         $specimen->addResult($this);
         $this->specimen = $specimen;
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int

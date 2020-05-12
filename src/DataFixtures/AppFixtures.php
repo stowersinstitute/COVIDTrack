@@ -83,7 +83,7 @@ class AppFixtures extends Fixture
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
                     $s = new Specimen($this->getNextSpecimenId(), $group);
                     $s->setType($this->getSpecimenType($i));
-                    $s->setCollectedAt(new \DateTime(sprintf('-%d days 5:00pm', $day)));
+                    $s->setCollectedAt(new \DateTimeImmutable(sprintf('-%d days 5:00pm', $day)));
                     $s->setStatus(Specimen::STATUS_RESULTS);
 
                     $em->persist($s);
@@ -94,7 +94,7 @@ class AppFixtures extends Fixture
                         $r1 = new SpecimenResultQPCR($s);
 
                         // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
-                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
+                        $r1->setCreatedAt(new \DateTimeImmutable(sprintf('-%d days', $i)));
 
                         // Set a random conclusion
                         $conclusions = SpecimenResultQPCR::getFormConclusions();

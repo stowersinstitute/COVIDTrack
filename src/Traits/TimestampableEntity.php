@@ -18,35 +18,35 @@ use Gedmo\Mapping\Annotation as Gedmo;
 trait TimestampableEntity
 {
     /**
-     * @var \DateTime
+     * @var \DateTimeImmutable
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime_immutable")
      */
     protected $createdAt;
 
     /**
-     * @var \DateTime
+     * @var \DateTimeImmutable
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime_immutable")
      */
     protected $updatedAt;
 
-    public function setCreatedAt(\DateTime $createdAt)
+    public function setCreatedAt(\DateTimeImmutable $createdAt)
     {
         $this->createdAt = $createdAt;
     }
 
-    public function getCreatedAt()
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setUpdatedAt(\DateTime $updatedAt)
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt)
     {
         $this->updatedAt = $updatedAt;
     }
 
-    public function getUpdatedAt()
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }

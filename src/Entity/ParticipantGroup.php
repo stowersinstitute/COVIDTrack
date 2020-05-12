@@ -72,7 +72,7 @@ class ParticipantGroup
         $this->accessionId = $accessionId;
         $this->setParticipantCount($participantCount);
         $this->specimens = new ArrayCollection();
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     /**
