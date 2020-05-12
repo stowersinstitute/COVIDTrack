@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
