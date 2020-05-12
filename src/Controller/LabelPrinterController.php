@@ -45,7 +45,7 @@ class LabelPrinterController extends AbstractController
                 'data' => 1,
                 'attr' => [
                     'min' => 1,
-                    'max' => 100, // todo: max # per roll? reasonable batch size?
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
                 ],
             ])
             ->add('send', SubmitType::class, [
@@ -63,7 +63,21 @@ class LabelPrinterController extends AbstractController
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
 
-            // todo: rest of the owl
+            $last = $this->getDoctrine()->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
+            $builder = new SpecimenIntakeLabelBuilder();
+            $builder->setPrinter($printer);
+
+            $numToPrint = $data['numToPrint'];
+            for ($i = 1; $i <= $numToPrint; $i++) {
+                $tube = new Tube('T' . str_pad($last->getId() + $i, 8, 0,STR_PAD_LEFT));
+                $this->getDoctrine()->getManager()->persist($tube);
+
+                $builder->setTube($tube);
+                $zpl->printBuilder($builder);
+
+            }
+
+            $this->getDoctrine()->getManager()->flush();
         }
 
         return $this->render('label-printer/print-specimen-labels.html.twig', [
@@ -167,6 +181,7 @@ class LabelPrinterController extends AbstractController
 
             $labelBuilder = new SpecimenIntakeLabelBuilder($printer);
             $labelBuilder->setTube($tube);
+
             $zpl->printBuilder($labelBuilder);
 
             $result = $zpl->getLastPrinterResponse();
