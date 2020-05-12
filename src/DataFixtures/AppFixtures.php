@@ -4,43 +4,31 @@ namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultDDPCR;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenResultSequencing;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements DependentFixtureInterface
 {
+    public function getDependencies()
+    {
+        return [
+            AppParticipantGroupsFixtures::class,
+        ];
+    }
+
     public function load(ObjectManager $em)
     {
-        $groups = $this->addParticipantGroups($em);
+        /** @var ParticipantGroup[] $groups */
+        $groups = $em->getRepository(ParticipantGroup::class)->findAll();
+
         $this->addPrintedSpecimens($em, $groups);
         $this->addResultedSpecimens($em, $groups);
 
         $em->flush();
-    }
-
-    /**
-     * @return ParticipantGroup[]
-     */
-    private function addParticipantGroups(ObjectManager $em): array
-    {
-        $groups = [];
-        $numToCreate = 5;
-        $participantCount = 5;
-        for ($i=0; $i<$numToCreate; $i++) {
-            $accessionId = 'GRP-'.($i+1);
-            $g = new ParticipantGroup($accessionId, $participantCount++);
-            $g->setTitle($this->getGroupTitle($i));
-
-            $groups[] = $g;
-
-            $em->persist($g);
-        }
-
-        return $groups;
     }
 
     /**
@@ -79,7 +67,6 @@ class AppFixtures extends Fixture
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
                     $s = new Specimen($this->getNextSpecimenId(), $group);
                     $s->setType($this->getSpecimenType($i));
-                    $s->setCollectedAt(new \DateTime(sprintf('-%d days 5:00pm', $day)));
 
                     $em->persist($s);
 
@@ -138,44 +125,6 @@ class AppFixtures extends Fixture
         $seq++;
 
         return sprintf("%s%s", $prefix, $seq);
-    }
-
-    private function getGroupTitle(int $idx): string
-    {
-        $titles = [
-            'Amber Alligators',
-            'Brown Bears',
-            'Cyan Chickens',
-            'Denim Dingos',
-            'Emerald Eels',
-            'Fuchsia Fish',
-            'Golden Geese',
-            'Heliotrope Herons',
-            'Indigo Impalas',
-            'Jade Jellyfish',
-            'Khaki Kangaroos',
-            'Lavender Lemurs',
-            'Mauve Meerkats',
-            'Navy Nightingales',
-            'Olive Otters',
-            'Pink Pelicans',
-            'Quartz Quails',
-            'Ruby Raccoons',
-            'Scarlet Sloths',
-            'Teal Tigers',
-            'Ultramarine Urchins',
-            'Violet Vultures',
-            'White Walruses',
-            'Xanthic Xenons',
-            'Yellow Yaks',
-            'Zero Zebras',
-        ];
-
-        if (!isset($titles[$idx])) {
-            throw new \InvalidArgumentException('No fixture ParticipantGroup title exists for index ' . $idx);
-        }
-
-        return $titles[$idx];
     }
 
     /**

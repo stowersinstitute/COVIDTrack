@@ -153,6 +153,18 @@ class Tube
         $this->tubeType = $tubeType;
     }
 
+    /**
+     * @return string[]
+     */
+    public static function getValidTubeTypes(): array
+    {
+        return [
+            self::TYPE_BLOOD,
+            self::TYPE_SALIVA,
+            self::TYPE_SWAB,
+        ];
+    }
+
     public function getParticipantGroup(): ?ParticipantGroup
     {
         return $this->participantGroup;
