@@ -88,6 +88,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
             $credentials['username']
         );
 
+        if (!$credentials['password']) throw new \InvalidArgumentException('Password cannot be blank');
+
         return $credentials;
     }
 
