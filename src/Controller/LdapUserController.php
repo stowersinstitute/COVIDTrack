@@ -38,6 +38,9 @@ class LdapUserController extends AbstractController
 
         $form = $this->createFormBuilder()
             ->add('username', TextType::class, [
+                'attr' => [
+                    'autofocus' => true,
+                ],
                 'constraints' => [
                     new Callback(function($fieldValue, ExecutionContextInterface $context) {
                         $ldapUser = $this->findLdapUser($fieldValue);
