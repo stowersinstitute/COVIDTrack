@@ -2,18 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\ExcelImportWorkbook;
-use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\ExcelImport\ParticipantGroupImporter;
-use App\Form\GenericExcelImportType;
-use App\Form\ParticipantGroupForm;
 use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
