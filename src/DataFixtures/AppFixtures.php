@@ -28,7 +28,7 @@ class AppFixtures extends Fixture
     private function addParticipantGroups(ObjectManager $em): array
     {
         $groups = [];
-        $numToCreate = 10;
+        $numToCreate = 5;
         $participantCount = 5;
         for ($i=0; $i<$numToCreate; $i++) {
             $accessionId = 'GRP-'.($i+1);
