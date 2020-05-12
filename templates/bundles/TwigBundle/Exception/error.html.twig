@@ -2,6 +2,11 @@
 
 {% block title %}COVIDTrack Error{% endblock %}
 
+{% set notifyStr = 'a system administrator' %}
+{% if app_user_support_email %}
+    {% set notifyStr = '<a href="mailto:' ~ app_user_support_email ~ '">' ~ app_user_support_email ~ '</a>' %}
+{% endif %}
+
 {% block body %}
     <div class="row margin">
         <div class="col-md-12">
@@ -12,7 +17,7 @@
 
                 <div class="box-body">
                     <div class="callout callout-danger">
-                        <p>Please notify whoever@example.com about this error and include the following information:</p>
+                        <p>Please notify {{ notifyStr|raw }} about this error and include the following information:</p>
 
                         <dl>
                             <dt>Location</dt>
