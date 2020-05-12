@@ -10,7 +10,9 @@ use App\Entity\Specimen;
  *
  * Usage:
  *
- *     echo $groupTestingRec;
+ *     $specimensInRange = ...; Specimen[]
+ *     $recommendation = GroupTestingRecommendation::createForSpecimens($specimensInRange);
+ *     echo $recommendation;
  */
 class GroupTestingRecommendation
 {
@@ -54,11 +56,11 @@ class GroupTestingRecommendation
         else if ($count[Specimen::CLIA_REC_PENDING] > 0) {
             $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_PENDING);
         }
-        // If all report negative, CLIA testing not necessary
+        // If all report no testing recommended, CLIA testing not necessary
         else if ($count[Specimen::CLIA_REC_NO] > 0) {
             $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_NO);
         }
-        // Group not tested during this period
+        // Collection of Specimen has no recommendation
         else {
             $text = '-';
         }

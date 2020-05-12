@@ -7,6 +7,9 @@ use App\Entity\Specimen;
 use App\Entity\SpecimenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Generate a recommendation for further CLIA testing for a given Participant Group.
+ */
 class GroupTestingRecommendationReport
 {
     /** @var SpecimenRepository */
