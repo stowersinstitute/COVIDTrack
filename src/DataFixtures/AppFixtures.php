@@ -109,8 +109,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
 
-            // Has been dropped off
-            // TODO: CVDLS-59 s.status should be DROPPEDOFF
+            // Doesn't have a CLIA testing rec yet
             ->andWhere('s.cliaTestingRecommendation = :recommendation')
             ->setParameter('recommendation', Specimen::CLIA_REC_PENDING)
 
