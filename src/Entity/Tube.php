@@ -107,6 +107,9 @@ class Tube
     private $checkedInByUsername;
 
     /**
+     * Date and Time when this Specimen was extracted (collected) from the Participant.
+     * For example, when they spit in the tube or did a blood draw.
+     *
      * @var \DateTimeImmutable
      * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
      */
