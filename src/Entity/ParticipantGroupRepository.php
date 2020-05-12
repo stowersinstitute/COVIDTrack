@@ -50,7 +50,7 @@ class ParticipantGroupRepository extends EntityRepository
     }
 
     /**
-     * @param array $groups
+     * @param ParticipantGroup[] $groups
      * @return ParticipantGroup[]
      */
     public function findActiveNotIn(array $groups)
