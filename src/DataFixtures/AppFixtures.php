@@ -15,17 +15,11 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $em)
     {
-        $users = $this->addUsers($em);
         $groups = $this->addParticipantGroups($em);
         $this->addPrintedSpecimens($em, $groups);
         $this->addResultedSpecimens($em, $groups);
 
         $em->flush();
-    }
-
-    private function addUsers(ObjectManager $em): array
-    {
-        return [];
     }
 
     /**
