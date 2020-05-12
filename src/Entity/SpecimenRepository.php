@@ -55,7 +55,7 @@ class SpecimenRepository extends EntityRepository
      *
      * @return Specimen[]
      */
-    public function findByGroupForCollectionPeriod(ParticipantGroup $group, \DateTime $collectedAt): array
+    public function findByGroupForCollectionPeriod(ParticipantGroup $group, \DateTimeInterface $collectedAt): array
     {
         return $this->createQueryBuilder('s')
             ->where('s.participantGroup = :group')

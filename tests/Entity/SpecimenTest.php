@@ -31,40 +31,45 @@ class SpecimenTest extends TestCase
         $r1->setCreatedAt(new \DateTime('2020-04-24'));
         $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
 
-        // This is the latest result
+        // R2. This is the latest result
         $r2 = new SpecimenResultQPCR($s);
         $r2->setCreatedAt(new \DateTime('2020-04-25'));
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
+        // R3. Adding an earlier result does not override R2
         $r3 = new SpecimenResultQPCR($s);
         $r3->setCreatedAt(new \DateTime('2020-04-23'));
-        $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_PENDING);
+        $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
 
         $this->assertSame($r2, $s->getMostRecentQPCRResult());
     }
 
     public function testGetCliaTestingText()
     {
-        $s = Specimen::buildExample('C100');
+        $specimen = Specimen::buildExample('C100');
 
-        // Default when no results yet
-        $this->assertSame('Awaiting Results', $s->getCliaTestingRecommendedText());
-
-        // Pending
-        $r1 = new SpecimenResultQPCR($s);
-        $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_PENDING);
-        $this->assertSame('Awaiting Results', $s->getCliaTestingRecommendedText());
+        // Default when Specimen test results not yet available
+        $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
 
         // Add Negative Result
-        $r2 = new SpecimenResultQPCR($s);
+        $r2 = new SpecimenResultQPCR($specimen);
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
-        $this->assertSame('No', $s->getCliaTestingRecommendedText());
-
+        $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
 
         // Add Positive Result
-        $r3 = new SpecimenResultQPCR($s);
+        $r3 = new SpecimenResultQPCR($specimen);
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
-        $this->assertSame('Yes', $s->getCliaTestingRecommendedText());
+        $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
+
+        // Add Recommended Result
+        $r4 = new SpecimenResultQPCR($specimen);
+        $r4->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+        $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
+
+        // Back to Inconclusive Result
+        $r5 = new SpecimenResultQPCR($specimen);
+        $r5->setConclusion(SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE);
+        $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
     }
 
     public function testCreateFromTube()

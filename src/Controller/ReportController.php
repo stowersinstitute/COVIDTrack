@@ -9,6 +9,7 @@ use App\Entity\Specimen;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
+use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +24,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * CLIA Testing Commendations by Participant Group
+     * Allows running report exposed by this Controller
+     *
+     * @var GroupTestingRecommendationReport
+     */
+    private $groupTestRecReport;
+
+    public function __construct(GroupTestingRecommendationReport $groupTestRecReport)
+    {
+        $this->groupTestRecReport = $groupTestRecReport;
+    }
+
+    /**
+     * CLIA Testing Recommendations by Participant Group
      *
      * @Route(path="/group/results", methods={"GET"}, name="app_report_group_results")
      */
@@ -60,38 +73,9 @@ class ReportController extends AbstractController
             $byDate = [];
 
             foreach ($collectionDates as $collectionDate) {
-                // Collect all Specimens for this group and period
-                $results = $specimenRepo->findByGroupForCollectionPeriod($group, $collectionDate);
+                $result = $this->groupTestRecReport->resultForGroup($group, $collectionDate);
 
-                // Calculate count for each Specimen CLIA testing recommendation value
-                $initial = [
-                    Specimen::CLIA_REC_RECOMMENDED => 0,
-                    Specimen::CLIA_REC_PENDING => 0,
-                    Specimen::CLIA_REC_NO => 0,
-                ];
-                $count = array_reduce($results, function (array $carry, Specimen $s) {
-                    $carry[$s->getCliaTestingRecommendation()]++;
-                    return $carry;
-                }, $initial);
-
-                // If any specimen recommended for testing, whole group must be notified for CLIA testing
-                if ($count[Specimen::CLIA_REC_RECOMMENDED] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_RECOMMENDED);
-                }
-                // If awaiting at least one result, group results still pending
-                else if ($count[Specimen::CLIA_REC_PENDING] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_PENDING);
-                }
-                // If all report negative, CLIA testing not necessary
-                else if ($count[Specimen::CLIA_REC_NO] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_NO);
-                }
-                // Group not tested during this period
-                else {
-                    $text = '-';
-                }
-
-                $byDate[$collectionDate->format('Y-m-d g:ia')] = $text;
+                $byDate[$collectionDate->format('Y-m-d g:ia')] = $result;
             }
 
             $reportData[$group->getTitle()] = $byDate;
