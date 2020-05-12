@@ -142,8 +142,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
      */
-    public function excelImportPreview(int $importId, ExcelImporter $excelImporter)
-    {
+    public function excelImportPreview(
+        int $importId,
+        ExcelImporter $excelImporter,
+        ParticipantGroupAccessionIdGenerator $idGenerator
+    ) {
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->getDoctrine()
@@ -154,7 +157,7 @@ class ParticipantGroupController extends AbstractController
 
         $importer = new ParticipantGroupImporter(
             $importingWorkbook->getFirstWorksheet(),
-            new ParticipantGroupAccessionIdGenerator($this->getDoctrine()->getManager())
+            $idGenerator
         );
         $importer->setEntityManager($em);
 
@@ -172,8 +175,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/commit/{importId<\d+>}", methods={"POST"}, name="group_excel_import_commit")
      */
-    public function excelImportCommit(int $importId, ExcelImporter $excelImporter)
-    {
+    public function excelImportCommit(
+        int $importId,
+        ExcelImporter $excelImporter,
+        ParticipantGroupAccessionIdGenerator $idGenerator
+    ) {
         $em = $this->getDoctrine()
             ->getManager();
 
@@ -184,7 +190,7 @@ class ParticipantGroupController extends AbstractController
 
         $importer = new ParticipantGroupImporter(
             $importingWorkbook->getFirstWorksheet(),
-            new ParticipantGroupAccessionIdGenerator($em)
+            $idGenerator
         );
         $importer->setEntityManager($em);
         $importer->process(true);
