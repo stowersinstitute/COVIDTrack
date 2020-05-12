@@ -48,8 +48,10 @@ abstract class BaseExcelImporter
 
     /**
      * Parse what's in the excel file and populate $this->output
+     *
+     * @param bool $commit If true, changes should be committed to the database
      */
-    abstract public function process();
+    abstract public function process($commit = false);
 
 
     public function __construct(ExcelImportWorksheet $worksheet)
