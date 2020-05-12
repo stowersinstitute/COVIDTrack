@@ -32,42 +32,4 @@ class AppParticipantGroupsFixtures extends Fixture
             [ 'title' => 'Violet',      'participantCount' => 15,   'accessionId' => 'GRP-CRYGX9' ],
         ];
     }
-
-    private function getGroupTitle(int $idx): string
-    {
-        $titles = [
-            'Amber Alligators',
-            'Brown Bears',
-            'Cyan Chickens',
-            'Denim Dingos',
-            'Emerald Eels',
-            'Fuchsia Fish',
-            'Golden Geese',
-            'Heliotrope Herons',
-            'Indigo Impalas',
-            'Jade Jellyfish',
-            'Khaki Kangaroos',
-            'Lavender Lemurs',
-            'Mauve Meerkats',
-            'Navy Nightingales',
-            'Olive Otters',
-            'Pink Pelicans',
-            'Quartz Quails',
-            'Ruby Raccoons',
-            'Scarlet Sloths',
-            'Teal Tigers',
-            'Ultramarine Urchins',
-            'Violet Vultures',
-            'White Walruses',
-            'Xanthic Xenons',
-            'Yellow Yaks',
-            'Zero Zebras',
-        ];
-
-        if (!isset($titles[$idx])) {
-            throw new \InvalidArgumentException('No fixture ParticipantGroup title exists for index ' . $idx);
-        }
-
-        return $titles[$idx];
-    }
 }
