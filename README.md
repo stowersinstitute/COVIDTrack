@@ -126,6 +126,15 @@ Or add the `--append` flag to keep existing database data and append fake data:
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
 
+## Login to dev environment with fixtures loaded
+
+These users are available when fixtures are loaded. Same username/password:
+
+* ctadmin - Sysadmin / Developer
+* coordinator - Study Coordinator
+* intaketech - Check-in Technician
+* kiosk - Kiosk UI
+
 ### Frontend Frameworks
 
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
