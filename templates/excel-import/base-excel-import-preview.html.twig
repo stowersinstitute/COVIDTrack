@@ -1,13 +1,31 @@
+{#
+
+## Available blocks
+
+importSourceDescription
+    Appears at the top of the page and includes the file and worksheet being read
+
+beforeTopConfirmButton
+    Appears above the first "confirm" button and below the "importSourceDescription" block
+
+importPreviewSection
+    Contains the outer row used to display the default import preview
+
+    Use this if you need to override the entire preview of import results instead of just
+    customizing the table
+#}
 {% extends 'base.html.twig' %}
 
 {% block page_title %}Import Preview{% endblock %}
 
 {% block body %}
 
-    <dl>
-        <dt>Importing From</dt>
-        <dd>{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</dd>
-    </dl>
+    {% block importSourceDescription %}
+        <dl>
+            <dt>Importing From</dt>
+            <dd>{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</dd>
+        </dl>
+    {% endblock %}
 
     {% if importer.hasErrors() %}
         <div class="callout callout-danger">
@@ -44,24 +62,30 @@
             </div>
         </div>
     {% else %}
+        {% block beforeTopConfirmButton %}{% endblock %}
+
         <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
         </form>
 
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="box">
-                    <div class="box-header">
-                        <h3 class="box-title">{{ importer.numImportedItems }} items to import</h3>
-                    </div>
-                    <div class="box-body">
+        {% block importPreviewSection %}
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        {% block importPreviewHeader %}
+                            <div class="box-header">
+                                <h3 class="box-title">{{ importer.numImportedItems }} items to import</h3>
+                            </div>
+                        {% endblock %}
+                        <div class="box-body">
 
-                        {% include importPreviewTemplate %}
+                            {% include importPreviewTemplate %}
 
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        {% endblock %}
 
         <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-top">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
