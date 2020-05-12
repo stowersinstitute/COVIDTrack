@@ -153,6 +153,8 @@ class Tube
 
     public function setTubeType(?string $tubeType): void
     {
+        $this->mustBeValidTubeType($tubeType);
+
         $this->tubeType = $tubeType;
     }
 
@@ -333,5 +335,14 @@ class Tube
         $statuses = array_flip(static::getValidStatuses());
 
         return $statuses[$statusConstant];
+    }
+
+    private function mustBeValidTubeType(?string $tubeType)
+    {
+        if ($tubeType === null) return;
+
+        if (!in_array($tubeType, self::getValidTubeTypes())) {
+            throw new \InvalidArgumentException('Invalid Tube Type');
+        }
     }
 }
