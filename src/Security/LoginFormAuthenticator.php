@@ -114,6 +114,15 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
     {
         // Authenticate against LDAP for LdapUsers
         if ($user instanceof LdapUser) {
+            $localUser = $this->entityManager
+                ->getRepository(AppUser::class)
+                ->findOneBy(['username' => $user->getUsername()]);
+
+            // Account is either not created yet or created but not approved
+            if (!$localUser || !$localUser->isProvisioned()) {
+                throw new CustomUserMessageAuthenticationException('You are not approved for access. Please contact a system administrator.');
+            }
+
             return $this->isLdapPasswordValid($credentials, $user);
         }
 
