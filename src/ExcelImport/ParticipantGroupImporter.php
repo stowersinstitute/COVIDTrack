@@ -4,14 +4,20 @@
 namespace App\ExcelImport;
 
 
+use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\ParticipantGroup;
 
 class ParticipantGroupImporter extends BaseExcelImporter
 {
-    public function __construct(ExcelImportWorksheet $worksheet)
+    /** @var ParticipantGroupAccessionIdGenerator  */
+    private $idGenerator;
+
+    public function __construct(ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
         parent::__construct($worksheet);
+
+        $this->idGenerator = $idGenerator;
 
         $this->columnMap = [
             'title' => 'A',
@@ -20,21 +26,56 @@ class ParticipantGroupImporter extends BaseExcelImporter
     }
 
     /**
+     * OVERRIDDEN to match format in process()
+     */
+    public function getNumImportedItems(): int
+    {
+        if ($this->output === null) throw new \LogicException('Called getNumImportedItems before process()');
+
+        $changedItems = 0;
+        foreach ($this->output as $action => $groups) {
+            $changedItems += count($groups);
+        }
+
+        return $changedItems;
+    }
+
+    /**
+     * Returns true if there is at least one group associated with $action
+     *
+     * $action can be:
+     *  - created
+     *  - updated
+     *  - deactivated
+     *
+     * See process()
+     */
+    public function hasGroupsForAction($action) : bool
+    {
+        return count($this->output[$action]) > 0;
+    }
+
+
+    /**
      * Processes the import
      *
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
      */
-    public function process()
+    public function process($commit = false)
     {
         if ($this->output !== null) return $this->output;
 
-        $participantGroups = [];
+        $groupRepo = $this->em->getRepository(ParticipantGroup::class);
 
-        // TODO: TEMPORARY, GENERATE REAL VALUE
-        $groupIdx = date('ymdhis');
+        $result = [
+            'created' => [],
+            'updated' => [],
+            'deactivated' => []
+        ];
 
+        // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
@@ -47,19 +88,50 @@ class ParticipantGroupImporter extends BaseExcelImporter
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            $group = new ParticipantGroup(
-                'GRP-' . $groupIdx,
-                $rawParticipantCount
-            );
+            $group = $groupRepo->findOneBy(['title' => $rawTitle]);
+            // New group
+            if (!$group) {
+                // Make it clear when previewing that this field is automatic
+                $accessionId = '(automatic)';
+                if ($commit) {
+                    $accessionId = $this->idGenerator->generate();
+                }
+
+                $group = new ParticipantGroup(
+                    $accessionId,
+                    $rawParticipantCount
+                );
+
+                $result['created'][] = $group;
+                if ($commit) {
+                    $this->em->persist($group);
+                }
+            }
+            // Existing group
+            else {
+                // Note: this does not guarantee any fields are changing, just that it was in the excel file
+                $result['updated'][] = $group;
+
+                // Ensure entities won't be flush()ed if we're not committing
+                if (!$commit) $this->em->detach($group);
+            }
 
             $group->setTitle($rawTitle);
-
-            $participantGroups[] = $group;
-
-            $groupIdx++;
+            $group->setParticipantCount($rawParticipantCount);
+            $group->setIsActive(true);
         }
 
-        $this->output = $participantGroups;
+        // Deactivated is everything not in the excel file
+        $toDeactivate = $groupRepo->findActiveNotIn($result['updated']);
+        foreach ($toDeactivate as $group) {
+            // Ensure entities won't be flush()ed if we're not committing
+            if (!$commit) $this->em->detach($group);
+            $result['deactivated'][] = $group;
+
+            $group->setIsActive(false);
+        }
+
+        $this->output = $result;
     }
 
     /**

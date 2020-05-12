@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
@@ -143,16 +144,23 @@ class ParticipantGroupController extends AbstractController
      */
     public function excelImportPreview(int $importId, ExcelImporter $excelImporter)
     {
+        $em = $this->getDoctrine()->getManager();
+
         $importingWorkbook = $this->getDoctrine()
             ->getManager()
             ->find(ExcelImportWorkbook::class, $importId);
 
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $importer = new ParticipantGroupImporter(
+            $importingWorkbook->getFirstWorksheet(),
+            new ParticipantGroupAccessionIdGenerator($this->getDoctrine()->getManager())
+        );
+        $importer->setEntityManager($em);
+
         $importer->process();
 
-        return $this->render('excel-import/base-excel-import-preview.html.twig', [
+        return $this->render('participantGroup/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
             'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
@@ -174,40 +182,20 @@ class ParticipantGroupController extends AbstractController
 
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
-        $importer->process();
-
-        $groups = $importer->getOutput();
-        $affectedGroups = [];
-        foreach ($groups as $uploadedGroup) {
-            /** @var ParticipantGroup $existingGroup */
-            $existingGroup = $em->getRepository(ParticipantGroup::class)
-                ->findOneBy(['accessionId' => $uploadedGroup->getAccessionId()]);
-
-            // Group already exists in the system
-            // todo: any properties we need to update? Maybe an isActive flag?
-            if ($existingGroup) {
-                $existingGroup->setTitle($uploadedGroup->getTitle());
-                $existingGroup->setParticipantCount($uploadedGroup->getParticipantCount());
-
-                $affectedGroups[] = $existingGroup;
-            }
-            // New group, persist it
-            else {
-                $em->persist($uploadedGroup);
-
-                $affectedGroups[] = $uploadedGroup;
-            }
-        }
+        $importer = new ParticipantGroupImporter(
+            $importingWorkbook->getFirstWorksheet(),
+            new ParticipantGroupAccessionIdGenerator($em)
+        );
+        $importer->setEntityManager($em);
+        $importer->process(true);
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);
 
         $em->flush();
 
-        return $this->render('excel-import/base-excel-import-result.html.twig', [
+        return $this->render('participantGroup/excel-import-result.html.twig', [
             'importer' => $importer,
-            'importResultTemplate' => 'participantGroup/excel-import-table.html.twig',
         ]);
     }
 
