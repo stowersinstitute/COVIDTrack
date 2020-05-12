@@ -198,7 +198,7 @@ class Specimen
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'type' => 'Type',
-            'collectedAt' => 'Collected At',
+            'collectedAt' => 'Collection Time',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
