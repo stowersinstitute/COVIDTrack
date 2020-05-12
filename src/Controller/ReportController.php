@@ -92,17 +92,4 @@ class ReportController extends AbstractController
             'reportData' => $reportData,
         ]);
     }
-
-    private function mustFindGroup($id): ParticipantGroup
-    {
-        $s = $this->getDoctrine()
-            ->getRepository(ParticipantGroup::class)
-            ->findOneByAnyId($id);
-
-        if (!$s) {
-            throw new \InvalidArgumentException('Cannot find Participant Group');
-        }
-
-        return $s;
-    }
 }
