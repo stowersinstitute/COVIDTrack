@@ -10,6 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * ORM\Entity
+ * ORM\Table(name="well_plates")
  * Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class WellPlate
