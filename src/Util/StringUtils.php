@@ -32,4 +32,27 @@ class StringUtils
 
         return $replaced;
     }
+
+    /**
+     * Returns a string containing $length random characters
+     *
+     * The string has the following features:
+     *  - No ambiguous characters (ie. 0 vs. O or 1 vs l)
+     *  - No vowels (so no recognizable words, dirty or otherwise)
+     */
+    public static function generateRandomString(int $length) : string
+    {
+        $alphabet = [
+            'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z',
+            '2', '5', '7', '9'
+        ];
+
+        $randomStr = '';
+
+        for ($i=0; $i < $length; $i++) {
+            $randomStr .= $alphabet[rand(0, count($alphabet) - 1)];
+        }
+
+        return $randomStr;
+    }
 }
