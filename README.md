@@ -106,11 +106,11 @@ Instead of using Docker, develop with tools installed directly on the host machi
 
 ## Running Automated Tests
 
-Tests written using [PHPUnit](https://phpunit.de/) and [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
+Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
 
 Run test suite from command-line:
 
-    bin/phpunit
+    ./vendor/bin/simple-phpunit
 
 ## Data Fixtures
 
