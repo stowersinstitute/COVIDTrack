@@ -4,58 +4,45 @@ namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResultDDPCR;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\SpecimenResultSequencing;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 class AppFixtures extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * Stores Specimen.id loaded with Results during this fixture class
+     * @var int[]
+     */
+    private $specimenIdsWithResults = [];
+
     public function getDependencies()
     {
         return [
             AppParticipantGroupsFixtures::class,
+            AppTubeFixtures::class,
         ];
     }
 
     public function load(ObjectManager $em)
     {
-        /** @var ParticipantGroup[] $groups */
-        $groups = $em->getRepository(ParticipantGroup::class)->findAll();
-
-        $this->addPrintedSpecimens($em, $groups);
-        $this->addResultedSpecimens($em, $groups);
+        $this->addResultedSpecimens($em);
 
         $em->flush();
-    }
-
-    /**
-     * Add Specimens that have had labels printed, but not imported with results.
-     *
-     * @param ObjectManager $em
-     * @param ParticipantGroup[] $groups
-     */
-    private function addPrintedSpecimens(ObjectManager $em, array $groups)
-    {
-        foreach ($groups as $group) {
-            for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                $s = new Specimen($this->getNextSpecimenId(), $group);
-
-                $em->persist($s);
-            }
-        }
     }
 
     /**
      * Add Specimens that have had labels printed and results.
      *
      * @param ObjectManager $em
-     * @param ParticipantGroup[] $groups
      */
-    private function addResultedSpecimens(ObjectManager $em, array $groups)
+    private function addResultedSpecimens(ObjectManager $em)
     {
+        /** @var ParticipantGroup[] $groups */
+        $groups = $em->getRepository(ParticipantGroup::class)->findAll();
+
+        // Reasonable positive/negative rate
         $possibleResults = $this->buildQPCRResultsDistribution();
 
         foreach ($groups as $group) {
@@ -65,66 +52,25 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
 
             for ($day=1; $day<=$daysWorthResults; $day++) {
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                    $s = new Specimen($this->getNextSpecimenId(), $group);
-                    $s->setType($this->getSpecimenType($i));
+                    $s = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
 
-                    $em->persist($s);
+                    // Might not have enough fixture Tubes to keep going
+                    if (!$s) continue;
 
-                    // Add many qPCR results, which test for presence of virus
-                    $maxQPCR = rand(1,2);
-                    for ($j=0; $j<$maxQPCR; $j++) {
-                        // Set a random conclusion, if we have one
-                        $conclusion = $possibleResults[array_rand($possibleResults)];
-                        if ($conclusion) {
-                            $r1 = new SpecimenResultQPCR($s);
-                            $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
-                            $r1->setConclusion($conclusion);
+                    // Set a random conclusion, if we have one
+                    $conclusion = $possibleResults[array_rand($possibleResults)];
+                    if ($conclusion) {
+                        $r1 = new SpecimenResultQPCR($s);
+                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
+                        $r1->setConclusion($conclusion);
 
-                            $s->setStatus(Specimen::STATUS_RESULTS);
-                        }
+                        $s->setStatus(Specimen::STATUS_RESULTS);
 
                         $em->persist($r1);
                     }
-
-                    // ddPCR Result
-                    $r2 = new SpecimenResultDDPCR($s);
-                    $r2->setIsFailure(rand(0,1));
-                    $s->addResult($r2);
-                    $em->persist($r2);
-
-                    // Sequencing Result
-                    $r3 = new SpecimenResultSequencing($s);
-                    $r3->setIsFailure(rand(0,1));
-                    $s->addResult($r3);
-                    $em->persist($r3);
                 }
             }
         }
-    }
-
-    private function getSpecimenType(int $i)
-    {
-        $types = array_values(Specimen::getFormTypes());
-
-        return $types[$i % count($types)];
-    }
-
-    /**
-     * Invoke to get next Specimen accessionId
-     * TODO: CVDLS-30 Support creating unique accession ID when creating
-     *
-     * @return string
-     */
-    private function getNextSpecimenId(): string
-    {
-        if (!isset($seq)) {
-            static $seq = 0;
-        }
-        $prefix = 'CID';
-
-        $seq++;
-
-        return sprintf("%s%s", $prefix, $seq);
     }
 
     /**
@@ -151,5 +97,42 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
         );
 
         return $possible;
+    }
+
+    private function getRandomSpecimenPendingResultsForGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
+    {
+        /** @var Specimen[] $specimens */
+        $qb = $em->getRepository(Specimen::class)
+            ->createQueryBuilder('s')
+
+            // Group
+            ->andWhere('s.participantGroup = :group')
+            ->setParameter('group', $group)
+
+            // Has been dropped off
+            // TODO: CVDLS-59 s.status should be DROPPEDOFF
+            ->andWhere('s.cliaTestingRecommendation = :recommendation')
+            ->setParameter('recommendation', Specimen::CLIA_REC_PENDING)
+
+            ->setMaxResults(1);
+
+        // Not a Specimen we already added results for,
+        // so we don't have to flush() after each loop
+        if ($this->specimenIdsWithResults) {
+            $qb->andWhere('s.id NOT IN (:seenSpecimenIds)')
+                ->setParameter('seenSpecimenIds', $this->specimenIdsWithResults);
+        }
+
+        $specimens = $qb->getQuery()->execute();
+
+        if (count($specimens) !== 1) {
+            // Might've run out of Specimens to result
+            return null;
+        }
+
+        $found = array_shift($specimens);
+        $this->specimenIdsWithResults[] = $found->getId();
+
+        return $found;
     }
 }

@@ -51,7 +51,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function distributedTubes(ObjectManager $em)
     {
-        $startAccession = 100;
+        $startAccession = 1000;
 
         for ($i=1; $i<=20; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
@@ -67,9 +67,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function droppedOffTubes(ObjectManager $em)
     {
-        $startAccession = 200;
+        $startAccession = 2000;
 
-        for ($i=1; $i<=50; $i++) {
+        for ($i=1; $i<=200; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
@@ -86,7 +86,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $startAccession = 300;
+        $startAccession = 3000;
 
         $numToCreate = 20;
         $checkedInBy = 'test-checkin-user';
@@ -110,7 +110,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function rejectedTubes(ObjectManager $em)
     {
-        $startAccession = 400;
+        $startAccession = 4000;
 
         $numToCreate = 10;
         $checkedInBy = 'test-checkin-user';
