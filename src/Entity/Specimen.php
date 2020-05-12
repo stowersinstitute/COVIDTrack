@@ -15,6 +15,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * to the group instead of the participant to maintain some anonymity.
  *
  * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
+ * @ORM\Table(name="specimens")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Specimen
@@ -40,7 +41,7 @@ class Specimen
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -49,7 +50,7 @@ class Specimen
      * Unique public ID for referencing this specimen.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string", unique=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
@@ -68,7 +69,7 @@ class Specimen
      *
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup", inversedBy="specimens")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id")
      */
     private $participantGroup;
 
@@ -82,7 +83,7 @@ class Specimen
      * Time when collected or received.
      *
      * @var \DateTime
-     * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="collected_at", type="datetime", nullable=true)
      * @Gedmo\Versioned
      */
     private $collectedAt;
@@ -92,14 +93,14 @@ class Specimen
      * should undergo CLIA-based testing.
      *
      * @var string
-     * @ORM\Column(name="cliaTestingRecommendation", type="string")
+     * @ORM\Column(name="clia_testing_recommendation", type="string")
      * @Gedmo\Versioned
      */
     private $cliaTestingRecommendation;
 
     /**
      * @var string
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="status", type="string")
      * @Gedmo\Versioned
      */
     private $status;
