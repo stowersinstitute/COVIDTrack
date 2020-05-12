@@ -6,6 +6,7 @@
             <th>Accession ID</th>
             <th>Title</th>
             <th>Participants</th>
+            <th>Active?</th>
             <th>Created</th>
             <th>Last Modified</th>
         </tr>
@@ -21,6 +22,13 @@
             </td>
             <td>{{ group.title }}</td>
             <td>{{ group.participantCount }}</td>
+            <td>
+                {% if group.isActive() %}
+                    <i class="fa fa-check text-green"></i>
+                {% else %}
+
+                {% endif %}
+            </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>
