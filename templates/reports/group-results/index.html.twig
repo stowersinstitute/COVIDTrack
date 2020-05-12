@@ -10,9 +10,13 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
+                        <th>&nbsp;</th>
+                        <th colspan="{{ collectionDates|length }}" style="text-align:center">Specimen Collection Date</th>
+                    </tr>
+                    <tr>
                         <th>Group</th>
                         {% for collectionDate in collectionDates %}
-                        <th>{{ collectionDate|date("Y-m-d g:ia") }}</th>
+                        <th>{{ collectionDate|date("Y-m-d") }}</th>
                         {% endfor %}
                     </tr>
                     </thead>
@@ -25,7 +29,7 @@
                                 <td>{{ group.title }}</td>
 
                                 {% for collectionDate in collectionDates %}
-                                    {% set key = collectionDate|date("Y-m-d g:ia") %}
+                                    {% set key = collectionDate|date("Y-m-d") %}
                                 <td>
                                     {{ groupResults[key] }}
                                 </td>

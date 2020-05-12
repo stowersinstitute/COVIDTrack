@@ -50,9 +50,9 @@ class ReportController extends AbstractController
          *
          * [
          *     'Alligators' => [
-         *         '2020-05-03 4:00pm' => 'Recommended',
-         *         '2020-05-04 4:00pm' => 'No',
-         *         '2020-05-05 4:00pm' => 'Awaiting Results',
+         *         '2020-05-03' => 'Recommended',
+         *         '2020-05-04' => 'No',
+         *         '2020-05-05' => 'Awaiting Results',
          *     ]
          * ]
          */
@@ -67,7 +67,7 @@ class ReportController extends AbstractController
 
         foreach ($groupsWithResults as $group) {
             /**
-             * Keys: Collection Date string like "2020-05-05 4:00pm". Printed in report.
+             * Keys: Collection Date string like "2020-05-05". Printed in report.
              * Values: Recommendation text string
              */
             $byDate = [];
@@ -75,7 +75,7 @@ class ReportController extends AbstractController
             foreach ($collectionDates as $collectionDate) {
                 $result = $this->groupTestRecReport->resultForGroup($group, $collectionDate);
 
-                $byDate[$collectionDate->format('Y-m-d g:ia')] = $result;
+                $byDate[$collectionDate->format('Y-m-d')] = $result;
             }
 
             $reportData[$group->getTitle()] = $byDate;
