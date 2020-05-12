@@ -66,12 +66,20 @@ class ParticipantGroup
      */
     private $specimens;
 
+    /**
+     * @var boolean If true, the system expects specimens for this group
+     *
+     * @ORM\Column(name="is_active", type="boolean", nullable=true)
+     */
+    private $isActive;
+
     public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
         $this->setParticipantCount($participantCount);
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTime();
+        $this->isActive = true;
     }
 
     /**
@@ -208,5 +216,15 @@ class ParticipantGroup
         }
 
         throw new \OutOfBoundsException(sprintf('participantCount must be between %d and %d', $min, $max));
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
     }
 }

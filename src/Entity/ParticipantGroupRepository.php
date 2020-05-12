@@ -48,4 +48,20 @@ class ParticipantGroupRepository extends EntityRepository
             ]
         );
     }
+
+    /**
+     * @param array $groups
+     * @return ParticipantGroup[]
+     */
+    public function findActiveNotIn(array $groups)
+    {
+        return $this->createQueryBuilder('g')
+            ->where('
+                g.isActive = true
+                AND
+                g.id NOT IN (:groups)
+            ')
+            ->setParameter('groups', $groups)
+            ->getQuery()->getResult();
+    }
 }
