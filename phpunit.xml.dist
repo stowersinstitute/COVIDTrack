@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+This project runs PHPUnit slightly differently than you may be accustomed.
+See https://symfony.com/doc/4.4/components/phpunit_bridge.html#usage
+-->
 
 <!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -16,7 +20,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
+        <testsuite name="COVIDTrack Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

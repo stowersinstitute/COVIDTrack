@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Confirm User Details{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="box box-primary">
+                <div class="box-body">
+                    <dl>
+                        <dt>Username</dt>
+                        <dd>{{ ldapUser.username }}</dd>
+                    </dl>
+
+                    <dl>
+                        <dt>Display Name</dt>
+                        <dd>{{ ldapUser.displayName }}</dd>
+                    </dl>
+
+                    <dl>
+                        <dt>Title</dt>
+                        <dd>{{ ldapUser.title }}</dd>
+                    </dl>
+
+                    <dl>
+                        <dt>E-Mail</dt>
+                        <dd>{{ ldapUser.emailAddress }}</dd>
+                    </dl>
+
+                    <form method="post" action="{{ path('ldap_user_onboarding_commit', { username: ldapUser.username }) }}">
+                        <input type="submit" value="Create User" class="btn-primary">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

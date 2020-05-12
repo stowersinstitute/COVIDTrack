@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * Physical container that holds a Specimen.
@@ -14,7 +15,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
  */
 class Tube
 {
-    use SoftDeleteableEntity;
+    use TimestampableEntity, SoftDeleteableEntity;
 
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
@@ -96,12 +97,14 @@ class Tube
     private $checkedInAt;
 
     /**
-     * Check-in Tech that processed this Tube during Check-In.
+     * Username of the Check-in Tech that processed this Tube during Check-In.
+     *
+     * NOTE: Username may not exist in the system, this is not a guaranteed AppUser association
      *
      * @var string
-     * @ORM\Column(name="checkedInBy", type="string", nullable=true)
+     * @ORM\Column(name="checkedInByUsername", type="string", nullable=true, length=255)
      */
-    private $checkedInBy;
+    private $checkedInByUsername;
 
     /**
      * @var \DateTimeImmutable
@@ -217,14 +220,14 @@ class Tube
         return $this->checkedInAt;
     }
 
-    public function getCheckedInBy(): ?string
+    public function getCheckedInByUsername(): ?string
     {
-        return $this->checkedInBy;
+        return $this->checkedInByUsername;
     }
 
-    public function setCheckedInBy(?string $checkedInBy): void
+    public function setCheckedInByUsername(?string $checkedInByUsername): void
     {
-        $this->checkedInBy = $checkedInBy;
+        $this->checkedInByUsername = $checkedInByUsername;
     }
 
     public function setSpecimen(Specimen $specimen): void
@@ -265,7 +268,7 @@ class Tube
 
         $this->setStatus(self::STATUS_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
-        $this->setCheckedInBy($checkedInBy);
+        $this->setCheckedInByUsername($checkedInBy);
     }
 
     /**
@@ -277,7 +280,7 @@ class Tube
 
         $this->setStatus(self::STATUS_REJECTED);
         $this->setCheckedInAt($checkedInAt);
-        $this->setCheckedInBy($checkedInBy);
+        $this->setCheckedInByUsername($checkedInBy);
     }
 
     /**

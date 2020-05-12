@@ -106,11 +106,11 @@ Instead of using Docker, develop with tools installed directly on the host machi
 
 ## Running Automated Tests
 
-Tests written using [PHPUnit](https://phpunit.de/) and [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
+Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
 
 Run test suite from command-line:
 
-    bin/phpunit
+    ./vendor/bin/simple-phpunit
 
 ## Data Fixtures
 
@@ -125,6 +125,15 @@ Or add the `--append` flag to keep existing database data and append fake data:
     $ bin/console doctrine:fixtures:load -n --append
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
+
+## Login to dev environment with fixtures loaded
+
+These users are available when fixtures are loaded. Same username/password:
+
+* ctadmin - Sysadmin / Developer
+* coordinator - Study Coordinator
+* intaketech - Check-in Technician
+* kiosk - Kiosk UI
 
 ### Frontend Frameworks
 

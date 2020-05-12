@@ -42,6 +42,14 @@ class ExcelImportWorkbook
     protected $uploadedAt;
 
     /**
+     * @var AppUser The user who uploaded this file
+     *
+     * @ORM\ManyToOne(targetEntity="AppUser")
+     * @ORM\JoinColumn(name="uploadedById", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    protected $uploadedBy;
+
+    /**
      * Worksheets associated with this workbook
      * @var ExcelImportWorksheet[]
      *
@@ -49,34 +57,6 @@ class ExcelImportWorkbook
      * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbookId")
      */
     protected $worksheets;
-
-    /**
-     * Populates an ExcelImportWorkbook from data contained within an uploaded file
-     */
-    public static function createFromUpload(UploadedFile $file) : ExcelImportWorkbook
-    {
-        $reader = new Xlsx();
-        $spreadsheet = $reader->load($file->getRealPath());
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
-
-        return $importWorkbook;
-    }
 
     public function __construct()
     {
@@ -129,5 +109,15 @@ class ExcelImportWorkbook
         }
 
         return false;
+    }
+
+    public function getUploadedBy(): ?AppUser
+    {
+        return $this->uploadedBy;
+    }
+
+    public function setUploadedBy(?AppUser $uploadedBy): void
+    {
+        $this->uploadedBy = $uploadedBy;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
+use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
@@ -111,7 +112,7 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport(Request $request)
+    public function excelImport(Request $request, ExcelImporter $excelImporter)
     {
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
@@ -122,7 +123,7 @@ class ParticipantGroupController extends AbstractController
             /** @var UploadedFile $excelFile */
             $excelFile = $form->get('excelFile')->getData();
 
-            $workbook = ExcelImportWorkbook::createFromUpload($excelFile);
+            $workbook = $excelImporter->createWorkbookFromUpload($excelFile);
             $em->persist($workbook);
             $em->flush();
 
@@ -140,25 +141,30 @@ class ParticipantGroupController extends AbstractController
     /**
      * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
      */
-    public function excelImportPreview(int $importId)
+    public function excelImportPreview(int $importId, ExcelImporter $excelImporter)
     {
         $importingWorkbook = $this->getDoctrine()
             ->getManager()
             ->find(ExcelImportWorkbook::class, $importId);
 
-        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        return $this->render('participantGroup/excel-import-preview.html.twig', [
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $importer->process();
+
+        return $this->render('excel-import/base-excel-import-preview.html.twig', [
             'importId' => $importId,
-            'importingWorkbook' => $importingWorkbook,
             'importer' => $importer,
+            'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
+            'importCommitRoute' => 'group_excel_import_commit',
+            'importCommitText' => 'Save Participant Groups',
         ]);
     }
 
     /**
      * @Route("/excel-import/commit/{importId<\d+>}", methods={"POST"}, name="group_excel_import_commit")
      */
-    public function excelImportCommit(int $importId)
+    public function excelImportCommit(int $importId, ExcelImporter $excelImporter)
     {
         $em = $this->getDoctrine()
             ->getManager();
@@ -166,9 +172,12 @@ class ParticipantGroupController extends AbstractController
         $importingWorkbook = $em
             ->find(ExcelImportWorkbook::class, $importId);
 
-        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $groups = $importer->getParticipantGroups();
+        $importer = new ParticipantGroupImporter($importingWorkbook->getFirstWorksheet());
+        $importer->process();
+
+        $groups = $importer->getOutput();
         $affectedGroups = [];
         foreach ($groups as $uploadedGroup) {
             /** @var ParticipantGroup $existingGroup */
@@ -196,8 +205,9 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        return $this->render('participantGroup/excel-import-confirm.html.twig', [
-            'groups' => $affectedGroups,
+        return $this->render('excel-import/base-excel-import-result.html.twig', [
+            'importer' => $importer,
+            'importResultTemplate' => 'participantGroup/excel-import-table.html.twig',
         ]);
     }
 

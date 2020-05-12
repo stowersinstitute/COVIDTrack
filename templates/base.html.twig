@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="google" content="notranslate">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <title>{% block title %}COVIDTrack{% endblock %}</title>
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -74,6 +74,13 @@
                 {% block body %}{% endblock %}
             </section>
         </div>
+
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> here
+            </div>
+            <strong>Some Copyright Stuff Here?</strong>
+        </footer>
     </div>
     </body>
 </html>

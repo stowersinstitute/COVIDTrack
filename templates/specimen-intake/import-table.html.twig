@@ -1,6 +1,7 @@
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
+        <th class="text-right" style="width: 75px;">Row #</th>
         <th>Accession ID</th>
         <th class="text-center">Accepted?</th>
         <th>Technician</th>
@@ -9,7 +10,7 @@
     </thead>
 
     <tbody>
-    {% for tube in tubes  %}
+    {% for tube in importer.output  %}
         {% set trClass = '' %}
         {% set statusContent = '<i class="fa fa-check text-green"></i>' %}
         {% if tube.status == 'REJECTED' %}
@@ -17,9 +18,10 @@
             {% set statusContent = '<i class="fa fa-times text-red"></i>' %}
         {% endif %}
         <tr class="{{ trClass }}">
+            <td class="text-right">{{ loop.index0 + importer.startingRow }}</td>
             <td>{{ tube.accessionId }}</td>
             <td class="text-center">{{ statusContent|raw }}</td>
-            <td>{{ tube.checkedInBy }}</td>
+            <td>{{ tube.checkedInByUsername }}</td>
             <td>{{ tube.checkedInAt|date('m/d/Y g:i:sa') }}</td>
         </tr>
     {% endfor %}

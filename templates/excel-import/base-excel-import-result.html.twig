@@ -3,13 +3,17 @@
 {% block page_title %}Import Saved{% endblock %}
 
 {% block body %}
+
+    <dl>
+        <dt>Imported From</dt>
+        <dd>{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</dd>
+    </dl>
+
     <div class="row">
         <div class="col-xs-12">
             <div class="box">
                 <div class="box-body">
-
-                    {% include 'participantGroup/excel-import-table.html.twig' with { groups: groups }%}
-
+                    {% include importResultTemplate %}
                 </div>
             </div>
         </div>

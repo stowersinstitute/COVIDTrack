@@ -2359,12 +2359,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Stowers-LIMS/zpl.git",
-                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa"
+                "reference": "05624efe876bcfeb885488a6af13f741c77280ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Stowers-LIMS/zpl/zipball/4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
-                "reference": "4fb01c597f0d10f6bf59735f0ab7e0886ba83bfa",
+                "url": "https://api.github.com/repos/Stowers-LIMS/zpl/zipball/05624efe876bcfeb885488a6af13f741c77280ae",
+                "reference": "05624efe876bcfeb885488a6af13f741c77280ae",
                 "shasum": ""
             },
             "require": {
@@ -2396,7 +2396,7 @@
                 "php-wrapper",
                 "zpl"
             ],
-            "time": "2020-04-24T17:59:52+00:00"
+            "time": "2020-05-08T22:05:17+00:00"
         },
         {
             "name": "symfony/asset",
@@ -6699,6 +6699,20 @@
             "keywords": [
                 "Fixture",
                 "persistence"
+            ],
+            "funding": [
+                {
+                    "url": "https://www.doctrine-project.org/sponsorship.html",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.patreon.com/phpdoctrine",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Fdoctrine-fixtures-bundle",
+                    "type": "tidelift"
+                }
             ],
             "time": "2020-04-02T16:40:37+00:00"
         },
