@@ -74,7 +74,7 @@ class Specimen
 
     /**
      * @var WellPlate
-     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
+     * ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
      */
     private $wellPlate;
 
@@ -381,15 +381,15 @@ class Specimen
         return $map[$rec] ?? '';
     }
 
-    public function getWellPlate(): ?WellPlate
-    {
-        return $this->wellPlate;
-    }
-
-    public function setWellPlate(?WellPlate $wellPlate): void
-    {
-        $this->wellPlate = $wellPlate;
-    }
+//    public function getWellPlate(): ?WellPlate
+//    {
+//        return $this->wellPlate;
+//    }
+//
+//    public function setWellPlate(?WellPlate $wellPlate): void
+//    {
+//        $this->wellPlate = $wellPlate;
+//    }
 
     public function getCollectedAt(): ?\DateTimeInterface
     {

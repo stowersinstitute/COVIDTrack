@@ -9,11 +9,8 @@ use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Class WellPlate
- * @package App\Entity
- *
- * @ORM\Entity
- * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
+ * ORM\Entity
+ * Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class WellPlate
 {
