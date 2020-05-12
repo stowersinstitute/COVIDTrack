@@ -49,6 +49,7 @@ class AppLdapUserSynchronizer
         // No local user account exists, create one
         $localUser = new AppUser($ldapUser->getUsername());
         $localUser->setIsLdapUser(true);
+        $localUser->setPassword('SEE_LDAP');
 
         $this->em->persist($localUser);
 
