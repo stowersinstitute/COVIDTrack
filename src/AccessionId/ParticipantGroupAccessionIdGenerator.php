@@ -7,7 +7,7 @@ namespace App\AccessionId;
 use App\Entity\ParticipantGroup;
 use App\Entity\ParticipantGroupRepository;
 use App\Util\StringUtils;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ParticipantGroupAccessionIdGenerator
 {
@@ -19,7 +19,7 @@ class ParticipantGroupAccessionIdGenerator
      */
     private $generatedThisInstance = [];
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->repository = $entityManager->getRepository(ParticipantGroup::class);
     }
