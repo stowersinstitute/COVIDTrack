@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Import Complete{% endblock %}
+
+{% block body %}
+    {% include 'participantGroup/excel-import-summary-widgets.html.twig' %}
+
+    <a class="btn btn-primary" href="{{ path('app_participant_group_list') }}">View Groups</a>
+{% endblock %}

@@ -33,13 +33,21 @@ class AppFixtures extends Fixture
      */
     private function addParticipantGroups(ObjectManager $em): array
     {
+        $fixtureData = [
+            [ 'title' => 'Red',         'participantCount' => 3,    'accessionId' => 'GRP-722XJW' ],
+            [ 'title' => 'Orange',      'participantCount' => 5,    'accessionId' => 'GRP-ZRGTSS' ],
+            [ 'title' => 'Yellow',      'participantCount' => 7,    'accessionId' => 'GRP-7PRMZC' ],
+            [ 'title' => 'Green',       'participantCount' => 9,    'accessionId' => 'GRP-N9YNSH' ],
+            [ 'title' => 'Blue',        'participantCount' => 11,   'accessionId' => 'GRP-9LT5SY' ],
+            [ 'title' => 'Indigo',      'participantCount' => 13,   'accessionId' => 'GRP-WCKXJT' ],
+            [ 'title' => 'Violet',      'participantCount' => 15,   'accessionId' => 'GRP-CRYGX9' ],
+        ];
+
         $groups = [];
-        $numToCreate = 10;
-        $participantCount = 5;
-        for ($i=0; $i<$numToCreate; $i++) {
-            $accessionId = 'GRP-'.($i+1);
-            $g = new ParticipantGroup($accessionId, $participantCount++);
-            $g->setTitle($this->getGroupTitle($i));
+        foreach ($fixtureData as $raw) {
+            $accessionId = $raw['accessionId'];
+            $g = new ParticipantGroup($accessionId, $raw['participantCount']);
+            $g->setTitle($raw['title']);
 
             $groups[] = $g;
 
