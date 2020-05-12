@@ -10,13 +10,9 @@ class AppParticipantGroupsFixtures extends Fixture
 {
     public function load(ObjectManager $em)
     {
-        $groups = [];
         foreach ($this->getData() as $raw) {
-            $accessionId = $raw['accessionId'];
-            $g = new ParticipantGroup($accessionId, $raw['participantCount']);
+            $g = new ParticipantGroup($raw['accessionId'], $raw['participantCount']);
             $g->setTitle($raw['title']);
-
-            $groups[] = $g;
 
             $em->persist($g);
         }
