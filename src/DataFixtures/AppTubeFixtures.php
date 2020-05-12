@@ -74,7 +74,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
             $T = new Tube($accessionId);
 
-            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i));
+            // Tube Specimens will have been collected (extracted) from the
+            // Participant within the last few days
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
 
             $em->persist($T);
