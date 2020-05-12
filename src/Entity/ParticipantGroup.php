@@ -12,6 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
+ * @ORM\Table(name="participant_groups")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
@@ -24,7 +25,7 @@ class ParticipantGroup
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -33,7 +34,7 @@ class ParticipantGroup
      * Unique public ID for referencing this group.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string")
+     * @ORM\Column(name="accession_id", type="string")
      * @Gedmo\Versioned
      */
     private $accessionId;
@@ -52,7 +53,7 @@ class ParticipantGroup
      * Number of Participants in this group.
      *
      * @var integer
-     * @ORM\Column(name="participantCount", type="smallint", options={"unsigned":true}, nullable=false)
+     * @ORM\Column(name="participant_count", type="smallint", options={"unsigned":true}, nullable=false)
      * @Gedmo\Versioned
      */
     private $participantCount;
