@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenResultQPCR extends SpecimenResult
 {
+    // When result is not yet available.
+    const CONCLUSION_PENDING = "PENDING";
+
     // When result did not find evidence of viral DNA in Specimen.
     const CONCLUSION_NEGATIVE = "NEGATIVE";
 
@@ -35,7 +38,7 @@ class SpecimenResultQPCR extends SpecimenResult
 
     public function __construct(Specimen $specimen)
     {
-        $this->conclusion = self::CONCLUSION_INCONCLUSIVE;
+        $this->conclusion = self::CONCLUSION_PENDING;
 
         parent::__construct($specimen);
     }
@@ -70,6 +73,7 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
+            'Pending' => self::CONCLUSION_PENDING,
             'Negative' => self::CONCLUSION_NEGATIVE,
             'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,

@@ -51,6 +51,11 @@ class SpecimenTest extends TestCase
         // Default when Specimen test results not yet available
         $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
 
+        // Add Pending Result
+        $r1 = new SpecimenResultQPCR($specimen);
+        $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_PENDING);
+        $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
+
         // Add Negative Result
         $r2 = new SpecimenResultQPCR($specimen);
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);

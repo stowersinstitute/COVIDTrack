@@ -68,6 +68,8 @@ class AppFixtures extends Fixture
      */
     private function addResultedSpecimens(ObjectManager $em, array $groups)
     {
+        $possibleResults = $this->buildQPCRResultsDistribution();
+
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
             // for this many days worth of testing
@@ -78,21 +80,21 @@ class AppFixtures extends Fixture
                     $s = new Specimen($this->getNextSpecimenId(), $group);
                     $s->setType($this->getSpecimenType($i));
                     $s->setCollectedAt(new \DateTime(sprintf('-%d days 5:00pm', $day)));
-                    $s->setStatus(Specimen::STATUS_RESULTS);
 
                     $em->persist($s);
 
                     // Add many qPCR results, which test for presence of virus
-                    $maxQPCR = rand(2,4);
+                    $maxQPCR = rand(1,2);
                     for ($j=0; $j<$maxQPCR; $j++) {
-                        $r1 = new SpecimenResultQPCR($s);
+                        // Set a random conclusion, if we have one
+                        $conclusion = $possibleResults[array_rand($possibleResults)];
+                        if ($conclusion) {
+                            $r1 = new SpecimenResultQPCR($s);
+                            $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
+                            $r1->setConclusion($conclusion);
 
-                        // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
-                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $i)));
-
-                        // Set a random conclusion
-                        $conclusions = SpecimenResultQPCR::getFormConclusions();
-                        $r1->setConclusion($conclusions[array_rand($conclusions)]);
+                            $s->setStatus(Specimen::STATUS_RESULTS);
+                        }
 
                         $em->persist($r1);
                     }
@@ -174,5 +176,31 @@ class AppFixtures extends Fixture
         }
 
         return $titles[$idx];
+    }
+
+    /**
+     * Build array of possible qPCR Results across a probability distribution.
+     * Pull a random element from this array to get a random result.
+     *
+     * Returns NULL when no result available, such as when Awaiting Results.
+     */
+    private function buildQPCRResultsDistribution(): array
+    {
+        // Approximate hit rate out of 100
+        $positive = 6;
+        $recommended = 4;
+        $negative = 72;
+        $inconclusive = 10;
+        $awaitingResults = 8;
+
+        $possible = array_merge(
+            array_fill(0, $positive, SpecimenResultQPCR::CONCLUSION_POSITIVE),
+            array_fill(0, $recommended, SpecimenResultQPCR::CONCLUSION_RECOMMENDED),
+            array_fill(0, $negative, SpecimenResultQPCR::CONCLUSION_NEGATIVE),
+            array_fill(0, $inconclusive, SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE),
+            array_fill(0, $awaitingResults, null)
+        );
+
+        return $possible;
     }
 }
