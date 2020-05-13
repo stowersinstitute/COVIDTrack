@@ -4,6 +4,7 @@
 namespace App\Command;
 
 
+use App\Security\OptionalLdapUserProvider;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -25,7 +26,7 @@ class DebugLdapUserCommand extends Command
 
     public function __construct(
         Ldap $ldap,
-        LdapUserProvider $ldapUserProvider
+        OptionalLdapUserProvider $ldapUserProvider
     ) {
         parent::__construct();
 

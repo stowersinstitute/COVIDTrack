@@ -96,9 +96,9 @@ class LdapUserController extends AbstractController
     {
         $this->denyAcessUnlessPermissions();
 
-        $ldapUser = $this->findLdapUser($username);
-        $localUser = $ldapUserSynchronizer->synchronize($ldapUser);
+        $localUser = $ldapUserSynchronizer->createLocalUser($username);
 
+        $this->getDoctrine()->getManager()->persist($localUser);
         $this->getDoctrine()->getManager()->flush();
 
         // After the user is created the normal user management pages can be used
