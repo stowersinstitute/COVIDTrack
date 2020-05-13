@@ -105,7 +105,7 @@ class TubeCheckinController extends AbstractController
     /**
      * @route(path="/import/start", name="checkin_import_start")
      */
-    public function startUpload(Request $request, ExcelImporter $excelImporter)
+    public function importStart(Request $request, ExcelImporter $excelImporter)
     {
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
@@ -126,7 +126,7 @@ class TubeCheckinController extends AbstractController
         }
 
         return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Tube Check-In',
+            'itemLabel' => 'Approve/Reject',
             'importForm' => $form->createView(),
         ]);
     }
@@ -136,27 +136,24 @@ class TubeCheckinController extends AbstractController
      */
     public function importPreview(int $importId, ExcelImporter $excelImporter)
     {
-        $importingWorkbook = $this->getDoctrine()
-            ->getManager()
-            ->find(ExcelImportWorkbook::class, $importId);
-
+        $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new SpecimenIntakeImporter(
-            $importingWorkbook->getFirstWorksheet(),
-            $this->getDoctrine()->getManager()
+            $this->getDoctrine()->getManager(),
+            $importingWorkbook->getFirstWorksheet()
         );
-        $importer = new SpecimenIntakeImporter($importingWorkbook->getFirstWorksheet());
-        $importer->setEntityManager($this->getDoctrine()->getManager());
 
-        $importer->process();
+        $output = $importer->process();
 
-        return $this->render('excel-import/base-excel-import-preview.html.twig', [
+        return $this->render('checkin/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
-            'importPreviewTemplate' => 'specimen-intake/import-table.html.twig',
+            'rejected' => $output['rejected'] ?? [],
+            'accepted' => $output['accepted'] ?? [],
+            'importPreviewTemplate' => 'checkin/excel-import-table.html.twig',
             'importCommitRoute' => 'checkin_import_commit',
-            'importCommitText' => 'Save Check-In',
+            'importCommitText' => 'Save Check-ins',
         ]);
     }
 
@@ -167,29 +164,37 @@ class TubeCheckinController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $importingWorkbook = $em
-            ->find(ExcelImportWorkbook::class, $importId);
-
+        $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new SpecimenIntakeImporter(
-            $importingWorkbook->getFirstWorksheet(),
-            $em
+            $em,
+            $importingWorkbook->getFirstWorksheet()
         );
-        $importer = new SpecimenIntakeImporter($importingWorkbook->getFirstWorksheet());
-        $importer->setEntityManager($em);
-
-        $importer->process(true);
-
-        $affectedTubes = $importer->getOutput();
+        $output = $importer->process(true);
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);
 
-        return $this->render('excel-import/base-excel-import-result.html.twig', [
+        $em->flush();
+
+        return $this->render('checkin/excel-import-result.html.twig', [
             'importer' => $importer,
-            'importResultTemplate' => 'specimen-intake/import-table.html.twig',
+            'rejected' => $output['rejected'] ?? [],
+            'accepted' => $output['accepted'] ?? [],
         ]);
+    }
+
+    private function mustFindImport(int $importId): ExcelImportWorkbook
+    {
+        $workbook = $this->getDoctrine()
+            ->getManager()
+            ->find(ExcelImportWorkbook::class, $importId);
+        if (!$workbook) {
+            throw new \InvalidArgumentException('Cannot find Import by ID');
+        }
+
+        return $workbook;
     }
 
     private function createJsonErrorResponse(string $msg): JsonResponse

@@ -1,0 +1,43 @@
+{% extends 'excel-import/base-excel-import-preview.html.twig' %}
+
+{# This information is displayed below #}
+{% block importSourceDescription %}{% endblock %}
+{# This normally includes the count, which doesn't apply since we break it into separate tables #}
+{% block importPreviewHeader %}{% endblock %}
+
+{% block beforeTopConfirmButton %}
+    {% include 'checkin/excel-import-summary-widgets.html.twig' %}
+{% endblock %}
+
+{% block importPreviewSection %}
+    {% if rejected|length > 0 %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">Rejected <span class="badge bg-red">{{ rejected|length }}</span></h3>
+                    </div>
+                    <div class="box-body">
+                        {% include 'checkin/excel-import-table.html.twig' with { checkins: rejected } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if accepted|length > 0 %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">Accepted <span class="badge bg-green">{{ accepted|length }}</span></h3>
+                    </div>
+                    <div class="box-body">
+                        {% include 'checkin/excel-import-table.html.twig' with { checkins: accepted } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

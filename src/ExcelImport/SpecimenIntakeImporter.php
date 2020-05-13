@@ -1,23 +1,54 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
+use Doctrine\ORM\EntityManager;
 
 class SpecimenIntakeImporter extends BaseExcelImporter
 {
-    public function __construct(ExcelImportWorksheet $worksheet)
+    /**
+     * Excel cell value when Tube is Accepted. Case insensitive.
+     */
+    const STATUS_ACCEPTED = 'ACCEPTED';
+    /**
+     * Excel cell value when Tube is Rejected. Case insensitive.
+     */
+    const STATUS_REJECTED = 'REJECTED';
+
+    /**
+     * Local cache for record lookup
+     * @var array Keys Tube.accessionId; Values Tube
+     */
+    private $tubeCache = [];
+
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
+        $this->setEntityManager($em);
+
         parent::__construct($worksheet);
 
         $this->columnMap = [
             'tubeId' => 'A',
             'acceptedStatus' => 'B',
-            'technicianUsername' => 'C',
+            'username' => 'C',
         ];
+    }
+
+    /**
+     * OVERRIDDEN to match format in process()
+     */
+    public function getNumImportedItems(): int
+    {
+        if ($this->output === null) throw new \LogicException('Called getNumImportedItems before process()');
+
+        $changedItems = 0;
+        foreach ($this->output as $action => $groups) {
+            $changedItems += count($groups);
+        }
+
+        return $changedItems;
     }
 
     /**
@@ -29,87 +60,123 @@ class SpecimenIntakeImporter extends BaseExcelImporter
     {
         if ($this->output !== null) return $this->output;
 
-        $seenTubes = [];
+        $output = [
+            'accepted' => [],
+            'rejected' => [],
+        ];
+
+        // Track Tubes imported during this import.
+        // Used for duplicate import checking.
+        $importedTubes = [];
 
         for ($rowNumber=$this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
-            $tubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
-            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
-            $rawTechnicianUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['technicianUsername']);
-
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
 
-            $tube = $this->getTube($tubeId);
-            // Immediately skip if there isn't a valid tube ID
-            if (!$tube) {
-                $details = sprintf('Tube ID "%s" does not exist', $tubeId);
-                // Special case for an empty $tubeId
-                if (!$tubeId) $details = 'Tube ID cannot be empty';
-                $this->messages[] = ImportMessage::newError(
-                    $details,
-                    $rowNumber,
-                    $this->columnMap['tubeId']
-                );
-                continue;
-            }
-
-            // Ensure that a modified entity won't be persisted unless we're importing for real (instead of previewing)
-            if (!$commit) $this->em->detach($tube);
+            $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
+            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
+            $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
+            $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateTargetTube($tube, $rowNumber) && $rowOk;
+            $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
-            $rowOk = $this->validateTechnicianUsername($rawTechnicianUsername, $rowNumber) && $rowOk;
+            $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            $isAccepted = strtolower($rawAcceptedStatus) == 'accept';
-            if ($isAccepted) {
-                $tube->markAccepted($rawTechnicianUsername);
-            }
-            else {
-                $tube->markRejected($rawTechnicianUsername);
+            // Tube already validated
+            $tube = $this->findTube($rawTubeId);
+
+            // Set accepted/rejected status
+            switch ($rawAcceptedStatus) {
+                case self::STATUS_ACCEPTED:
+                    $tube->markAccepted($rawUsername);
+                    $output['accepted'][] = $tube;
+                    break;
+                case self::STATUS_REJECTED:
+                    $tube->markRejected($rawUsername);
+                    $output['rejected'][] = $tube;
+                    break;
             }
 
-            $seenTubes[] = $tube;
+            $importedTubes[$tube->getAccessionId()] = $tube;
         }
 
-        // Commit changes to the database
-        if ($commit) $this->em->flush();
+        if (!$commit) {
+            $this->getEntityManager()->clear();
+        }
 
-        $this->output = $seenTubes;
+        $this->output = $output;
+
+        return $this->output;
     }
 
-    protected function validateTargetTube(Tube $tube, $rowNumber) : bool
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     *
+     * @param Tube[]  $seenTubes Tubes already imported during this import
+     * @return bool
+     */
+    private function validateTube(string $rawTubeId, $rowNumber, array $seenTubes): bool
     {
-        // todo: not sure any validation applies? If a tube shows up in the results but was never checked in is that really an error
-        //          or should we just do our best to check it in and then audit log it?
-        return true;
-
-        // Tubes must be in "ACCEPTED" (next step is check in)
-        if ($tube->getStatus() !== Tube::STATUS_ACCEPTED) {
+        if (!$rawTubeId) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Tube ID "%s" cannot be checked in because it has status %s', $tube->getAccessionId(), $tube->getStatusText()),
+                'Tube ID cannot be blank',
                 $rowNumber,
                 $this->columnMap['tubeId']
             );
             return false;
         }
 
-        // todo: validate user-selected type is the same as in the excel file? Or just update and audit log?
+        // Ensure Tube can be found
+        $tube = $this->findTube($rawTubeId);
+        if (!$tube) {
+            $this->messages[] = ImportMessage::newError(
+                'Tube not found by Tube ID',
+                $rowNumber,
+                $this->columnMap['tubeId']
+            );
+            return false;
+        }
+
+        // Don't re-process same tube again
+        if (isset($seenTubes[$tube->getAccessionId()])) {
+            $this->messages[] = ImportMessage::newError(
+                'Tube ID occurs more than once in uploaded workbook',
+                $rowNumber,
+                $this->columnMap['tubeId']
+            );
+            return false;
+        }
+
+        // Tubes must be in correct status to be checked-in
+        if (!$tube->isReadyForCheckin()) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Tube cannot be checked in because it has status %s', $tube->getStatusText()),
+                $rowNumber,
+                $this->columnMap['tubeId']
+            );
+            return false;
+        }
 
         return true;
     }
 
-    protected function validateAcceptOrReject($raw, $rowNumber) : bool
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validateAcceptOrReject($raw, $rowNumber): bool
     {
-        // Case-insensitive check to see if a valid accept/result is specified
-        $validStatuses = ['accept', 'reject'];
-        if (!in_array(strtolower($raw), $validStatuses)) {
+        $validStatuses = [self::STATUS_ACCEPTED, self::STATUS_REJECTED];
+        if (!in_array($raw, $validStatuses)) {
             $this->messages[] = ImportMessage::newError(
-                // todo: get real column name + statuses
                 sprintf('Accept/Reject must be one of: %s', join(", ", $validStatuses)),
                 $rowNumber,
                 $this->columnMap['acceptedStatus']
@@ -120,23 +187,28 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         return true;
     }
 
-    protected function validateTechnicianUsername($raw, $rowNumber) : bool
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validateUsername(string $rawUsername, $rowNumber): bool
     {
-        if (!$raw) {
+        if (!$rawUsername) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Technician username cannot be blank'),
+                sprintf('Technician Username cannot be blank'),
                 $rowNumber,
-                $this->columnMap['technicianUsername']
+                $this->columnMap['username']
             );
             return false;
         }
 
         $maxLen = 255; // From Tube::checkedInByUsername
-        if (strlen($raw) > $maxLen) {
+        if (strlen($rawUsername) > $maxLen) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Technician username must be less than %s characters', $maxLen),
+                sprintf('Technician Username must be less than %s characters', $maxLen),
                 $rowNumber,
-                $this->columnMap['technicianUsername']
+                $this->columnMap['username']
             );
             return false;
         }
@@ -144,10 +216,22 @@ class SpecimenIntakeImporter extends BaseExcelImporter
         return true;
     }
 
-    protected function getTube(string $tubeId) : ?Tube
+    private function findTube(string $tubeId) : ?Tube
     {
-        return $this->em
+        if (isset($this->tubeCache[$tubeId])) {
+            return $this->tubeCache[$tubeId];
+        }
+
+        /** @var Tube $tube */
+        $tube = $this->em
             ->getRepository(Tube::class)
             ->findOneBy(['accessionId' => $tubeId]);
+        if (!$tube) {
+            return null;
+        }
+
+        $this->tubeCache[$tubeId] = $tube;
+
+        return $tube;
     }
 }

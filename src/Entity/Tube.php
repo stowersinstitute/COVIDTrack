@@ -26,6 +26,9 @@ class Tube
     const TYPE_SALIVA = "SALIVA";
     const TYPE_SWAB = "SWAB";
 
+    const CHECKED_IN_ACCEPTED = "ACCEPTED";
+    const CHECKED_IN_REJECTED = "REJECTED";
+
     /**
      * @var int
      * @ORM\Id()
@@ -88,6 +91,17 @@ class Tube
      * @ORM\JoinColumn(name="dropOffId", referencedColumnName="id", onDelete="SET NULL")
      */
     private $dropOff;
+
+    /**
+     * What Check-in Technician decided when observing Tube and Specimen
+     * during check-in process.
+     *
+     * Values are self::CHECK_IN_* constants.
+     *
+     * @var string
+     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     */
+    private $checkInDecision;
 
     /**
      * Date/Time when Tube was processed for check-in by Check-in Technician.
@@ -229,6 +243,48 @@ class Tube
     }
 
     /**
+     * Whether this Tube is in the correct state to be processed for a check-in
+     * by a Check-in Technician.
+     */
+    public function isReadyForCheckin(): bool
+    {
+        return $this->checkInDecision === null;
+    }
+
+    public function getCheckInDecision(): ?string
+    {
+        return $this->checkInDecision;
+    }
+
+    /**
+     * @param string $decision self::CHECKED_IN_* constant
+     */
+    public function setCheckInDecision(string $decision)
+    {
+        $valid = [
+            self::CHECKED_IN_ACCEPTED,
+            self::CHECKED_IN_REJECTED,
+        ];
+        if (!in_array($decision, $valid)) {
+            throw new \InvalidArgumentException('Invalid check-in decision');
+        }
+
+        $this->checkInDecision = $decision;
+    }
+
+    public function getCheckInDecisionText(): string
+    {
+        switch ($this->checkInDecision) {
+            case self::CHECKED_IN_ACCEPTED:
+                return 'Accepted';
+            case self::CHECKED_IN_REJECTED:
+                return 'Rejected';
+            default:
+                return '';
+        }
+    }
+
+    /**
      * Set when Check-in Tech processed the returned Tube.
      */
     public function setCheckedInAt(?\DateTimeImmutable $checkedInAt): void
@@ -293,6 +349,7 @@ class Tube
 
         // Tube
         $this->setStatus(self::STATUS_ACCEPTED);
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
 
@@ -312,6 +369,7 @@ class Tube
 
         // Tube
         $this->setStatus(self::STATUS_REJECTED);
+        $this->setCheckInDecision(self::CHECKED_IN_REJECTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
 

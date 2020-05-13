@@ -1,0 +1,19 @@
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Tube ID</th>
+            <th>Accepted/Rejected</th>
+            <th>Checked-in By Username</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for checkin in checkins  %}
+        <tr>
+            <td>{{ checkin.accessionId }}</td>
+            <td>{{ checkin.checkInDecisionText }}</td>
+            <td>{{ checkin.checkInDecisionText }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

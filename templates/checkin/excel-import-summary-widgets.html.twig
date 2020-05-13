@@ -1,0 +1,48 @@
+<div class="row">
+    {# Total Rows #}
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="fa fa-file-excel-o"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</span>
+                <span class="info-box-number">{{ importer.numImportedItems }} Rows</span>
+            </div>
+        </div>
+    </div>
+
+    {# Rejected Results #}
+    {% if rejected|length > 0 %}
+        {% set bgColor = 'bg-red' %}
+        {% set actionCount = rejected|length %}
+    {% else %}
+        {% set bgColor = 'bg-gray' %}
+        {% set actionCount = '-- None --' %}
+    {% endif %}
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-minus-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Rejected</span>
+                <span class="info-box-number">{{ actionCount }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# Accepted Results #}
+    {% if accepted|length > 0 %}
+        {% set bgColor = 'bg-green' %}
+        {% set actionCount = accepted|length %}
+    {% else %}
+        {% set bgColor = 'bg-gray' %}
+        {% set actionCount = '-- None --' %}
+    {% endif %}
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-plus-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Accepted</span>
+                <span class="info-box-number">{{ accepted|length }}</span>
+            </div>
+        </div>
+    </div>
+</div>
