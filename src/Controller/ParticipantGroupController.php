@@ -149,10 +149,7 @@ class ParticipantGroupController extends AbstractController
     ) {
         $em = $this->getDoctrine()->getManager();
 
-        $importingWorkbook = $this->getDoctrine()
-            ->getManager()
-            ->find(ExcelImportWorkbook::class, $importId);
-
+        $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter(
@@ -183,9 +180,7 @@ class ParticipantGroupController extends AbstractController
         $em = $this->getDoctrine()
             ->getManager();
 
-        $importingWorkbook = $em
-            ->find(ExcelImportWorkbook::class, $importId);
-
+        $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter(
@@ -217,5 +212,17 @@ class ParticipantGroupController extends AbstractController
         }
 
         return $s;
+    }
+
+    private function mustFindImport(int $importId): ExcelImportWorkbook
+    {
+        $workbook = $this->getDoctrine()
+            ->getManager()
+            ->find(ExcelImportWorkbook::class, $importId);
+        if (!$workbook) {
+            throw new \InvalidArgumentException('Cannot find Import by ID');
+        }
+
+        return $workbook;
     }
 }
