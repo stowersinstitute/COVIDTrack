@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Specimen;
 use App\Entity\Tube;
 use Doctrine\ORM\EntityRepository;
 
@@ -26,5 +27,24 @@ class TubeRepository extends EntityRepository
         return $this->findOneBy([
             'accessionId' => $id,
         ]);
+    }
+
+    /**
+     * Tubes ready for Check-In by a Technician
+     *
+     * @return Tube[]
+     */
+    public function findReadyForCheckin(): array
+    {
+        return $this->createQueryBuilder('t')
+            ->addSelect('s')
+            ->join('t.specimen', 's')
+            ->where('s.status = :status')
+            ->setParameter('status', Specimen::STATUS_RETURNED)
+
+            ->orderBy('t.accessionId')
+
+            ->getQuery()
+            ->execute();
     }
 }

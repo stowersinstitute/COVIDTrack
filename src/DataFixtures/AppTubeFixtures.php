@@ -39,7 +39,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $em)
     {
         $this->distributedTubes($em);
-        $this->droppedOffTubes($em);
+        $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
@@ -63,9 +63,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Tubes that Participants have returned at a Kiosk.
+     * Tubes that Participants have returned at a Kiosk and are ready for
+     * Technician check-in.
      */
-    private function droppedOffTubes(ObjectManager $em)
+    private function returnedTubes(ObjectManager $em)
     {
         $startAccession = 2000;
 

@@ -74,6 +74,7 @@ class KioskController extends AbstractController
      */
     public function tubeInput(int $id, Request $request)
     {
+        /** @var DropOff $dropOff */
         $dropOff = $this->getDoctrine()->getRepository(DropOff::class)->find($id);
 
         $form = $this->createForm(TubeType::class);

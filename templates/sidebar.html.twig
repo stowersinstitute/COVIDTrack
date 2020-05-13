@@ -54,16 +54,25 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_specimen_list'
                 },
                 {
-                    text: 'Check-in',
-                    iconClass: 'fa-check-square',
-                    route: 'specimen_intake_start'
-                },
-                {
                     text: 'New',
                     iconClass: 'fa-plus',
                     route: 'app_specimen_new'
                 },
             ])
+        }}
+        {{
+        _self.treenode('Check-In', 'fa-flask', [
+            {
+                text: 'Queue',
+                iconClass: 'fa-list',
+                route: 'checkin_queue'
+            },
+            {
+                text: 'Import',
+                iconClass: 'fa-check-square',
+                route: 'checkin_import_start'
+            },
+        ], ['ROLE_SPECIMEN_CHECK_IN'])
         }}
         {{
             _self.treenode('Participant Groups', 'fa-users', [
