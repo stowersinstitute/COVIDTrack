@@ -5,6 +5,7 @@ namespace App\Ldap;
 
 
 use App\Entity\AppUser;
+use App\Security\OptionalLdapUserProvider;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -13,44 +14,39 @@ class AppLdapUserSynchronizer
     /** @var EntityManager  */
     protected $em;
 
-    public function __construct(EntityManagerInterface $em)
-    {
+    /** @var OptionalLdapUserProvider */
+    protected $ldapUserProvider;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        OptionalLdapUserProvider $ldapUserProvider
+    ) {
         $this->em = $em;
+        $this->ldapUserProvider = $ldapUserProvider;
     }
 
     /**
-     * Ensures that a local user account exists for $ldapUser and it is current
-     * with the data in $ldapUser
+     * Updates $localUser to be current with data stored in LDAP
      *
      * Note that you must flush the entity manager after calling this method
      */
-    public function synchronize(AppLdapUser $ldapUser) : AppUser
+    public function synchronize(AppUser $localUser) : AppUser
     {
-        $localUser = $this->findLocalUser($ldapUser);
-        if (!$localUser) {
-            $localUser = $this->createLocalUser($ldapUser);
-        }
+        $ldapUser = $this->getAppLdapUser($localUser->getUsername());
 
         $this->updateLocalUserFromLdapUser($localUser, $ldapUser);
 
         return $localUser;
     }
 
-    protected function createLocalUser(AppLdapUser $ldapUser) : AppUser
+    public function createLocalUser(string $username) : AppUser
     {
-        $localUser = $this->findLocalUser($ldapUser);
+        $ldapUser = $this->getAppLdapUser($username);
 
-        // If a local user exists make sure it's flagged as an LDAP user
-        if ($localUser) {
-            $localUser->setIsLdapUser(true);
-            return $localUser;
-        }
-
-        // No local user account exists, create one
         $localUser = new AppUser($ldapUser->getUsername());
         $localUser->setIsLdapUser(true);
 
-        $this->em->persist($localUser);
+        $this->updateLocalUserFromLdapUser($localUser, $ldapUser);
 
         return $localUser;
     }
@@ -62,10 +58,12 @@ class AppLdapUserSynchronizer
         $localUser->setTitle($ldapUser->getTitle());
     }
 
-    protected function findLocalUser(AppLdapUser $ldapUser) : ?AppUser
+    protected function getAppLdapUser(string $username) : AppLdapUser
     {
-        return $this->em
-            ->getRepository(AppUser::class)
-            ->findOneBy(['username' => $ldapUser->getUsername()]);
+        $ldapUser = $this->ldapUserProvider->loadUserByUsername($username);
+
+        if (!$ldapUser) throw new \InvalidArgumentException('No ldap user found for ' . $username);
+
+        return AppLdapUser::fromLdapUser($ldapUser);
     }
 }
