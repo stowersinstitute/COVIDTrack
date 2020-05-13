@@ -88,6 +88,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
             $credentials['username']
         );
 
+        if (!$credentials['password']) throw new \InvalidArgumentException('Password cannot be blank');
+
         return $credentials;
     }
 
@@ -173,6 +175,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $dn = str_replace('{username}', $username, $this->ldapAuthUserDnFormat);
 
         try {
+            // Passing an empty password to bind() is an anonymous bind and will succeed!
+            if (!$credentials['password']) {
+                return false;
+            }
+
             // Throws an exception if password is invalid
             $this->ldap->bind($dn, $credentials['password']);
         } catch (ConnectionException $e) {
