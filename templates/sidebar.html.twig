@@ -34,6 +34,15 @@ Renders a top-level navigation node in the tree navigation.
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         {{
+            _self.treenode('Tubes', 'fa-vial', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_tube_list'
+                }
+            ])
+        }}
+        {{
             _self.treenode('Specimens', 'fa-flask', [
                 {
                     text: 'List',
