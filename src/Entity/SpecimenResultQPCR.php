@@ -50,7 +50,7 @@ class SpecimenResultQPCR extends SpecimenResult
 
     public function setConclusion(string $conclusion): void
     {
-        if (!in_array($conclusion, self::getFormConclusions())) {
+        if (!self::isValidConclusion($conclusion)) {
             throw new \InvalidArgumentException('Tried setting invalid Conclusion');
         }
 
@@ -58,6 +58,11 @@ class SpecimenResultQPCR extends SpecimenResult
 
         // Specimen recommendation depends on conclusion
         $this->getSpecimen()->recalculateCliaTestingRecommendation();
+    }
+
+    public static function isValidConclusion(string $conclusion): bool
+    {
+        return in_array($conclusion, self::getFormConclusions());
     }
 
     public function getConclusionText(): string

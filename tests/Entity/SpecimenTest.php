@@ -23,6 +23,63 @@ class SpecimenTest extends TestCase
         $this->assertSame($s->getParticipantGroup(), $group);
     }
 
+    public function testGetQPCRResultsWhenEmpty()
+    {
+        $s = Specimen::buildExample('C100');
+
+        // No results returned when has 0 results
+        $results = $s->getQPCRResults(1);
+        $this->assertCount(0, $results);
+
+        // Add first result
+        $r1 = new SpecimenResultQPCR($s);
+        $r1->setCreatedAt(new \DateTime('2020-04-24'));
+        $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Add second result (but it's the most recent created at)
+        $r2 = new SpecimenResultQPCR($s);
+        $r2->setCreatedAt(new \DateTime('2020-04-25'));
+        $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        // Add third result
+        $r3 = new SpecimenResultQPCR($s);
+        $r3->setCreatedAt(new \DateTime('2020-04-23'));
+        $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+
+        //
+        $this->assertSame($r2, $s->getMostRecentQPCRResult());
+    }
+
+    public function testGetQPCRResultsOrderedByDate()
+    {
+        $s = Specimen::buildExample('C100');
+
+        // Add first result
+        $r1 = new SpecimenResultQPCR($s);
+        $r1->setCreatedAt(new \DateTime('2020-04-24'));
+        $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Add second result (but it's the most recent created at)
+        $r2 = new SpecimenResultQPCR($s);
+        $r2->setCreatedAt(new \DateTime('2020-04-25'));
+        $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        // Add third result
+        $r3 = new SpecimenResultQPCR($s);
+        $r3->setCreatedAt(new \DateTime('2020-04-23'));
+        $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+
+        // Most recent
+        $found = $s->getQPCRResults(1);
+        $this->assertCount(1, $found);
+        $this->assertEquals([$r2], $found);
+
+        // Two most recent
+        $found = $s->getQPCRResults(2);
+        $this->assertCount(2, $found);
+        $this->assertEquals([$r2, $r1], $found);
+    }
+
     public function testGetNewestQPCRResult()
     {
         $s = Specimen::buildExample('C100');

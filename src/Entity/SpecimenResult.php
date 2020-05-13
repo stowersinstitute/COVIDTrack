@@ -34,7 +34,7 @@ abstract class SpecimenResult
     /**
      * Specimen analyzed to generate these results.
      *
-     * @var ParticipantGroup
+     * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="results")
      * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -63,6 +63,11 @@ abstract class SpecimenResult
     public function getSpecimen(): Specimen
     {
         return $this->specimen;
+    }
+
+    public function getSpecimenAccessionId(): string
+    {
+        return $this->specimen->getAccessionId();
     }
 
     public function setIsFailure(bool $bool): void
