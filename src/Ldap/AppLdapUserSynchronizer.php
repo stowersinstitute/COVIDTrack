@@ -11,17 +11,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class AppLdapUserSynchronizer
 {
-    /** @var EntityManager  */
-    protected $em;
-
     /** @var OptionalLdapUserProvider */
     protected $ldapUserProvider;
 
     public function __construct(
-        EntityManagerInterface $em,
         OptionalLdapUserProvider $ldapUserProvider
     ) {
-        $this->em = $em;
         $this->ldapUserProvider = $ldapUserProvider;
     }
 
