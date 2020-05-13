@@ -9,6 +9,7 @@
             <th>Active?</th>
             <th>Created</th>
             <th>Last Modified</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -29,6 +30,7 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
+            <th><a href="{{ path('app_participant_group_print', {accessionId: group.accessionId}) }}" title="Print Participant Group Labels"><i class="fa fa-fw fa-print"></i></a></th>
         </tr>
     {% endfor %}
     </tbody>

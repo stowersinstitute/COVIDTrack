@@ -5,12 +5,19 @@ namespace App\Controller;
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
+use App\Entity\LabelPrinter;
 use App\Entity\ParticipantGroup;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
+use App\Label\ParticipantGroupLabelBuilder;
+use App\Label\ZplPrinting;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -107,6 +114,59 @@ class ParticipantGroupController extends AbstractController
         return $this->render('participantGroup/participant-group-view.html.twig', [
             'group' => $group,
             'auditLogs' => $auditLogs,
+        ]);
+    }
+
+    /**
+     * Print group labels
+     *
+     * @Route("/{accessionId}/print", methods={"GET", "POST"}, name="app_participant_group_print")
+     */
+    public function print(string $accessionId, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $group = $this->findGroup($accessionId);
+
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('numToPrint', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => $group->getParticipantCount(),
+                'attr' => [
+                    'min' => 1,
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
+                ],
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $copies = $data['numToPrint'];
+
+            $builder = new ParticipantGroupLabelBuilder();
+            $builder->setPrinter($printer);
+            $builder->setGroup($group);
+
+            $zpl->printBuilder($builder, $copies);
+
+            return $this->redirectToRoute('app_participant_group_list');
+        }
+
+        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 
