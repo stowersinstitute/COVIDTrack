@@ -56,28 +56,34 @@ class LabelPrinterController extends AbstractController
 
         $form->handleRequest($request);
 
-        $b64Image = null;
-        $zplText = null;
-
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            $numToPrint = $data['numToPrint'];
 
             $last = $this->getDoctrine()->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
-            $builder = new SpecimenIntakeLabelBuilder();
-            $builder->setPrinter($printer);
 
-            $numToPrint = $data['numToPrint'];
+            $tubes = [];
+
             for ($i = 1; $i <= $numToPrint; $i++) {
                 $tube = new Tube('T' . str_pad($last->getId() + $i, 8, 0,STR_PAD_LEFT));
                 $this->getDoctrine()->getManager()->persist($tube);
 
-                $builder->setTube($tube);
-                $zpl->printBuilder($builder);
-
+                $tubes[] = $tube;
             }
 
             $this->getDoctrine()->getManager()->flush();
+
+            // Print out the saved tubes
+            $builder = new SpecimenIntakeLabelBuilder();
+            $builder->setPrinter($printer);
+
+            foreach ($tubes as $tube) {
+                $builder->setTube($tube);
+                $zpl->printBuilder($builder);
+            }
+
+            return $this->redirectToRoute('app_tube_list');
         }
 
         return $this->render('label-printer/print-specimen-labels.html.twig', [
