@@ -166,6 +166,7 @@ class ParticipantGroupController extends AbstractController
         }
 
         return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'group' => $group,
             'form' => $form->createView(),
         ]);
     }
