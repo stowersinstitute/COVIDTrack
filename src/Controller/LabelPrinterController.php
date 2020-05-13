@@ -10,6 +10,7 @@ use App\Form\LabelPrinterType;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplImage;
 use App\Label\ZplPrinting;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -30,7 +31,7 @@ class LabelPrinterController extends AbstractController
     /**
      * @Route("/print-specimen-labels", name="app_label_printer_print_specimen_labels")
      */
-    public function printSpecimenLabels(Request $request, ZplPrinting $zpl)
+    public function printSpecimenLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
@@ -58,21 +59,21 @@ class LabelPrinterController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
             $numToPrint = $data['numToPrint'];
 
-            $last = $this->getDoctrine()->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
+            $last = $em->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
 
             $tubes = [];
 
             for ($i = 1; $i <= $numToPrint; $i++) {
                 $tube = new Tube('T' . str_pad($last->getId() + $i, 8, 0,STR_PAD_LEFT));
-                $this->getDoctrine()->getManager()->persist($tube);
+                $em->persist($tube);
 
                 $tubes[] = $tube;
             }
 
-            $this->getDoctrine()->getManager()->flush();
+            $em->flush();
 
             // Print out the saved tubes
             $builder = new SpecimenIntakeLabelBuilder();
@@ -81,6 +82,9 @@ class LabelPrinterController extends AbstractController
             foreach ($tubes as $tube) {
                 $builder->setTube($tube);
                 $zpl->printBuilder($builder);
+                $tube->markPrinted();
+
+                $em->flush();
             }
 
             return $this->redirectToRoute('app_tube_list');
