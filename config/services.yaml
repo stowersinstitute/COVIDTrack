@@ -29,11 +29,6 @@ services:
         resource: '../src/*'
         exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
-    App\Command\DebugLdapUserCommand:
-        arguments:
-            # Cannot autowire based on LdapUserProvider so must use the concrete service
-            Symfony\Component\Ldap\Security\LdapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
-
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
