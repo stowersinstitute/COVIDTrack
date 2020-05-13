@@ -29,9 +29,9 @@ class LabelPrinterController extends AbstractController
 {
 
     /**
-     * @Route("/print-specimen-labels", name="app_label_printer_print_specimen_labels")
+     * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
      */
-    public function printSpecimenLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
@@ -90,7 +90,7 @@ class LabelPrinterController extends AbstractController
             return $this->redirectToRoute('app_tube_list');
         }
 
-        return $this->render('label-printer/print-specimen-labels.html.twig', [
+        return $this->render('label-printer/print-tube-labels.html.twig', [
             'form' => $form->createView(),
         ]);
     }

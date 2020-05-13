@@ -39,6 +39,11 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'List',
                     iconClass: 'fa-list',
                     route: 'app_tube_list'
+                },
+                {
+                    text: 'Print Tube Labels',
+                    iconClass: 'fa-print',
+                    route: 'app_label_printer_print_tube_labels'
                 }
             ])
         }}
@@ -100,11 +105,6 @@ Renders a top-level navigation node in the tree navigation.
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [
-                {
-                    text: 'Print Specimen Labels',
-                    iconClass: 'fa-print',
-                    route: 'app_label_printer_print_specimen_labels'
-                },
                 {
                     text: 'List',
                     iconClass: 'fa-list',
