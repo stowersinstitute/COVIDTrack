@@ -1,0 +1,34 @@
+{% block body %}
+    {{ form_start(form) }}
+    {{ form_row(form.printer) }}
+    {{ form_row(form.print) }}
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+                <th>Accession ID</th>
+                <th>Type</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tube in tubes %}
+            <tr>
+                <td>
+                    <input type="checkbox" class="tube-checkbox" name="tubes[]" value="{{ tube.accessionId }}">
+                </td>
+                <td>{{ tube.accessionId }}</td>
+                <td>{{ tube.tubeType }}</td>
+                <td>{{ tube.statusText }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {{ form_end(form) }}
+
+<script type="application/javascript">
+    $('#check-all').change(function() {
+        $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+</script>
+{% endblock %}

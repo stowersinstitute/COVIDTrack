@@ -17,6 +17,7 @@ class Tube
 {
     use TimestampableEntity, SoftDeleteableEntity;
 
+    const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
@@ -115,7 +116,7 @@ class Tube
     public function __construct(?string $accessionId = null)
     {
         $this->accessionId = $accessionId;
-        $this->status = self::STATUS_PRINTED;
+        $this->status = self::STATUS_CREATED;
     }
 
     public function __toString()
@@ -251,6 +252,14 @@ class Tube
     }
 
     /**
+     * When a label is printed for this tube
+     */
+    public function markPrinted()
+    {
+        $this->setStatus(self::STATUS_PRINTED);
+    }
+
+    /**
      * When a Participant has returned this Tube with their Specimen inside.
      */
     public function markReturned(\DateTimeImmutable $returnedAt)
@@ -301,6 +310,7 @@ class Tube
     private static function getValidStatuses(): array
     {
         return [
+            'Created' => self::STATUS_CREATED,
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,
