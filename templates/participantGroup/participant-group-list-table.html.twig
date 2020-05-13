@@ -3,8 +3,8 @@
     <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>Accession ID</th>
             <th>Title</th>
+            <th>Accession ID</th>
             <th>Participants</th>
             <th>Active?</th>
             <th>Created</th>
@@ -16,12 +16,12 @@
     {% for group in groups %}
         <tr>
             <td>
-                <a href="{{ path('app_participant_group_edit', {accessionId: group.accessionId}) }}">Edit</a>
+                <a href="{{ path('app_participant_group_edit', {title: group.title}) }}">Edit</a>
             </td>
             <td>
-                <a href="{{ path('app_participant_group_view', {accessionId: group.accessionId}) }}">{{ group.accessionId }}</a>
+                <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
-            <td>{{ group.title }}</td>
+            <td>{{ group.accessionId }}</td>
             <td>{{ group.participantCount }}</td>
             <td>
                 {% if group.isActive() %}
@@ -30,7 +30,7 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            <td><a href="{{ path('app_participant_group_print', {accessionId: group.accessionId}) }}" title="Print Participant Group Labels"><i class="fa fa-fw fa-print"></i></a></td>
+            <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" title="Print Participant Group Labels"><i class="fa fa-fw fa-print"></i></a></td>
         </tr>
     {% endfor %}
     </tbody>

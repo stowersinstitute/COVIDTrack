@@ -73,11 +73,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * Edit a single Group.
      *
-     * @Route("/{accessionId}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
+     * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
      */
-    public function edit(string $accessionId, Request $request) : Response
+    public function edit(string $title, Request $request) : Response
     {
-        $group = $this->findGroup($accessionId);
+        $group = $this->findGroup($title);
 
         $form = $this->createForm(ParticipantGroupForm::class, $group);
         $form->handleRequest($request);
@@ -87,7 +87,7 @@ class ParticipantGroupController extends AbstractController
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_view', [
-                'accessionId' => $group->getAccessionId(),
+                'title' => $group->getTitle(),
             ]);
         }
 
@@ -101,11 +101,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * View a single Group.
      *
-     * @Route("/{accessionId}", methods={"GET", "POST"}, name="app_participant_group_view")
+     * @Route("/{title}", methods={"GET", "POST"}, name="app_participant_group_view")
      */
-    public function view(string $accessionId)
+    public function view(string $title)
     {
-        $group = $this->findGroup($accessionId);
+        $group = $this->findGroup($title);
 
         $auditLogs = $this->getDoctrine()
             ->getRepository(AuditLog::class)
@@ -120,11 +120,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * Print group labels
      *
-     * @Route("/{accessionId}/print", methods={"GET", "POST"}, name="app_participant_group_print")
+     * @Route("/{title}/print", methods={"GET", "POST"}, name="app_participant_group_print")
      */
-    public function print(string $accessionId, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
-        $group = $this->findGroup($accessionId);
+        $group = $this->findGroup($title);
 
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
