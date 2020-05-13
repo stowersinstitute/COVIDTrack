@@ -13,8 +13,20 @@ Renders a top-level navigation node in the tree navigation.
 @param childrenItem.text (string) Navigation link text
 @param childrenItem.iconClass (string) CSS classes for Font Awesome icon next to nav item (i.e. fa-list)
 @param childrenItem.route (string) Name of Controller route linked to
+@param mustHaveOnePermissionToView (array) Optional. Array of strings. User must have one or more of these roles to view.
 #}
-{% macro treenode(parentText, parentIconClass, children) %}
+{% macro treenode(parentText, parentIconClass, children, mustHaveOneRoleToView) %}
+    {% set canView = true %}
+    {% if mustHaveOneRoleToView|length > 0 %}
+        {% set canView = false %}
+        {% for requiredRole in mustHaveOneRoleToView %}
+            {% if not canView and is_granted(requiredRole) %}
+                {% set canView = true %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if canView %}
     <li class="treeview {% for child in children %}{{ _self.activeClass(child.route) }}{% endfor %}">
         <a href="#">
             <i class="fa {{ parentIconClass }}"></i> <span>{{ parentText }}</span>
@@ -28,6 +40,7 @@ Renders a top-level navigation node in the tree navigation.
             {% endfor %}
         </ul>
     </li>
+    {% endif %}
 {% endmacro %}
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
