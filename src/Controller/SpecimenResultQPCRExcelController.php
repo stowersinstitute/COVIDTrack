@@ -96,6 +96,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
 
         return $this->render('results/qpcr/excel-import-result.html.twig', [
             'importer' => $importer,
+            'createdResults' => $output['created'] ?? [],
+            'updatedResults' => $output['updated'] ?? [],
         ]);
     }
 
