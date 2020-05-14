@@ -47,6 +47,7 @@ class TubeCheckinController extends AbstractController
         return $this->render('checkin/list.html.twig', [
             'tubes' => $tubes,
             'typeCounts' => $typeCounts,
+            'typeCountsTotal' => array_sum($typeCounts),
         ]);
     }
 

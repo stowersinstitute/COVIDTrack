@@ -7,9 +7,13 @@
     {% for typeText, count in typeCounts %}
         <tr>
             <td style="font-weight:bold;">{{ typeText }}</td>
-            <td style="padding-left:10px;">{{ count }}</td>
+            <td style="padding-left:10px; text-align:right;">{{ count }}</td>
         </tr>
     {% endfor %}
+        <tr style="border-top:1px solid #eee;">
+            <td style="font-weight:bold;">TOTAL</td>
+            <td style="padding-left:10px; text-align:right;">{{ typeCountsTotal }}</td>
+        </tr>
     </table>
 </dl>
 
