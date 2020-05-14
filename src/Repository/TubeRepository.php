@@ -46,8 +46,6 @@ class TubeRepository extends EntityRepository
     public function findReadyForCheckin(): array
     {
         return $this->createQueryBuilder('t')
-            ->addSelect('s')
-            ->join('t.specimen', 's')
             ->where('t.status = :status')
             ->setParameter('status', Tube::STATUS_RETURNED)
 

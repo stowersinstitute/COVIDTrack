@@ -30,7 +30,6 @@
     </thead>
     <tbody>
     {% for tube in tubes %}
-        {% set specimen = tube.specimen %}
         <tr class="row-tube-{{ tube.accessionId|e('html_attr') }}">
             {% if allowPerTubeDecision %}
             <td style="text-align:center;">
@@ -41,7 +40,7 @@
             </td>
             {% endif %}
             <td>{{ tube.accessionId }}</td>
-            <td>{{ specimen.typeText }}</td>
+            <td>{{ tube.typeText }}</td>
             <td>{{ tube.collectedAt is empty ? "" : tube.collectedAt|date("Y-m-d g:ia") }}</td>
             <td>{{ tube.returnedAt is empty ? "" : tube.returnedAt|date("Y-m-d g:ia") }}</td>
             {% if allowPerTubeDecision %}

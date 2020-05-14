@@ -33,7 +33,7 @@ class TubeCheckinController extends AbstractController
             ->findReadyForCheckin();
 
         $typeCounts = array_reduce($tubes, function(array $carry, Tube $T) {
-            $txt = $T->getSpecimen()->getTypeText();
+            $txt = $T->getTypeText();
             if (!isset($carry[$txt])) {
                 $carry[$txt] = 0;
             }
