@@ -132,7 +132,7 @@ These users are available when fixtures are loaded. Same username/password:
 
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
-* intaketech - Check-in Technician
+* checkintech - Check-in Technician
 * kiosk - Kiosk UI
 
 ### Frontend Frameworks

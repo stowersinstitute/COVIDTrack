@@ -30,8 +30,8 @@ class AppUserFixtures extends Fixture
         // Study Coordinator
         $this->buildUser($manager, 'coordinator', ['ROLE_PARTICIPANT_GROUP_EDIT']);
 
-        // Specimen intake technician
-        $this->buildUser($manager, 'intaketech', ['ROLE_SPECIMEN_CHECK_IN']);
+        // Specimen check-in technician
+        $this->buildUser($manager, 'checkintech', ['ROLE_SPECIMEN_CHECK_IN']);
 
         // Kiosk
         $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);
