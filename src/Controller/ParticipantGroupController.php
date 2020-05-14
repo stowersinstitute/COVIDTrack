@@ -77,7 +77,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function edit(string $title, Request $request) : Response
     {
-        $group = $this->findGroup($title);
+        $group = $this->findGroupByTitle($title);
 
         $form = $this->createForm(ParticipantGroupForm::class, $group);
         $form->handleRequest($request);
@@ -105,7 +105,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function view(string $title)
     {
-        $group = $this->findGroup($title);
+        $group = $this->findGroupByTitle($title);
 
         $auditLogs = $this->getDoctrine()
             ->getRepository(AuditLog::class)
@@ -124,7 +124,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
-        $group = $this->findGroup($title);
+        $group = $this->findGroupByTitle($title);
 
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
@@ -267,11 +267,11 @@ class ParticipantGroupController extends AbstractController
     }
 
 
-    private function findGroup($id): ParticipantGroup
+    private function findGroupByTitle($title): ParticipantGroup
     {
         $s = $this->getDoctrine()
             ->getRepository(ParticipantGroup::class)
-            ->findOneByAnyId($id);
+            ->findOneBy(['title' => $title]);
 
         if (!$s) {
             throw new \InvalidArgumentException('Cannot find Participant Group');
