@@ -19,7 +19,7 @@ class ParticipantGroupRepository extends EntityRepository
         }
 
         return $this->findOneBy([
-            'accessionId' => $id,
+            'title' => $id,
         ]);
     }
 

@@ -5,12 +5,19 @@ namespace App\Controller;
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
+use App\Entity\LabelPrinter;
 use App\Entity\ParticipantGroup;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
+use App\Label\ParticipantGroupBadgeLabelBuilder;
+use App\Label\ZplPrinting;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,11 +73,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * Edit a single Group.
      *
-     * @Route("/{accessionId}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
+     * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
      */
-    public function edit(string $accessionId, Request $request) : Response
+    public function edit(string $title, Request $request) : Response
     {
-        $group = $this->findGroup($accessionId);
+        $group = $this->findGroupByTitle($title);
 
         $form = $this->createForm(ParticipantGroupForm::class, $group);
         $form->handleRequest($request);
@@ -80,7 +87,7 @@ class ParticipantGroupController extends AbstractController
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_view', [
-                'accessionId' => $group->getAccessionId(),
+                'title' => $group->getTitle(),
             ]);
         }
 
@@ -94,11 +101,11 @@ class ParticipantGroupController extends AbstractController
     /**
      * View a single Group.
      *
-     * @Route("/{accessionId}", methods={"GET", "POST"}, name="app_participant_group_view")
+     * @Route("/{title}", methods={"GET", "POST"}, name="app_participant_group_view")
      */
-    public function view(string $accessionId)
+    public function view(string $title)
     {
-        $group = $this->findGroup($accessionId);
+        $group = $this->findGroupByTitle($title);
 
         $auditLogs = $this->getDoctrine()
             ->getRepository(AuditLog::class)
@@ -107,6 +114,60 @@ class ParticipantGroupController extends AbstractController
         return $this->render('participantGroup/participant-group-view.html.twig', [
             'group' => $group,
             'auditLogs' => $auditLogs,
+        ]);
+    }
+
+    /**
+     * Print group labels
+     *
+     * @Route("/{title}/print", methods={"GET", "POST"}, name="app_participant_group_print")
+     */
+    public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $group = $this->findGroupByTitle($title);
+
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('numToPrint', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => $group->getParticipantCount(),
+                'attr' => [
+                    'min' => 1,
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
+                ],
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $copies = $data['numToPrint'];
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($printer);
+            $builder->setGroup($group);
+
+            $zpl->printBuilder($builder, $copies);
+
+            return $this->redirectToRoute('app_participant_group_list');
+        }
+
+        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'group' => $group,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -201,11 +262,11 @@ class ParticipantGroupController extends AbstractController
     }
 
 
-    private function findGroup($id): ParticipantGroup
+    private function findGroupByTitle($title): ParticipantGroup
     {
         $s = $this->getDoctrine()
             ->getRepository(ParticipantGroup::class)
-            ->findOneByAnyId($id);
+            ->findOneBy(['title' => $title]);
 
         if (!$s) {
             throw new \InvalidArgumentException('Cannot find Participant Group');
