@@ -109,6 +109,10 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
 
+            // Has been approved by a Check-in Technician
+            ->andWhere('s.status = :status')
+            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+
             // Doesn't have a CLIA testing rec yet
             ->andWhere('s.cliaTestingRecommendation = :recommendation')
             ->setParameter('recommendation', Specimen::CLIA_REC_PENDING)
