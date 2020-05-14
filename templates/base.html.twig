@@ -25,34 +25,19 @@
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav class="navbar navbar-static-top">
-                <!-- Sidebar toggle button-->
-                <a href="#" class="sidebar-toggle fa5" data-toggle="push-menu" role="button">
-                    <span class="sr-only">Toggle navigation</span>
-                </a>
-                <!-- Navbar Right Menu -->
-                <div class="navbar-custom-menu">
-                    <ul class="nav navbar-nav">
-                        <li class="dropdown user user-menu">
-                            {% if app.user %}
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
-                                        {{ app.user.username }}
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ path("app_logout") }}">Sign Out</a>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <a href="{{ path('app_login') }}">Log In</a>
-                            {% endif %}
-                        </li>
-                        <!-- Control Sidebar Toggle Button -->
-                        <li>
-                            <a href="#" data-toggle="control-sidebar"><i class="fa fa-cogs"></i></a>
-                        </li>
-                    </ul>
-                </div>
-
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> {{ app.user.username }} <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {# todo: change password, etc. for local users #}
+                            {#
+                            <li><a href="#">Profile</a></li>
+                            <li role="separator" class="divider"></li>
+                            #}
+                            <li><a class="dropdown-item" href="{{ path("app_logout") }}">Sign Out</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </nav>
         </header>
 
