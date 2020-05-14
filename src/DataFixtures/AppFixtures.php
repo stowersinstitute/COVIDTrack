@@ -74,7 +74,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Build array of possible qPCR Results across a probability distribution.
+     * Build array of possible Results across a probability distribution.
      * Pull a random element from this array to get a random result.
      *
      * Returns NULL when no result available, such as when Awaiting Results.

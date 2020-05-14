@@ -500,15 +500,15 @@ class Specimen
         // Current recommendation
         $rec = $this->cliaTestingRecommendation;
 
-        // Latest qPCR result
+        // Latest result
         $qpcr = $this->getMostRecentQPCRResult();
 
-        // When qPCR result available
+        // When result available
         if ($qpcr) {
-            // Get the qPCR conclusion
+            // Get the conclusion
             $result = $qpcr->getConclusion();
 
-            // qPCR conclusion ==> CLIA Recommendation
+            // conclusion ==> CLIA Recommendation
             $map = [
                 SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,

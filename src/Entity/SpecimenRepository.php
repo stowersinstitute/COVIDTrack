@@ -19,8 +19,13 @@ class SpecimenRepository extends EntityRepository
             return $this->find($id);
         }
 
+        return $this->findOneByAccessionId($id);
+    }
+
+    public function findOneByAccessionId(string $accessionId): ?Specimen
+    {
         return $this->findOneBy([
-            'accessionId' => $id,
+            'accessionId' => $accessionId,
         ]);
     }
 
