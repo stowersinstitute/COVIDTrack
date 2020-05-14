@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -14,6 +15,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SpecimenForm extends AbstractType
 {
+    /**
+     * @var SpecimenAccessionIdGenerator
+     */
+    private $specimenIdGen;
+
+    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
+    {
+        $this->specimenIdGen = $specimenIdGen;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -41,7 +52,7 @@ class SpecimenForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => Specimen::class,
             'empty_data' => function(FormInterface $form) {
-                $accessionId = 'CID'.time(); // TODO: CVDLS-30 Replace with real accession ID prefix
+                $accessionId = $this->specimenIdGen->generate();
                 $group = $form->get('participantGroup')->getData();
                 $s = new Specimen($accessionId, $group);
 
