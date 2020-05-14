@@ -4,16 +4,14 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Class WellPlate
- * @package App\Entity
- *
- * @ORM\Entity
- * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
+ * ORM\Entity
+ * ORM\Table(name="well_plates")
+ * Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class WellPlate
 {

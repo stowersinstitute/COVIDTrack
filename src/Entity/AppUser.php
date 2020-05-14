@@ -11,6 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\AppUserRepository")
+ * @ORM\Table(name="users")
  *
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
@@ -21,19 +22,19 @@ class AppUser implements UserInterface
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=180, unique=true, nullable=false)
+     * @ORM\Column(name="username", type="string", length=180, unique=true, nullable=false)
      *
      * @Gedmo\Versioned
      */
     private $username;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(name="roles", type="json")
      *
      * @Gedmo\Versioned
      */
@@ -41,13 +42,13 @@ class AppUser implements UserInterface
 
     /**
      * @var string The hashed password (will be null if this user came from LDAP)
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(name="password", type="string", nullable=true)
      */
     private $password;
 
     /**
      * @var bool If true, this user is managed by LDAP and should be authenticated against it
-     * @ORM\Column(type="boolean", name="isLdapUser")
+     * @ORM\Column(name="is_ldap_user", type="boolean")
      *
      * @Gedmo\Versioned
      */
@@ -56,28 +57,28 @@ class AppUser implements UserInterface
     /**
      * @var boolean Whether the user has ever logged in
      *
-     * @ORM\Column(name="hasLoggedIn", type="boolean", nullable=false)
+     * @ORM\Column(name="has_logged_in", type="boolean", nullable=false)
      */
     protected $hasLoggedIn;
 
     /**
      * @var \DateTimeImmutable The first time the user logged in
      *
-     * @ORM\Column(name="firstLoggedInAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="first_logged_in_at", type="datetime_immutable", nullable=true)
      */
     protected $firstLoggedInAt;
 
     /**
      * @var \DateTimeImmutable The most recent time the user logged in
      *
-     * @ORM\Column(name="lastLoggedInAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="last_logged_in_at", type="datetime_immutable", nullable=true)
      */
     protected $lastLoggedInAt;
 
     /**
      * @var string User's preferred display name
      *
-     * @ORM\Column(name="displayName", type="string", length=255, nullable=true)
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
      *
      * @Gedmo\Versioned
      */
