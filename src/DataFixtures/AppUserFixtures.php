@@ -31,7 +31,7 @@ class AppUserFixtures extends Fixture
         $this->buildUser($manager, 'coordinator', ['ROLE_PARTICIPANT_GROUP_EDIT']);
 
         // Specimen check-in technician
-        $this->buildUser($manager, 'checkintech', ['ROLE_SPECIMEN_CHECK_IN']);
+        $this->buildUser($manager, 'checkintech', ['ROLE_TUBE_CHECK_IN']);
 
         // Kiosk
         $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);

@@ -29,12 +29,14 @@ class AppPermissions
         'ROLE_PARTICIPANT_GROUP_EDIT',
         'ROLE_PARTICIPANT_GROUP_VIEW',
 
+        // Tubes
+        'ROLE_TUBE_CHECK_IN',
+
         // Kiosk
         'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
 
         // Specimens
         'ROLE_SPECIMEN_DROP_OFF',
-        'ROLE_SPECIMEN_CHECK_IN',
     ];
 
     /**
