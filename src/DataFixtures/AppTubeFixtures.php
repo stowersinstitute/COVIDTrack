@@ -39,7 +39,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $em)
     {
         $this->distributedTubes($em);
-        $this->droppedOffTubes($em);
+        $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
@@ -53,7 +53,8 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     {
         $startAccession = 1000;
 
-        for ($i=1; $i<=20; $i++) {
+        $numToCreate = 20;
+        for ($i=1; $i<= $numToCreate; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
@@ -63,20 +64,22 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Tubes that Participants have returned at a Kiosk.
+     * Tubes that Participants have returned at a Kiosk and are ready for
+     * Technician check-in.
      */
-    private function droppedOffTubes(ObjectManager $em)
+    private function returnedTubes(ObjectManager $em)
     {
         $startAccession = 2000;
 
-        for ($i=1; $i<=200; $i++) {
+        $numToCreate = 50;
+        for ($i=1; $i<= $numToCreate; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
 
             // Tube Specimens will have been collected (extracted) from the
             // Participant within the last few days
-            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%14));
             $this->doKioskDropoff($em, $T, $collectedAt);
 
             $em->persist($T);
@@ -84,24 +87,25 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Tubes that have been checked in by a tech.
+     * Tubes that have been checked-in by a Tech.
+     *
+     * These Tubes are ready to have Results made.
      */
     private function acceptedTubes(ObjectManager $em)
     {
         $startAccession = 3000;
 
-        $numToCreate = 20;
+        $numToCreate = 25;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
 
-            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i));
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
 
-            // TODO: CVDLS-39 This probably needs a Specimen but John will work that out later
-            $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
+            $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
 
             $em->persist($T);
         }
@@ -121,10 +125,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
             $T = new Tube($accessionId);
 
-            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i));
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
 
-            $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
+            $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
 
             $em->persist($T);
         }

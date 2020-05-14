@@ -1,0 +1,100 @@
+{% block body %}
+{% set allowPerTubeDecision = is_granted("ROLE_ADMIN") %}
+
+<dl class="dl-horizontal">
+    <h4>Counts</h4>
+    <table>
+    {% for typeText, count in typeCounts %}
+        <tr>
+            <td style="font-weight:bold;">{{ typeText }}</td>
+            <td style="padding-left:10px; text-align:right;">{{ count }}</td>
+        </tr>
+    {% endfor %}
+        <tr style="border-top:1px solid #eee;">
+            <td style="font-weight:bold;">TOTAL</td>
+            <td style="padding-left:10px; text-align:right;">{{ typeCountsTotal }}</td>
+        </tr>
+    </table>
+</dl>
+
+<table class="table table-bordered table-hover table-striped">
+    <thead>
+        <tr>
+            {% if allowPerTubeDecision %}<th style="width:100px;">Approve</th>{% endif %}
+            <th>Tube ID</th>
+            <th>Type</th>
+            <th>Collected At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></span></th>
+            <th>Returned At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Tube returned at a Kiosk."></span></th>
+            {% if allowPerTubeDecision %}<th style="width:100px;">Reject</th>{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for tube in tubes %}
+        <tr class="row-tube-{{ tube.accessionId|e('html_attr') }}">
+            {% if allowPerTubeDecision %}
+            <td style="text-align:center;">
+                {# Approve #}
+                <button type="button" class="approve-one-tube btn btn-success btn-sm" title="Approve" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                </button>
+            </td>
+            {% endif %}
+            <td>{{ tube.accessionId }}</td>
+            <td>{{ tube.typeText }}</td>
+            <td>{{ tube.collectedAt is empty ? "" : tube.collectedAt|date("Y-m-d g:ia") }}</td>
+            <td>{{ tube.returnedAt is empty ? "" : tube.returnedAt|date("Y-m-d g:ia") }}</td>
+            {% if allowPerTubeDecision %}
+            <td style="text-align:center;">
+                {# Reject #}
+                <button type="button" class="btn-tube-{{ tube.accessionId|e('html_attr') }} reject-one-tube btn btn-danger btn-sm" title="Reject" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                </button>
+            </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if allowPerTubeDecision %}
+<script>
+    /**
+     * Callback when clicking a button
+     * @param decision {string} Decision constant sent to server: APPROVED, REJECTED
+     * @returns {function}
+     */
+    let onClickHandler = function(decision) {
+        return function() {
+            const $btn = $(this);
+            const tubeId = $btn.data('tube-id');
+            const url = "{{ path('checkin_decide_tube') }}";
+
+            if (!confirm("Mark Tube "+tubeId+" "+decision+"?")) return;
+
+            // Send decision to server
+            $.post(url, {
+                tubeId: tubeId,
+                decision: decision
+            })
+            .fail(function(responseObj) {
+                // Error happened, show it
+                const response = responseObj.responseJSON;
+                const errorMsg = response.errorMsg;
+                if (errorMsg) {
+                    alert(errorMsg);
+                    return;
+                }
+                alert('Cannot save Tube.');
+            })
+            .done(function(responseObj) {
+                // Disable clicking Approved/Rejected buttons again
+                $('.row-tube-'+tubeId+' button').prop('disabled', true);
+            });
+        }
+    };
+    $('.approve-one-tube').on('click', onClickHandler("APPROVED"));
+    $('.reject-one-tube').on('click', onClickHandler("REJECTED"));
+</script>
+{% endif %}
+
+{% endblock %}

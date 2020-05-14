@@ -22,27 +22,33 @@
         </div>
     </div>
 
-    {% if is_granted('ROLE_SPECIMEN_CHECK_IN') %}
+    {% if is_granted('ROLE_TUBE_CHECK_IN') %}
+    <h2>Tubes</h2>
+
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <h3>{{ numTubesReturned }}</h3>
+
+                    <p>Check-in Queue</p>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-clipboard-check"></i>
+                </div>
+                <a href="{{ path('checkin_queue') }}" class="small-box-footer">
+                    View <i class="fa fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
         <h2>Specimens</h2>
 
         <div class="row">
-            <div class="col-lg-3 col-xs-6">
-                <!-- small box -->
-                <div class="small-box bg-aqua">
-                    <div class="inner">
-                        <h3>{{ numTubesReturned }}</h3>
-
-                        <p>Dropped Off (awaiting checkin)</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fa fa-check-square"></i>
-                    </div>
-                    <a href="{{ path('specimen_intake_start') }}" class="small-box-footer">
-                        Check in Specimens <i class="fa fa-arrow-circle-right"></i>
-                    </a>
-                </div>
-            </div>
-
             <div class="col-lg-3 col-xs-6">
                 <!-- small box -->
                 <div class="small-box bg-aqua">
@@ -52,14 +58,13 @@
                         <p>In Process</p>
                     </div>
                     <div class="icon">
-                        <i class="fa fa-check-square"></i>
+                        <i class="fa fa-th"></i>
                     </div>
                     {# todo: link to results upload #}
-                    <a href="{{ path('specimen_intake_start') }}" class="small-box-footer">
-                        Upload Results <i class="fa fa-arrow-circle-right"></i>
+                    <a href="{{ path('qpcr_excel_import') }}" class="small-box-footer">
+                        Import Results <i class="fa fa-upload"></i>
                     </a>
                 </div>
             </div>
         </div>
-    {% endif %}
 {% endblock %}

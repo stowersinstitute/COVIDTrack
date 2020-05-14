@@ -10,38 +10,38 @@
         </div>
     </div>
 
-    {# New Results #}
-    {% if createdResults|length > 0 %}
-        {% set bgColor = 'bg-green' %}
-        {% set actionCount = createdResults|length %}
+    {# Rejected Results #}
+    {% if rejected|length > 0 %}
+        {% set bgColor = 'bg-red' %}
+        {% set actionCount = rejected|length %}
     {% else %}
         {% set bgColor = 'bg-gray' %}
         {% set actionCount = '-- None --' %}
     {% endif %}
     <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-plus"></i></span>
+            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-minus-circle"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">New</span>
+                <span class="info-box-text">Rejected</span>
                 <span class="info-box-number">{{ actionCount }}</span>
             </div>
         </div>
     </div>
 
-    {# Updated Results #}
-    {% if updatedResults|length > 0 %}
-        {% set bgColor = 'bg-orange' %}
-        {% set actionCount = createdResults|length %}
+    {# Accepted Results #}
+    {% if accepted|length > 0 %}
+        {% set bgColor = 'bg-green' %}
+        {% set actionCount = accepted|length %}
     {% else %}
         {% set bgColor = 'bg-gray' %}
         {% set actionCount = '-- None --' %}
     {% endif %}
     <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-            <span class="info-box-icon bg-orange"><i class="fa fa-edit"></i></span>
+            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-plus-circle"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Updated</span>
-                <span class="info-box-number">{{ updatedResults|length }}</span>
+                <span class="info-box-text">Accepted</span>
+                <span class="info-box-number">{{ accepted|length }}</span>
             </div>
         </div>
     </div>

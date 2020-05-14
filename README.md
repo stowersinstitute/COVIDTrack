@@ -132,11 +132,11 @@ These users are available when fixtures are loaded. Same username/password:
 
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
-* intaketech - Check-in Technician
+* checkintech - Check-in Technician
 * kiosk - Kiosk UI
 
 ### Frontend Frameworks
 
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
 * [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
-* [Font Awesome 5.13](https://fontawesome.com/icons?d=gallery&v=5.13.0) for extra icons
+* [Font Awesome 5.13](https://fontawesome.com/icons?d=gallery) for extra icons

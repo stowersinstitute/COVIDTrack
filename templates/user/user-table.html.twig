@@ -38,7 +38,8 @@
             <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Specimens #}
             <td class="text-center">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center">{% if 'ROLE_SPECIMEN_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Tubes #}
+            <td class="text-center">{% if 'ROLE_TUBE_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
         </tr>
     {% endfor %}
     </tbody>

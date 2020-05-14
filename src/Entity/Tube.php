@@ -27,6 +27,9 @@ class Tube
     const TYPE_SALIVA = "SALIVA";
     const TYPE_SWAB = "SWAB";
 
+    const CHECKED_IN_ACCEPTED = "ACCEPTED";
+    const CHECKED_IN_REJECTED = "REJECTED";
+
     /**
      * @var int
      * @ORM\Id()
@@ -55,6 +58,7 @@ class Tube
     /**
      * Specimen created as result of Tube being checked in.
      *
+     * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -88,6 +92,17 @@ class Tube
      * @ORM\JoinColumn(name="drop_off_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $dropOff;
+
+    /**
+     * What Check-in Technician decided when observing Tube and Specimen
+     * during check-in process.
+     *
+     * Values are self::CHECK_IN_* constants.
+     *
+     * @var string
+     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     */
+    private $checkInDecision;
 
     /**
      * Date/Time when Tube was processed for check-in by Check-in Technician.
@@ -160,14 +175,31 @@ class Tube
     }
 
     /**
+     * Get human-readable text of selected Type
+     */
+    public function getTypeText(): string
+    {
+        if ($this->tubeType === null) {
+            return '';
+        }
+
+        $types = self::getValidTubeTypes();
+
+        // Key by TYPE_* constant
+        $types = array_flip($types);
+
+        return $types[$this->tubeType];
+    }
+
+    /**
      * @return string[]
      */
     public static function getValidTubeTypes(): array
     {
         return [
-            self::TYPE_BLOOD,
-            self::TYPE_SALIVA,
-            self::TYPE_SWAB,
+            'Blood' => self::TYPE_BLOOD,
+            'Swab' => self::TYPE_SWAB,
+            'Saliva' => self::TYPE_SALIVA,
         ];
     }
 
@@ -203,7 +235,7 @@ class Tube
     }
 
     /**
-     * Call when a Tube is being dropped off by a Participant at a Kiosk.
+     * Call when a Tube is being returned by a Participant at a Kiosk.
      *
      * @param SpecimenAccessionIdGenerator $gen
      * @param DropOff            $drop
@@ -216,13 +248,58 @@ class Tube
         $this->dropOff = $drop;
         $drop->addTube($this);
 
+        // User-entered data from kiosk
         $this->setParticipantGroup($group);
         $this->setTubeType($tubeType);
         $this->setCollectedAt($collectedAt);
 
+        $this->markReturned();
+
         // Create Specimen
         $this->specimen = Specimen::createFromTube($this, $gen);
-        $this->specimen->setStatus(Specimen::STATUS_DROPPED_OFF);
+        $this->specimen->setStatus(Specimen::STATUS_RETURNED);
+    }
+
+    /**
+     * Whether this Tube is in the correct state to be processed for a check-in
+     * by a Check-in Technician.
+     */
+    public function isReadyForCheckin(): bool
+    {
+        return $this->checkInDecision === null;
+    }
+
+    public function getCheckInDecision(): ?string
+    {
+        return $this->checkInDecision;
+    }
+
+    /**
+     * @param string $decision self::CHECKED_IN_* constant
+     */
+    public function setCheckInDecision(string $decision)
+    {
+        $valid = [
+            self::CHECKED_IN_ACCEPTED,
+            self::CHECKED_IN_REJECTED,
+        ];
+        if (!in_array($decision, $valid)) {
+            throw new \InvalidArgumentException('Invalid check-in decision');
+        }
+
+        $this->checkInDecision = $decision;
+    }
+
+    public function getCheckInDecisionText(): string
+    {
+        switch ($this->checkInDecision) {
+            case self::CHECKED_IN_ACCEPTED:
+                return 'Accepted';
+            case self::CHECKED_IN_REJECTED:
+                return 'Rejected';
+            default:
+                return '';
+        }
     }
 
     /**
@@ -278,35 +355,52 @@ class Tube
 
     /**
      * When a Participant has returned this Tube with their Specimen inside.
+     * @deprecated Use method kioskDropoff(), this will flip private
      */
-    public function markReturned(\DateTimeImmutable $returnedAt)
+    public function markReturned(\DateTimeImmutable $returnedAt = null)
     {
+        if ($returnedAt === null) $returnedAt = new \DateTimeImmutable();
+
         $this->setStatus(self::STATUS_RETURNED);
         $this->setReturnedAt($returnedAt);
     }
 
     /**
-     * Intake technician has confirmed the specimen is acceptable and checked it in
+     * Check-In Technician confirms the Tube and Specimen appear in acceptable
+     * condition to perform further research.
      */
-    public function markAccepted(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
+    public function markAccepted(string $checkedInBy, \DateTimeImmutable $checkedInAt = null): void
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
+        // Tube
         $this->setStatus(self::STATUS_ACCEPTED);
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
+
+        // Specimen
+        $this->specimen->setStatus(Specimen::STATUS_ACCEPTED);
     }
 
     /**
-     * Intake technician has rejected the specimen
+     * Check-In Technician observes condition of the Tube or Specimen that
+     * would compromise further research.
+     *
+     * Conditions like the Specimen has leaked out of the tube into the surrounding bag.
      */
-    public function markRejected(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
+    public function markRejected(string $checkedInBy, \DateTimeImmutable $checkedInAt = null): void
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
+        // Tube
         $this->setStatus(self::STATUS_REJECTED);
+        $this->setCheckInDecision(self::CHECKED_IN_REJECTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
+
+        // Specimen
+        $this->specimen->setStatus(Specimen::STATUS_REJECTED);
     }
 
     /**

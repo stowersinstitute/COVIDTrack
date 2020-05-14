@@ -23,11 +23,12 @@ class Specimen
     use TimestampableEntity, SoftDeleteableEntity;
 
     const STATUS_CREATED = "CREATED";
-    const STATUS_PENDING = "PENDING";
+    const STATUS_RETURNED = "RETURNED";
+    const STATUS_ACCEPTED = "ACCEPTED";
+    const STATUS_REJECTED = "REJECTED";
     const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS";
     const STATUS_COMPLETE = "COMPLETE";
-    const STATUS_DROPPED_OFF = "DROPPEDOFF";
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
@@ -335,8 +336,9 @@ class Specimen
     {
         return [
             'Created' => self::STATUS_CREATED,
-            'Pending' => self::STATUS_PENDING,
-            'Dropped Off' => self::STATUS_DROPPED_OFF,
+            'Returned' => self::STATUS_RETURNED,
+            'Accepted' => self::STATUS_ACCEPTED,
+            'Rejected' => self::STATUS_REJECTED,
             'In Process' => self::STATUS_IN_PROCESS,
             'Results' => self::STATUS_RESULTS,
             'Complete' => self::STATUS_COMPLETE,
