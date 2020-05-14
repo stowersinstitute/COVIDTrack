@@ -43,8 +43,8 @@ class ParticipantGroupLabelBuilder extends AbstractLabelBuilder
         $fontSize = 6;
         $zpl->setFont($font, $fontSize);
 
-        $zpl->drawQrCode(0, 0, $this->group->getAccessionId(), 18);
-        $zpl->drawText(0, 18, $this->group->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawQrCode(0, 0, $this->group->getTitle(), 18);
+        $zpl->drawText(0, 18, $this->group->getTitle(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
         return $zpl->toZpl();
     }
