@@ -21,21 +21,21 @@ class DropOff
      * @var integer
      *
      * @ORM\Id
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="status")
+     * @ORM\Column(name="status", type="string")
      */
     private $status;
 
     /**
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $group;
 
@@ -47,7 +47,7 @@ class DropOff
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="kiosk", nullable=true)
+     * @ORM\Column(name="kiosk", type="string", nullable=true)
      */
     private $kiosk;
 

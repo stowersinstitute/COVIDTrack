@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Result of performing qPCR analysis on Specimen.
  *
  * @ORM\Entity
+ * NOTE: (a)ORM\Table defined on parent class
  */
 class SpecimenResultQPCR extends SpecimenResult
 {
