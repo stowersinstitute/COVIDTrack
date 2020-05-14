@@ -18,10 +18,20 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Ldap\Ldap;
 use Symfony\Component\Ldap\Security\LdapUser;
 use Symfony\Component\Ldap\Security\LdapUserProvider;
+use Symfony\Component\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 
 class UserAddCommand extends Command
 {
     protected static $defaultName = 'app:user:add';
+
+    /** @var UserPasswordEncoderInterface */
+    private $passwordEncoder;
+
+    /** @var RouterInterface */
+    private $router;
 
     /** @var Ldap  */
     private $ldap;
@@ -37,6 +47,8 @@ class UserAddCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em,
+        UserPasswordEncoderInterface $passwordEncoder,
+        RouterInterface $router,
         Ldap $ldap,
         OptionalLdapUserProvider $ldapUserProvider,
         AppLdapUserSynchronizer $ldapUserSynchronizer
@@ -44,6 +56,10 @@ class UserAddCommand extends Command
         parent::__construct();
 
         $this->em = $em;
+
+        $this->passwordEncoder = $passwordEncoder;
+        $this->router = $router;
+
         $this->ldap = $ldap;
         $this->ldapUserProvider = $ldapUserProvider;
         $this->ldapUserSynchronizer = $ldapUserSynchronizer;
@@ -60,13 +76,29 @@ class UserAddCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // todo: non-ldap support https://jira.stowers.org/browse/CVDLS-70
+        $username = $input->getArgument('username');
         $extraRoles = [];
 
-        /** @var LdapUser $rawLdapUser */
-        $rawLdapUser = $this->ldapUserProvider->loadUserByUsername($input->getArgument('username'));
+        $this->usernameMustNotExist($input, $output, $username);
 
-        if (!$rawLdapUser) throw new \InvalidArgumentException(sprintf('"%s" was not found', $input->getArgument('username')));
+        /** @var LdapUser $rawLdapUser */
+        $rawLdapUser = null;
+        try {
+            $rawLdapUser = $this->ldapUserProvider->loadUserByUsername($username);
+        } catch (UsernameNotFoundException $e) {
+            // this is OK, let them create a local user
+        }
+
+        // LDAP user not found, add a local one
+        if (!$rawLdapUser) {
+            $this->userMustConfirm($input, $output, sprintf(
+                '"%s" was not found in LDAP, add as a local user?',
+                $username
+            ));
+
+            $this->addLocalUser($input, $output, $username);
+            return 0;
+        }
 
         $appLdapUser = AppLdapUser::fromLdapUser($rawLdapUser);
 
@@ -90,6 +122,45 @@ class UserAddCommand extends Command
             $appLdapUser->getUsername(),
             $newUser->getId()
         ));
+
+        return 0;
+    }
+
+    protected function addLocalUser(InputInterface $input, OutputInterface $output, string $username)
+    {
+        $extraRoles = [];
+        $password = substr(md5(random_bytes(16)), 0, 12);
+
+        $output->writeln('');
+        $output->writeln('New User Details');
+        $output->writeln('----------------');
+        $output->writeln(sprintf("Username    : %s", $username));
+        $output->writeln(sprintf("Password    : %s", $password));
+        $output->writeln('');
+
+        if ($input->getOption('as-sys-admin')) {
+            $output->writeln('<comment>User will be a system administrator!</comment>');
+            $output->writeln('');
+            $extraRoles[] = 'ROLE_ADMIN';
+        }
+
+        $this->userMustConfirm($input, $output, 'Create this user?');
+
+        $user = new AppUser($username);
+        $user->setPassword($this->passwordEncoder->encodePassword(
+            $user,
+            $password
+        ));
+
+        foreach ($extraRoles as $role) {
+            $user->addRole($role);
+        }
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $userEditRoute = $this->router->generate('user_edit', ['username' => $username], Router::ABSOLUTE_URL);
+        $output->writeln(sprintf('User created: %s', $userEditRoute));
     }
 
     protected function addUserFromLdap(AppLdapUser $appLdapUser, array $extraRoles = []) : AppUser
@@ -106,10 +177,22 @@ class UserAddCommand extends Command
         return $localUser;
     }
 
-    protected function userMustConfirm(InputInterface $input, OutputInterface $output)
+    protected function usernameMustNotExist(InputInterface $input, OutputInterface $output, string $username)
     {
+        $user = $this->em->getRepository(AppUser::class)
+            ->findOneBy(['username' => $username]);
+
+        if ($user) {
+            throw new \InvalidArgumentException('User already exists');
+        }
+    }
+
+    protected function userMustConfirm(InputInterface $input, OutputInterface $output, string $prompt)
+    {
+        $questionText = sprintf('%s (y/n)', $prompt);
+
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('Add this user? (y/n) ', false);
+        $question = new ConfirmationQuestion($questionText, false);
 
         if (!$helper->ask($input, $output, $question)) {
             $output->writeln('User canceled');
