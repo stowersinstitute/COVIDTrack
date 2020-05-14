@@ -7,7 +7,7 @@
         <th class="text-center">System Admin</th>
         <th class="text-center">Kiosk Access</th>
         <th colspan="2" class="text-center">Participant Groups</th>
-        <th colspan="2" class="text-center">Specimens</th>
+        <th colspan="3" class="text-center">Specimens</th>
     </tr>
     <tr>
         <th>Username</th>
@@ -20,6 +20,7 @@
         {# Specimens #}
         <th class="text-center">Drop Off</th>
         <th class="text-center">Check In</th>
+        <th class="text-center">Upload Results</th>
     </tr>
     </thead>
     <tbody>
@@ -38,8 +39,8 @@
             <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Specimens #}
             <td class="text-center">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            {# Tubes #}
             <td class="text-center">{% if 'ROLE_TUBE_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_RESULTS_UPLOAD' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
         </tr>
     {% endfor %}
     </tbody>

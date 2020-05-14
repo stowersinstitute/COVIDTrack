@@ -37,6 +37,9 @@ class AppPermissions
 
         // Specimens
         'ROLE_SPECIMEN_DROP_OFF',
+
+        // Results
+        'ROLE_RESULTS_UPLOAD',
     ];
 
     /**

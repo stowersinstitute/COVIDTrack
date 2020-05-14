@@ -48,6 +48,7 @@ security:
             - ROLE_KIOSK_UI
             - ROLE_SPECIMEN_DROP_OFF
             - ROLE_TUBE_CHECK_IN
+            - ROLE_RESULTS_UPLOAD
         ROLE_PARTICIPANT_GROUP_EDIT:
             - ROLE_PARTICIPANT_GROUP_VIEW
         ROLE_KIOSK_UI:
