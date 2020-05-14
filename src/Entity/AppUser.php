@@ -111,6 +111,20 @@ class AppUser implements UserInterface
     }
 
     /**
+     * This method returns true if this user has been granted access to the application
+     *
+     * Users are able to log in if they've been granted any role in addition to ROLE_USER
+     */
+    public function isProvisioned() : bool
+    {
+        foreach ($this->roles as $role) {
+            if ($role != 'ROLE_USER') return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Convert audit log field changes from internal format to human-readable format.
      *
      * The input to this method will be a map of properties and their raw values

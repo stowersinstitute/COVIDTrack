@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Tubes{% endblock %}
+
+{% block body %}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body">
+                {% include('tube/tube-list-table.html.twig') %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

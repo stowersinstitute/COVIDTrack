@@ -29,6 +29,15 @@ class TubeRepository extends EntityRepository
         ]);
     }
 
+    public function getReturnedCount() : int
+    {
+        return $this->createQueryBuilder('t')
+            ->select('count(t.id)')
+            ->where('t.status = :droppedOffStatus')
+            ->setParameter('droppedOffStatus', Tube::STATUS_RETURNED)
+            ->getQuery()->getSingleScalarResult();
+    }
+
     /**
      * Tubes ready for Check-In by a Technician
      *

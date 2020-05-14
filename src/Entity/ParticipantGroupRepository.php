@@ -28,8 +28,7 @@ class ParticipantGroupRepository extends EntityRepository
      */
     public function findActive()
     {
-        // todo: implement isActive flag
-        return $this->findBy([], ['accessionId' => 'ASC']);
+        return $this->findBy(['isActive' => true], ['accessionId' => 'ASC']);
     }
 
     /**
@@ -63,5 +62,13 @@ class ParticipantGroupRepository extends EntityRepository
             ')
             ->setParameter('groups', $groups)
             ->getQuery()->getResult();
+    }
+
+    public function getActiveCount() : int
+    {
+        return $this->createQueryBuilder('g')
+            ->select('count(g.id)')
+            ->where('g.isActive = true')
+            ->getQuery()->getSingleScalarResult();
     }
 }

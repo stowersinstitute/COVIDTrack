@@ -47,6 +47,20 @@ Renders a top-level navigation node in the tree navigation.
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         {{
+            _self.treenode('Tubes', 'fa-vial', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_tube_list'
+                },
+                {
+                    text: 'Print Tube Labels',
+                    iconClass: 'fa-print',
+                    route: 'app_label_printer_print_tube_labels'
+                }
+            ])
+        }}
+        {{
             _self.treenode('Specimens', 'fa-flask', [
                 {
                     text: 'List',
@@ -103,7 +117,7 @@ Renders a top-level navigation node in the tree navigation.
             ])
         }}
         {{
-            _self.treenode('Reports', 'fa-bar-chart', [
+            _self.treenode('Reports', 'fa-chart-bar', [
                 {
                     text: 'Group Results',
                     iconClass: 'fa-list',
@@ -113,11 +127,6 @@ Renders a top-level navigation node in the tree navigation.
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [
-                {
-                    text: 'Print Specimen Labels',
-                    iconClass: 'fa-print',
-                    route: 'app_label_printer_print_specimen_labels'
-                },
                 {
                     text: 'List',
                     iconClass: 'fa-list',

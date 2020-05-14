@@ -44,7 +44,7 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 
         $zpl = $this->getZplBuilder();
 
-        $zpl->setHome(2, 2);
+        $zpl->setHome(2, 8);
 
         // These dots are only for troubleshooting. These can be removed once labels are working consistently.
 //        $zpl->drawDot(0,2);
@@ -57,11 +57,10 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 
         $date = $this->tube->getCreatedAt();
 
-        $zpl->drawCode128(1, 2, 4, $this->tube->getAccessionId(), 1, false, 'R');
-        $zpl->drawText(6, 5, $this->tube->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
-        $zpl->drawQrCode(6, 4, $this->tube->getAccessionId(), 11);
-        $zpl->drawText(6, 16, $date->format('Y.m.d'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
-        $zpl->drawText(6, 18, $date->format('H:i:s'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawCode128(0, 0, 8, $this->tube->getAccessionId(), 1);
+        $zpl->drawText(0, 12, $this->tube->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawText(0, 14, $date->format('Y.m.d'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $zpl->drawText(0, 16, $date->format('H:i:s'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
         return $zpl->toZpl();
     }
