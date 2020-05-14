@@ -8,7 +8,7 @@ use App\Entity\LabelPrinter;
 use App\Entity\ParticipantGroup;
 use Zpl\ZplBuilder;
 
-class ParticipantGroupLabelBuilder extends AbstractLabelBuilder
+class ParticipantGroupBadgeLabelBuilder extends AbstractLabelBuilder
 {
     /**
      * @var ParticipantGroup

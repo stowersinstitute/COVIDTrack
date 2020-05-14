@@ -11,7 +11,7 @@ use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
-use App\Label\ParticipantGroupLabelBuilder;
+use App\Label\ParticipantGroupBadgeLabelBuilder;
 use App\Label\ZplPrinting;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -156,7 +156,7 @@ class ParticipantGroupController extends AbstractController
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
             $copies = $data['numToPrint'];
 
-            $builder = new ParticipantGroupLabelBuilder();
+            $builder = new ParticipantGroupBadgeLabelBuilder();
             $builder->setPrinter($printer);
             $builder->setGroup($group);
 
