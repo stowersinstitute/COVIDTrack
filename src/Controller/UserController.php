@@ -57,6 +57,9 @@ class UserController extends AbstractController
     }
 
     /**
+     * Optional GET parameters:
+     *  - forceLocal If present, automatic redirection to the LdapUserController will be disabled
+     *
      * @Route(path="/new", methods={"GET", "POST"}, name="user_new")
      */
     public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
