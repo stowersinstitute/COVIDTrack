@@ -6,7 +6,7 @@ use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use Doctrine\ORM\EntityManager;
 
-class SpecimenIntakeImporter extends BaseExcelImporter
+class SpecimenCheckinImporter extends BaseExcelImporter
 {
     /**
      * Excel cell value when Tube is Accepted. Case insensitive.

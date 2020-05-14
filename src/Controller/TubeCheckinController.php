@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\ExcelImporter;
-use App\ExcelImport\SpecimenIntakeImporter;
+use App\ExcelImport\SpecimenCheckinImporter;
 use App\Form\GenericExcelImportType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -139,7 +139,7 @@ class TubeCheckinController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenIntakeImporter(
+        $importer = new SpecimenCheckinImporter(
             $this->getDoctrine()->getManager(),
             $importingWorkbook->getFirstWorksheet()
         );
@@ -167,7 +167,7 @@ class TubeCheckinController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenIntakeImporter(
+        $importer = new SpecimenCheckinImporter(
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
