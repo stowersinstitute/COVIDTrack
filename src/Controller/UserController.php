@@ -64,7 +64,7 @@ class UserController extends AbstractController
         $this->denyAcessUnlessPermissions();
 
         // If LDAP is enabled redirect to the LDAP workflow
-        if (AppConfiguration::isLdapEnabled()) {
+        if (AppConfiguration::isLdapEnabled() && !$request->query->has('forceLocal')) {
             return $this->redirectToRoute('ldap_user_onboarding_start');
         }
 
