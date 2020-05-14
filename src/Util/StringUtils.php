@@ -40,17 +40,19 @@ class StringUtils
      *  - No ambiguous characters (ie. 0 vs. O or 1 vs l)
      *  - No vowels (so no recognizable words, dirty or otherwise)
      */
-    public static function generateRandomString(int $length) : string
+    public static function generateRandomString(int $length, bool $lettersOnly = false) : string
     {
         $alphabet = [
             'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z',
-            '2', '5', '7', '9'
         ];
 
-        $randomStr = '';
+        if (!$lettersOnly) {
+            $alphabet = array_merge($alphabet, ['2', '5', '7', '9']);
+        }
 
+        $randomStr = '';
         for ($i=0; $i < $length; $i++) {
-            $randomStr .= $alphabet[rand(0, count($alphabet) - 1)];
+            $randomStr .= $alphabet[array_rand($alphabet)];
         }
 
         return $randomStr;
