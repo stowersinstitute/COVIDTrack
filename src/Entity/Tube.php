@@ -108,6 +108,9 @@ class Tube
     private $checkedInByUsername;
 
     /**
+     * Date and Time when this Specimen was extracted (collected) from the Participant.
+     * For example, when they spit in the tube or did a blood draw.
+     *
      * @var \DateTimeImmutable
      * @ORM\Column(name="collected_at", type="datetime", nullable=true)
      */
@@ -151,7 +154,21 @@ class Tube
 
     public function setTubeType(?string $tubeType): void
     {
+        $this->mustBeValidTubeType($tubeType);
+
         $this->tubeType = $tubeType;
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidTubeTypes(): array
+    {
+        return [
+            self::TYPE_BLOOD,
+            self::TYPE_SALIVA,
+            self::TYPE_SWAB,
+        ];
     }
 
     public function getParticipantGroup(): ?ParticipantGroup
@@ -328,5 +345,14 @@ class Tube
         $statuses = array_flip(static::getValidStatuses());
 
         return $statuses[$statusConstant];
+    }
+
+    private function mustBeValidTubeType(?string $tubeType)
+    {
+        if ($tubeType === null) return;
+
+        if (!in_array($tubeType, self::getValidTubeTypes())) {
+            throw new \InvalidArgumentException('Invalid Tube Type');
+        }
     }
 }

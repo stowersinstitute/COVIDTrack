@@ -4,84 +4,47 @@ namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResult;
-use App\Entity\SpecimenResultDDPCR;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\SpecimenResultSequencing;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * Stores Specimen.id loaded with Results during this fixture class
+     * @var int[]
+     */
+    private $specimenIdsWithResults = [];
+
+    public function getDependencies()
+    {
+        return [
+            AppParticipantGroupsFixtures::class,
+            AppTubeFixtures::class,
+        ];
+    }
+
     public function load(ObjectManager $em)
     {
-        $users = $this->addUsers($em);
-        $groups = $this->addParticipantGroups($em);
-        $this->addPrintedSpecimens($em, $groups);
-        $this->addResultedSpecimens($em, $groups);
+        $this->addResultedSpecimens($em);
 
         $em->flush();
-    }
-
-    private function addUsers(ObjectManager $em): array
-    {
-        return [];
-    }
-
-    /**
-     * @return ParticipantGroup[]
-     */
-    private function addParticipantGroups(ObjectManager $em): array
-    {
-        $fixtureData = [
-            [ 'title' => 'Red',         'participantCount' => 3,    'accessionId' => 'GRP-722XJW' ],
-            [ 'title' => 'Orange',      'participantCount' => 5,    'accessionId' => 'GRP-ZRGTSS' ],
-            [ 'title' => 'Yellow',      'participantCount' => 7,    'accessionId' => 'GRP-7PRMZC' ],
-            [ 'title' => 'Green',       'participantCount' => 9,    'accessionId' => 'GRP-N9YNSH' ],
-            [ 'title' => 'Blue',        'participantCount' => 11,   'accessionId' => 'GRP-9LT5SY' ],
-            [ 'title' => 'Indigo',      'participantCount' => 13,   'accessionId' => 'GRP-WCKXJT' ],
-            [ 'title' => 'Violet',      'participantCount' => 15,   'accessionId' => 'GRP-CRYGX9' ],
-        ];
-
-        $groups = [];
-        foreach ($fixtureData as $raw) {
-            $accessionId = $raw['accessionId'];
-            $g = new ParticipantGroup($accessionId, $raw['participantCount']);
-            $g->setTitle($raw['title']);
-
-            $groups[] = $g;
-
-            $em->persist($g);
-        }
-
-        return $groups;
-    }
-
-    /**
-     * Add Specimens that have had labels printed, but not imported with results.
-     *
-     * @param ObjectManager $em
-     * @param ParticipantGroup[] $groups
-     */
-    private function addPrintedSpecimens(ObjectManager $em, array $groups)
-    {
-        foreach ($groups as $group) {
-            for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                $s = new Specimen($this->getNextSpecimenId(), $group);
-
-                $em->persist($s);
-            }
-        }
     }
 
     /**
      * Add Specimens that have had labels printed and results.
      *
      * @param ObjectManager $em
-     * @param ParticipantGroup[] $groups
      */
-    private function addResultedSpecimens(ObjectManager $em, array $groups)
+    private function addResultedSpecimens(ObjectManager $em)
     {
+        /** @var ParticipantGroup[] $groups */
+        $groups = $em->getRepository(ParticipantGroup::class)->findAll();
+
+        // Reasonable positive/negative rate
+        $possibleResults = $this->buildQPCRResultsDistribution();
+
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
             // for this many days worth of testing
@@ -89,104 +52,86 @@ class AppFixtures extends Fixture
 
             for ($day=1; $day<=$daysWorthResults; $day++) {
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                    $s = new Specimen($this->getNextSpecimenId(), $group);
-                    $s->setType($this->getSpecimenType($i));
-                    $s->setCollectedAt(new \DateTimeImmutable(sprintf('-%d days 5:00pm', $day)));
-                    $s->setStatus(Specimen::STATUS_RESULTS);
+                    $s = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
 
-                    $em->persist($s);
+                    // Might not have enough fixture Tubes to keep going
+                    if (!$s) continue;
 
-                    // Add many qPCR results, which test for presence of virus
-                    $maxQPCR = rand(2,4);
-                    for ($j=0; $j<$maxQPCR; $j++) {
+                    // Set a random conclusion, if we have one
+                    $conclusion = $possibleResults[array_rand($possibleResults)];
+                    if ($conclusion) {
                         $r1 = new SpecimenResultQPCR($s);
+                        $r1->setCreatedAt(new \DateTimeImmutable(sprintf('-%d days', $day)));
+                        $r1->setConclusion($conclusion);
 
-                        // This sadly isn't working. See Gedmo\AbstractTrackingListener#prePersist()
-                        $r1->setCreatedAt(new \DateTimeImmutable(sprintf('-%d days', $i)));
-
-                        // Set a random conclusion
-                        $conclusions = SpecimenResultQPCR::getFormConclusions();
-                        $r1->setConclusion($conclusions[array_rand($conclusions)]);
+                        $s->setStatus(Specimen::STATUS_RESULTS);
 
                         $em->persist($r1);
                     }
-
-                    // ddPCR Result
-                    $r2 = new SpecimenResultDDPCR($s);
-                    $r2->setIsFailure(rand(0,1));
-                    $s->addResult($r2);
-                    $em->persist($r2);
-
-                    // Sequencing Result
-                    $r3 = new SpecimenResultSequencing($s);
-                    $r3->setIsFailure(rand(0,1));
-                    $s->addResult($r3);
-                    $em->persist($r3);
                 }
             }
         }
     }
 
-    private function getSpecimenType(int $i)
-    {
-        $types = array_values(Specimen::getFormTypes());
-
-        return $types[$i % count($types)];
-    }
-
     /**
-     * Invoke to get next Specimen accessionId
-     * TODO: CVDLS-30 Support creating unique accession ID when creating
+     * Build array of possible Results across a probability distribution.
+     * Pull a random element from this array to get a random result.
      *
-     * @return string
+     * Returns NULL when no result available, such as when Awaiting Results.
      */
-    private function getNextSpecimenId(): string
+    private function buildQPCRResultsDistribution(): array
     {
-        if (!isset($seq)) {
-            static $seq = 0;
-        }
-        $prefix = 'CID';
+        // Approximate hit rate out of 100
+        $positive = 6;
+        $recommended = 4;
+        $negative = 72;
+        $inconclusive = 10;
+        $awaitingResults = 8;
 
-        $seq++;
+        $possible = array_merge(
+            array_fill(0, $positive, SpecimenResultQPCR::CONCLUSION_POSITIVE),
+            array_fill(0, $recommended, SpecimenResultQPCR::CONCLUSION_RECOMMENDED),
+            array_fill(0, $negative, SpecimenResultQPCR::CONCLUSION_NEGATIVE),
+            array_fill(0, $inconclusive, SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE),
+            array_fill(0, $awaitingResults, null)
+        );
 
-        return sprintf("%s%s", $prefix, $seq);
+        return $possible;
     }
 
-    private function getGroupTitle(int $idx): string
+    private function getRandomSpecimenPendingResultsForGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
     {
-        $titles = [
-            'Amber Alligators',
-            'Brown Bears',
-            'Cyan Chickens',
-            'Denim Dingos',
-            'Emerald Eels',
-            'Fuchsia Fish',
-            'Golden Geese',
-            'Heliotrope Herons',
-            'Indigo Impalas',
-            'Jade Jellyfish',
-            'Khaki Kangaroos',
-            'Lavender Lemurs',
-            'Mauve Meerkats',
-            'Navy Nightingales',
-            'Olive Otters',
-            'Pink Pelicans',
-            'Quartz Quails',
-            'Ruby Raccoons',
-            'Scarlet Sloths',
-            'Teal Tigers',
-            'Ultramarine Urchins',
-            'Violet Vultures',
-            'White Walruses',
-            'Xanthic Xenons',
-            'Yellow Yaks',
-            'Zero Zebras',
-        ];
+        /** @var Specimen[] $specimens */
+        $qb = $em->getRepository(Specimen::class)
+            ->createQueryBuilder('s')
 
-        if (!isset($titles[$idx])) {
-            throw new \InvalidArgumentException('No fixture ParticipantGroup title exists for index ' . $idx);
+            // Group
+            ->andWhere('s.participantGroup = :group')
+            ->setParameter('group', $group)
+
+            // Doesn't have a CLIA testing rec yet
+            ->andWhere('s.cliaTestingRecommendation = :recommendation')
+            ->setParameter('recommendation', Specimen::CLIA_REC_PENDING)
+
+            ->setMaxResults(1);
+
+        // Not a Specimen we already added results for,
+        // so we don't have to flush() after each loop
+        if ($this->specimenIdsWithResults) {
+            $qb->andWhere('s.id NOT IN (:seenSpecimenIds)')
+                ->setParameter('seenSpecimenIds', $this->specimenIdsWithResults);
         }
 
-        return $titles[$idx];
+        $specimens = $qb->getQuery()->execute();
+
+        if (count($specimens) !== 1) {
+            // Might've run out of Specimens to result
+            return null;
+        }
+
+        $found = array_shift($specimens);
+        $this->specimenIdsWithResults[] = $found->getId();
+
+        return $found;
     }
 }

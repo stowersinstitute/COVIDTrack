@@ -19,8 +19,13 @@ class SpecimenRepository extends EntityRepository
             return $this->find($id);
         }
 
+        return $this->findOneByAccessionId($id);
+    }
+
+    public function findOneByAccessionId(string $accessionId): ?Specimen
+    {
         return $this->findOneBy([
-            'accessionId' => $id,
+            'accessionId' => $accessionId,
         ]);
     }
 
@@ -55,7 +60,7 @@ class SpecimenRepository extends EntityRepository
      *
      * @return Specimen[]
      */
-    public function findByGroupForCollectionPeriod(ParticipantGroup $group, \DateTime $collectedAt): array
+    public function findByGroupForCollectionPeriod(ParticipantGroup $group, \DateTimeInterface $collectedAt): array
     {
         return $this->createQueryBuilder('s')
             ->where('s.participantGroup = :group')

@@ -35,7 +35,7 @@ class Specimen
     const TYPE_SALIVA = "SALIVA";
 
     const CLIA_REC_PENDING = "PENDING";
-    const CLIA_REC_RECOMMENDED = "RECOMMENDED";
+    const CLIA_REC_YES = "YES";
     const CLIA_REC_NO = "NO";
 
     /**
@@ -80,7 +80,8 @@ class Specimen
     private $wellPlate;
 
     /**
-     * Time when collected or received.
+     * Date and Time when this Specimen was extracted (collected) from the Participant.
+     * For example, when they spit in the tube or did a blood draw.
      *
      * @var \DateTime
      * @ORM\Column(name="collected_at", type="datetime", nullable=true)
@@ -198,7 +199,7 @@ class Specimen
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'type' => 'Type',
-            'collectedAt' => 'Collected At',
+            'collectedAt' => 'Collection Time',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
@@ -364,6 +365,7 @@ class Specimen
 
     public function getCliaTestingRecommendedText(): string
     {
+        // NOTE: See $this->recalculateCliaTestingRecommendation() for $this->cliaTestingRecommendation
         return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
     }
 
@@ -375,8 +377,8 @@ class Specimen
     {
         $map = [
             self::CLIA_REC_PENDING => 'Awaiting Results',
-            self::CLIA_REC_RECOMMENDED => 'Yes',
-            self::CLIA_REC_NO => 'No',
+            self::CLIA_REC_YES => 'Recommend Diagnostic Testing',
+            self::CLIA_REC_NO => 'No Recommendation',
         ];
 
         return $map[$rec] ?? '';
@@ -496,20 +498,21 @@ class Specimen
         // Current recommendation
         $rec = $this->cliaTestingRecommendation;
 
-        // Latest qPCR result
+        // Latest result
         $qpcr = $this->getMostRecentQPCRResult();
 
-        // When qPCR result available
+        // When result available
         if ($qpcr) {
-            // Get the qPCR conclusion
+            // Get the conclusion
             $result = $qpcr->getConclusion();
 
-            // qPCR conclusion ==> CLIA Recommendation
+            // conclusion ==> CLIA Recommendation
             $map = [
-                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_RECOMMENDED,
-                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
-                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
+                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
+                SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
+                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_NO,
             ];
 
             // Use mapped recommendation value, else keep existing rec

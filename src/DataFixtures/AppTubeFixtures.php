@@ -2,16 +2,44 @@
 
 namespace App\DataFixtures;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Entity\DropOff;
+use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppTubeFixtures extends Fixture
+class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * @var ParticipantGroup[]
+     */
+    private $allGroups;
+
+    public function getDependencies()
+    {
+        return [
+            AppParticipantGroupsFixtures::class,
+        ];
+    }
+
+    /**
+     * Generates Species ID
+     *
+     * @var SpecimenAccessionIdGenerator
+     */
+    private $speciesAccessionIdGen;
+
+    public function __construct(SpecimenAccessionIdGenerator $gen)
+    {
+        $this->speciesAccessionIdGen = $gen;
+    }
+
     public function load(ObjectManager $em)
     {
         $this->distributedTubes($em);
-        $this->returnedTubes($em);
+        $this->droppedOffTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
@@ -23,7 +51,7 @@ class AppTubeFixtures extends Fixture
      */
     private function distributedTubes(ObjectManager $em)
     {
-        $startAccession = 100;
+        $startAccession = 1000;
 
         for ($i=1; $i<=20; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
@@ -37,15 +65,19 @@ class AppTubeFixtures extends Fixture
     /**
      * Tubes that Participants have returned at a Kiosk.
      */
-    private function returnedTubes(ObjectManager $em)
+    private function droppedOffTubes(ObjectManager $em)
     {
-        $startAccession = 200;
+        $startAccession = 2000;
 
-        for ($i=1; $i<=20; $i++) {
+        for ($i=1; $i<=200; $i++) {
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
-            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+
+            // Tube Specimens will have been collected (extracted) from the
+            // Participant within the last few days
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
+            $this->doKioskDropoff($em, $T, $collectedAt);
 
             $em->persist($T);
         }
@@ -56,7 +88,7 @@ class AppTubeFixtures extends Fixture
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $startAccession = 300;
+        $startAccession = 3000;
 
         $numToCreate = 20;
         $checkedInBy = 'test-checkin-user';
@@ -64,7 +96,10 @@ class AppTubeFixtures extends Fixture
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
-            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i));
+            $this->doKioskDropoff($em, $T, $collectedAt);
+
             // TODO: CVDLS-39 This probably needs a Specimen but John will work that out later
             $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
 
@@ -77,7 +112,7 @@ class AppTubeFixtures extends Fixture
      */
     private function rejectedTubes(ObjectManager $em)
     {
-        $startAccession = 400;
+        $startAccession = 4000;
 
         $numToCreate = 10;
         $checkedInBy = 'test-checkin-user';
@@ -85,10 +120,39 @@ class AppTubeFixtures extends Fixture
             $accessionId = 'TUBE-' . ($i+$startAccession);
 
             $T = new Tube($accessionId);
-            $T->markReturned(new \DateTimeImmutable(sprintf('-%d days 9:00am', $i)));
+
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i));
+            $this->doKioskDropoff($em, $T, $collectedAt);
+
             $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i)));
 
             $em->persist($T);
         }
+    }
+
+    private function getRandomGroup(ObjectManager $em): ParticipantGroup
+    {
+        if (empty($this->allGroups)) {
+            $this->allGroups = $em->getRepository(ParticipantGroup::class)->findAll();
+        }
+
+        return $this->allGroups[array_rand($this->allGroups)];
+    }
+
+    /**
+     * All the work to simulate a kiosk dropoff.
+     */
+    private function doKioskDropoff(ObjectManager $em, Tube $T, \DateTimeInterface $collectedAt)
+    {
+        // Assume 1 tube per dropoff
+        $dropoff = new DropOff();
+        $em->persist($dropoff);
+
+        $group = $this->getRandomGroup($em);
+
+        $possibleTubeTypes = Tube::getValidTubeTypes();
+        $tubeType = $possibleTubeTypes[array_rand($possibleTubeTypes)];
+
+        $T->kioskDropoff($this->speciesAccessionIdGen, $dropoff, $group, $tubeType, $collectedAt);
     }
 }

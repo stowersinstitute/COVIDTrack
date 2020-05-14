@@ -37,7 +37,7 @@ class SpecimenResultQPCRController extends AbstractController
     }
 
     /**
-     * Create a single new qPCR Result
+     * Create a single new Result
      *
      * Optional query string params:
      *
@@ -82,7 +82,7 @@ class SpecimenResultQPCRController extends AbstractController
     }
 
     /**
-     * Edit a single qPCR Result.
+     * Edit a single Result.
      *
      * Optional query string params:
      *
@@ -126,7 +126,7 @@ class SpecimenResultQPCRController extends AbstractController
             ->find($id);
 
         if (!$q) {
-            throw new \InvalidArgumentException('Cannot find qPCR Result');
+            throw new \InvalidArgumentException('Cannot find Result');
         }
 
         return $q;
