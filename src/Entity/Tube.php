@@ -175,14 +175,31 @@ class Tube
     }
 
     /**
+     * Get human-readable text of selected Type
+     */
+    public function getTypeText(): string
+    {
+        if ($this->tubeType === null) {
+            return '';
+        }
+
+        $types = self::getValidTubeTypes();
+
+        // Key by TYPE_* constant
+        $types = array_flip($types);
+
+        return $types[$this->tubeType];
+    }
+
+    /**
      * @return string[]
      */
     public static function getValidTubeTypes(): array
     {
         return [
-            self::TYPE_BLOOD,
-            self::TYPE_SALIVA,
-            self::TYPE_SWAB,
+            'Blood' => self::TYPE_BLOOD,
+            'Swab' => self::TYPE_SWAB,
+            'Saliva' => self::TYPE_SALIVA,
         ];
     }
 
