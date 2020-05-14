@@ -57,6 +57,9 @@ class UserController extends AbstractController
     }
 
     /**
+     * Optional GET parameters:
+     *  - forceLocal If present, automatic redirection to the LdapUserController will be disabled
+     *
      * @Route(path="/new", methods={"GET", "POST"}, name="user_new")
      */
     public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
@@ -64,7 +67,7 @@ class UserController extends AbstractController
         $this->denyAcessUnlessPermissions();
 
         // If LDAP is enabled redirect to the LDAP workflow
-        if (AppConfiguration::isLdapEnabled()) {
+        if (AppConfiguration::isLdapEnabled() && !$request->query->has('forceLocal')) {
             return $this->redirectToRoute('ldap_user_onboarding_start');
         }
 
