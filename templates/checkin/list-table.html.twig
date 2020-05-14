@@ -69,6 +69,8 @@
             const tubeId = $btn.data('tube-id');
             const url = "{{ path('checkin_decide_tube') }}";
 
+            if (!confirm("Mark Tube "+tubeId+" "+decision+"?")) return;
+
             // Send decision to server
             $.post(url, {
                 tubeId: tubeId,
