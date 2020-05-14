@@ -61,7 +61,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
                     $conclusion = $possibleResults[array_rand($possibleResults)];
                     if ($conclusion) {
                         $r1 = new SpecimenResultQPCR($s);
-                        $r1->setCreatedAt(new \DateTime(sprintf('-%d days', $day)));
+                        $r1->setCreatedAt(new \DateTimeImmutable(sprintf('-%d days', $day)));
                         $r1->setConclusion($conclusion);
 
                         $s->setStatus(Specimen::STATUS_RESULTS);

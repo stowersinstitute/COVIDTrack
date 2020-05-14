@@ -38,6 +38,9 @@ class LdapUserController extends AbstractController
 
         $form = $this->createFormBuilder()
             ->add('username', TextType::class, [
+                'attr' => [
+                    'autofocus' => true,
+                ],
                 'constraints' => [
                     new Callback(function($fieldValue, ExecutionContextInterface $context) {
                         $ldapUser = $this->findLdapUser($fieldValue);
@@ -93,9 +96,9 @@ class LdapUserController extends AbstractController
     {
         $this->denyAcessUnlessPermissions();
 
-        $ldapUser = $this->findLdapUser($username);
-        $localUser = $ldapUserSynchronizer->synchronize($ldapUser);
+        $localUser = $ldapUserSynchronizer->createLocalUser($username);
 
+        $this->getDoctrine()->getManager()->persist($localUser);
         $this->getDoctrine()->getManager()->flush();
 
         // After the user is created the normal user management pages can be used

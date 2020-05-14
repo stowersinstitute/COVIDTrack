@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Represents an excel worksheet associated with a workbook
  *
  * @ORM\Entity
+ * @ORM\Table(name="excel_import_worksheets")
  */
 class ExcelImportWorksheet
 {
@@ -35,7 +36,7 @@ class ExcelImportWorksheet
      * @var ExcelImportWorkbook The workbook this sheet belongs to
      *
      * @ORM\ManyToOne(targetEntity="ExcelImportWorkbook", inversedBy="worksheets")
-     * @ORM\JoinColumn(name="workbookId", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="workbook_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $workbook;
 

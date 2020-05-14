@@ -14,13 +14,14 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * A workbook created by parsing an uploaded Excel file
  *
  * @ORM\Entity
+ * @ORM\Table(name="excel_import_workbooks")
  */
 class ExcelImportWorkbook
 {
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -37,7 +38,7 @@ class ExcelImportWorkbook
      * When the file was uploaded
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(name="uploadedAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="uploaded_at", type="datetime_immutable", nullable=true)
      */
     protected $uploadedAt;
 
@@ -45,7 +46,7 @@ class ExcelImportWorkbook
      * @var AppUser The user who uploaded this file
      *
      * @ORM\ManyToOne(targetEntity="AppUser")
-     * @ORM\JoinColumn(name="uploadedById", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="uploaded_by_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     protected $uploadedBy;
 
@@ -54,7 +55,7 @@ class ExcelImportWorkbook
      * @var ExcelImportWorksheet[]
      *
      * @ORM\OneToMany(targetEntity="ExcelImportWorksheet", cascade={"persist", "remove"}, orphanRemoval=true, mappedBy="workbook")
-     * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbookId")
+     * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbook_id")
      */
     protected $worksheets;
 

@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use App\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
@@ -17,6 +17,7 @@ class Tube
 {
     use TimestampableEntity, SoftDeleteableEntity;
 
+    const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
@@ -29,7 +30,7 @@ class Tube
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -38,7 +39,7 @@ class Tube
      * Unique public ID for referencing. This is referred to as the "Tube ID"
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string", unique=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true)
      */
     private $accessionId;
 
@@ -47,7 +48,7 @@ class Tube
      *
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $participantGroup;
 
@@ -55,7 +56,7 @@ class Tube
      * Specimen created as result of Tube being checked in.
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
-     * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $specimen;
 
@@ -69,7 +70,7 @@ class Tube
 
     /**
      * @var string
-     * @ORM\Column(name="tubeType", type="string", nullable=true)
+     * @ORM\Column(name="tube_type", type="string", nullable=true)
      */
     private $tubeType;
 
@@ -77,14 +78,14 @@ class Tube
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="returnedAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="returned_at", type="datetime_immutable", nullable=true)
      */
     private $returnedAt;
 
     /**
      * @var DropOff
      * @ORM\ManyToOne(targetEntity="App\Entity\DropOff", inversedBy="tubes")
-     * @ORM\JoinColumn(name="dropOffId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="drop_off_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $dropOff;
 
@@ -92,7 +93,7 @@ class Tube
      * Date/Time when Tube was processed for check-in by Check-in Technician.
      *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="checkedInAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="checked_in_at", type="datetime_immutable", nullable=true)
      */
     private $checkedInAt;
 
@@ -102,7 +103,7 @@ class Tube
      * NOTE: Username may not exist in the system, this is not a guaranteed AppUser association
      *
      * @var string
-     * @ORM\Column(name="checkedInByUsername", type="string", nullable=true, length=255)
+     * @ORM\Column(name="checked_in_by_username", type="string", nullable=true, length=255)
      */
     private $checkedInByUsername;
 
@@ -111,14 +112,14 @@ class Tube
      * For example, when they spit in the tube or did a blood draw.
      *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="collected_at", type="datetime", nullable=true)
      */
     private $collectedAt;
 
     public function __construct(?string $accessionId = null)
     {
         $this->accessionId = $accessionId;
-        $this->status = self::STATUS_PRINTED;
+        $this->status = self::STATUS_CREATED;
     }
 
     public function __toString()
@@ -268,6 +269,14 @@ class Tube
     }
 
     /**
+     * When a label is printed for this tube
+     */
+    public function markPrinted()
+    {
+        $this->setStatus(self::STATUS_PRINTED);
+    }
+
+    /**
      * When a Participant has returned this Tube with their Specimen inside.
      */
     public function markReturned(\DateTimeImmutable $returnedAt)
@@ -318,6 +327,7 @@ class Tube
     private static function getValidStatuses(): array
     {
         return [
+            'Created' => self::STATUS_CREATED,
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,

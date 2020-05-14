@@ -14,6 +14,9 @@ parameters:
     default_ldap_auth_search_password: ''
     default_ldap_auth_user_dn_format: ''
 
+    # Default values for environment variables
+    env(CT_USER_SUPPORT_EMAIL): ''
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -25,11 +28,6 @@ services:
     App\:
         resource: '../src/*'
         exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
-
-    App\Command\DebugLdapUserCommand:
-        arguments:
-            # Cannot autowire based on LdapUserProvider so must use the concrete service
-            Symfony\Component\Ldap\Security\LdapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class

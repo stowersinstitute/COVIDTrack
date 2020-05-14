@@ -33,17 +33,17 @@ class SpecimenTest extends TestCase
 
         // Add first result
         $r1 = new SpecimenResultQPCR($s);
-        $r1->setCreatedAt(new \DateTime('2020-04-24'));
+        $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
         $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
 
         // Add second result (but it's the most recent created at)
         $r2 = new SpecimenResultQPCR($s);
-        $r2->setCreatedAt(new \DateTime('2020-04-25'));
+        $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         // Add third result
         $r3 = new SpecimenResultQPCR($s);
-        $r3->setCreatedAt(new \DateTime('2020-04-23'));
+        $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
 
         //
@@ -56,17 +56,17 @@ class SpecimenTest extends TestCase
 
         // Add first result
         $r1 = new SpecimenResultQPCR($s);
-        $r1->setCreatedAt(new \DateTime('2020-04-24'));
+        $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
         $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
 
         // Add second result (but it's the most recent created at)
         $r2 = new SpecimenResultQPCR($s);
-        $r2->setCreatedAt(new \DateTime('2020-04-25'));
+        $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         // Add third result
         $r3 = new SpecimenResultQPCR($s);
-        $r3->setCreatedAt(new \DateTime('2020-04-23'));
+        $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
 
         // Most recent
@@ -85,17 +85,17 @@ class SpecimenTest extends TestCase
         $s = Specimen::buildExample('C100');
 
         $r1 = new SpecimenResultQPCR($s);
-        $r1->setCreatedAt(new \DateTime('2020-04-24'));
+        $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
         $r1->setConclusion(SpecimenResultQPCR::CONCLUSION_NEGATIVE);
 
         // R2. This is the latest result
         $r2 = new SpecimenResultQPCR($s);
-        $r2->setCreatedAt(new \DateTime('2020-04-25'));
+        $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
         $r2->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         // R3. Adding an earlier result does not override R2
         $r3 = new SpecimenResultQPCR($s);
-        $r3->setCreatedAt(new \DateTime('2020-04-23'));
+        $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
         $r3->setConclusion(SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
 
         $this->assertSame($r2, $s->getMostRecentQPCRResult());

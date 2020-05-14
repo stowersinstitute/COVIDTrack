@@ -73,6 +73,15 @@ class SpecimenRepository extends EntityRepository
             ->execute();
     }
 
+    public function getInProcessCount() : int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('count(s.id)')
+            ->where('s.status = :inProcessStatus')
+            ->setParameter('inProcessStatus', Specimen::STATUS_IN_PROCESS)
+            ->getQuery()->getSingleScalarResult();
+    }
+
     /**
      * QueryBuilder to query Specimen ready for reporting results.
      *

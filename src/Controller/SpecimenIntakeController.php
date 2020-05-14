@@ -17,12 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
  * Manages actions for the specimen intake process where specimens are delivered to the
  * testing facility and technicians acknowledge receipt
  *
- * @Route(path="/testing/specimen-intake")
+ * @Route("/testing/specimen-intake")
  */
 class SpecimenIntakeController extends AbstractController
 {
     /**
-     * @route(path="/upload/start", name="specimen_intake_start")
+     * @Route("/upload/start", name="specimen_intake_start")
      */
     public function startUpload(Request $request, ExcelImporter $excelImporter)
     {
@@ -100,8 +100,6 @@ class SpecimenIntakeController extends AbstractController
         $importer->setEntityManager($em);
 
         $importer->process(true);
-
-        $affectedTubes = $importer->getOutput();
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);

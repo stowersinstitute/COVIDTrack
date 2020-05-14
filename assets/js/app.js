@@ -9,7 +9,7 @@
 require('bootstrap/dist/css/bootstrap.css');
 require('admin-lte/dist/css/AdminLTE.css');
 require('admin-lte/dist/css/skins/skin-blue.css');
-require('font-awesome/css/font-awesome.css');
+require('@fortawesome/fontawesome-free/css/all.css')
 require('../css/app.css');
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
