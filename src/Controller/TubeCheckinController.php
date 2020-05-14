@@ -104,7 +104,7 @@ class TubeCheckinController extends AbstractController
     }
 
     /**
-     * @route(path="/import/start", name="checkin_import_start")
+     * @Route(path="/import/start", name="checkin_import_start")
      */
     public function importStart(Request $request, ExcelImporter $excelImporter)
     {
