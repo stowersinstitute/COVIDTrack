@@ -44,7 +44,7 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 
         $zpl = $this->getZplBuilder();
 
-        $zpl->setHome(2, 8);
+        $zpl->setHome(2, 2);
 
         // These dots are only for troubleshooting. These can be removed once labels are working consistently.
 //        $zpl->drawDot(0,2);
