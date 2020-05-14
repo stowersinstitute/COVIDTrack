@@ -1,6 +1,11 @@
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
 
+imports:
+    # Build process writes version information to this file
+    # Active version number is stored in the app_current_version parameter
+    - { resource: version.yaml }
+
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
