@@ -54,4 +54,26 @@ class TubeRepository extends EntityRepository
             ->getQuery()
             ->execute();
     }
+
+    public function findSpecimenAccessionIdByTubeAccessionId(string $tubeAccessionId): ?string
+    {
+        $found = $this->createQueryBuilder('t')
+            ->select('t.accessionId as tubeId, s.accessionId as specimenId')
+            ->join('t.specimen', 's')
+            ->where('t.accessionId = :tubeAccessionId')
+            ->setParameter('tubeAccessionId', $tubeAccessionId)
+            ->getQuery()
+            ->execute();
+
+        if (count($found) === 0) {
+            return null;
+        }
+        if (count($found) > 1) {
+            throw new \RuntimeException(sprintf('Found more than one Tube for Accession ID %s', $tubeAccessionId));
+        }
+
+        $record = array_shift($found);
+
+        return $record['specimenId'];
+    }
 }
