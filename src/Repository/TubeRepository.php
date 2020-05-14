@@ -48,8 +48,8 @@ class TubeRepository extends EntityRepository
         return $this->createQueryBuilder('t')
             ->addSelect('s')
             ->join('t.specimen', 's')
-            ->where('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_RETURNED)
+            ->where('t.status = :status')
+            ->setParameter('status', Tube::STATUS_RETURNED)
 
             ->orderBy('t.accessionId')
 
