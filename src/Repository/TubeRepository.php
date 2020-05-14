@@ -33,8 +33,8 @@ class TubeRepository extends EntityRepository
     {
         return $this->createQueryBuilder('t')
             ->select('count(t.id)')
-            ->where('t.status = :droppedOffStatus')
-            ->setParameter('droppedOffStatus', Tube::STATUS_RETURNED)
+            ->where('t.status = :status')
+            ->setParameter('status', Tube::STATUS_RETURNED)
             ->getQuery()->getSingleScalarResult();
     }
 
