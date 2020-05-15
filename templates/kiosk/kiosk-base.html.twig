@@ -91,8 +91,9 @@
                 }
 
                 // If the server is running a different version than we are refresh the page
+                // Only do this if we're in the idle "waiting for user" state
                 if (data.appVersion && data.appVersion != hbData.appVersion) {
-                    location.reload(true);
+                    if (hbData.state === 'WAITING_DROPOFF_START') location.reload(true);
                 }
             },
 
