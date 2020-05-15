@@ -127,6 +127,23 @@ class Specimen
         $this->createdAt = new \DateTimeImmutable();
     }
 
+    /**
+     * Create a new Specimen
+     *
+     * @return Specimen
+     */
+    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen): self
+    {
+        $accessionId = $gen->generate();
+
+        return new static($accessionId, $group);
+    }
+
+    /**
+     * Create a Specimen from contents in the given Tube.
+     *
+     * @return Specimen
+     */
     public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
     {
         // Use Tube's Participant Group
@@ -135,11 +152,8 @@ class Specimen
             throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
         }
 
-        // Specimen Accession ID
-        $accessionId = $gen->generate();
-
         // New Specimen
-        $s = new static($accessionId, $group);
+        $s = static::createNew($group, $gen);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
