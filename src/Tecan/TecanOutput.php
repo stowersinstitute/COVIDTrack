@@ -30,13 +30,11 @@ class TecanOutput
     }
 
     /**
-     * Copies original input file and writes a new file with the Tube Accession IDs
-     * replaced with Specimen Accession IDs.
+     * Find and replace Tube Accession IDs with Specimen Accession IDs.
      *
-     * @param string $exportFilePath Path including filename where output written
-     * @return string Path where output file written
+     * @return string[] Input file lines with Tube IDs replaced. Each line contains original line ending.
      */
-    public function convertTubesToSpecimens(TubeRepository $tubeRepo, string $exportFilePath): string
+    public function convertTubesToSpecimens(TubeRepository $tubeRepo): array
     {
         /** @var string[] $output */
         $output = [];
@@ -61,12 +59,6 @@ class TecanOutput
             $output[] = $line;
         }
 
-        // Write to tmp path
-        $success = file_put_contents($exportFilePath, $output);
-        if (!$success) {
-            throw new \RuntimeException('Could not write Tube ID conversion temp file');
-        }
-
-        return $exportFilePath;
+        return $output;
     }
 }

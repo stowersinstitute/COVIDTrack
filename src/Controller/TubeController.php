@@ -118,30 +118,45 @@ class TubeController extends AbstractController
                 'filename.extension' => pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_BASENAME),
             ];
 
-            // Example: RPE1P7-1589466345.XLS
-            $tmpFilename = sprintf('%s-%d.%s', $fileinfo['filename'], time(), $fileinfo['extension']);
-            $tmpPath = sprintf('%s/%s', $this->getParameter('kernel.cache_dir'), $tmpFilename);
-
             // TecanOutput object knows about uploaded file format
             $tecan = TecanOutput::fromUploadFile($uploadedFile);
 
-            // Update Tubes to Specimens, write new version to tmp
+            // Update Tubes to Specimens in memory
             $tubeRepo = $this->getDoctrine()->getManager()->getRepository(Tube::class);
-            $tecan->convertTubesToSpecimens($tubeRepo, $tmpPath);
+            $output = $tecan->convertTubesToSpecimens($tubeRepo);
 
-            // Return modified tmp file as download
+            // Return data as file download with original MIME-type and extension
+            $originalMineType = $uploadedFile->getClientMimeType();
             $originalFilename = $fileinfo['filename.extension'];
 
-            // Generate Response
-            $response = $this->file($tmpPath, $originalFilename);
-            // Unlink temp file after Response sent to client
-            $response->deleteFileAfterSend(true);
+            $responseText = implode("", $output);
 
-            return $response;
+            return $this->fileDownloadResponseFromText($responseText, $originalMineType, $originalFilename);
         }
 
         return $this->render('tube/tecan-to-specimen-ids.html.twig', [
             'form' => $form->createView()
         ]);
+    }
+
+    /**
+     * Creates file download Response for given string content.
+     *
+     * Use this instead of BinaryDownloadResponse() so $content can be read from
+     * memory instead of a temp file.
+     */
+    private function fileDownloadResponseFromText(string $content, string $mimeType, string $filename): Response
+    {
+        $R = new Response();
+
+        // Headers to force download and set filename
+        $R->headers->set('Cache-Control', 'private');
+        $R->headers->set('Content-type', $mimeType);
+        $R->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '";');
+        $R->headers->set('Content-length', strlen($content));
+
+        $R->setContent($content);
+
+        return $R;
     }
 }
