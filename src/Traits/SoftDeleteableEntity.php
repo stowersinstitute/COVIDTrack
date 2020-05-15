@@ -21,19 +21,19 @@ trait SoftDeleteableEntity
     /**
      * Timestamp when this entity was deleted.
      *
-     * @var \DateTimeImmutable
-     * @ORM\Column(name="deleted_at", type="datetime_immutable", nullable=true)
+     * @var \DateTime
+     * @ORM\Column(name="deleted_at", type="datetime", nullable=true)
      */
     protected $deletedAt;
 
-    public function setDeletedAt(?\DateTimeImmutable $deletedAt)
+    public function setDeletedAt(?\DateTime $deletedAt)
     {
-        $this->deletedAt = $deletedAt;
+        $this->deletedAt = ($deletedAt === null) ? null : clone $deletedAt;
     }
 
-    public function getDeletedAt(): ?\DateTimeImmutable
+    public function getDeletedAt(): ?\DateTime
     {
-        return $this->deletedAt;
+        return $this->deletedAt === null ? null : clone $this->deletedAt;
     }
 
     /**
