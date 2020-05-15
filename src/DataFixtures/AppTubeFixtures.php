@@ -161,6 +161,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         $T->kioskDropoff($this->speciesAccessionIdGen, $dropoff, $group, $tubeType, $collectedAt);
     }
 
+    /**
+     * Ensure fixture Tubes exist that match Tube IDs in example Tecan output
+     * file at src/Resources/RPE1P7.XLS.
+     */
     private function tubesForTecanExample(ObjectManager $em)
     {
         $repo = $em->getRepository(Tube::class);
