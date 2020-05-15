@@ -94,9 +94,6 @@ class TubeController extends AbstractController
                 'constraints' => [
                     new File([
                         'maxSize' => ini_get('upload_max_filesize'),
-                        'mimeTypes' => [
-                            'application/octet-stream', // Reported for tab-delimited file
-                        ]
                     ])
                 ]
             ])
