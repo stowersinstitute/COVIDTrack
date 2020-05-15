@@ -29,8 +29,6 @@ class KioskAdminController extends AbstractController
     }
 
     /**
-     * Create a single new Group
-     *
      * @Route(path="/new", methods={"GET", "POST"}, name="kiosk_admin_new")
      */
     public function new(Request $request, EntityManagerInterface $em)
@@ -58,8 +56,6 @@ class KioskAdminController extends AbstractController
     }
 
     /**
-     * Edit a single Group.
-     *
      * @Route("/{kioskId<\d+>}/edit", methods={"GET", "POST"}, name="kiosk_admin_edit")
      */
     public function edit(int $kioskId, Request $request, EntityManagerInterface $em)
@@ -81,5 +77,19 @@ class KioskAdminController extends AbstractController
             'kiosk' => $kiosk,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/{kioskId<\d+>}/delete", methods={"POST"}, name="kiosk_admin_delete")
+     */
+    public function delete(int $kioskId, EntityManagerInterface $em)
+    {
+        $kiosk = $em->find(Kiosk::class, $kioskId);
+
+        $em->remove($kiosk);
+
+        $em->flush();
+
+        return $this->redirectToRoute('kiosk_admin_list');
     }
 }

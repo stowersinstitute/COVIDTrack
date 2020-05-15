@@ -13,6 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table(name="kiosks")
  *
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt")
  */
 class Kiosk
 {
