@@ -142,6 +142,15 @@ class Tube
         return $this->getAccessionId();
     }
 
+    /**
+     * We consider the created-at time when it was printed. Under normal use
+     * a Tube record is created when its Label is printed.
+     */
+    public function getPrintedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt ?: null;
+    }
+
     public function getId(): int
     {
         return $this->id;
