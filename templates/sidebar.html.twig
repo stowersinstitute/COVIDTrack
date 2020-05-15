@@ -186,7 +186,17 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-barcode',
                     route: 'kiosk_index'
                 },
-            ], ['ROLE_KIOSK_UI'])
+                {
+                    text: 'View Kiosks',
+                    iconClass: 'fa-list',
+                    route: 'kiosk_admin_list'
+                },
+                {
+                    text: 'Add Kiosk',
+                    iconClass: 'fa-plus',
+                    route: 'kiosk_admin_new'
+                },
+            ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
         }}
     </ul>
 </section>
