@@ -3,9 +3,9 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Traits\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * Physical container that holds a Specimen.

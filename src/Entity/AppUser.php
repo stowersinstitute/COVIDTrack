@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
+use App\Traits\TimestampableEntity;
 use App\Util\AuditLogUtils;
 use App\Util\StringUtils;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Gedmo\Mapping\Annotation as Gedmo;
 
