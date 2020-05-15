@@ -5,6 +5,9 @@ namespace App\Tecan;
 use App\Repository\TubeRepository;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+/**
+ * Class for working with file output from Tecan hardware.
+ */
 class TecanOutput
 {
     /**
