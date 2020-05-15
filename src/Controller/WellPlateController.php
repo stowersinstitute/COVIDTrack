@@ -26,6 +26,8 @@ class WellPlateController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
 
         return $this->render('well-plate/well-plate-list.html.twig', [
@@ -39,6 +41,8 @@ class WellPlateController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $wellPlate = new WellPlate();
 
         $form = $this->createForm(WellPlateType::class, $wellPlate);
@@ -63,6 +67,8 @@ class WellPlateController extends AbstractController
      */
     public function update(int $id, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $wellPlate = $this->getDoctrine()->getRepository(WellPlate::class)->find($id);
         
         $form = $this->createForm(WellPlateType::class, $wellPlate);

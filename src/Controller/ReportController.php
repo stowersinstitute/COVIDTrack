@@ -34,6 +34,8 @@ class ReportController extends AbstractController
      */
     public function groupResults()
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
+
         $specimenRepo = $this->getDoctrine()->getRepository(Specimen::class);
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 

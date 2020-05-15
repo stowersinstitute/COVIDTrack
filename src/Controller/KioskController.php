@@ -34,6 +34,8 @@ class KioskController extends AbstractController
      */
     public function index(Request $request)
     {
+        $this->mustHavePermissions();
+
         $dropOff = new DropOff();
 
         $form = $this->createFormBuilder($dropOff)
@@ -74,6 +76,8 @@ class KioskController extends AbstractController
      */
     public function tubeInput(int $id, Request $request)
     {
+        $this->mustHavePermissions();
+
         /** @var DropOff $dropOff */
         $dropOff = $this->getDoctrine()->getRepository(DropOff::class)->find($id);
 
@@ -123,6 +127,13 @@ class KioskController extends AbstractController
      */
     public function completeDropOff(int $id, Request $request)
     {
+        $this->mustHavePermissions();
+
         return $this->render('kiosk/complete.html.twig');
+    }
+
+    protected function mustHavePermissions()
+    {
+        $this->denyAccessUnlessGranted('ROLE_KIOSK_UI', 'Kiosk Access Required', 'You must have kiosk UI permissions to view this page');
     }
 }

@@ -23,6 +23,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
      */
     public function start(Request $request, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
 
@@ -52,6 +54,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
      */
     public function preview(int $importId, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
@@ -78,6 +82,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
      */
     public function commit(int $importId, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);

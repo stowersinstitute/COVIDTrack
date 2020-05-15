@@ -27,6 +27,8 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
+
         $results = $this->getDoctrine()
             ->getRepository(SpecimenResultQPCR::class)
             ->findAll();
@@ -47,6 +49,8 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $result = null;
 
         // Query string params may indicate desired Specimen
@@ -92,6 +96,8 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function edit(string $id, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $result = $this->findResult($id);
 
         $form = $this->createForm(SpecimenResultQPCRForm::class, $result);

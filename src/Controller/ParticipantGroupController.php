@@ -37,6 +37,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
+
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
@@ -51,6 +53,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $form = $this->createForm(ParticipantGroupForm::class);
         $form->handleRequest($request);
 
@@ -77,6 +81,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function edit(string $title, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $group = $this->findGroupByTitle($title);
 
         $form = $this->createForm(ParticipantGroupForm::class, $group);
@@ -105,6 +111,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function view(string $title)
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $group = $this->findGroupByTitle($title);
 
         $auditLogs = $this->getDoctrine()
@@ -124,6 +132,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
         $group = $this->findGroupByTitle($title);
 
         $form = $this->createFormBuilder()
@@ -176,6 +186,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function excelImport(Request $request, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
 
@@ -208,6 +220,8 @@ class ParticipantGroupController extends AbstractController
         ExcelImporter $excelImporter,
         ParticipantGroupAccessionIdGenerator $idGenerator
     ) {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
@@ -238,6 +252,8 @@ class ParticipantGroupController extends AbstractController
         ExcelImporter $excelImporter,
         ParticipantGroupAccessionIdGenerator $idGenerator
     ) {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
         $em = $this->getDoctrine()
             ->getManager();
 

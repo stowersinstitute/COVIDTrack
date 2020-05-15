@@ -17,6 +17,8 @@ class DebugController extends AbstractController
      */
     public function genericError()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         throw new \ErrorException('A generic error message');
     }
 }

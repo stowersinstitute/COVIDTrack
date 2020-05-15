@@ -28,6 +28,8 @@ class TubeCheckinController extends AbstractController
      */
     public function queue()
     {
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
         $tubes = $this->getDoctrine()
             ->getRepository(Tube::class)
             ->findReadyForCheckin();
@@ -63,6 +65,8 @@ class TubeCheckinController extends AbstractController
      */
     public function decide(Request $request)
     {
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
         // Tube
         $tubeId = $request->request->get('tubeId');
         /** @var Tube $tube */
@@ -108,6 +112,8 @@ class TubeCheckinController extends AbstractController
      */
     public function importStart(Request $request, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
 
@@ -137,6 +143,8 @@ class TubeCheckinController extends AbstractController
      */
     public function importPreview(int $importId, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
@@ -163,6 +171,8 @@ class TubeCheckinController extends AbstractController
      */
     public function importCommit(int $importId, ExcelImporter $excelImporter)
     {
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
