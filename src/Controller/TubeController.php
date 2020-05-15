@@ -4,12 +4,10 @@ namespace App\Controller;
 
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
-use App\Form\TubeForm;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
 use App\Tecan\TecanOutput;
 use Doctrine\ORM\EntityManagerInterface;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -80,8 +78,9 @@ class TubeController extends AbstractController
     }
 
     /**
-     * Accepts file upload from a Tecan plate reader, returns that file
-     * with the Tube IDs replaced with Specimen IDs.
+     * Accepts file upload from a Tecan plate reader in tab-delimited format.
+     * Replaces file's Tube Accession IDs with Specimen Accession IDs.
+     * Returns modified data as a file download.
      *
      * @Route(path="/tecan-to-specimen-ids", methods={"GET", "POST"}, name="tecan_to_specimen_ids")
      */
@@ -96,9 +95,7 @@ class TubeController extends AbstractController
                     new File([
                         'maxSize' => ini_get('upload_max_filesize'),
                         'mimeTypes' => [
-                            'application/octet-stream', // Reported by example Tecan file sent to us
-                            'application/vnd.ms-excel', // office 2007
-                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // modern office
+                            'application/octet-stream', // Reported for tab-delimited file
                         ]
                     ])
                 ]
@@ -133,15 +130,9 @@ class TubeController extends AbstractController
             $tecan->convertTubesToSpecimens($tubeRepo, $tmpPath);
 
             // Return modified tmp file as download
-            $response = new BinaryFileResponse($tmpPath);
-
             $downloadFilename = $tmpFilename = sprintf('%s-%d.%s', $fileinfo['filename'], time(), $fileinfo['extension']);
-            $response->setContentDisposition(
-                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $downloadFilename
-            );
 
-            return $response;
+            return $this->file($tmpPath, $downloadFilename);
         }
 
         return $this->render('tube/tecan-to-specimen-ids.html.twig', [
