@@ -132,7 +132,12 @@ class TubeController extends AbstractController
             // Return modified tmp file as download
             $originalFilename = $fileinfo['filename.extension'];
 
-            return $this->file($tmpPath, $originalFilename);
+            // Generate Response
+            $response = $this->file($tmpPath, $originalFilename);
+            // Unlink temp file after Response sent to client
+            $response->deleteFileAfterSend(true);
+
+            return $response;
         }
 
         return $this->render('tube/tecan-to-specimen-ids.html.twig', [
