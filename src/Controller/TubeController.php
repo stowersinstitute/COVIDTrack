@@ -101,7 +101,7 @@ class TubeController extends AbstractController
                 ]
             ])
             ->add('upload', SubmitType::class, [
-                'label' => 'Upload',
+                'label' => 'Convert and Download',
                 'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
