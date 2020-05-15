@@ -88,6 +88,8 @@ class TubeController extends AbstractController
      */
     public function tecanToSpecimenId(Request $request)
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $form = $this->createFormBuilder()
             ->add('tecanFile', FileType::class, [
                 'label' => 'Tecan File',

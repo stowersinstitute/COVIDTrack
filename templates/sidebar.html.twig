@@ -123,6 +123,7 @@ Renders a top-level navigation node in the tree navigation.
             _self.treenode('Results', 'fa-th', [
                 {
                     text: 'Tecan to Specimen IDs',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-recycle',
                     route: 'tecan_to_specimen_ids'
                 },
