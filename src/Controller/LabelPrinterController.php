@@ -33,6 +33,8 @@ class LabelPrinterController extends AbstractController
      */
     public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
+
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
                 'class' => LabelPrinter::class,
@@ -100,6 +102,8 @@ class LabelPrinterController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printers = $this->getDoctrine()->getRepository(LabelPrinter::class)->findAll();
 
         return $this->render('label-printer/label-printer-list.html.twig', [
@@ -112,6 +116,8 @@ class LabelPrinterController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printer = new LabelPrinter();
 
         $form = $this->createForm(LabelPrinterType::class, $printer);
@@ -136,6 +142,8 @@ class LabelPrinterController extends AbstractController
      */
     public function update(int $id, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($id);
         
         $form = $this->createForm(LabelPrinterType::class, $printer);
@@ -161,6 +169,8 @@ class LabelPrinterController extends AbstractController
      */
     public function testPrint(Request $request, ZplPrinting $zpl)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $form = $this->createFormBuilder()
             ->add('tube', EntityType::class, [
                 'class' => Tube::class,

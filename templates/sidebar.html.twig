@@ -36,7 +36,19 @@ Renders a top-level navigation node in the tree navigation.
         </a>
         <ul class="treeview-menu">
             {% for child in children %}
-            <li class="{{ _self.activeClass(child.route) }}"><a href="{{ path(child.route) }}"><i class="fa {{ child.iconClass }}"></i> {{ child.text }}</a></li>
+                {% set canViewChild = true %}
+                {% if child.mustHaveOneRoleToView is defined %}
+                    {% set canViewChild = false %}
+                    {% for requiredRole in child.mustHaveOneRoleToView %}
+                        {% if not canViewChild and is_granted(requiredRole) %}
+                            {% set canViewChild = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if canViewChild %}
+                    <li class="{{ _self.activeClass(child.route) }}"><a href="{{ path(child.route) }}"><i class="fa {{ child.iconClass }}"></i> {{ child.text }}</a></li>
+                {% endif %}
             {% endfor %}
         </ul>
     </li>
@@ -58,7 +70,7 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-print',
                     route: 'app_label_printer_print_tube_labels'
                 }
-            ])
+            ], ['ROLE_ADMIN'])
         }}
         {{
             _self.treenode('Specimens', 'fa-flask', [
@@ -72,21 +84,21 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-plus',
                     route: 'app_specimen_new'
                 },
-            ])
+            ], ['ROLE_ADMIN'])
         }}
         {{
-        _self.treenode('Check-In', 'fa-clipboard-check', [
-            {
-                text: 'Queue',
-                iconClass: 'fa-list',
-                route: 'checkin_queue'
-            },
-            {
-                text: 'Import Approve/Reject',
-                iconClass: 'fa-upload',
-                route: 'checkin_import_start'
-            },
-        ], ['ROLE_TUBE_CHECK_IN'])
+            _self.treenode('Check-In', 'fa-clipboard-check', [
+                {
+                    text: 'Queue',
+                    iconClass: 'fa-list',
+                    route: 'checkin_queue'
+                },
+                {
+                    text: 'Import Approve/Reject',
+                    iconClass: 'fa-upload',
+                    route: 'checkin_import_start'
+                },
+            ], ['ROLE_TUBE_CHECK_IN'])
         }}
         {{
             _self.treenode('Participant Groups', 'fa-users', [
@@ -105,30 +117,33 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-upload',
                     route: 'group_excel_import'
                 },
-            ])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Results', 'fa-th', [
                 {
                     text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                     iconClass: 'fa-list',
                     route: 'app_results_qpcr_list'
                 },
                 {
                     text: 'Import',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-upload',
                     route: 'qpcr_excel_import'
                 },
-            ])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_EDIT'])
         }}
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
                 {
                     text: 'Group Results',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
                 },
-            ])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_VIEW'])
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [
@@ -142,9 +157,8 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-plus',
                     route: 'app_labelprinter_testprint'
                 },
-            ])
+            ], ['ROLE_ADMIN'])
         }}
-        {% if is_granted('ROLE_ADMIN') %}
         {{
             _self.treenode('Users', 'fa-users', [
                 {
@@ -157,8 +171,16 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-plus',
                     route: 'user_new'
                 },
-            ])
+            ], ['ROLE_ADMIN'])
         }}
-        {% endif %}
+        {{
+            _self.treenode('Kiosks', 'fa-tablet-alt', [
+                {
+                    text: 'Kiosk UI',
+                    iconClass: 'fa-barcode',
+                    route: 'kiosk_index'
+                },
+            ], ['ROLE_KIOSK_UI'])
+        }}
     </ul>
 </section>

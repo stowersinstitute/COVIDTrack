@@ -25,18 +25,26 @@ class AppPermissions
     public const AVAILABLE_ROLES = [
         'ROLE_ADMIN',
 
+        // Kiosk
+        'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
+
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',
         'ROLE_PARTICIPANT_GROUP_VIEW',
 
-        // Tubes
-        'ROLE_TUBE_CHECK_IN',
+        // Printing
+        'ROLE_PRINT_TUBE_LABELS',
+        'ROLE_PRINT_GROUP_LABELS',
 
-        // Kiosk
-        'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
+        // Results
+        'ROLE_RESULTS_EDIT',
+        'ROLE_RESULTS_VIEW',
 
         // Specimens
         'ROLE_SPECIMEN_DROP_OFF',
+
+        // Tubes
+        'ROLE_TUBE_CHECK_IN',
     ];
 
     /**
