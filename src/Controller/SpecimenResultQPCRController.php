@@ -27,7 +27,7 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function list()
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_UPLOAD');
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
 
         $results = $this->getDoctrine()
             ->getRepository(SpecimenResultQPCR::class)
@@ -49,7 +49,7 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_UPLOAD');
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = null;
 
@@ -96,7 +96,7 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function edit(string $id, Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_UPLOAD');
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = $this->findResult($id);
 

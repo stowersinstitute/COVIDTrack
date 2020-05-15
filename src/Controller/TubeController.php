@@ -28,7 +28,7 @@ class TubeController extends AbstractController
      */
     public function list(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
         $tubes = $this->getDoctrine()
             ->getRepository(Tube::class)

@@ -132,7 +132,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
 
         $group = $this->findGroupByTitle($title);
 

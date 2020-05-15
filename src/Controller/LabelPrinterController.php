@@ -33,7 +33,7 @@ class LabelPrinterController extends AbstractController
      */
     public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
