@@ -48,7 +48,7 @@
         </div>
     {% endif %}
 
-    {% if is_granted('ROLE_RESULTS_UPLOAD') %}
+    {% if is_granted('ROLE_RESULTS_VIEW') %}
         <h2>Specimens</h2>
 
         <div class="row">
@@ -64,9 +64,11 @@
                         <i class="fa fa-th"></i>
                     </div>
                     {# todo: link to results upload #}
-                    <a href="{{ path('qpcr_excel_import') }}" class="small-box-footer">
-                        Import Results <i class="fa fa-upload"></i>
-                    </a>
+                    {% if is_granted('ROLE_RESULTS_EDIT') %}
+                        <a href="{{ path('qpcr_excel_import') }}" class="small-box-footer">
+                            Import Results <i class="fa fa-upload"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -129,11 +129,11 @@ Renders a top-level navigation node in the tree navigation.
                 },
                 {
                     text: 'Import',
-                    mustHaveOneRoleToView: ['ROLE_RESULTS_UPLOAD'],
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-upload',
                     route: 'qpcr_excel_import'
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_UPLOAD'])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_EDIT'])
         }}
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
@@ -143,7 +143,7 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_UPLOAD'])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_VIEW'])
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [

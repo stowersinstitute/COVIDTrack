@@ -78,7 +78,8 @@ class UserType extends AbstractType
 
         $this->addRoleField($builder, 'ROLE_TUBE_CHECK_IN', 'Tube: Check In');
 
-        $this->addRoleField($builder, 'ROLE_RESULTS_UPLOAD', 'Results: Upload');
+        $this->addRoleField($builder, 'ROLE_RESULTS_EDIT', 'Results: Upload and Edit');
+        $this->addRoleField($builder, 'ROLE_RESULTS_VIEW', 'Results: View');
 
         $builder
             ->add('Save', SubmitType::class)
