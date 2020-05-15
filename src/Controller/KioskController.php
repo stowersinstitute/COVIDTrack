@@ -184,9 +184,10 @@ class KioskController extends AbstractController
     public function heartbeat(Request $request, EntityManagerInterface $em)
     {
         $kioskId = $request->cookies->get('CT_KIOSK_ID');
-        if (!$kioskId) return new JsonResponse(['isError' => true, 'message' => 'Unknown kiosk ID']);
+        if (!$kioskId) return new JsonResponse(['isError' => true, 'message' => 'CT_KIOSK_ID cookie not present']);
 
         $kiosk = $em->getRepository(Kiosk::class)->find($kioskId);
+        if (!$kiosk) return new JsonResponse(['isError' => true, 'message' => 'Invalid kiosk ID']);
         if (!$kiosk->isProvisioned()) return new JsonResponse(['isError' => true, 'message' => 'Tried to heartbeat on an unprovisioned kiosk']);
 
         // Update kiosk properties
