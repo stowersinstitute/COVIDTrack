@@ -58,11 +58,6 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-print',
                     route: 'app_label_printer_print_tube_labels'
                 },
-                {
-                    text: 'Tecan to Specimen IDs',
-                    iconClass: 'fa-recycle',
-                    route: 'tecan_to_specimen_ids'
-                },
             ])
         }}
         {{
@@ -114,6 +109,11 @@ Renders a top-level navigation node in the tree navigation.
         }}
         {{
             _self.treenode('Results', 'fa-th', [
+                {
+                    text: 'Tecan to Specimen IDs',
+                    iconClass: 'fa-recycle',
+                    route: 'tecan_to_specimen_ids'
+                },
                 {
                     text: 'List',
                     iconClass: 'fa-list',
