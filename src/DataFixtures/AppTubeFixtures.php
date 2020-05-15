@@ -42,6 +42,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
+        $this->tubesForTecanExample($em);
 
         $em->flush();
     }
@@ -158,5 +159,32 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         $tubeType = $possibleTubeTypes[array_rand($possibleTubeTypes)];
 
         $T->kioskDropoff($this->speciesAccessionIdGen, $dropoff, $group, $tubeType, $collectedAt);
+    }
+
+    /**
+     * Ensure fixture Tubes exist that match Tube IDs in example Tecan output
+     * file at src/Resources/RPE1P7.XLS.
+     */
+    private function tubesForTecanExample(ObjectManager $em)
+    {
+        $repo = $em->getRepository(Tube::class);
+        foreach(range(122, 217) as $i) {
+            $accessionId = sprintf("T00000%d", $i);
+
+            $found = $repo->findOneBy(['accessionId' => $accessionId]);
+            if (!$found) {
+                // Create
+                $T = new Tube($accessionId);
+
+                // Drop-off
+                $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', 1));
+                $this->doKioskDropoff($em, $T, $collectedAt);
+
+                // Accepted
+                $T->markAccepted('fixtures', new \DateTimeImmutable(sprintf('-%d days 10:00am', 1)));
+
+                $em->persist($T);
+            }
+        }
     }
 }
