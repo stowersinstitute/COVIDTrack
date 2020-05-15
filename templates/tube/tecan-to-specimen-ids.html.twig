@@ -17,6 +17,23 @@
                     </div>
                 </div>
 
+                {% if errors|length > 0 %}
+                <div class="box box-solid box-danger">
+                    <div class="box-header">
+                        <h3 class="box-title">Conversion Errors</h3>
+                    </div>
+                    <div class="box-body">
+                        Could not complete conversion:
+
+                        <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
                 {{ form(form) }}
             </div>
         </div>

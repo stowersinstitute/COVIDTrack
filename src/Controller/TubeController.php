@@ -6,6 +6,8 @@ use App\Entity\LabelPrinter;
 use App\Entity\Tube;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
+use App\Tecan\CannotReadOutputFileException;
+use App\Tecan\SpecimenIdNotFoundException;
 use App\Tecan\TecanOutput;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -106,6 +108,12 @@ class TubeController extends AbstractController
 
         $form->handleRequest($request);
 
+        /**
+         * User-visible error messages about file parsing procses
+         * @var string[]
+         */
+        $errors = [];
+
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UploadedFile $uploadedFile */
             $uploadedFile = $form->get('tecanFile')->getData();
@@ -116,24 +124,37 @@ class TubeController extends AbstractController
                 'filename.extension' => pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_BASENAME),
             ];
 
-            // TecanOutput object knows about uploaded file format
-            $tecan = TecanOutput::fromUploadFile($uploadedFile);
-
-            // Update Tubes to Specimens in memory
             $tubeRepo = $this->getDoctrine()->getManager()->getRepository(Tube::class);
-            $output = $tecan->convertTubesToSpecimens($tubeRepo);
 
-            // Return data as file download with original MIME-type and extension
-            $originalMineType = $uploadedFile->getClientMimeType();
-            $originalFilename = $fileinfo['filename.extension'];
+            // Exceptions report errors back to user
+            try {
+                // TecanOutput object knows about uploaded file format
+                $tecan = TecanOutput::fromUploadFile($uploadedFile);
 
-            $responseText = implode("", $output);
+                // Convert to Accession IDs
+                $output = $tecan->convertTubesToSpecimens($tubeRepo);
+            } catch (SpecimenIdNotFoundException | CannotReadOutputFileException $e) {
+                $errors[] = $e->getMessage();
+            } catch (\Exception | \Throwable $e) {
+                $errors[] = 'A server error prevented conversion. Please contact application support.';
+            }
 
-            return $this->fileDownloadResponseFromText($responseText, $originalMineType, $originalFilename);
+            if (empty($errors)) {
+                // Return data as file download with original MIME-type and extension
+                $originalMineType = $uploadedFile->getClientMimeType();
+                $originalFilename = $fileinfo['filename.extension'];
+
+                $responseText = implode("", $output);
+
+                return $this->fileDownloadResponseFromText($responseText, $originalMineType, $originalFilename);
+            }
+
+            // Fall through to redisplay upload form with errors
         }
 
         return $this->render('tube/tecan-to-specimen-ids.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'errors' => $errors,
         ]);
     }
 

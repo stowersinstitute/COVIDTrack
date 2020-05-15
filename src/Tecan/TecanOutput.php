@@ -22,7 +22,12 @@ class TecanOutput
 
     public function __construct(string $filepath)
     {
-        $this->inputLines = file($filepath);
+        $lines = file($filepath);
+        if (!$lines) {
+            throw new CannotReadOutputFileException('Cannot read Tecan file');
+        }
+
+        $this->inputLines = $lines;
     }
 
     /**
@@ -56,10 +61,12 @@ class TecanOutput
 
                 // If Specimen ID found
                 $specimenId = $tubeRepo->findSpecimenAccessionIdByTubeAccessionId($tubeId);
-                if ($specimenId) {
-                    // Replace Tube ID with Specimen ID
-                    $line = str_replace($tubeId, $specimenId, $line);
+                if (!$specimenId) {
+                    throw new SpecimenIdNotFoundException(sprintf('Cannot find Specimen ID for Tube ID %s', $tubeId));
                 }
+
+                // Replace Tube ID with Specimen ID
+                $line = str_replace($tubeId, $specimenId, $line);
             }
 
             $output[] = $line;
