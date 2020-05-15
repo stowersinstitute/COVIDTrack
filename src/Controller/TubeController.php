@@ -130,9 +130,9 @@ class TubeController extends AbstractController
             $tecan->convertTubesToSpecimens($tubeRepo, $tmpPath);
 
             // Return modified tmp file as download
-            $downloadFilename = $tmpFilename = sprintf('%s-%d.%s', $fileinfo['filename'], time(), $fileinfo['extension']);
+            $originalFilename = $fileinfo['filename.extension'];
 
-            return $this->file($tmpPath, $downloadFilename);
+            return $this->file($tmpPath, $originalFilename);
         }
 
         return $this->render('tube/tecan-to-specimen-ids.html.twig', [
