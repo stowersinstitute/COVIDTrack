@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Class for working with file output from Tecan hardware.
+ *
+ * For example original file output, see src/Resources/RPE1P7.XLS
+ * which is a tab-delimited file, but uses .XLS for easy opening in Excel on Desktop.
  */
 class TecanOutput
 {
