@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class TecanOutput
 {
     /**
+     * Text lines of original input file. Each array value is a text line.
+     *
      * @var array[]
      */
     private $inputLines;
@@ -15,9 +17,6 @@ class TecanOutput
     public function __construct(string $filepath)
     {
         $this->inputLines = file($filepath);
-
-        $this->parseVersion();
-        $this->parseWellPlateId();
     }
 
     /**
@@ -63,19 +62,11 @@ class TecanOutput
         }
 
         // Write to tmp path
-        file_put_contents($exportFilePath, $output);
+        $success = file_put_contents($exportFilePath, $output);
+        if (!$success) {
+            throw new \RuntimeException('Could not write Tube ID conversion temp file');
+        }
 
         return $exportFilePath;
-    }
-
-    private function parseWellPlateId()
-    {
-        // TODO: Cell I2
-    }
-
-    private function parseVersion()
-    {
-        // TODO: Cell B2
-        // TODO: Warning if parser and upload file don't match?
     }
 }
