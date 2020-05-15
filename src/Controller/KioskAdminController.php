@@ -21,6 +21,8 @@ class KioskAdminController extends AbstractController
      */
     public function list(EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $repo = $em->getRepository(Kiosk::class);
 
         return $this->render('kiosk-admin/list.html.twig', [
@@ -33,6 +35,8 @@ class KioskAdminController extends AbstractController
      */
     public function new(Request $request, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $kiosk = null; // Will refer to the entity if editing
         $form = $this->createForm(KioskType::class);
         $form->handleRequest($request);
@@ -60,6 +64,8 @@ class KioskAdminController extends AbstractController
      */
     public function edit(int $kioskId, Request $request, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $kiosk = $em->find(Kiosk::class, $kioskId);
 
         $form = $this->createForm(KioskType::class, $kiosk);
