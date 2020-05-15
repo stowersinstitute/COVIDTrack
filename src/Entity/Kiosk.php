@@ -103,7 +103,7 @@ class Kiosk
         $this->isProvisioned = false;
     }
 
-    public function isStaleHeartbeat() :bool
+    public function isStaleHeartbeat() : ?bool
     {
         // No valid response if there's never been a heartbeat
         if ($this->lastHeartbeatAt === null) return null;
