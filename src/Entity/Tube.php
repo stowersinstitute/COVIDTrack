@@ -132,7 +132,7 @@ class Tube
      */
     private $collectedAt;
 
-    public function __construct(?string $accessionId = null)
+    public function __construct(string $accessionId)
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
