@@ -4,7 +4,6 @@
 namespace App\Controller;
 
 
-use App\AccessionId\TubeAccessionIdGenerator;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
 use App\Form\LabelPrinterType;
@@ -32,7 +31,7 @@ class LabelPrinterController extends AbstractController
      *
      * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
      */
-    public function printTubeLabels(Request $request, TubeAccessionIdGenerator $tubeIdGen, EntityManagerInterface $em, ZplPrinting $zpl)
+    public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
@@ -67,12 +66,13 @@ class LabelPrinterController extends AbstractController
 
             $tubes = [];
             for ($i = 1; $i <= $numToPrint; $i++) {
-                $tube = Tube::create($tubeIdGen);
+                $tube = new Tube();
                 $em->persist($tube);
 
                 $tubes[] = $tube;
             }
 
+            // Assigns Tube IDs
             $em->flush();
 
             // Print out the saved tubes

@@ -5,14 +5,13 @@ namespace App\Label;
 
 
 use App\Entity\LabelPrinter;
-use App\Entity\Specimen;
 use App\Entity\Tube;
 use Zpl\ZplBuilder;
 
 class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 {
     /**
-     * @var Specimen
+     * @var Tube
      */
     protected $tube;
 
@@ -57,8 +56,13 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
 
         $date = $this->tube->getCreatedAt();
 
-        $zpl->drawCode128(0, 0, 8, $this->tube->getAccessionId(), 1);
-        $zpl->drawText(0, 12, $this->tube->getAccessionId(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
+        $accessionId = $this->tube->getAccessionId();
+        if (!$accessionId) {
+            throw new \RuntimeException('Cannot print Tube Label without Tube Accession ID');
+        }
+
+        $zpl->drawCode128(0, 0, 8, $accessionId, 1);
+        $zpl->drawText(0, 12, $accessionId, 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
         $zpl->drawText(0, 14, $date->format('Y.m.d'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
         $zpl->drawText(0, 16, $date->format('H:i:s'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
