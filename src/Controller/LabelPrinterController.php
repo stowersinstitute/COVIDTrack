@@ -28,23 +28,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class LabelPrinterController extends AbstractController
 {
     /**
-     * For generating new Tube Accession IDs when printing each Tube.
-     *
-     * @var TubeAccessionIdGenerator
-     */
-    private $tubeAccessionIdGen;
-
-    public function __construct(TubeAccessionIdGenerator $gen)
-    {
-        $this->tubeAccessionIdGen = $gen;
-    }
-
-    /**
      * Form to print new labels for collection Tubes distributed to Participants.
      *
      * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
      */
-    public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    public function printTubeLabels(Request $request, TubeAccessionIdGenerator $tubeIdGen, EntityManagerInterface $em, ZplPrinting $zpl)
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
@@ -79,7 +67,7 @@ class LabelPrinterController extends AbstractController
 
             $tubes = [];
             for ($i = 1; $i <= $numToPrint; $i++) {
-                $tube = Tube::create($this->tubeAccessionIdGen);
+                $tube = Tube::create($tubeIdGen);
                 $em->persist($tube);
 
                 $tubes[] = $tube;
