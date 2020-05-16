@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\TubeAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
@@ -25,24 +26,32 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Generates Species ID
+     * Generates Tube Accession IDs
+     *
+     * @var TubeAccessionIdGenerator
+     */
+    private $tubeAccessionIdGen;
+
+    /**
+     * Generates Species Accession IDs
      *
      * @var SpecimenAccessionIdGenerator
      */
     private $speciesAccessionIdGen;
 
-    public function __construct(SpecimenAccessionIdGenerator $gen)
+    public function __construct(TubeAccessionIdGenerator $tubeIdGen, SpecimenAccessionIdGenerator $specIdGen)
     {
-        $this->speciesAccessionIdGen = $gen;
+        $this->tubeAccessionIdGen = $tubeIdGen;
+        $this->speciesAccessionIdGen = $specIdGen;
     }
 
     public function load(ObjectManager $em)
     {
+        $this->tubesForTecanExample($em);
         $this->distributedTubes($em);
         $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
-        $this->tubesForTecanExample($em);
 
         $em->flush();
     }
@@ -52,13 +61,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function distributedTubes(ObjectManager $em)
     {
-        $startAccession = 1000;
-
         $numToCreate = 20;
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = Tube::create($this->tubeAccessionIdGen);
 
             $em->persist($T);
         }
@@ -70,13 +75,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function returnedTubes(ObjectManager $em)
     {
-        $startAccession = 2000;
-
         $numToCreate = 50;
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = Tube::create($this->tubeAccessionIdGen);
 
             // Tube Specimens will have been collected (extracted) from the
             // Participant within the last few days
@@ -94,14 +95,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $startAccession = 3000;
-
         $numToCreate = 25;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = Tube::create($this->tubeAccessionIdGen);
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
@@ -117,14 +114,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function rejectedTubes(ObjectManager $em)
     {
-        $startAccession = 4000;
-
         $numToCreate = 10;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = Tube::create($this->tubeAccessionIdGen);
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
@@ -173,7 +166,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
             $found = $repo->findOneBy(['accessionId' => $accessionId]);
             if (!$found) {
-                // Create
+                // Create with hardcoded Tube Accession ID
                 $T = new Tube($accessionId);
 
                 // Drop-off
@@ -186,5 +179,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
                 $em->persist($T);
             }
         }
+
+        // These Tube IDs must exist so remaining fixtures are generated
+        // with higher Accession IDs
+        $em->flush();
     }
 }

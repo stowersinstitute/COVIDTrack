@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\TubeAccessionIdGenerator;
 use App\Traits\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
@@ -135,6 +136,14 @@ class Tube
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
+    }
+
+    /**
+     * Create a new Tube with next sequential Accession ID.
+     */
+    public static function create(TubeAccessionIdGenerator $tubeAccessionIdGen): self
+    {
+        return new static($tubeAccessionIdGen->generate());
     }
 
     public function __toString()

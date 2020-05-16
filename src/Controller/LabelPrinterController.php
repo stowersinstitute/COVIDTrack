@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\AccessionId\TubeAccessionIdGenerator;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
 use App\Form\LabelPrinterType;
@@ -27,6 +28,17 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class LabelPrinterController extends AbstractController
 {
+    /**
+     * For generating new Tube Accession IDs when printing each Tube.
+     *
+     * @var TubeAccessionIdGenerator
+     */
+    private $tubeAccessionIdGen;
+
+    public function __construct(TubeAccessionIdGenerator $gen)
+    {
+        $this->tubeAccessionIdGen = $gen;
+    }
 
     /**
      * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
@@ -64,12 +76,9 @@ class LabelPrinterController extends AbstractController
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
             $numToPrint = $data['numToPrint'];
 
-            $last = $em->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
-
             $tubes = [];
-
             for ($i = 1; $i <= $numToPrint; $i++) {
-                $tube = new Tube('T' . str_pad($last->getId() + $i, 8, 0,STR_PAD_LEFT));
+                $tube = Tube::create($this->tubeAccessionIdGen);
                 $em->persist($tube);
 
                 $tubes[] = $tube;

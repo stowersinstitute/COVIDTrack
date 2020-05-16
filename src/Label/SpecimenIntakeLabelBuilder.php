@@ -68,7 +68,7 @@ class SpecimenIntakeLabelBuilder extends AbstractLabelBuilder
     public static function testLabelZpl(LabelPrinter $printer): string
     {
         $builder = new self($printer);
-        $tube = new Tube('CVD-1234567');
+        $tube = new Tube('T12345678');
         $builder->setTube($tube);
 
         return $builder->build();

@@ -29,6 +29,17 @@ class TubeRepository extends EntityRepository
         ]);
     }
 
+    /**
+     * Return highest number Tube Accession ID currently saved.
+     */
+    public function findMaxAccessionId(): ?string
+    {
+        /** @var Tube $tube */
+        $tube = $this->findOneBy([], ['accessionId' => 'desc']);
+
+        return $tube ? $tube->getAccessionId() : null;
+    }
+
     public function getReturnedCount() : int
     {
         return $this->createQueryBuilder('t')
