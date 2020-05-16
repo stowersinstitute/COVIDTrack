@@ -9,6 +9,7 @@
                 <th>Accession ID</th>
                 <th>Type</th>
                 <th>Status</th>
+                <th>Printed At</th>
             </tr>
         </thead>
         <tbody>
@@ -20,6 +21,7 @@
                 <td>{{ tube.accessionId }}</td>
                 <td>{{ tube.tubeType }}</td>
                 <td>{{ tube.statusText }}</td>
+                <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
             </tr>
         {% endfor %}
         </tbody>
