@@ -21,4 +21,39 @@ class DebugController extends AbstractController
 
         throw new \ErrorException('A generic error message');
     }
+
+    /**
+     * @Route(path="/out-of-memory-error")
+     */
+    public function outOfMemory()
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $stuffs = [];
+        while (true) $stuffs[] = "MORE THINGS";
+    }
+
+    /**
+     * @Route(path="/runtime-error")
+     */
+    public function runtimeError()
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $object = null;
+
+        $object->getSomethingThatDoesNotExist();
+    }
+
+    /**
+     * @Route(path="/parse-error")
+     */
+    public function parseError()
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $object = null;
+
+        eval('$object = null; $object->getSometh');
+    }
 }
