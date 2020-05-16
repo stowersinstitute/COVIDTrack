@@ -2,7 +2,6 @@
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th style="width: 2em;">ID</th>
             <th>Title</th>
             <th>Host</th>
             <th>Description</th>
@@ -16,15 +15,14 @@
     {% for printer in printers %}
         <tr>
             <td>
-                <a href="{{ path('app_labelprinter_update', {id: printer.id}) }}">{{ printer.id }}</a>
+                <a href="{{ path('app_labelprinter_update', {id: printer.id}) }}">{{ printer.title }}</a>
             </td>
-            <td>{{ printer.title }}</td>
             <td>{{ printer.host }}</td>
             <td>{{ printer.description }}</td>
             <td>{{ printer.dpi }}</td>
             <td>{{ printer.mediaWidthIn }}in</td>
             <td>{{ printer.mediaHeightIn }}in</td>
-            <td>{{ printer.isActive }}</td>
+            <td>{{ printer.isActive ? 'Yes' : 'No' }}</td>
         </tr>
     {% endfor %}
     </tbody>
