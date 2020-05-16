@@ -49,7 +49,8 @@ class TubeController extends AbstractController
                 'placeholder' => '- None -'
             ])
             ->add('print', SubmitType::class, [
-                'label' => 'Print Selected'
+                'label' => 'Print Selected',
+                'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
 
