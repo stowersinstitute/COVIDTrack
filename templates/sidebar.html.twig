@@ -183,10 +183,23 @@ Renders a top-level navigation node in the tree navigation.
             _self.treenode('Kiosks', 'fa-tablet-alt', [
                 {
                     text: 'Kiosk UI',
+                    mustHaveOneRoleToView: ['ROLE_KIOSK_UI'],
                     iconClass: 'fa-barcode',
                     route: 'kiosk_index'
                 },
-            ], ['ROLE_KIOSK_UI'])
+                {
+                    text: 'View Kiosks',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-list',
+                    route: 'kiosk_admin_list'
+                },
+                {
+                    text: 'Add Kiosk',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-plus',
+                    route: 'kiosk_admin_new'
+                },
+            ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
         }}
     </ul>
 </section>

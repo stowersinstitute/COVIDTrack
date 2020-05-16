@@ -44,6 +44,75 @@
             {% block body %}{% endblock %}
         </section>
     </div>
+
+    <div class="modal fade" id="maintenanceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="myModalLabel"><i class="fa fa-exclamation-triangle text-yellow"></i> System Maintenance <i class="fa fa-exclamation-triangle text-yellow"></i></h4>
+                </div>
+                <div class="modal-body">
+                    <i class="fa fa-spin fa-spinner"></i> Reconnecting...
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{# Kiosk Heartbeat scripts #}
+<script>
+    function showMaintenanceModal() {
+        $('#maintenanceModal').modal('show');
+    }
+
+    function hideMaintenanceModal() {
+        $('#maintenanceModal').modal('hide');
+    }
+
+    function doHeartbeat() {
+        var hbData = {
+            appVersion: "{{ app_current_version|escape('js') }}",
+            // Number of seconds since the page loaded
+            idleSeconds: Math.round(((new Date()).getTime() - CT_PAGE_LOADED_AT.getTime()) / 1000),
+            state: "{{ kiosk_state|default('PROVISIONING')|escape('js') }}"
+        };
+
+        $.ajax('{{ path('kiosk_heartbeat') }}', {
+            method: 'POST',
+            data: hbData,
+
+            success: function(data) {
+                // A successful response should clear the maintenance modal
+                hideMaintenanceModal();
+
+                if (data.isError) {
+                    // Not showing anything to the client since there's nothing they can do about it
+                    console.error("HB Error: " + data.message);
+                    return;
+                }
+
+                // If the server is running a different version than we are refresh the page
+                // Only do this if we're in the idle "waiting for user" state
+                if (data.appVersion && data.appVersion != hbData.appVersion) {
+                    if (hbData.state === 'WAITING_DROPOFF_START') location.reload(true);
+                }
+            },
+
+            // Unexpected errors like 500 server or network down
+            error: function(xhr, textStatus, error) {
+                console.log("error in response: " + textStatus + " " + error);
+
+                // Prevent kiosk interaction until successful heartbeat (see success())
+                showMaintenanceModal();
+            }
+        });
+    }
+
+    CT_PAGE_LOADED_AT = new Date();
+
+    // Send a heartbeat when the page loads
+    doHeartbeat();
+    // and then every 60 seconds
+    setInterval(doHeartbeat, 60 * 1000);
+</script>
 </body>
 </html>
