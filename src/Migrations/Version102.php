@@ -8,9 +8,9 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Adds kiosks table
  */
-final class Version20200515171116 extends AbstractMigration
+final class Version102 extends AbstractMigration
 {
     public function getDescription() : string
     {
