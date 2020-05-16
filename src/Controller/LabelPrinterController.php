@@ -20,15 +20,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class LabelPrinterController
- * @package App\Controller
+ * Perform actions related to Label Printers.
  *
  * @Route(path="/label-printers")
  */
 class LabelPrinterController extends AbstractController
 {
-
     /**
+     * Form to print new labels for collection Tubes distributed to Participants.
+     *
      * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
      */
     public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
@@ -64,17 +64,15 @@ class LabelPrinterController extends AbstractController
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
             $numToPrint = $data['numToPrint'];
 
-            $last = $em->getRepository(Tube::class)->findOneBy([], ['id' => 'desc']);
-
             $tubes = [];
-
             for ($i = 1; $i <= $numToPrint; $i++) {
-                $tube = new Tube('T' . str_pad($last->getId() + $i, 8, 0,STR_PAD_LEFT));
+                $tube = new Tube();
                 $em->persist($tube);
 
                 $tubes[] = $tube;
             }
 
+            // Assigns Tube IDs
             $em->flush();
 
             // Print out the saved tubes
@@ -186,7 +184,10 @@ class LabelPrinterController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- None -'
             ])
-            ->add('send', SubmitType::class)
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
 
         $form->handleRequest($request);

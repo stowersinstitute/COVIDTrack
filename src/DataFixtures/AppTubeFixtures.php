@@ -25,15 +25,15 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Generates Species ID
+     * Generates Species Accession IDs
      *
      * @var SpecimenAccessionIdGenerator
      */
     private $speciesAccessionIdGen;
 
-    public function __construct(SpecimenAccessionIdGenerator $gen)
+    public function __construct(SpecimenAccessionIdGenerator $specIdGen)
     {
-        $this->speciesAccessionIdGen = $gen;
+        $this->speciesAccessionIdGen = $specIdGen;
     }
 
     public function load(ObjectManager $em)
@@ -42,9 +42,12 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
-        $this->tubesForTecanExample($em);
 
+        // Must flush because Tecan import example has hardcoded IDs.
+        // Below code can't detect existing tubes unless flushed first.
         $em->flush();
+
+        $this->tubesForTecanExample($em);
     }
 
     /**
@@ -52,15 +55,11 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function distributedTubes(ObjectManager $em)
     {
-        $startAccession = 1000;
-
-        $numToCreate = 20;
+        // Fixtures require at least 250 distributed tubes for Tecan import example to work.
+        // See $this->tubesForTecanExample()
+        $numToCreate = 250;
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
-
-            $em->persist($T);
+            $em->persist(new Tube());
         }
     }
 
@@ -70,13 +69,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function returnedTubes(ObjectManager $em)
     {
-        $startAccession = 2000;
-
         $numToCreate = 50;
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = new Tube();
 
             // Tube Specimens will have been collected (extracted) from the
             // Participant within the last few days
@@ -94,14 +89,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $startAccession = 3000;
-
         $numToCreate = 25;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = new Tube();
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
@@ -117,14 +108,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function rejectedTubes(ObjectManager $em)
     {
-        $startAccession = 4000;
-
         $numToCreate = 10;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
-            $accessionId = 'TUBE-' . ($i+$startAccession);
-
-            $T = new Tube($accessionId);
+            $T = new Tube();
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
@@ -168,23 +155,28 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     private function tubesForTecanExample(ObjectManager $em)
     {
         $repo = $em->getRepository(Tube::class);
+
+        // Has Tube Accession IDs between 122 and 217.
+        // This might re-use some of the "distributed" tubes from $this->distributedTubes()
         foreach(range(122, 217) as $i) {
             $accessionId = sprintf("T00000%d", $i);
 
-            $found = $repo->findOneBy(['accessionId' => $accessionId]);
-            if (!$found) {
-                // Create
+            $T = $repo->findOneBy(['accessionId' => $accessionId]);
+            if (!$T) {
+                // Create with hardcoded Tube Accession ID
                 $T = new Tube($accessionId);
-
-                // Drop-off
-                $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', 1));
-                $this->doKioskDropoff($em, $T, $collectedAt);
-
-                // Accepted
-                $T->markAccepted('fixtures', new \DateTimeImmutable(sprintf('-%d days 10:00am', 1)));
-
-                $em->persist($T);
             }
+
+            // Drop-off
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', 1));
+            $this->doKioskDropoff($em, $T, $collectedAt);
+
+            // Accepted
+            $T->markAccepted('fixtures', new \DateTimeImmutable(sprintf('-%d days 10:00am', 1)));
+
+            $em->persist($T);
         }
+
+        $em->flush();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Traits\TimestampableEntity;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
 
@@ -12,10 +13,16 @@ use App\Traits\SoftDeleteableEntity;
  *
  * @ORM\Entity(repositoryClass="App\Repository\TubeRepository")
  * @ORM\Table(name="tubes")
+ * @ORM\HasLifecycleCallbacks
  */
 class Tube
 {
     use TimestampableEntity, SoftDeleteableEntity;
+
+    /**
+     * Text prefix added to numeric part of Accession ID
+     */
+    const ACCESSION_ID_PREFIX = 'T';
 
     const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
@@ -42,7 +49,7 @@ class Tube
      * Unique public ID for referencing. This is referred to as the "Tube ID"
      *
      * @var string
-     * @ORM\Column(name="accession_id", type="string", unique=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true, nullable=true)
      */
     private $accessionId;
 
@@ -131,7 +138,7 @@ class Tube
      */
     private $collectedAt;
 
-    public function __construct(?string $accessionId = null)
+    public function __construct(string $accessionId = null)
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
@@ -156,15 +163,47 @@ class Tube
         return $this->id;
     }
 
+    /**
+     * Create the Accession ID for this Tube.
+     *
+     * @ORM\PostPersist
+     * @internal
+     */
+    public function createAccessionId(LifecycleEventArgs $e): void
+    {
+        // Exit early if already exists
+        if (null !== $this->accessionId) {
+            return;
+        }
+
+        if (!$this->id) {
+            throw new \RuntimeException('Not all data present to create Tube Accession ID');
+        }
+
+        // Accession ID based on database ID, which is guaranteed unique
+        $newInt = $this->id;
+
+        $maxIntLength = 8;
+        if (strlen($newInt) > $maxIntLength) {
+            throw new \RuntimeException('Tube Accession ID generation exceeded maximum value');
+        }
+
+        // Convert to string and re-pad with leading zeros
+        // 1235 => "00001235"
+        $padWithChar = '0';
+        $newNumber = str_pad($newInt, $maxIntLength, $padWithChar, STR_PAD_LEFT);
+
+        // Prepend prefix
+        $this->accessionId = self::ACCESSION_ID_PREFIX . $newNumber;
+
+        $e->getEntityManager()->flush();
+    }
+
     public function getAccessionId(): ?string
     {
         return $this->accessionId;
     }
 
-    public function setAccessionId(?string $accessionId): void
-    {
-        $this->accessionId = $accessionId;
-    }
 
     public function getStatus(): string
     {
