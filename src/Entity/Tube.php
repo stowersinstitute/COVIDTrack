@@ -311,16 +311,13 @@ class Tube
     }
 
     /**
-     * Call when the drop off os complete
+     * Call when the drop off is complete
      *
      * @param SpecimenAccessionIdGenerator $gen
-     * @param ParticipantGroup $group
-     * @param string $tubeType
-     * @param \DateTimeInterface $collectedAt
      */
     public function kioskDropoffComplete(SpecimenAccessionIdGenerator $gen): void
     {
-        $this->setStatus(self::STATUS_AT_KIOSK);
+        $this->setStatus(self::STATUS_RETURNED);
 
         $returnedAt = new \DateTimeImmutable();
         $this->setReturnedAt($returnedAt);
