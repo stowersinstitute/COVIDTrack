@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use App\Traits\SoftDeleteableEntity;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Physical container that holds a Specimen.
@@ -14,6 +15,7 @@ use App\Traits\SoftDeleteableEntity;
  * @ORM\Entity(repositoryClass="App\Repository\TubeRepository")
  * @ORM\Table(name="tubes")
  * @ORM\HasLifecycleCallbacks
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Tube
 {
@@ -50,6 +52,7 @@ class Tube
      *
      * @var string
      * @ORM\Column(name="accession_id", type="string", unique=true, nullable=true)
+     * @Gedmo\Versioned
      */
     private $accessionId;
 
@@ -76,20 +79,33 @@ class Tube
      *
      * @var string
      * @ORM\Column(name="status", type="string")
+     * @Gedmo\Versioned
      */
     private $status;
 
     /**
      * @var string
      * @ORM\Column(name="tube_type", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $tubeType;
+
+    /**
+     * Describes the distribution kit given to the Participant. Normally this
+     * is entered by a Technician when the Tubes are checked-in.
+     *
+     * @var null|string
+     * @ORM\Column(name="kit_type", type="text", nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $kitType;
 
     /**
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
      * @ORM\Column(name="returned_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $returnedAt;
 
@@ -108,6 +124,7 @@ class Tube
      *
      * @var string
      * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $checkInDecision;
 
@@ -116,6 +133,7 @@ class Tube
      *
      * @var \DateTimeImmutable
      * @ORM\Column(name="checked_in_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $checkedInAt;
 
@@ -126,6 +144,7 @@ class Tube
      *
      * @var string
      * @ORM\Column(name="checked_in_by_username", type="string", nullable=true, length=255)
+     * @Gedmo\Versioned
      */
     private $checkedInByUsername;
 
@@ -135,6 +154,7 @@ class Tube
      *
      * @var \DateTimeImmutable
      * @ORM\Column(name="collected_at", type="datetime", nullable=true)
+     * @Gedmo\Versioned
      */
     private $collectedAt;
 
@@ -156,6 +176,76 @@ class Tube
     public function getPrintedAt(): ?\DateTimeInterface
     {
         return $this->createdAt ?: null;
+    }
+
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * Audit Logging tracks field/value changes using entity property names
+     * and values like this:
+     *
+     *     [
+     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable values
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $keyConverter = [
+            // Specimen.propertyNameHere => Human-Readable Description
+            'accessionId' => 'Accession ID',
+            'status' => 'Status',
+            'tubeType' => 'Type',
+            'kitType' => 'Kit Type',
+            'collectedAt' => 'Collected At',
+            'returnedAt' => 'Returned At',
+            'checkInDecision' => 'Check-in Decision',
+            'checkedInAt' => 'Checked-in At',
+            'checkedInByUsername' => 'Checked-in By',
+        ];
+
+        $dateTimeConvert = function(?\DateTimeInterface $value) {
+            return $value ? $value->format('Y-m-d g:ia') : null;
+        };
+
+        /**
+         * Keys are array key from $changes
+         * Values are callbacks to convert $changes[$key] value
+         */
+        $valueConverter = [
+            // Convert STATUS_* constants into human-readable text
+            'status' => function($value) {
+                return self::lookupStatusText($value);
+            },
+            'collectedAt' => $dateTimeConvert,
+            'returnedAt' => $dateTimeConvert,
+            'checkedInAt' => $dateTimeConvert,
+        ];
+
+        $return = [];
+        foreach ($changes as $fieldId => $value) {
+            // If mapping fieldId to human-readable string, use it
+            // Else fallback to original fieldId
+            $key = $keyConverter[$fieldId] ?? $fieldId;
+
+            // If mapping callback defined for fieldId, use it
+            // Else fallback to current value
+            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
+
+            $return[$key] = $value;
+        }
+
+        return $return;
     }
 
     public function getId(): int
@@ -249,6 +339,16 @@ class Tube
             'Swab' => self::TYPE_SWAB,
             'Saliva' => self::TYPE_SALIVA,
         ];
+    }
+
+    public function getKitType(): ?string
+    {
+        return $this->kitType;
+    }
+
+    public function setKitType(?string $kitType): void
+    {
+        $this->kitType = $kitType;
     }
 
     public function getParticipantGroup(): ?ParticipantGroup
