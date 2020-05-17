@@ -3,6 +3,7 @@
         <tr>
             <th>Tube ID</th>
             <th>Accepted/Rejected</th>
+            <th>Kit Type</th>
             <th>Checked-in By Username</th>
         </tr>
     </thead>
@@ -12,6 +13,7 @@
         <tr>
             <td>{{ checkin.accessionId }}</td>
             <td>{{ checkin.checkInDecisionText }}</td>
+            <td>{{ checkin.kitType }}</td>
             <td>{{ checkin.checkedInByUsername }}</td>
         </tr>
     {% endfor %}
