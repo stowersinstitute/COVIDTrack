@@ -109,7 +109,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
 
-            // Has been approved by a Check-in Technician
+            // Has been accepted by a Check-in Technician
             ->andWhere('s.status = :status')
             ->setParameter('status', Specimen::STATUS_ACCEPTED)
 
