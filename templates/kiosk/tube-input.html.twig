@@ -52,22 +52,22 @@
 {% endblock %}
 
 {% block modal %}
-    <div class="modal fade modal-danger" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal fade" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-red">
                     <h4 class="modal-title text-center" id="cancelLabel"><i class="fa fa-exclamation-triangle"></i> Cancel Drop Off</h4>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to cancel this drop off?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-lg pull-left" data-dismiss="modal"><i class="fa fa-fw fa-chevron-left"></i>Go Back</button>
                     {{ form_start(cancelForm) }}
                     {{ form_row(cancelForm.cancel,
                         {
-                            'attr': {'class': 'btn-outline'},
-                            'label': 'Yes, cancel this drop off'
+                            'attr': {'class': 'btn-lg btn-danger'},
+                            'label': 'Yes, cancel'
                         }
                     ) }}
                     {{ form_end(cancelForm) }}
