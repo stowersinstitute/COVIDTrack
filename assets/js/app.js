@@ -16,8 +16,7 @@ require('../css/app.css');
 
 import $ from 'jquery';
 global.$ = global.jQuery = $;
-import 'bootstrap/js/dropdown';
-import 'bootstrap/js/modal';
+import 'bootstrap/dist/js/bootstrap';
 import 'admin-lte/dist/js/adminlte';
 
 import jsQR from 'jsqr';

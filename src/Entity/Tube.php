@@ -26,6 +26,7 @@ class Tube
 
     const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
+    const STATUS_AT_KIOSK = "KIOSK";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED";
@@ -259,7 +260,7 @@ class Tube
     /**
      * Set the Participant Group scanned when returning this tube.
      */
-    public function setParticipantGroup(ParticipantGroup $group): void
+    public function setParticipantGroup(?ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
     }
@@ -282,16 +283,21 @@ class Tube
         return $this->dropOff;
     }
 
+    public function setDropOff(DropOff $dropOff)
+    {
+        $this->dropOff = $dropOff;
+    }
+
     /**
      * Call when a Tube is being returned by a Participant at a Kiosk.
      *
      * @param SpecimenAccessionIdGenerator $gen
      * @param DropOff            $drop
-     * @param ParticipantGroup   $gropu
+     * @param ParticipantGroup   $group
      * @param string             $tubeType Tube::TYPE_* constant
      * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
      */
-    public function kioskDropoff(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
+    public function kioskDropoff(DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
         $this->dropOff = $drop;
         $drop->addTube($this);
@@ -301,11 +307,37 @@ class Tube
         $this->setTubeType($tubeType);
         $this->setCollectedAt($collectedAt);
 
-        $this->markReturned();
+        $this->setStatus(self::STATUS_AT_KIOSK);
+    }
+
+    /**
+     * Call when the drop off os complete
+     *
+     * @param SpecimenAccessionIdGenerator $gen
+     * @param ParticipantGroup $group
+     * @param string $tubeType
+     * @param \DateTimeInterface $collectedAt
+     */
+    public function kioskDropoffComplete(SpecimenAccessionIdGenerator $gen): void
+    {
+        $this->setStatus(self::STATUS_AT_KIOSK);
+
+        $returnedAt = new \DateTimeImmutable();
+        $this->setReturnedAt($returnedAt);
 
         // Create Specimen
         $this->specimen = Specimen::createFromTube($this, $gen);
         $this->specimen->setStatus(Specimen::STATUS_RETURNED);
+    }
+
+    /**
+     * Reset something when the drop off is cancelled
+     */
+    public function kioskDropoffCancel(): void
+    {
+        $this->setCollectedAt(null);
+        $this->setParticipantGroup(null);
+        $this->setStatus(self::STATUS_PRINTED);
     }
 
     /**
@@ -471,6 +503,7 @@ class Tube
         return [
             'Created' => self::STATUS_CREATED,
             'Label Printed' => self::STATUS_PRINTED,
+            'At Kiosk' => self::STATUS_AT_KIOSK,
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,

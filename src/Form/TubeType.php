@@ -32,7 +32,8 @@ class TubeType extends AbstractType
 
         $builder
             ->add('accessionId', TextType::class, [
-                'label' => 'Tube Label ID'
+                'label' => 'Tube Label ID',
+                'attr' => [ 'data-scanner-input' => null ]
             ])
             ->add('tubeType', RadioButtonGroupType::class, [
                 'choices' => [

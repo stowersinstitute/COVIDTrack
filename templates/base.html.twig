@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="google" content="notranslate">
         <title>{% block title %}COVIDTrack{% endblock %}</title>
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=2" />
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -21,7 +22,9 @@
                 <!-- mini logo for sidebar mini 50x50 pixels -->
                 <span class="logo-mini"><b>C</b>Trk</span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><b>COVID</b>Track</span>
+                <span class="logo-lg">
+                    <img src="{{ asset('images/logo-white.svg') }}">
+                    <b>COVID</b>Track</span>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav class="navbar navbar-static-top">

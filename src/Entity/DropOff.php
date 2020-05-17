@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,6 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class DropOff
 {
+    use TimestampableEntity, SoftDeleteableEntity;
+
     const STATUS_INPROCESS = "IN_PROCESS";
     const STATUS_COMPLETE = "COMPLETE";
 
@@ -111,12 +116,19 @@ class DropOff
         $this->kiosk = $kiosk;
     }
 
-    public function markCompleted()
+    public function markCompleted(SpecimenAccessionIdGenerator $specimenIdGen)
     {
         $this->status = self::STATUS_COMPLETE;
 
         foreach ($this->tubes as $tube) {
-            $tube->markReturned();
+            $tube->kioskDropoffComplete($specimenIdGen);
+        }
+    }
+
+    public function cancel()
+    {
+        foreach ($this->tubes as $tube) {
+            $tube->kioskDropoffCancel();
         }
     }
 

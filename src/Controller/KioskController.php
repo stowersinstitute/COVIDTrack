@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -84,10 +85,10 @@ class KioskController extends AbstractController
             ->add('group', EntityType::class, [
                 'class' => ParticipantGroup::class,
                 'choice_name' => 'title',
-                'required' => false,
+                'required' => true,
                 'empty_data' => "",
                 'placeholder' => '- None -',
-                'attr' => ['class' => 'input-lg'],
+                'attr' => ['class' => 'input-lg', 'data-scanner-input' => null],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Next >',
@@ -126,9 +127,34 @@ class KioskController extends AbstractController
         /** @var DropOff $dropOff */
         $dropOff = $this->getDoctrine()->getRepository(DropOff::class)->find($id);
 
+        if (!$dropOff) {
+            throw new NotFoundHttpException('Drop off not found');
+        }
+
+        // This is separate because it shows up in a different part of the template. Is there a better way?
+        $cancelForm = $this->createFormBuilder()
+            ->add('cancel', SubmitType::class, [
+                'label' => 'Cancel Drop Off',
+                'attr' => ['class' => 'btn-sm btn-danger'],
+                'validate' => false,
+            ])
+            ->getForm();
+
+        $cancelForm = $cancelForm->handleRequest($request);
+
+        // If we're cancelling, we don't need to validate the form.
+        if ($cancelForm->get('cancel')->isClicked()) {
+            $dropOff->cancel();
+            $em->remove($dropOff);
+            $em->flush();
+            return $this->redirectToRoute('app_kiosk_canceldropoff', ['id' => $dropOff->getId()]);
+        }
+
+        // The real form
         $form = $this->createForm(TubeType::class);
 
         $form = $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $form->getData();
@@ -144,24 +170,26 @@ class KioskController extends AbstractController
 
             $collectedAt = new \DateTime($formData['collectedAtDate'] . $formData['collectedAtTime']);
 
-            // Also creates Specimen
-            $tube->kioskDropoff($this->specimenIdGen, $dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
+            $tube->kioskDropoff($dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
 
-            if($form->get('done')->isClicked()) {
-                $dropOff->markCompleted();
+            if ($form->get('done')->isClicked()) {
+                // Also creates Specimen
+                $dropOff->markCompleted($this->specimenIdGen);
             }
 
             $em->flush();
 
             if ($form->get('save')->isClicked()) {
                 return $this->redirectToRoute('app_kiosk_tubeinput', ['id' => $dropOff->getId()]);
-            } else if($form->get('done')->isClicked()) {
+            } else if ($form->get('done')->isClicked()) {
                 return $this->redirectToRoute('app_kiosk_completedropoff', ['id' => $dropOff->getId()]);
             }
         }
 
         return $this->render('kiosk/tube-input.html.twig', [
             'form' => $form->createView(),
+            'cancelForm' => $cancelForm->createView(),
+            'dropOff' => $dropOff,
             'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
         ]);
     }
@@ -176,6 +204,16 @@ class KioskController extends AbstractController
         if ($this->needsToBeProvisioned($request, $em)) return $this->redirectToRoute('kiosk_provision');
 
         return $this->render('kiosk/complete.html.twig');
+    }
+
+    /**
+     * @Route(path="/cancel", methods={"GET"})
+     */
+    public function cancelDropOff()
+    {
+        $this->mustHavePermissions();
+
+        return $this->render('kiosk/cancel.html.twig');
     }
 
     /**

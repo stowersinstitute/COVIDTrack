@@ -13,23 +13,122 @@
             }}
             {{ form_errors(form) }}
             {{ form_row(form.accessionId) }}
-            {{ form_row(form.tubeType) }}
-            <div class="row">
-                <div class="col-sm-3 col-sm-offset-3">
+
+            <div id="tubeDetails" class="collapse">
+                {{ form_row(form.tubeType) }}
+                <div class="row">
+                    <div class="col-xs-6">
                         {{ form_row(form.collectedAtDate) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.collectedAtTime) }}
+                    </div>
                 </div>
-                <div class="col-sm-3">
-                    {{ form_row(form.collectedAtTime) }}
+
+                <div class="row">
+                    <div class="col-xs-6 text-right">
+                        {{ form_row(form.save) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.done) }}
+                    </div>
                 </div>
             </div>
 
-            {{ form_row(form.save) }}
-            {{ form_row(form.done) }}
-
-
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancelDropOff">
+                        <i class="fa fa-fw fa-trash"></i>
+                        Cancel Drop Off
+                    </button>
+                </div>
+            </div>
             {{ form_end(form) }}
 
 
         </div>
     </div>
+    {%  include 'kiosk/scan-help.html.twig' %}
+{% endblock %}
+
+{% block modal %}
+    <div class="modal fade modal-danger" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="cancelLabel"><i class="fa fa-exclamation-triangle"></i> Cancel Drop Off</h4>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to cancel this drop off?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                    {{ form_start(cancelForm) }}
+                    {{ form_row(cancelForm.cancel,
+                        {
+                            'attr': {'class': 'btn-outline'},
+                            'label': 'Yes, cancel this drop off'
+                        }
+                    ) }}
+                    {{ form_end(cancelForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        // Scanner input detection
+        (function($) {
+            var _timeoutHandler = 0,
+                _inputString = '',
+                _onKeypress = function(e) {
+                    if (_timeoutHandler) {
+                        clearTimeout(_timeoutHandler);
+                    }
+
+                    if(e.key !== "Enter") {
+                        _inputString += e.key;
+                    }
+
+                    _timeoutHandler = setTimeout(function () {
+                        if (_inputString.length <= 3) {
+                            _inputString = '';
+                            return;
+                        }
+                        console.log(_inputString);
+                        $(e.target).trigger('scannerinput', _inputString);
+                        _inputString = '';
+
+                    }, 50); //iPad seems to like 50ms.
+                };
+            $(document).on({
+                keypress: _onKeypress
+            });
+        })($);
+
+        // What to do when scanner input
+        $(document).on( "scannerinput", function(e, inputString) {
+            if (!$("[data-scanner-input]").focused) {
+                $("[data-scanner-input]").val(inputString).trigger('input');
+            }
+        });
+
+        $(document).ready(function(){
+            $("input").on('input', function(e) {
+                console.log(e);
+                if($(e.target).val() !== "") {
+                    $("#tubeDetails").collapse('show');
+                    $("#scanTip").hide();
+                } else {
+                    $("#tubeDetails").collapse('hide');
+                    $("#scanTip").show();
+                }
+            });
+        });
+
+    </script>
 {% endblock %}
