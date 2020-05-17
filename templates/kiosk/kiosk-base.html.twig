@@ -10,7 +10,6 @@
     {% endblock %}
     {% block javascripts %}
         {{ encore_entry_script_tags('app') }}
-
     {% endblock %}
 
     <style>
@@ -20,10 +19,6 @@
     </style>
 </head>
 <body class="hold-transition skin-blue layout-top-nav">
-<script>
-    $('#refresh').click(function() { alert("halp!"); window.location.reload(); return false; })
-</script>
-
 <div class="wrapper">
     <header class="main-header">
         <nav class="navbar navbar-static-top">
@@ -44,7 +39,6 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div id="navbar-collapse" class="collapse navbar-collapse pull-left">
                     <ul class="nav navbar-nav">
-                        <li><a href="#" onclick="window.history.back();"><i class="fa fa-fw fa-arrow-left"></i>Back</a></li>
                         <li><a href="#" onclick="window.location.reload();"><i class="fa fa-fw fa-redo"></i>Refresh</a></li>
                         <li class="text text-gray">v{{ app_current_version }}</li>
                     </ul>

@@ -189,7 +189,6 @@ class KioskController extends AbstractController
         return $this->render('kiosk/tube-input.html.twig', [
             'form' => $form->createView(),
             'cancelForm' => $cancelForm->createView(),
-            'dropOff' => $dropOff,
             'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
         ]);
     }
