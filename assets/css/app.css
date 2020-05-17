@@ -6,7 +6,25 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, .4);
 }
 
-.navbar-custom-menu .navbar-nav > li.text {
-    padding: 15px;
+.navbar-nav > li.text {
+    padding: 10px 15px;
     line-height: 20px;
+}
+
+.main-header .logo img {
+    height: 100%;
+    vertical-align: bottom;
+    padding: .5em 0;
+}
+
+.main-header .navbar-brand img {
+    height: 100%;
+    vertical-align: bottom;
+    display: inline;
+}
+
+.login-box .login-logo img {
+    width: 48px;
+    position: relative;
+    top: -4px;
 }
