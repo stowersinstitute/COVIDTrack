@@ -23,10 +23,9 @@
                 })
             }}
             {{ form_errors(form) }}
-            <h3><i class="fa fa-fw fa-vial"></i> Tube Label ID</h3>
             {{ form_row(form.accessionId, {
                 'label': false,
-                'attr': {'class': 'input-lg'}
+                'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
             }) }}
 
             <div id="tubeDetails" class="collapse">
@@ -71,7 +70,11 @@
         </div>
     </div>
 
-    {% block scan_help %}{%  include 'kiosk/scan-help.html.twig' %}{% endblock %}
+    {% block scan_help %}
+    {%  include 'kiosk/scan-help.html.twig' with {
+        scanTipHtml: 'Scan Tube barcode<br>below the screen'
+    } %}
+    {% endblock %}
 {% endblock %}
 
 {% block modal %}
