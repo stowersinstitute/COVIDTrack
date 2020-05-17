@@ -12,7 +12,7 @@
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-            {% include 'kiosk/group-selected.html.twig' with {group:group} %}
+            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ group.title }} Group</strong></h3>
 
             {% block body_content %}
 
