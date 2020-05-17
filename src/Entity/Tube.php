@@ -86,6 +86,15 @@ class Tube
     private $tubeType;
 
     /**
+     * Describes the distribution kit given to the Participant. Normally this
+     * is entered by a Technician when the Tubes are checked-in.
+     *
+     * @var null|string
+     * @ORM\Column(name="kit_type", type="text", nullable=true)
+     */
+    private $kitType;
+
+    /**
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
@@ -249,6 +258,16 @@ class Tube
             'Swab' => self::TYPE_SWAB,
             'Saliva' => self::TYPE_SALIVA,
         ];
+    }
+
+    public function getKitType(): ?string
+    {
+        return $this->kitType;
+    }
+
+    public function setKitType(?string $kitType): void
+    {
+        $this->kitType = $kitType;
     }
 
     public function getParticipantGroup(): ?ParticipantGroup
