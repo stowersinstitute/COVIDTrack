@@ -18,17 +18,13 @@ final class Version20200517032250 extends AbstractMigration
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        if ($schema->hasTable('tubes') && !$schema->getTable('tubes')->hasColumn('kit_type')) {
-            $this->addSql('ALTER TABLE tubes ADD kit_type LONGTEXT DEFAULT NULL');
-        }
+        $this->addSql('ALTER TABLE tubes ADD kit_type LONGTEXT DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        if ($schema->hasTable('tubes') && $schema->getTable('tubes')->hasColumn('kit_type')) {
-            $this->addSql('ALTER TABLE tubes DROP kit_type');
-        }
+        $this->addSql('ALTER TABLE tubes DROP kit_type');
     }
 }
