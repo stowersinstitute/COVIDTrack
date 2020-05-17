@@ -23,4 +23,4 @@ import jsQR from 'jsqr';
 // There is probably a better way to do this by putting the template JS code in a file that gets compiled, but this works for now.
 global.jsQR = jsQR;
 
-console.log('Hello Webpack Encore! Edit me in assets/js/app.js');
+import './scanner'

@@ -23,7 +23,11 @@
                 })
             }}
             {{ form_errors(form) }}
-            {{ form_row(form.accessionId) }}
+            <h3><i class="fa fa-fw fa-vial"></i> Tube Label ID</h3>
+            {{ form_row(form.accessionId, {
+                'label': false,
+                'attr': {'class': 'input-lg'}
+            }) }}
 
             <div id="tubeDetails" class="collapse">
                 {{ form_row(form.tubeType) }}
@@ -71,10 +75,10 @@
 {% endblock %}
 
 {% block modal %}
-    <div class="modal fade modal-danger" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal fade" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-red">
                     <h4 class="modal-title text-center" id="cancelLabel"><i class="fa fa-exclamation-triangle"></i> Cancel Drop Off</h4>
                 </div>
                 <div class="modal-body" style="background-color:#fff !important;color:#111 !important; text-align:center;">
@@ -98,35 +102,6 @@
     {{ parent() }}
 
     <script>
-        // Scanner input detection
-        (function($) {
-            var _timeoutHandler = 0,
-                _inputString = '',
-                _onKeypress = function(e) {
-                    if (_timeoutHandler) {
-                        clearTimeout(_timeoutHandler);
-                    }
-
-                    if(e.key !== "Enter") {
-                        _inputString += e.key;
-                    }
-
-                    _timeoutHandler = setTimeout(function () {
-                        if (_inputString.length <= 3) {
-                            _inputString = '';
-                            return;
-                        }
-                        console.log(_inputString);
-                        $(e.target).trigger('scannerinput', _inputString);
-                        _inputString = '';
-
-                    }, 50); //iPad seems to like 50ms.
-                };
-            $(document).on({
-                keypress: _onKeypress
-            });
-        })($);
-
         // What to do when scanner input
         $(document).on( "scannerinput", function(e, inputString) {
             if (!$("[data-scanner-input]").focused) {
