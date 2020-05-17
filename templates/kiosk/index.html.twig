@@ -12,12 +12,15 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
     <div class="row">
         <div class="col-md-12">
             {{
-                form(form, {
+                form_start(form, {
                     'attr': {
                         'autocomplete': 'off',
                     }
                 })
             }}
+            <h2><i class="fa fa-fw fa-users"></i> Your Group</h2>
+            {{ form_row(form.group, {'label': false}) }}
+            {{ form_end(form) }}
         </div>
     </div>
 
@@ -28,37 +31,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
     {{ parent() }}
 
     <script>
-        // Scanner input detection
-        (function($) {
-            var _timeoutHandler = 0,
-                _inputString = '',
-                _onKeypress = function(e) {
-                    if (_timeoutHandler) {
-                        clearTimeout(_timeoutHandler);
-                    }
-
-                    if(e.key !== "Enter") {
-                        _inputString += e.key;
-                    }
-
-                    _timeoutHandler = setTimeout(function () {
-                        if (_inputString.length <= 3) {
-                            _inputString = '';
-                            return;
-                        }
-                        console.log(_inputString);
-                        $(e.target).trigger('scannerinput', _inputString);
-                        _inputString = '';
-
-                    }, 50); //iPad seems to like 50ms.
-                };
-            $(document).on({
-                keypress: _onKeypress
-            });
-        })($);
-
         // What to do when scanner input
-
         $(document).on( "scannerinput", function(e, inputString) {
             if ($("option:contains(" + inputString + ")", "[data-scanner-input]").length === 0) {
                 console.log('Not an option');

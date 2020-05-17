@@ -92,7 +92,7 @@ class KioskController extends AbstractController
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Next >',
-                'attr' => ['class' => 'btn-primary'],
+                'attr' => ['class' => 'btn-primary btn-lg'],
             ])
             ->getForm();
 
