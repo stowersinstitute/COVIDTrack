@@ -35,7 +35,6 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
         $(document).on( "scannerinput", function(e, inputString) {
             if ($("option:contains(" + inputString + ")", "[data-scanner-input]").length === 0) {
                 console.log('Not an option');
-                alert('not an option:' + inputString);
                 return;
             }
 
