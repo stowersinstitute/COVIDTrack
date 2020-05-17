@@ -10,7 +10,9 @@
                 _inputString += e.key;
             }
 
+            // Since the scanner acts like a keyboard we are checking for quickly entered key presses in a short period of time.
             _timeoutHandler = setTimeout(function () {
+                // This just checks to make sure we have more than three characters scanned, otherwise we can assume someone is just typing fast.
                 if (_inputString.length <= 3) {
                     _inputString = '';
                     return;
