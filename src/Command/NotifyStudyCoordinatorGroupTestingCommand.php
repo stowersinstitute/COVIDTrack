@@ -3,25 +3,16 @@
 namespace App\Command;
 
 use App\Entity\AppUser;
-use App\Ldap\AppLdapUser;
-use App\Ldap\AppLdapUserSynchronizer;
-use App\Security\OptionalLdapUserProvider;
+use App\Entity\ParticipantGroup;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Ldap\Ldap;
-use Symfony\Component\Ldap\Security\LdapUser;
-use Symfony\Component\Ldap\Security\LdapUserProvider;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Symfony\Component\Security\Core\Role\RoleHierarchy;
-use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
 /**
  * Notifies Users that should be notified of a Participant Group having a
@@ -36,37 +27,34 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
 
     protected static $defaultName = 'app:notify:study-coordinator-group-testing';
 
-    private $hierarchy;
     /** @var EntityManagerInterface */
     private $em;
+
+    /** @var MailerInterface */
+    private $mailer;
 
     /** @var RouterInterface */
     private $router;
 
-    /**
-     * @var InputInterface
-     */
+    /** @var InputInterface */
     private $input;
 
-    /**
-     * @var OutputInterface
-     */
+    /** @var OutputInterface */
     private $output;
 
-    public function __construct(EntityManagerInterface $em, RouterInterface $router, RoleHierarchyInterface $hierarchy)
+    public function __construct(EntityManagerInterface $em, MailerInterface $mailer, RouterInterface $router)
     {
         parent::__construct();
 
         $this->em = $em;
+        $this->mailer = $mailer;
         $this->router = $router;
-        $this->hierarchy = $hierarchy;
     }
 
     protected function configure()
     {
         $this
             ->setDescription('Notifies users that a Participant Group is recommended for further testing based on results.')
-            ->addOption('additional-email', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'If testing required, this email will also be notified. Supports multiple uses.', [])
         ;
     }
 
@@ -76,79 +64,91 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
         $this->output = $output;
     }
 
-    private function output(string $line)
-    {
-        $this->output->writeln($line);
-    }
-
     private function outputDebug(string $line)
     {
-//        if ($this->output->isVerbose()) {
+        if ($this->output->isVerbose()) {
             $this->output->writeln($line);
-//        }
+        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $emails = array_merge(
-            $this->getUserEmails(),
-            $input->getOption('additional-email')
-        );
-
-        if (empty($emails)) {
+        $recipients = $this->getEmailRecipients();
+        if (empty($recipients)) {
             $this->outputDebug('No users to email');
             return 0;
         }
 
-        $validEmails = array_filter($emails, function(string $email) {
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->outputDebug('Cannot notify invalid email: ' . $email);
-                return false;
-            }
+        $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
+            return sprintf('<li>%s</li>', $g->getTitle());
+        }, $this->getNewGroupsRecommendedTesting());
 
-            return true;
-        });
+        $email = (new Email())
+            ->from('lims@stowers.org')
+            ->replyTo('lims@stowers.org')
+            ->to(...$recipients)
+            ->subject('TEST: New Group Testing Recommendation')
+            ->html(sprintf("
+                <p>These groups require testing:</p>\n
+                <ul>
+                    %s
+                </ul>\n
+            ", implode("\n", $groupsRecTestingOutput)));
 
-        // TODO: Real email code
-        foreach ($validEmails as $email) {
-            $this->output('Will email: ' . $email);
-        }
+        $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
+        $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
+        $this->outputDebug('From: ' . implode(', ', $fromOutput));
+        $this->outputDebug('To: ' . implode(', ', $toOutput));
+        $this->outputDebug('Subject: ' . $email->getSubject());
+        $this->outputDebug('------');
+        $this->outputDebug($email->getHtmlBody());
+
+        $this->mailer->send($email);
 
         return 0;
     }
 
-    protected function userMustConfirm(InputInterface $input, OutputInterface $output, string $prompt)
-    {
-        $questionText = sprintf('%s (y/n)', $prompt);
-
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion($questionText, false);
-
-        if (!$helper->ask($input, $output, $question)) {
-            $output->writeln('User canceled');
-            exit(1);
-        }
-    }
-
     /**
-     * Get emails of users who should be emailed based on user permissions.
+     * Get Address objects for users who should be emailed this report.
      *
-     * @return string[]
+     * @return Address[]
      */
-    private function getUserEmails(): array
+    private function getEmailRecipients(): array
     {
         $users = $this->em->getRepository(AppUser::class)->findAll();
+
+        /** @var AppUser[] $notifyUsers */
         $notifyUsers = array_filter($users, function(AppUser $u) {
             // Users without email address can't be notified
             if (!$u->getEmail()) {
                 return false;
             }
 
+            // Only users assigned a permission on their Edit User page
             return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE);
         });
 
-        return array_filter($notifyUsers, function(AppUser $u) {
-            return $u->getEmail();
-        });
+        // Create Address objects accepted by Symfony Mailer
+        // Email address syntax verified inside Address object
+        $addr = [];
+        foreach ($notifyUsers as $user) {
+            try {
+                $addr[] = new Address($user->getEmail(), $user->getDisplayName());
+            } catch (\Exception $e) {
+                $this->outputDebug(sprintf('Cannot send email to invalid email address "%s"', $user));
+            }
+        }
+
+        return $addr;
+    }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    private function getNewGroupsRecommendedTesting(): array
+    {
+        // TODO: Real report data based on Results upload date
+        // TODO: Only report on same group once per day
+        return $this->em->getRepository(ParticipantGroup::class)->findAll();
     }
 }
