@@ -187,8 +187,9 @@ class UserAddCommand extends Command
         }
     }
 
-    protected function userMustConfirm(InputInterface $input, OutputInterface $output, string $prompt)
+    protected function userMustConfirm(InputInterface $input, OutputInterface $output, string $prompt = null)
     {
+        if ($prompt === null) $prompt = 'Continue?';
         $questionText = sprintf('%s (y/n)', $prompt);
 
         $helper = $this->getHelper('question');
