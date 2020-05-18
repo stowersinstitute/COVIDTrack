@@ -29,6 +29,21 @@ class TubeRepository extends EntityRepository
         ]);
     }
 
+    /**
+     * Find a Tube and join its Specimen record, so it doesn't trigger a second
+     * query later.
+     */
+    public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
+    {
+        return $this->createQueryBuilder('t')
+            ->addSelect('s')
+            ->join('t.specimen', 's')
+            ->where('t.accessionId = :accessionId')
+            ->setParameter('accessionId', $accessionId)
+            ->setMaxResults(1)
+            ->getQuery()->getSingleResult();
+    }
+
     public function getReturnedCount() : int
     {
         return $this->createQueryBuilder('t')
