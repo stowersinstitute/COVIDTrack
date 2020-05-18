@@ -14,20 +14,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class TecanOutput
 {
     /**
-     * Text lines of original input file. Each array value is a text line.
-     *
-     * @var array[]
+     * @var string
      */
-    private $inputLines;
+    private $filepath;
 
     public function __construct(string $filepath)
     {
-        $lines = file($filepath);
-        if (!$lines) {
-            throw new CannotReadOutputFileException('Cannot read Tecan file');
-        }
-
-        $this->inputLines = $lines;
+        $this->filepath = $filepath;
     }
 
     /**
@@ -47,10 +40,16 @@ class TecanOutput
      */
     public function convertTubesToSpecimens(TubeRepository $tubeRepo): array
     {
+        // Text lines of original input file. Each array value is a text line.
+        $inputLines = file($this->filepath);
+        if (!$inputLines) {
+            throw new CannotReadOutputFileException('Cannot read Tecan file');
+        }
+
         /** @var string[] $output */
         $output = [];
 
-        foreach ($this->inputLines as $line) {
+        foreach ($inputLines as $line) {
             // Pattern matches: (tab)T00001234
             preg_match("/\t(T\d{8})/", $line, $matches);
 
