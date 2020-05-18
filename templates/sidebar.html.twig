@@ -129,7 +129,7 @@ Renders a top-level navigation node in the tree navigation.
                 },
                 {
                     text: 'List',
-                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_results_qpcr_list'
                 },
@@ -145,11 +145,11 @@ Renders a top-level navigation node in the tree navigation.
             _self.treenode('Reports', 'fa-chart-bar', [
                 {
                     text: 'Group Results',
-                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
+                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_RESULTS_VIEW'])
+            ], ['ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [

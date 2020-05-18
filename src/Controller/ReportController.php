@@ -22,7 +22,7 @@ class ReportController extends AbstractController
      */
     public function groupResults(GroupTestingRecommendationReport $groupTestRecReport)
     {
-        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
+        $this->denyAccessUnlessGranted('ROLE_REPORTS_GROUP_VIEW');
 
         $specimenRepo = $this->getDoctrine()->getRepository(Specimen::class);
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
