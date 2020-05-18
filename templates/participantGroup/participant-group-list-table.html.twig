@@ -8,7 +8,9 @@
             <th>Active?</th>
             <th>Created</th>
             <th>Last Modified</th>
+            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
             <th></th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -28,7 +30,9 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
+            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
             <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a></td>
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
