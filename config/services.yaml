@@ -21,6 +21,7 @@ parameters:
 
     # Default values for environment variables
     env(CT_USER_SUPPORT_EMAIL): ''
+    env(CT_USER_SUPPORT_HTML): ''
 
 services:
     # default configuration for services in *this* file

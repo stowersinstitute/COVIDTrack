@@ -32,7 +32,8 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         $this->columnMap = [
             'tubeId' => 'A',
             'acceptedStatus' => 'B',
-            'username' => 'C',
+            'kitType' => 'C',
+            'username' => 'D',
         ];
     }
 
@@ -76,12 +77,14 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
             $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
             $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
+            $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
             $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
+            $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
             $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
@@ -101,6 +104,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
                     $output['rejected'][] = $tube;
                     break;
             }
+
+            // Kit Type
+            $tube->setKitType($rawKitType);
 
             $importedTubes[$tube->getAccessionId()] = $tube;
         }
@@ -155,9 +161,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         }
 
         // Tubes must be in correct status to be checked-in
-        if (!$tube->isReadyForCheckin()) {
+        if (!$tube->willAllowCheckinDecision()) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Tube cannot be checked in because it has status %s', $tube->getStatusText()),
+                sprintf('Tube cannot be checked-in because it is in the wrong status: %s', $tube->getStatusText()),
                 $rowNumber,
                 $this->columnMap['tubeId']
             );
@@ -192,6 +198,17 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
+    private function validateKitType($rawKitType, $rowNumber): bool
+    {
+        // No validation rules
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
     private function validateUsername(string $rawUsername, $rowNumber): bool
     {
         if (!$rawUsername) {
@@ -216,21 +233,21 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         return true;
     }
 
-    private function findTube(string $tubeId) : ?Tube
+    private function findTube(string $accessionId) : ?Tube
     {
-        if (isset($this->tubeCache[$tubeId])) {
-            return $this->tubeCache[$tubeId];
+        if (isset($this->tubeCache[$accessionId])) {
+            return $this->tubeCache[$accessionId];
         }
 
         /** @var Tube $tube */
         $tube = $this->em
             ->getRepository(Tube::class)
-            ->findOneBy(['accessionId' => $tubeId]);
+            ->findOneWithSpecimenLoaded($accessionId);
         if (!$tube) {
             return null;
         }
 
-        $this->tubeCache[$tubeId] = $tube;
+        $this->tubeCache[$accessionId] = $tube;
 
         return $tube;
     }

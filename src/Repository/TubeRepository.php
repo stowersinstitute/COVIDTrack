@@ -30,14 +30,18 @@ class TubeRepository extends EntityRepository
     }
 
     /**
-     * Return highest number Tube Accession ID currently saved.
+     * Find a Tube and join its Specimen record, so it doesn't trigger a second
+     * query later.
      */
-    public function findMaxAccessionId(): ?string
+    public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
     {
-        /** @var Tube $tube */
-        $tube = $this->findOneBy([], ['accessionId' => 'desc']);
-
-        return $tube ? $tube->getAccessionId() : null;
+        return $this->createQueryBuilder('t')
+            ->addSelect('s')
+            ->join('t.specimen', 's')
+            ->where('t.accessionId = :accessionId')
+            ->setParameter('accessionId', $accessionId)
+            ->setMaxResults(1)
+            ->getQuery()->getSingleResult();
     }
 
     public function getReturnedCount() : int

@@ -8,6 +8,7 @@
                 <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
                 <th>Accession ID</th>
                 <th>Type</th>
+                <th>Kit Type</th>
                 <th>Status</th>
                 <th>Printed At</th>
             </tr>
@@ -19,7 +20,8 @@
                     <input type="checkbox" class="tube-checkbox" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
                 <td>{{ tube.accessionId }}</td>
-                <td>{{ tube.tubeType }}</td>
+                <td>{{ tube.typeText }}</td>
+                <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
                 <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
             </tr>

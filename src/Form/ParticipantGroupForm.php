@@ -16,11 +16,11 @@ class ParticipantGroupForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('accessionId', TextType::class, [
-                'label' => 'Accession ID',
-            ])
             ->add('title', TextType::class, [
                 'label' => 'Title',
+            ])
+            ->add('accessionId', TextType::class, [
+                'label' => 'Accession ID',
             ])
             ->add('participantCount', IntegerType::class, [
                 'label' => 'Number of Participants',
