@@ -59,6 +59,25 @@ Renders a top-level navigation node in the tree navigation.
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         {{
+            _self.treenode('Participant Groups', 'fa-users', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_participant_group_list'
+                },
+                {
+                    text: 'New',
+                    iconClass: 'fa-plus',
+                    route: 'app_participant_group_new'
+                },
+                {
+                    text: 'Import',
+                    iconClass: 'fa-upload',
+                    route: 'group_excel_import'
+                },
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
+        }}
+        {{
             _self.treenode('Tubes', 'fa-vial', [
                 {
                     text: 'List',
@@ -99,25 +118,6 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'checkin_import_start'
                 },
             ], ['ROLE_TUBE_CHECK_IN'])
-        }}
-        {{
-            _self.treenode('Participant Groups', 'fa-users', [
-                {
-                    text: 'List',
-                    iconClass: 'fa-list',
-                    route: 'app_participant_group_list'
-                },
-                {
-                    text: 'New',
-                    iconClass: 'fa-plus',
-                    route: 'app_participant_group_new'
-                },
-                {
-                    text: 'Import',
-                    iconClass: 'fa-upload',
-                    route: 'group_excel_import'
-                },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Results', 'fa-th', [
