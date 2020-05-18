@@ -133,7 +133,7 @@ class TubeCheckinController extends AbstractController
         }
 
         return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Approve/Reject',
+            'itemLabel' => 'Accepted/Rejected',
             'importForm' => $form->createView(),
         ]);
     }
