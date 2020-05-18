@@ -38,11 +38,11 @@ class ParticipantGroupRepository extends EntityRepository
     {
         return $this->findBy(
             // Params
-            [],
+            [
+                'isActive' => true,
+            ],
             // Sort
             [
-                // todo: implement isActive flag
-                // 'isActive' => true,
                 'title' => 'ASC',
             ]
         );

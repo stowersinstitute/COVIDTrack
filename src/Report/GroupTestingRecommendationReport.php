@@ -21,16 +21,16 @@ class GroupTestingRecommendationReport
     }
 
     /**
-     * Get a testing recommendation for a Participant Group and the date their
-     * Specimens were collected (i.e. extracted from their body.)
+     * Get a testing recommendation for a Participant Group given the date
+     * Specimen Results were reported.
      *
      * GroupTestingRecommendation object can be used as a string.
      */
-    public function resultForGroup(ParticipantGroup $group, \DateTimeInterface $collectionDate): GroupTestingRecommendation
+    public function resultForGroup(ParticipantGroup $group, \DateTimeInterface $resultedAt): GroupTestingRecommendation
     {
         // Collect all Specimens for this group and period
         $specimens = $this->specimenRepo
-            ->findByGroupForCollectionPeriod($group, $collectionDate);
+            ->findByGroupForResultsPeriod($group, $resultedAt);
 
         return GroupTestingRecommendation::createForSpecimens($specimens);
     }

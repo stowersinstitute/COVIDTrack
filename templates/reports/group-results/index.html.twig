@@ -11,12 +11,12 @@
                     <thead>
                     <tr>
                         <th>&nbsp;</th>
-                        <th colspan="{{ collectionDates|length }}" style="text-align:center">Specimen Collection Date</th>
+                        <th colspan="{{ resultDates|length }}" style="text-align:center">Specimen Results Date</th>
                     </tr>
                     <tr>
                         <th>Group</th>
-                        {% for collectionDate in collectionDates %}
-                        <th>{{ collectionDate|date("Y-m-d") }}</th>
+                        {% for resultDate in resultDates %}
+                        <th>{{ resultDate|date("Y-m-d") }}</th>
                         {% endfor %}
                     </tr>
                     </thead>
@@ -28,8 +28,8 @@
                             <tr>
                                 <td>{{ group.title }}</td>
 
-                                {% for collectionDate in collectionDates %}
-                                    {% set key = collectionDate|date("Y-m-d") %}
+                                {% for resultDate in resultDates %}
+                                    {% set key = resultDate|date("Y-m-d") %}
                                 <td>
                                     {{ groupResults[key] }}
                                 </td>

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\DateUtils;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 
@@ -30,28 +31,40 @@ class SpecimenRepository extends EntityRepository
     }
 
     /**
-     * Find Species.collectedAt DateTimes for which Specimens have available results.
+     * Find unique list of DateTimes for when Results were uploaded for Specimens.
      *
      * @return \DateTime[]
      */
     public function findAvailableGroupResultDates(): array
     {
-        $asName = 'collectedAt';
+        $asName = 'resultDate';
         $results = $this->createResultsQB('s')
+            ->join('s.results', 'r')
             // Requires database value has exact same time,
             // we may want to round dates to regular intervals
-            ->select('DISTINCT(s.collectedAt) as '.$asName)
-            ->andWhere('s.collectedAt IS NOT NULL')
-            ->orderBy('s.collectedAt')
+            ->select('DISTINCT(r.createdAt) as '.$asName)
+            ->orderBy('r.createdAt')
             ->getQuery()
             ->execute();
 
         // Doctrine returns values as strings due to DISTINCT() use above
-        $dateStrings = array_column($results, $asName);
+        // Each value looks like "2020-05-16 10:26:27"
+        $dateStringsWithTime = array_column($results, $asName);
 
-        return array_map(function(string $dateString) {
-            return new \DateTime($dateString);
-        }, $dateStrings);
+        // Narrow to unique set by YYYY-MM-DD
+        // Convert to DateTime
+        /** @var |DateTime $return */
+        $return = [];
+        foreach ($dateStringsWithTime as $dateStringWithTime) {
+            $dt = new \DateTime($dateStringWithTime);
+            $dt->setTime(0, 0, 0, 0);
+
+            // Keyed by YYYY-MM-DD to make unique by date
+            $return[$dt->format('Y-m-d')] = $dt;
+        }
+
+        // Remove unique-making index
+        return array_values($return);
     }
 
     /**
@@ -68,6 +81,32 @@ class SpecimenRepository extends EntityRepository
 
             ->andWhere('s.collectedAt = :collectedAt')
             ->setParameter('collectedAt', $collectedAt, Type::DATETIME)
+
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * Find Specimens belonging to members of given Participation Group,
+     * but only those with Results reported on a specific date.
+     *
+     * @return Specimen[]
+     */
+    public function findByGroupForResultsPeriod(ParticipantGroup $group, \DateTimeInterface $resultedOnDate): array
+    {
+        list($range) = DateUtils::getDaysFromRange($resultedOnDate, $resultedOnDate);
+
+        $start = $range['start'];
+        $end = $range['end'];
+
+        return $this->createQueryBuilder('s')
+            ->join('s.results', 'r')
+            ->where('s.participantGroup = :group')
+            ->setParameter('group', $group)
+
+            ->andWhere('r.createdAt BETWEEN :resultedAtStart AND :resultedAtEnd')
+            ->setParameter('resultedAtStart', $start, Type::DATETIME)
+            ->setParameter('resultedAtEnd', $end, Type::DATETIME)
 
             ->getQuery()
             ->execute();

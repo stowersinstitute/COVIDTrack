@@ -28,7 +28,8 @@ class ReportController extends AbstractController
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
         /**
-         * Collect results for each group. Internal format ends up like this:
+         * Roll-up testing recommendation for each Participant Group.
+         * Internal format ends up like this:
          *
          * [
          *     'Alligators' => [
@@ -41,23 +42,22 @@ class ReportController extends AbstractController
         $reportData = [];
 
         // X axis
-        /** @var \DateTime[] $collectionDates */
-        $collectionDates = $specimenRepo->findAvailableGroupResultDates();
-        // Y axis
-        // TODO: Only Groups with results Specimens?
-        $groupsWithResults = $groupRepo->findActiveAlphabetical();
+        /** @var \DateTime[] $resultDates */
+        $resultDates = $specimenRepo->findAvailableGroupResultDates();
 
-        foreach ($groupsWithResults as $group) {
+        // Y axis
+        $groups = $groupRepo->findActiveAlphabetical();
+        foreach ($groups as $group) {
             /**
-             * Keys: Collection Date string like "2020-05-05". Printed in report.
+             * Keys: Results Date string like "2020-05-05". Printed in report.
              * Values: Recommendation text string
              */
             $byDate = [];
 
-            foreach ($collectionDates as $collectionDate) {
-                $result = $groupTestRecReport->resultForGroup($group, $collectionDate);
+            foreach ($resultDates as $resultDate) {
+                $result = $groupTestRecReport->resultForGroup($group, $resultDate);
 
-                $byDate[$collectionDate->format('Y-m-d')] = $result;
+                $byDate[$resultDate->format('Y-m-d')] = $result;
             }
 
             $reportData[$group->getTitle()] = $byDate;
@@ -70,7 +70,7 @@ class ReportController extends AbstractController
 
         return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,
-            'collectionDates' => $collectionDates,
+            'resultDates' => $resultDates,
             'reportData' => $reportData,
         ]);
     }
