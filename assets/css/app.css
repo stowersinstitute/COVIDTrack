@@ -22,3 +22,10 @@ body {
     vertical-align: bottom;
     display: inline;
 }
+
+
+.login-box .login-logo img {
+    width: 48px;
+    position: relative;
+    top: -4px;
+}

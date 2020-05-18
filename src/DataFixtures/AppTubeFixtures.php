@@ -99,6 +99,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
             $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
 
+            $kitTypeNumber = ($i % 3) + 1;
+            $T->setKitType('Example Type ' . $kitTypeNumber);
+
             $em->persist($T);
         }
     }
@@ -117,6 +120,9 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
             $this->doKioskDropoff($em, $T, $collectedAt);
 
             $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
+
+            $kitTypeNumber = ($i % 3) + 1;
+            $T->setKitType('Example Type ' . $kitTypeNumber);
 
             $em->persist($T);
         }

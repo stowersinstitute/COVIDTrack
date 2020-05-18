@@ -38,7 +38,7 @@ class TubeController extends AbstractController
 
         $tubes = $this->getDoctrine()
             ->getRepository(Tube::class)
-            ->findAll();
+            ->findBy([], ['accessionId' => 'desc']);
 
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
