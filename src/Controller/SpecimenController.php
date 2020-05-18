@@ -24,7 +24,7 @@ class SpecimenController extends AbstractController
      */
     public function list()
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT_ALL');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
 
         $specimens = $this->getDoctrine()
             ->getRepository(Specimen::class)
@@ -42,7 +42,7 @@ class SpecimenController extends AbstractController
      */
     public function view(string $accessionId)
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT_ALL');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
 
         $specimen = $this->findSpecimen($accessionId);
 
@@ -63,7 +63,7 @@ class SpecimenController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT_ALL');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
 
         $form = $this->createForm(SpecimenForm::class);
         $form->handleRequest($request);
@@ -94,7 +94,7 @@ class SpecimenController extends AbstractController
      */
     public function edit(string $accessionId, Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT_ALL');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
 
         $specimen = $this->findSpecimen($accessionId);
 
