@@ -32,8 +32,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         $this->columnMap = [
             'tubeId' => 'A',
             'acceptedStatus' => 'B',
-            'kitType' => 'C',
-            'username' => 'D',
+            'rnaWellPlateId' => 'C',
+            'kitType' => 'D',
+            'username' => 'E',
         ];
     }
 
@@ -77,6 +78,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
             $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
             $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
+            $rawWellPlateId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['rnaWellPlateId']);
             $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
             $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
 
@@ -84,6 +86,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             $rowOk = true;
             $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellPlateId($rawWellPlateId, $rowNumber) && $rowOk;
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
             $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
@@ -104,6 +107,8 @@ class SpecimenCheckinImporter extends BaseExcelImporter
                     $output['rejected'][] = $tube;
                     break;
             }
+
+            $tube->setRnaWellPlateId($rawWellPlateId);
 
             // Kit Type
             $tube->setKitType($rawKitType);
@@ -190,6 +195,17 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             return false;
         }
 
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validateWellPlateId($rawWellPlateId, $rowNumber): bool
+    {
+        // No validation rules
         return true;
     }
 
