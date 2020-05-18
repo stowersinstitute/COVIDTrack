@@ -20,13 +20,13 @@
 <table class="table table-bordered table-hover table-striped">
     <thead>
         <tr>
-            {% if allowPerTubeDecision %}<th style="width:100px;">Approve</th>{% endif %}
+            {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Accept</th>{% endif %}
             <th>Tube ID</th>
             <th>Type</th>
             <th>Printed At</th>
             <th>Collected At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></span></th>
             <th>Returned At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Tube returned at a Kiosk."></span></th>
-            {% if allowPerTubeDecision %}<th style="width:100px;">Reject</th>{% endif %}
+            {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Reject</th>{% endif %}
         </tr>
     </thead>
     <tbody>
@@ -34,8 +34,8 @@
         <tr class="row-tube-{{ tube.accessionId|e('html_attr') }}">
             {% if allowPerTubeDecision %}
             <td style="text-align:center;">
-                {# Approve #}
-                <button type="button" class="approve-one-tube btn btn-success btn-sm" title="Approve" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
+                {# Accept #}
+                <button type="button" class="accept-one-tube btn btn-success btn-sm" title="Accept" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                 </button>
             </td>
@@ -62,7 +62,7 @@
 <script>
     /**
      * Callback when clicking a button
-     * @param decision {string} Decision constant sent to server: APPROVED, REJECTED
+     * @param decision {string} Decision constant sent to server: ACCEPTED, REJECTED
      * @returns {function}
      */
     let onClickHandler = function(decision) {
@@ -89,12 +89,12 @@
                 alert('Cannot save Tube.');
             })
             .done(function(responseObj) {
-                // Disable clicking Approved/Rejected buttons again
+                // Disable clicking Accepted/Rejected buttons again
                 $('.row-tube-'+tubeId+' button').prop('disabled', true);
             });
         }
     };
-    $('.approve-one-tube').on('click', onClickHandler("APPROVED"));
+    $('.accept-one-tube').on('click', onClickHandler("ACCEPTED"));
     $('.reject-one-tube').on('click', onClickHandler("REJECTED"));
 </script>
 {% endif %}
