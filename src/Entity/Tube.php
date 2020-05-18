@@ -412,9 +412,20 @@ class Tube
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
      */
-    public function isReadyForCheckin(): bool
+    public function willAllowCheckinDecision(): bool
     {
-        return $this->checkInDecision === null;
+        // Has a check-in decision, but not yet further along
+        // Accepted
+        if ($this->status === self::STATUS_ACCEPTED) {
+            return true;
+        }
+        // Rejected
+        if ($this->status === self::STATUS_REJECTED) {
+            return true;
+        }
+
+        // Status before Accepted/Rejected
+        return $this->status === self::STATUS_RETURNED;
     }
 
     public function getCheckInDecision(): ?string
