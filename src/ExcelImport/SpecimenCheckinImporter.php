@@ -161,9 +161,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         }
 
         // Tubes must be in correct status to be checked-in
-        if (!$tube->isReadyForCheckin()) {
+        if (!$tube->willAllowCheckinDecision()) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Tube cannot be checked in because it has status %s', $tube->getStatusText()),
+                sprintf('Tube cannot be checked-in because it is in the wrong status: %s', $tube->getStatusText()),
                 $rowNumber,
                 $this->columnMap['tubeId']
             );
