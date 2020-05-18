@@ -18,13 +18,16 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
                     }
                 })
             }}
-            <h3><i class="fa fa-fw fa-users"></i> Your Group</h3>
-            {{ form_row(form.group, {'label': false}) }}
+            {{ form_row(form.group, {'label': false, 'placeholder': 'Select Group here or Scan Group barcode using kiosk scanner'}) }}
             {{ form_end(form) }}
         </div>
     </div>
 
-    {%  include 'kiosk/scan-help.html.twig' %}
+    {% block scan_help %}
+    {% include 'kiosk/scan-help.html.twig' with {
+        scanTipHtml: 'Scan Group barcode<br>below the screen'
+    }%}
+    {% endblock %}
 {% endblock %}
 
 {% block javascripts %}
