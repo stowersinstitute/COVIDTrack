@@ -12,7 +12,11 @@
                 <h3 class="box-title">General</h3>
             </div>
             <div class="box-body">
-                {{ form(form) }}
+                {{ form(form, {
+                    'attr': {
+                        'autocomplete': 'off',
+                    }
+                }) }}
             </div>
         </div>
     </div>

@@ -34,7 +34,11 @@
                 </div>
                 {% endif %}
 
-                {{ form(form) }}
+                {{ form(form, {
+                    'attr': {
+                        'autocomplete': 'off',
+                    }
+                }) }}
             </div>
         </div>
     </div>
