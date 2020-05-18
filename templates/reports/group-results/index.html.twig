@@ -11,12 +11,12 @@
                     <thead>
                     <tr>
                         <th>&nbsp;</th>
-                        <th colspan="{{ resultDates|length }}" style="text-align:center">Specimen Results Date</th>
+                        <th colspan="{{ resultDates|length }}" style="text-align:center">Date Specimen Results Reported</th>
                     </tr>
                     <tr>
                         <th>Group</th>
                         {% for resultDate in resultDates %}
-                        <th>{{ resultDate|date("Y-m-d") }}</th>
+                        <th>{{ resultDate|date("F j, Y") }}</th>
                         {% endfor %}
                     </tr>
                     </thead>
