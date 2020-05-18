@@ -111,7 +111,7 @@ class TubeController extends AbstractController
         $form->handleRequest($request);
 
         /**
-         * User-visible error messages about file parsing procses
+         * User-visible error messages about file parsing process
          * @var string[]
          */
         $errors = [];
