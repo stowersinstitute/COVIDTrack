@@ -30,6 +30,7 @@ class SpecimenForm extends AbstractType
     {
         $builder
             ->add('participantGroup', EntityType::class, [
+                'label' => 'Participant Group',
                 'class' => ParticipantGroup::class,
                 'required' => true,
                 'placeholder' => '',
