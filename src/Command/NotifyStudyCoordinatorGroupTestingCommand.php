@@ -136,7 +136,7 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
         $addr = [];
         foreach ($notifyUsers as $user) {
             try {
-                $addr[] = new Address($user->getEmail(), $user->getDisplayName());
+                $addr[] = new Address($user->getEmail(), $user->getDisplayName() ?? $user->getUsername());
             } catch (\Exception $e) {
                 $this->outputDebug(sprintf('Cannot send email to invalid email address "%s"', $user));
             }
