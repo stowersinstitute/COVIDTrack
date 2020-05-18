@@ -84,8 +84,7 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
         }, $this->getNewGroupsRecommendedTesting());
 
         $email = (new Email())
-            ->from('lims@stowers.org')
-            ->replyTo('lims@stowers.org')
+            ->from($_ENV['CT_DEFAULT_FROM_ADDRESS'])
             ->to(...$recipients)
             ->subject('TEST: New Group Testing Recommendation')
             ->html(sprintf("
@@ -94,6 +93,10 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
                     %s
                 </ul>\n
             ", implode("\n", $groupsRecTestingOutput)));
+
+        if ($_ENV['CT_DEFAULT_REPLY_TO_ADDRESS']) {
+            $email->replyTo($_ENV['CT_DEFAULT_REPLY_TO_ADDRESS']);
+        }
 
         $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
         $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
