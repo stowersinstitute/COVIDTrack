@@ -233,21 +233,21 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         return true;
     }
 
-    private function findTube(string $tubeId) : ?Tube
+    private function findTube(string $accessionId) : ?Tube
     {
-        if (isset($this->tubeCache[$tubeId])) {
-            return $this->tubeCache[$tubeId];
+        if (isset($this->tubeCache[$accessionId])) {
+            return $this->tubeCache[$accessionId];
         }
 
         /** @var Tube $tube */
         $tube = $this->em
             ->getRepository(Tube::class)
-            ->findOneBy(['accessionId' => $tubeId]);
+            ->findOneWithSpecimenLoaded($accessionId);
         if (!$tube) {
             return null;
         }
 
-        $this->tubeCache[$tubeId] = $tube;
+        $this->tubeCache[$accessionId] = $tube;
 
         return $tube;
     }
