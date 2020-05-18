@@ -16,23 +16,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * Allows running report exposed by this Controller
-     *
-     * @var GroupTestingRecommendationReport
-     */
-    private $groupTestRecReport;
-
-    public function __construct(GroupTestingRecommendationReport $groupTestRecReport)
-    {
-        $this->groupTestRecReport = $groupTestRecReport;
-    }
-
-    /**
      * CLIA Testing Recommendations by Participant Group
      *
      * @Route(path="/group/results", methods={"GET"}, name="app_report_group_results")
      */
-    public function groupResults()
+    public function groupResults(GroupTestingRecommendationReport $groupTestRecReport)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
 
@@ -67,7 +55,7 @@ class ReportController extends AbstractController
             $byDate = [];
 
             foreach ($collectionDates as $collectionDate) {
-                $result = $this->groupTestRecReport->resultForGroup($group, $collectionDate);
+                $result = $groupTestRecReport->resultForGroup($group, $collectionDate);
 
                 $byDate[$collectionDate->format('Y-m-d')] = $result;
             }
