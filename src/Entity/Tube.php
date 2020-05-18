@@ -428,11 +428,13 @@ class Tube
     }
 
     /**
-     * Reset something when the drop off is cancelled
+     * Return Tube to state from before Drop Off began.
      */
     public function kioskDropoffCancel(): void
     {
+        $this->setTubeType(null);
         $this->setCollectedAt(null);
+        $this->setReturnedAt(null);
         $this->setParticipantGroup(null);
         $this->setStatus(self::STATUS_PRINTED);
     }
