@@ -27,8 +27,8 @@ class AppUserFixtures extends Fixture
         // System Administrator
         $this->buildUser($manager, 'ctadmin', ['ROLE_ADMIN']);
 
-        // Study Coordinator
-        $this->buildUser($manager, 'coordinator', ['ROLE_STUDY_COORDINATOR']);
+        // Study Coordinator (with explicit notification role)
+        $this->buildUser($manager, 'coordinator', ['ROLE_STUDY_COORDINATOR', 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING']);
 
         // Specimen check-in technician
         $this->buildUser($manager, 'checkintech', ['ROLE_TUBE_CHECK_IN']);
@@ -52,6 +52,7 @@ class AppUserFixtures extends Fixture
         if ($password === null) $password = $username;
 
         $user = new AppUser($username);
+        $user->setEmail(sprintf('%s@example.com', $username));
 
         if ($roles) {
             $user->setRoles($roles);
