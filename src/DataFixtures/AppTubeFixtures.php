@@ -38,6 +38,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $em)
     {
+        return; // TODO: Reenable. Temp disabled for demo
         $this->distributedTubes($em);
         $this->returnedTubes($em);
         $this->acceptedTubes($em);

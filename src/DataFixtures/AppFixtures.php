@@ -27,6 +27,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $em)
     {
+        return; // TODO: Reenable. Temp disabled for demo
         $this->addResultedSpecimens($em);
 
         $em->flush();
