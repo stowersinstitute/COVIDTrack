@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 /**
  * A workbook created by parsing an uploaded Excel file
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\ExcelImportWorkbookRepository")
  * @ORM\Table(name="excel_import_workbooks")
  */
 class ExcelImportWorkbook
