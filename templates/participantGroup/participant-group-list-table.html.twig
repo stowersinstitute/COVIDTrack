@@ -28,7 +28,7 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" title="Print Participant Group Badge Labels"><i class="fa fa-fw fa-print"></i></a></td>
+            <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a></td>
         </tr>
     {% endfor %}
     </tbody>
