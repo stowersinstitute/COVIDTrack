@@ -45,6 +45,9 @@ class AppPermissions
 
         // Tubes
         'ROLE_TUBE_CHECK_IN',
+
+        // Notifications
+        'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING'
     ];
 
     /**

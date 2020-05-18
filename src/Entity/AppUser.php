@@ -6,6 +6,7 @@ use App\Traits\TimestampableEntity;
 use App\Util\AuditLogUtils;
 use App\Util\StringUtils;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -198,6 +199,24 @@ class AppUser implements UserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    /**
+     * Whether user has been granted this role in the admin interface.
+     * Does NOT account for inherited roles/permissions.
+     */
+    public function hasRoleExplicit(string $role): bool
+    {
+        return in_array($role, $this->roles);
+    }
+
+    /**
+     * Whether user has been granted this role, either explicitly or through
+     * inherited roles.
+     */
+    public function hasRole(RoleHierarchyInterface $hierarchy, string $role): bool
+    {
+        return in_array($role, $hierarchy->getReachableRoleNames($this->roles));
     }
 
     public function addRole(string $role): self
