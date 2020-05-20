@@ -38,6 +38,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $em)
     {
+        return; // TODO: Reenable. Temp disabled for demo
         $this->distributedTubes($em);
         $this->returnedTubes($em);
         $this->acceptedTubes($em);
@@ -57,8 +58,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     {
         // Fixtures require at least 250 distributed tubes for Tecan import example to work.
         // See $this->tubesForTecanExample()
-//        $numToCreate = 250; // TODO: Disabled for demo. Re-enable
-        $numToCreate = 50;
+        $numToCreate = 250;
         for ($i=1; $i<= $numToCreate; $i++) {
             $em->persist(new Tube());
         }
@@ -70,14 +70,13 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function returnedTubes(ObjectManager $em)
     {
-        $numToCreate = 20;
+        $numToCreate = 50;
         for ($i=1; $i<= $numToCreate; $i++) {
             $T = new Tube();
 
             // Tube Specimens will have been collected (extracted) from the
             // Participant within the last few days
-//            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%14)); TODO: Disabled for demo. Re-enable
-            $collectedAt = new \DateTimeImmutable(sprintf('-1 days %d:00pm', ($i%4)+1));
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%14));
             $this->doKioskDropoff($em, $T, $collectedAt);
 
             $em->persist($T);
@@ -163,7 +162,6 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function tubesForTecanExample(ObjectManager $em)
     {
-        return;
         $repo = $em->getRepository(Tube::class);
 
         // Has Tube Accession IDs between 122 and 217.
