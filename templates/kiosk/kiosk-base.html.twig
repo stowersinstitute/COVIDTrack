@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.25">
     <title>{% block title %}COVIDTrack Kiosk{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
     <link rel="manifest" href="/manifest-kiosk.json">
@@ -19,25 +20,35 @@
         }
     </style>
 </head>
-<body class="hold-transition skin-blue">
-
+<body class="hold-transition skin-blue layout-top-nav">
 <div class="wrapper">
     <header class="main-header">
-        <!-- Logo -->
-        <a href="{{ path('kiosk_index') }}" class="logo">
-            <!-- mini logo for sidebar mini 50x50 pixels -->
-            <span class="logo-mini"><b>C</b>Trk</span>
-            <!-- logo for regular state and mobile devices -->
-            <span class="logo-lg"><b>COVID</b>Track</span>
-        </a>
-        <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top">
-            <div class="navbar-custom-menu">
-                <ul class="nav navbar-nav">
-                    <li class="text text-gray">v{{ app_current_version }}</li>
-                </ul>
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="#" class="navbar-brand">
+                        <!-- logo for regular state and mobile devices -->
+                        <img src="{{ asset('images/logo-white.svg') }}">
+                        <span class="logo-lg">
+                            <b>COVID</b>Track
+                        </span>
+                    </a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div id="navbar-collapse" class="collapse navbar-collapse pull-left">
+                    <ul class="nav navbar-nav">
+                        <li><a href="#" onclick="window.location.reload();"><i class="fa fa-fw fa-redo"></i>Refresh</a></li>
+                        <li class="text text-gray">v{{ app_current_version }}</li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+
             </div>
-            <!-- Navbar Right Menu -->
+            <!-- /.container-fluid -->
         </nav>
     </header>
 
@@ -56,6 +67,18 @@
                 </div>
                 <div class="modal-body">
                     <i class="fa fa-spin fa-spinner"></i> Reconnecting...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block modal %}{% endblock %}
+
+    <div class="modal fade" id="loadingMask" tabindex="-1" role="dialog" aria-labelledby="loadingMaskLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="loadingMaskLabel"><i class="fa fa-spin fa-virus"></i> Processing...</h4>
                 </div>
             </div>
         </div>
@@ -116,6 +139,10 @@
     doHeartbeat();
     // and then every 60 seconds
     setInterval(doHeartbeat, 60 * 1000);
+
+    $('form').submit(function() {
+        $('#loadingMask').modal('show');
+    });
 </script>
 </body>
 </html>

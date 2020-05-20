@@ -32,7 +32,8 @@ class TubeType extends AbstractType
 
         $builder
             ->add('accessionId', TextType::class, [
-                'label' => 'Tube Label ID'
+                'label' => 'Tube Label ID',
+                'attr' => [ 'data-scanner-input' => null ]
             ])
             ->add('tubeType', RadioButtonGroupType::class, [
                 'choices' => [
@@ -58,8 +59,8 @@ class TubeType extends AbstractType
                 'label' => '+ Save and Add Another',
                 'attr' => ['class' => 'btn-lg btn-primary'],
             ])
-            ->add('done', SubmitType::class, [
-                'label' => '√ Save and Complete Drop Off',
+            ->add('review', SubmitType::class, [
+                'label' => 'Save and Continue >',
                 'attr' => ['class' => 'btn-lg btn-success'],
             ])
             ->getForm();

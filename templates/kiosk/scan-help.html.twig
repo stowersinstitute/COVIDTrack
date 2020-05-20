@@ -1,0 +1,33 @@
+<div id="scanTip" class="bouncing-box">
+    {{ scanTipHtml|raw }}
+    <div><i class="fa fa-chevron-down"></i></div>
+</div>
+
+<style>
+    .bouncing-box {
+        animation-duration: 2s;
+        animation-name: bounce;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
+        width: 60rem;
+        position: absolute;
+        margin: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 3rem;
+    }
+    
+    @keyframes bounce {
+        from {
+            bottom: 2em;
+        }
+        50% {
+            bottom: 0;
+        }
+        to {
+            bottom: 2em;
+        }
+    }
+</style>

@@ -29,11 +29,11 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
      *
      * @var SpecimenAccessionIdGenerator
      */
-    private $speciesAccessionIdGen;
+    private $specimenAccessionIdGen;
 
     public function __construct(SpecimenAccessionIdGenerator $specIdGen)
     {
-        $this->speciesAccessionIdGen = $specIdGen;
+        $this->specimenAccessionIdGen = $specIdGen;
     }
 
     public function load(ObjectManager $em)
@@ -151,7 +151,8 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         $possibleTubeTypes = Tube::getValidTubeTypes();
         $tubeType = $possibleTubeTypes[array_rand($possibleTubeTypes)];
 
-        $T->kioskDropoff($this->speciesAccessionIdGen, $dropoff, $group, $tubeType, $collectedAt);
+        $T->kioskDropoff($dropoff, $group, $tubeType, $collectedAt);
+        $dropoff->markCompleted($this->specimenAccessionIdGen);
     }
 
     /**

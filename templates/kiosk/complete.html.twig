@@ -4,14 +4,11 @@
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-            <div class="jumbotron">
-                <h2>
-                    Thank you for dropping off your kit!
-                </h2>
-                <p>
-                    Returning to drop off interface...
-                </p>
-
+            <div class="jumbotron" style="background:transparent;">
+                {% block complete_message %}
+                <h2>Thank you for dropping off your kit!</h2>
+                <p>Returning to home screen&hellip;</p>
+                {% endblock %}
             </div>
         </div>
     </div>

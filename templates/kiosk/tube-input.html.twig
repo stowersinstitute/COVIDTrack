@@ -1,3 +1,10 @@
+{% macro renderCancelButton() %}
+    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancelDropOff">
+        <i class="fa fa-fw fa-trash"></i>
+        Cancel Drop Off
+    </button>
+{% endmacro %}
+
 {% extends 'kiosk/kiosk-base.html.twig' %}
 
 {% block page_title %}COVIDTrack Kiosk{% endblock %}
@@ -5,6 +12,10 @@
 {% block body %}
     <div class="row">
         <div class="col-md-12">
+            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ group.title }} Group</strong></h3>
+
+            {% block body_content %}
+
             {{ form_start(form, {
                     'attr': {
                         'autocomplete': 'off',
@@ -12,24 +23,132 @@
                 })
             }}
             {{ form_errors(form) }}
-            {{ form_row(form.accessionId) }}
-            {{ form_row(form.tubeType) }}
-            <div class="row">
-                <div class="col-sm-3 col-sm-offset-3">
+            {{ form_row(form.accessionId, {
+                'label': false,
+                'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
+            }) }}
+
+            <div id="tubeDetails" class="collapse">
+                {{ form_row(form.tubeType) }}
+                <div class="row">
+                    <div class="col-xs-6">
                         {{ form_row(form.collectedAtDate) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.collectedAtTime) }}
+                    </div>
                 </div>
-                <div class="col-sm-3">
-                    {{ form_row(form.collectedAtTime) }}
+
+                <div class="row">
+                    <div class="col-xs-6 text-right">
+                        {{ form_row(form.save) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.review) }}
+                    </div>
+                </div>
+
+                <div class="row col-xs-12 text-center">
+                    {{ _self.renderCancelButton() }}
                 </div>
             </div>
 
-            {{ form_row(form.save) }}
-            {{ form_row(form.done) }}
-
+            <div class="row" id="buttons-before-tube-entered">
+                <div class="col-xs-6 text-right">
+                    {{ _self.renderCancelButton() }}
+                </div>
+                <div class="col-xs-6">
+                    <a href="{{ path('kiosk_review', {'id':dropoff.id}) }}" class="btn btn-sm btn-success">
+                        Continue <i class="fa fa-fw fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
 
             {{ form_end(form) }}
 
-
+            {% endblock %}
         </div>
     </div>
+
+    {% block scan_help %}
+    {%  include 'kiosk/scan-help.html.twig' with {
+        scanTipHtml: 'Scan Tube barcode<br>below the screen'
+    } %}
+    {% endblock %}
+{% endblock %}
+
+{% block modal %}
+    <div class="modal fade" id="cancelDropOff" tabindex="-1" role="dialog" aria-labelledby="cancelLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-red">
+                    <h4 class="modal-title text-center" id="cancelLabel"><i class="fa fa-exclamation-triangle"></i> Cancel Drop Off</h4>
+                </div>
+                <div class="modal-body" style="background-color:#fff !important;color:#111 !important; text-align:center;">
+                    Are you sure you want to cancel this drop off?
+                </div>
+                <div class="modal-footer" style="background-color:#f6f6f6 !important;">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">
+                        <i class="fa fa-chevron-left"></i> Go Back
+                    </button>
+
+                    <button id="confirm-cancel-dropoff" type="button" class="btn btn-danger pull-right">
+                        Yes, cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        // What to do when scanner input
+        $(document).on( "scannerinput", function(e, inputString) {
+            if (!$("[data-scanner-input]").focused) {
+                $("[data-scanner-input]").val(inputString).trigger('input');
+            }
+        });
+
+        $(document).ready(function(){
+            // React when inputting Tube Label ID
+            $("input").on('input', function(e) {
+                console.log(e);
+                if($(e.target).val() !== "") {
+                    // Expand to show form details
+                    $("#tubeDetails").collapse('show');
+                    $("#scanTip").hide();
+                    $("#buttons-before-tube-entered").hide();
+                } else {
+                    // Collapse form details
+                    $("#tubeDetails").collapse('hide');
+                    $("#scanTip").show();
+                    $("#buttons-before-tube-entered").show();
+                }
+            });
+
+            // Confirming Cancel does POST to do real cancel
+            $('#confirm-cancel-dropoff').on('click', function(e) {
+                const url = "{{ path('kiosk_cancel', {id: dropoff.id}) }}";
+                $.post(url)
+                    .fail(function(responseObj) {
+                        // Error happened, show it
+                        const response = responseObj.responseJSON;
+                        const errorMsg = response.errorMsg;
+                        if (errorMsg) {
+                            alert(errorMsg);
+                            return;
+                        }
+                        alert('Cannot Cancel Dropoff. Please use the top-right menu to Refresh the screen.');
+                    })
+                    .done(function(response) {
+                        // Redirect to another screen
+                        window.location = response.redirectToUrl;
+                    });
+            });
+        });
+
+    </script>
 {% endblock %}
