@@ -1,0 +1,19 @@
+{
+  "short_name": "COVIDTrack",
+  "name": "COVIDTrack",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/images/logo-blue-512x512-bg.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/images/logo-blue-192x192-bg.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#d2d6de"
+}
