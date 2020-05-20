@@ -31,7 +31,6 @@ class AppUserFixtures extends Fixture
         $this->buildUser($manager, 'coordinator', ['ROLE_STUDY_COORDINATOR', 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING']);
 
         // Specimen Collection Team
-        $this->buildUser($manager, 'checkintech', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN']);
         $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN']);
 
         // Kiosk
