@@ -81,8 +81,13 @@ class UserType extends AbstractType
         $this->addRoleField($builder, 'ROLE_RESULTS_EDIT', 'Results: Upload and Edit');
         $this->addRoleField($builder, 'ROLE_RESULTS_VIEW', 'Results: View');
 
+        $this->addRoleField($builder, 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'Notification: Group Testing Recommended');
+
         $builder
-            ->add('Save', SubmitType::class)
+            ->add('Save', SubmitType::class, [
+                'label' => 'Save',
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
     }
 

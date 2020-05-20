@@ -135,6 +135,21 @@ These users are available when fixtures are loaded. Same username/password:
 * checkintech - Check-in Technician
 * kiosk - Kiosk UI
 
+## Development Environment - Monitoring Sent Email
+
+Use [Mailhog](https://github.com/mailhog/MailHog) as a Docker image to see email sent by the application:
+
+    $ docker run --rm -p8025:8025 -p1025:1025 mailhog/mailhog
+
+Add environment var `MAILER_DSN` to file .env.local:
+
+    # .env.local
+    MAILER_DSN=smtp://127.0.0.1:1025
+
+Perform actions that would normally send an application email.
+
+View mail in Mailhog: <http://0.0.0.0:8025>
+
 ### Frontend Frameworks
 
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)

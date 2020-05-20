@@ -56,6 +56,11 @@ abstract class SpecimenResult
         $this->createdAt = new \DateTimeImmutable();
     }
 
+    public function getReportedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
