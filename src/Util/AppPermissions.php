@@ -28,6 +28,9 @@ class AppPermissions
         // Kiosk
         'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
 
+        // Notifications
+        'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',
         'ROLE_PARTICIPANT_GROUP_VIEW',
@@ -45,9 +48,6 @@ class AppPermissions
 
         // Tubes
         'ROLE_TUBE_CHECK_IN',
-
-        // Notifications
-        'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING'
     ];
 
     /**
