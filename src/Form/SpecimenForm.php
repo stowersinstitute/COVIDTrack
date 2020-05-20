@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -29,6 +30,7 @@ class SpecimenForm extends AbstractType
     {
         $builder
             ->add('participantGroup', EntityType::class, [
+                'label' => 'Participant Group',
                 'class' => ParticipantGroup::class,
                 'required' => true,
                 'placeholder' => '',
@@ -36,6 +38,10 @@ class SpecimenForm extends AbstractType
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
                 'placeholder' => '- Select -',
+                'required' => false,
+            ])
+            ->add('rnaWellPlateId', TextType::class, [
+                'label' => 'RNA Well Plate ID',
                 'required' => false,
             ])
             ->add('status', ChoiceType::class, [
