@@ -75,10 +75,12 @@ class Specimen
     private $participantGroup;
 
     /**
-     * @var WellPlate
-     * ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
+     * Well where this Specimen is located.
+     *
+     * @var ?SpecimenWell
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist"})
      */
-    private $wellPlate;
+    private $well;
 
     /**
      * Well Plate ID where original RNA is held.
@@ -408,6 +410,28 @@ class Specimen
         ];
 
         return $map[$rec] ?? '';
+    }
+
+    public function removeFromWell()
+    {
+        $well = null;
+        if ($this->well) {
+            $well = $this->well;
+            $this->well = null;
+        }
+        if ($well) {
+            $well->delete();
+        }
+
+    }
+
+    public function setWellPlate(WellPlate $plate, int $position): void
+    {
+        if ($this->well) {
+            $this->well->delete();
+        }
+
+        $this->well = new SpecimenWell($plate, $this, $position);
     }
 
     public function getRnaWellPlateId(): ?string

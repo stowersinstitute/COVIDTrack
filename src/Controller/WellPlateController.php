@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Controller;
-
 
 use App\Entity\AuditLog;
 use App\Entity\WellPlate;
@@ -13,26 +11,35 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class WellPlateController
- * @package App\Controller
+ * Interact with Well Plates
  *
  * @Route(path="/well-plates")
  */
 class WellPlateController extends AbstractController
 {
-
     /**
-     * @Route(path="/", methods={"GET"})
+     * @Route(path="/", methods={"GET"}, name="well_plate_list")
      */
     public function list()
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
         $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
 
-        return $this->render('well-plate/well-plate-list.html.twig', [
-            'headers' => ['ID', 'Title'],
+        return $this->render('well-plate/list.html.twig', [
             'wellPlates' => $wellPlates,
+        ]);
+    }
+
+    /**
+     * View a single Specimen.
+     *
+     * @Route("/{id<\d+>}", methods={"GET"}, name="well_plate_view")
+     */
+    public function view(string $id)
+    {
+        $wellPlate = $this->getDoctrine()->getRepository(WellPlate::class)->find($id);
+
+        return $this->render('well-plate/view.html.twig', [
+            'wellPlate' => $wellPlate,
         ]);
     }
 
@@ -56,7 +63,7 @@ class WellPlateController extends AbstractController
             $entityManager->persist($wellPlate);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_wellplate_list');
+            return $this->redirectToRoute('well_plate_list');
         }
 
         return $this->render('well-plate/well-plate-form.html.twig', ['new' => true, 'form'=>$form->createView()]);
@@ -79,7 +86,7 @@ class WellPlateController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_wellplate_list');
+            return $this->redirectToRoute('well_plate_list');
         }
 
         $revisions = $this->getDoctrine()->getRepository(AuditLog::class)->getLogEntries($wellPlate);
@@ -91,5 +98,4 @@ class WellPlateController extends AbstractController
             'revisions'=>$revisions
         ]);
     }
-
 }

@@ -119,6 +119,16 @@ Renders a top-level navigation node in the tree navigation.
                 },
             ], ['ROLE_TUBE_CHECK_IN'])
         }}
+
+        {{
+            _self.treenode('Well Plates', 'fa-th', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'well_plate_list'
+                },
+            ])
+        }}
         {{
             _self.treenode('Results', 'fa-th', [
                 {

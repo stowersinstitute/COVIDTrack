@@ -2,58 +2,49 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * ORM\Entity
- * ORM\Table(name="well_plates")
- * Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
+ * Well Plate with one Specimen per Well
+ *
+ * @ORM\Entity
+ * @ORM\Table(name="well_plates")
  */
 class WellPlate
 {
-    use TimestampableEntity, SoftDeleteableEntity;
-
-    const STATUS_PENDING = "PENDING";
-    const STATUS_IN_PROCESS = "IN_PROCESS";
-    const STATUS_RESULTS = "RESULTS";
-    const STATUS_COMPLETE = "COMPLETE";
+    use TimestampableEntity;
 
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
+     * String encoded into the barcode that is physically on the Well Plate.
+     *
      * @var string
-     * @ORM\Column(type="string")
-     * @Gedmo\Versioned
+     * @ORM\Column(name="barcode", type="string", length=255)
      */
     private $barcode;
 
     /**
-     * @var string
-     * @ORM\Column(type="string")
-     * @Gedmo\Versioned
+     * Wells that contain Specimens.
+     *
+     * @var SpecimenWell[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="wellPlate", cascade={"persist"}, orphanRemoval=true)
+     * @ORM\OrderBy({"position" = "ASC"})
      */
-    private $status;
-
-    /**
-     * @var Specimen[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\Specimen", mappedBy="wellPlate")
-     */
-    private $specimens;
+    private $wells;
 
     public function __construct()
     {
-        $this->status = self::STATUS_PENDING;
-        $this->specimens = new ArrayCollection();
+        $this->wells = new ArrayCollection();
     }
 
     public function __toString()
@@ -61,58 +52,42 @@ class WellPlate
         return $this->barcode;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function getBarcode(): ?string
     {
         return $this->barcode;
     }
 
-    /**
-     * @param string $barcode
-     */
-    public function setBarcode(string $barcode): self
+    public function setBarcode(string $barcode)
     {
         $this->barcode = $barcode;
-
-        return $this;
     }
 
     /**
-     * @return string
+     * @return SpecimenWell[]
      */
-    public function getStatus(): string
+    public function getWells(): array
     {
-        return $this->status;
+        return $this->wells->getValues();
     }
 
-    /**
-     * @param string $status
-     */
-    public function setStatus(string $status): self
+    public function removeSpecimen(Specimen $specimen): void
     {
-        $this->status = $status;
+        $removeKey = null;
+        foreach ($this->wells as $key => $well) {
+            if (EntityUtils::isSameEntity($specimen, $well->getSpecimen())) {
+                $removeKey = $key;
+                break;
+            }
+        }
 
-        return $this;
-    }
-
-    public static function getFormStatuses()
-    {
-        return [
-            'Pending' => self::STATUS_PENDING,
-            'In Process' => self::STATUS_IN_PROCESS,
-            'Results' => self::STATUS_RESULTS,
-            'Complete' => self::STATUS_COMPLETE,
-        ];
+        if ($removeKey !== null) {
+            $this->wells->remove($removeKey);
+        }
     }
 
     /**
@@ -120,6 +95,12 @@ class WellPlate
      */
     public function getSpecimens(): array
     {
-        return $this->specimens->getValues();
+        $specimens = [];
+
+        foreach ($this->wells as $well) {
+            $specimens[] = $well->getSpecimen();
+        }
+
+        return $specimens;
     }
 }
