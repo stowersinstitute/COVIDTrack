@@ -16,7 +16,11 @@
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
-                    <dt>RNA Well Plate</dt><dd><a href="{{ path('well_plate_view', {barcode: specimen.rnaWellPlateBarcode}) }}">{{ specimen.rnaWellPlateBarcode }}</a></dd>
+                    <dt>RNA Well Plate</dt><dd>
+                        {% if specimen.rnaWellPlateBarcode %}
+                        <a href="{{ path('well_plate_view', {barcode: specimen.rnaWellPlateBarcode}) }}">{{ specimen.rnaWellPlateBarcode }}</a>
+                        {% endif %}
+                    </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
                     <dt>CLIA Testing Recommended?</dt><dd>{{ specimen.cliaTestingRecommendedText }}</dd>
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
