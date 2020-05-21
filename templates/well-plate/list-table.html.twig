@@ -11,7 +11,7 @@
     {% for wellPlate in wellPlates %}
         <tr>
             <td>
-                <a href="{{ path('well_plate_view', {id: wellPlate.id}) }}">{{ wellPlate.barcode }}</a>
+                <a href="{{ path('well_plate_view', {barcode: wellPlate.barcode}) }}">{{ wellPlate.barcode }}</a>
             </td>
             <td>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
