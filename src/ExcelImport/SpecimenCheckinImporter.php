@@ -4,6 +4,7 @@ namespace App\ExcelImport;
 
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
+use App\Entity\WellPlate;
 use Doctrine\ORM\EntityManager;
 
 class SpecimenCheckinImporter extends BaseExcelImporter
@@ -71,6 +72,8 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         // Used for duplicate import checking.
         $importedTubes = [];
 
+        $plateRepo = $this->em->getRepository(WellPlate::class);
+
         for ($rowNumber=$this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -108,7 +111,8 @@ class SpecimenCheckinImporter extends BaseExcelImporter
                     break;
             }
 
-            $tube->setRnaWellPlateId($rawWellPlateId);
+            $plate = $this->findWellPlateOrMakeNew($rawWellPlateId);
+            $tube->setWellPlate($plate);
 
             // Kit Type
             $tube->setKitType($rawKitType);
@@ -266,5 +270,17 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         $this->tubeCache[$accessionId] = $tube;
 
         return $tube;
+    }
+
+    private function findWellPlateOrMakeNew(string $rawWellPlateId): WellPlate
+    {
+        $plate = $this->em
+            ->getRepository(WellPlate::class)
+            ->findOneByBarcode($rawWellPlateId);
+        if (!$plate) {
+            $plate = new WellPlate($rawWellPlateId);
+        }
+
+        return $plate;
     }
 }

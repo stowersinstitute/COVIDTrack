@@ -83,15 +83,6 @@ class Specimen
     private $well;
 
     /**
-     * Well Plate ID where original RNA is held.
-     *
-     * @var string
-     * @ORM\Column(name="rna_well_plate_id", type="string", nullable=true)
-     * @Gedmo\Versioned
-     */
-    private $rnaWellPlateId;
-
-    /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
      * For example, when they spit in the tube or did a blood draw.
      *
@@ -226,7 +217,6 @@ class Specimen
             'accessionId' => 'Accession ID',
             'type' => 'Type',
             'collectedAt' => 'Collection Time',
-            'rnaWellPlateId' => 'RNA Well Plate ID',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
@@ -425,7 +415,7 @@ class Specimen
 
     }
 
-    public function setWellPlate(WellPlate $plate, int $position): void
+    public function setWellPlate(WellPlate $plate, int $position = null): void
     {
         if ($this->well) {
             $this->well->delete();
@@ -436,12 +426,7 @@ class Specimen
 
     public function getRnaWellPlateId(): ?string
     {
-        return $this->rnaWellPlateId;
-    }
-
-    public function setRnaWellPlateId(?string $rnaWellPlateId): void
-    {
-        $this->rnaWellPlateId = $rnaWellPlateId;
+        return $this->well ? $this->well->getWellPlateBarcode() : '';
     }
 
 //    public function getWellPlate(): ?WellPlate

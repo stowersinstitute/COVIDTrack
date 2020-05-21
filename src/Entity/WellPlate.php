@@ -10,7 +10,7 @@ use App\Traits\TimestampableEntity;
 /**
  * Well Plate with one Specimen per Well
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\WellPlateRepository")
  * @ORM\Table(name="well_plates")
  */
 class WellPlate
@@ -29,7 +29,7 @@ class WellPlate
      * String encoded into the barcode that is physically on the Well Plate.
      *
      * @var string
-     * @ORM\Column(name="barcode", type="string", length=255)
+     * @ORM\Column(name="barcode", type="string", length=255, nullable=false, unique=true)
      */
     private $barcode;
 
@@ -42,9 +42,10 @@ class WellPlate
      */
     private $wells;
 
-    public function __construct()
+    public function __construct(string $barcode)
     {
         $this->wells = new ArrayCollection();
+        $this->barcode = $barcode;
     }
 
     public function __toString()
@@ -80,6 +81,20 @@ class WellPlate
         $removeKey = null;
         foreach ($this->wells as $key => $well) {
             if (EntityUtils::isSameEntity($specimen, $well->getSpecimen())) {
+                $removeKey = $key;
+                break;
+            }
+        }
+
+        if ($removeKey !== null) {
+            $this->wells->remove($removeKey);
+        }
+    }
+
+    public function removeWell(SpecimenWell $wellToRemove): void
+    {
+        foreach ($this->wells as $key => $well) {
+            if (EntityUtils::isSameEntity($wellToRemove, $well)) {
                 $removeKey = $key;
                 break;
             }

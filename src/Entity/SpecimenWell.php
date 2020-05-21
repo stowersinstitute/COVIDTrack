@@ -33,11 +33,11 @@ class SpecimenWell
 
     /**
      * @var int
-     * @ORM\Column(name="position", type="smallint", options={"unsigned":true}, nullable=false)
+     * @ORM\Column(name="position", type="smallint", options={"unsigned":true})
      */
     private $position;
 
-    public function __construct(WellPlate $plate, Specimen $specimen, int $position)
+    public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
     {
         $this->wellPlate = $plate;
         $this->specimen = $specimen;
@@ -47,6 +47,7 @@ class SpecimenWell
     public function delete()
     {
         // Remove WellPlate relationship
+        /** @var WellPlate $wellPlate */
         $wellPlate = null;
         if ($this->wellPlate) {
             $wellPlate = $this->wellPlate;
@@ -54,6 +55,7 @@ class SpecimenWell
         }
 
         // Remove Specimen relationship
+        /** @var Specimen $specimen */
         $specimen = null;
         if ($this->specimen) {
             $specimen = $this->specimen;
@@ -72,6 +74,11 @@ class SpecimenWell
     public function getWellPlate(): WellPlate
     {
         return $this->wellPlate;
+    }
+
+    public function getWellPlateBarcode(): ?string
+    {
+        return $this->wellPlate->getBarcode();
     }
 
     public function getSpecimen(): Specimen
