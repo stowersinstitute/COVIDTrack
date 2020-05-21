@@ -405,7 +405,6 @@ class Tube
     /**
      * Call when a Tube is being returned by a Participant at a Kiosk.
      *
-     * @param SpecimenAccessionIdGenerator $gen
      * @param DropOff            $drop
      * @param ParticipantGroup   $group
      * @param string             $tubeType Tube::TYPE_* constant
