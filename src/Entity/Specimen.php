@@ -412,7 +412,6 @@ class Specimen
         if ($well) {
             $well->delete();
         }
-
     }
 
     public function setWellPlate(WellPlate $plate, int $position = null): void
