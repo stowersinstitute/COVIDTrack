@@ -424,7 +424,7 @@ class Specimen
         $this->well = new SpecimenWell($plate, $this, $position);
     }
 
-    public function getRnaWellPlateId(): ?string
+    public function getRnaWellPlateBarcode(): ?string
     {
         return $this->well ? $this->well->getWellPlateBarcode() : '';
     }

@@ -39,8 +39,7 @@ class AppWellPlateFixtures extends Fixture implements DependentFixtureInterface
     private function createWellPlates(ObjectManager $em)
     {
         foreach ($this->getWellPlateData() as $data) {
-            $plate = new WellPlate();
-            $plate->setBarcode($data['barcode']);
+            $plate = new WellPlate($data['barcode']);
 
             $this->setReference('wellPlate.' . $data['barcode'], $plate);
 

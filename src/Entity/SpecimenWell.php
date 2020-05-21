@@ -33,7 +33,7 @@ class SpecimenWell
 
     /**
      * @var int
-     * @ORM\Column(name="position", type="smallint", options={"unsigned":true})
+     * @ORM\Column(name="position", type="smallint", options={"unsigned":true}, nullable=true)
      */
     private $position;
 
