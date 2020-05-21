@@ -22,7 +22,11 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
-            <td>{{ specimen.rnaWellPlateBarcode }}</td>
+            <td>
+                {% if specimen.rnaWellPlateBarcode %}
+                <a href="{{ path('well_plate_view', {barcode: specimen.rnaWellPlateBarcode}) }}">{{ specimen.rnaWellPlateBarcode }}</a>
+                {% endif %}
+            </td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>
             <td>{{ specimen.statusText }}</td>
         </tr>
