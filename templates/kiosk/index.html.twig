@@ -11,13 +11,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-            {{
-                form_start(form, {
-                    'attr': {
-                        'autocomplete': 'off',
-                    }
-                })
-            }}
+            {{ form_start(form) }}
             {{ form_row(form.group, {'label': false, 'placeholder': 'Select Group here or Scan Group barcode using kiosk scanner'}) }}
             {{ form_end(form) }}
         </div>
