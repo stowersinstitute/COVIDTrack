@@ -182,6 +182,14 @@ class ParticipantGroup
         return join(' ', $strings);
     }
 
+    /**
+     * @return DropOffWindow[]
+     */
+    public function getDropOffWindows() : array
+    {
+        return $this->dropOffWindows->getValues();
+    }
+
     public function addDropOffWindow(DropOffWindow $dropOffWindow)
     {
         if ($this->hasDropOffWindow($dropOffWindow)) return;
