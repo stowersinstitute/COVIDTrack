@@ -21,11 +21,9 @@ class ParticipantGroupRoundRobinScheduler
      */
     public function assignByDays(array $groups, SiteDropOffSchedule $schedule)
     {
-        $calculator = new ScheduleCalculator($schedule);
-
         $numToAssignPerGroup = $schedule->getNumExpectedDropOffsPerGroup();
 
-        $windowsByDay = $calculator->getWindowsByWeekday();
+        $windowsByDay = $schedule->getWindowsByWeekday();
         $days = array_keys($windowsByDay);
 
         foreach ($groups as $group) {

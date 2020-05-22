@@ -55,41 +55,4 @@ class ScheduleCalculator
 
         return $windows;
     }
-
-    /**
-     * Returns an array where the keys are days of the week (eg. 'Mon', 'Tue') and the value
-     * is an array of all windows occurring on that day
-     *
-     * @return array
-     */
-    public function getWindowsByWeekday() : array
-    {
-        /*
-         * Keys are the weekday and values are windows within that day
-         */
-        $byWeekday = [];
-
-        foreach ($this->getWeeklyWindows() as $window) {
-            $weekday = $this->toRruleWeekday($window->getStartsAt()->format('D'));
-
-            if (!isset($byWeekday[$weekday])) {
-                $byWeekday[$weekday] = [];
-            }
-
-            $byWeekday[$weekday][] = $window;
-        }
-
-        return $byWeekday;
-    }
-
-    /**
-     * Converts a three-letter weekday (eg. from the 'D' date format) to same format the drop off schedule uses
-     *
-     * Example:
-     *      Mon -> MO
-     */
-    protected function toRruleWeekday(string $threeLetterWeekday) : string
-    {
-        return strtoupper(substr($threeLetterWeekday, 0, 2));
-    }
 }
