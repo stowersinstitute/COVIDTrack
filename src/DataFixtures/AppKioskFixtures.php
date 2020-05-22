@@ -30,6 +30,8 @@ class AppKioskFixtures extends Fixture
     {
         return [
             [ 'label' => 'Kiosk One',   'location' => 'Main Entry', ],
+            [ 'label' => 'Kiosk Two',   'location' => 'Side Entry', ],
+            [ 'label' => 'Kiosk Three',   'location' => 'Basement', ],
         ];
     }
 }

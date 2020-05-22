@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -13,14 +14,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ParticipantGroupForm extends AbstractType
 {
+    /**
+     * @var ParticipantGroupAccessionIdGenerator
+     */
+    private $accessionIdGen;
+
+    public function __construct(ParticipantGroupAccessionIdGenerator $gen)
+    {
+        $this->accessionIdGen = $gen;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Title',
-            ])
-            ->add('accessionId', TextType::class, [
-                'label' => 'Accession ID',
             ])
             ->add('participantCount', IntegerType::class, [
                 'label' => 'Number of Participants',
@@ -40,7 +48,7 @@ class ParticipantGroupForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => ParticipantGroup::class,
             'empty_data' => function(FormInterface $form) {
-                $accessionId = $form->get('accessionId')->getData();
+                $accessionId = $this->accessionIdGen->generate();
                 $count = $form->get('participantCount')->getData();
 
                 return new ParticipantGroup($accessionId, $count);

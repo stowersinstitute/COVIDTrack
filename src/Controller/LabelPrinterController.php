@@ -59,6 +59,9 @@ class LabelPrinterController extends AbstractController
 
         $form->handleRequest($request);
 
+        $printer = null;
+        $numToPrint = null;
+        $displaySuccessfulPrintAlert = false;
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
@@ -87,11 +90,14 @@ class LabelPrinterController extends AbstractController
                 $em->flush();
             }
 
-            return $this->redirectToRoute('app_tube_list');
+            $displaySuccessfulPrintAlert = true;
         }
 
         return $this->render('label-printer/print-tube-labels.html.twig', [
             'form' => $form->createView(),
+            'previousSelectedPrinter' => $printer,
+            'previousNumToPrint' => $numToPrint,
+            'displaySuccessfulPrintAlert' => $displaySuccessfulPrintAlert,
         ]);
     }
 
