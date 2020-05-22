@@ -5,6 +5,7 @@
             <th>&nbsp;</th>
             <th>Title</th>
             <th>Participants</th>
+            <th>Drop-off Times</th>
             <th>Active?</th>
             <th>Created</th>
             <th>Last Modified</th>
@@ -21,6 +22,12 @@
                 <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
             <td>{{ group.participantCount }}</td>
+            <td>
+                {% for window in group.getDropOffWindows() %}
+                    {{ window.getDisplayString() }}
+                    {% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
             <td>
                 {% if group.isActive() %}
                     <i class="fa fa-check text-green"></i>

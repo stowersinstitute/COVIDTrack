@@ -78,6 +78,16 @@ class DropOffWindow
         $schedule->addDropOffWindow($this);
     }
 
+    public function getDisplayString() : string
+    {
+        return sprintf(
+            '%s %s-%s',
+            $this->startsAt->format('D'),
+            $this->startsAt->format('H:i'),
+            $this->endsAt->format('H:i')
+        );
+    }
+
     /**
      * Returns a string that uniquely identifies this window within its parent schedule
      *
