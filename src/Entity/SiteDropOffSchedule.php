@@ -3,6 +3,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -99,7 +100,8 @@ class SiteDropOffSchedule
     /**
      * @var DropOffWindow[] Drop off windows associated with this schedule
      *
-     * @ORM\OneToMany(targetEntity="DropOffWindow", mappedBy="schedule", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="DropOffWindow", mappedBy="schedule", cascade={"persist", "remove"}, orphanRemoval=true, fetch="EAGER")
+     * @ORM\OrderBy({"startsAt" = "ASC"})
      */
     protected $dropOffWindows;
 
@@ -164,11 +166,108 @@ class SiteDropOffSchedule
     }
 
     /**
+     * Returns an array of dates representing the week days this schedule is enabled on
+     *
+     * @return \DateTimeImmutable[]
+     */
+    public function getDropOffDaysAsDates() : array
+    {
+        $dayDates = [];
+        foreach ($this->dropOffWindows as $window) {
+            $weekdayStr = $window->getStartsAt()->format('l');
+
+            if (array_key_exists($weekdayStr, $dayDates)) continue;
+
+            $dayDates[$weekdayStr] = $window->getStartsAt();
+        }
+
+        return $dayDates;
+    }
+
+    /**
+     * @return DropOffWindow[]
+     */
+    public function getDailyWindowsAsDates() : array
+    {
+        // A date representing one of the weekdays in the schedule
+        // Only used to filter windows to a single day
+        $days = $this->getDropOffDaysAsDates();
+        $day = array_shift($days);
+        $filterDayStr = $day->format('l');
+
+        $dayWindows = [];
+        foreach ($this->dropOffWindows as $window) {
+            $windowDayStr = $window->getStartsAt()->format('l');
+            if ($windowDayStr !== $filterDayStr) continue;
+
+            $dayWindows[] = $window;
+        }
+
+        return $dayWindows;
+    }
+
+    public function getWindowByWeekDayAndStartTime(\DateTimeInterface $dayDate, \DateTimeInterface $windowStartDate) : ?DropOffWindow
+    {
+        foreach ($this->dropOffWindows as $window) {
+            if ($window->getStartsAt()->format('l') != $dayDate->format('l')) continue;
+            if ($window->getStartsAt()->format('His') != $windowStartDate->format('His')) continue;
+
+            // All filters passed, this will only happen for one window
+            return $window;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns an array where the keys are days of the week (eg. 'Mon', 'Tue') and the value
+     * is an array of all windows occurring on that day
+     *
+     * @return array
+     */
+    public function getWindowsByWeekday() : array
+    {
+        $byWeekday = [];
+
+        foreach ($this->dropOffWindows as $window) {
+            $weekday = $window->getStartsAt()->format('D');
+
+            if (!isset($byWeekday[$weekday])) {
+                $byWeekday[$weekday] = [];
+            }
+
+            $byWeekday[$weekday][] = $window;
+        }
+
+        return $byWeekday;
+    }
+
+    /**
      * @return DropOffWindow[]
      */
     public function getDropOffWindows() : array
     {
         return $this->dropOffWindows->getValues();
+    }
+
+    public function addDropOffWindow(DropOffWindow $window)
+    {
+        if ($this->hasDropOffWindow($window)) return;
+
+        $this->dropOffWindows->add($window);
+    }
+
+    public function hasDropOffWindow(DropOffWindow $window) : bool
+    {
+        foreach ($this->dropOffWindows as $currWindow) {
+            if (EntityUtils::isSameEntity($currWindow, $window)) return true;
+
+            // Also need to check if the drop off window represents exactly the same
+            // time slot as an existing window
+            if ($currWindow->getTimeSlotId() === $window->getTimeSlotId()) return true;
+        }
+
+        return false;
     }
 
     /**
