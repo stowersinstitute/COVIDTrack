@@ -7,12 +7,14 @@ namespace App\Controller;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
 use App\Form\LabelPrinterType;
+use App\Label\MBSBloodTubeLabelBuilder;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplImage;
 use App\Label\ZplPrinting;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,6 +45,15 @@ class LabelPrinterController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- Select -'
             ])
+            ->add('labelType', ChoiceType::class, [
+                'choices' => [
+                    '0.75" x 0.75" Square' => SpecimenIntakeLabelBuilder::class,
+                    '1" x 0.25" MBS Blood Tube' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'label' => 'Label Type',
+                'data' => SpecimenIntakeLabelBuilder::class,
+                'required' => true,
+            ])
             ->add('numToPrint', IntegerType::class, [
                 'label' => 'Number of Labels',
                 'data' => 1,
@@ -65,6 +76,7 @@ class LabelPrinterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $builderClass = $data['labelType'];
             $numToPrint = $data['numToPrint'];
 
             $tubes = [];
@@ -79,7 +91,7 @@ class LabelPrinterController extends AbstractController
             $em->flush();
 
             // Print out the saved tubes
-            $builder = new SpecimenIntakeLabelBuilder();
+            $builder = new $builderClass();
             $builder->setPrinter($printer);
 
             foreach ($tubes as $tube) {
@@ -190,6 +202,15 @@ class LabelPrinterController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- None -'
             ])
+            ->add('labelType', ChoiceType::class, [
+                'choices' => [
+                    '0.75" x 0.75" Square' => SpecimenIntakeLabelBuilder::class,
+                    '1" x 0.25" MBS Blood Tube' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'label' => 'Label Type',
+                'data' => SpecimenIntakeLabelBuilder::class,
+                'required' => true,
+            ])
             ->add('send', SubmitType::class, [
                 'label' => 'Print',
                 'attr' => ['class' => 'btn-primary'],
@@ -205,8 +226,9 @@ class LabelPrinterController extends AbstractController
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
             $tube = $this->getDoctrine()->getRepository(Tube::class)->find($data['tube']);
+            $builderClass = $data['labelType'];
 
-            $labelBuilder = new SpecimenIntakeLabelBuilder($printer);
+            $labelBuilder = new $builderClass($printer);
             $labelBuilder->setTube($tube);
 
             $zpl->printBuilder($labelBuilder);
