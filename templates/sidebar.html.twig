@@ -201,5 +201,15 @@ Renders a top-level navigation node in the tree navigation.
                 },
             ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
         }}
+        {{
+            _self.treenode('Configuration', 'fa-cog', [
+                {
+                    text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-calendar-week',
+                    route: 'site_drop_off_schedule_index'
+                },
+            ], ['ROLE_ADMIN'])
+        }}
     </ul>
 </section>

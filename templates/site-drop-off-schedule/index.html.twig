@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Drop-off Schedule{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    {{ form_start(form) }}
+
+                    <div>
+                        {{ form_row(form.startTime) }}
+                        {{ form_row(form.endTime) }}
+                        {{ form_row(form.interval) }}
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Sunday</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {# Checkboxes to enable scheduling (shows additional UI) #}
+                        <tr>
+                            <td>
+                                {{ form_row(form.SU_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.MO_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.TU_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.WE_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.TH_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.FR_enabled) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.SA_enabled) }}
+                            </td>
+                        </tr>
+
+                        {# Day-specific drop-off times #}
+                        {#
+                        <tr>
+                            <td>
+                                {{ form_row(form.SU_startTime) }}
+                                {{ form_row(form.SU_endTime) }}
+                                {{ form_row(form.SU_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.MO_startTime) }}
+                                {{ form_row(form.MO_endTime) }}
+                                {{ form_row(form.MO_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.TU_startTime) }}
+                                {{ form_row(form.TU_endTime) }}
+                                {{ form_row(form.TU_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.WE_startTime) }}
+                                {{ form_row(form.WE_endTime) }}
+                                {{ form_row(form.WE_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.TH_startTime) }}
+                                {{ form_row(form.TH_endTime) }}
+                                {{ form_row(form.TH_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.FR_startTime) }}
+                                {{ form_row(form.FR_endTime) }}
+                                {{ form_row(form.FR_interval) }}
+                            </td>
+                            <td>
+                                {{ form_row(form.SA_startTime) }}
+                                {{ form_row(form.SA_endTime) }}
+                                {{ form_row(form.SA_interval) }}
+                            </td>
+                        </tr>
+                        #}
+                        </tbody>
+                    </table>
+
+                    {{ form_row(form.submit) }}
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
