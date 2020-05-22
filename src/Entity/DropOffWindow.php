@@ -68,11 +68,14 @@ class DropOffWindow
 
     public function __construct(SiteDropOffSchedule $schedule, \DateTimeImmutable $startsAt, \DateTimeImmutable $endsAt)
     {
-        $this->schedule = $schedule;
         $this->startsAt = $startsAt;
         $this->endsAt = $endsAt;
 
+        $this->schedule = $schedule;
+
         $this->particpantGroups = new ArrayCollection();
+
+        $schedule->addDropOffWindow($this);
     }
 
     /**
@@ -83,7 +86,8 @@ class DropOffWindow
     public function getTimeSlotId() : string
     {
         return sprintf(
-            '%s.%s',
+            '%s.%s.%s',
+            $this->startsAt->format('D'),
             $this->startsAt->format('His'),
             $this->endsAt->format('His')
         );
@@ -97,6 +101,14 @@ class DropOffWindow
             $this->startsAt->format('h:i:sa'),
             $this->endsAt->format('h:i:sa')
         );
+    }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function getParticipantGroups() : array
+    {
+        return $this->particpantGroups->getValues();
     }
 
     public function addParticipantGroup(ParticipantGroup $group)
