@@ -12,7 +12,7 @@
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ group.title }} Group</strong></h3>
+            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ kioskSession.participantGroup.title }} Group</strong></h3>
 
             {% block body_content %}
 
@@ -58,7 +58,7 @@
                     {{ _self.renderCancelButton() }}
                 </div>
                 <div class="col-xs-6">
-                    <a href="{{ path('kiosk_review', {'id':dropoff.id}) }}" class="btn btn-sm btn-success">
+                    <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-sm btn-success">
                         Continue <i class="fa fa-fw fa-chevron-right"></i>
                     </a>
                 </div>
@@ -131,7 +131,7 @@
 
             // Confirming Cancel does POST to do real cancel
             $('#confirm-cancel-dropoff').on('click', function(e) {
-                const url = "{{ path('kiosk_cancel', {id: dropoff.id}) }}";
+                const url = "{{ path('kiosk_cancel', {id: kioskSession.id}) }}";
                 $.post(url)
                     .fail(function(responseObj) {
                         // Error happened, show it

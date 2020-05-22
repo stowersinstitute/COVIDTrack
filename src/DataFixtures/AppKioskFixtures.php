@@ -21,6 +21,9 @@ class AppKioskFixtures extends Fixture
             $kiosk->setLocation($raw['location'] ?? null);
 
             $manager->persist($kiosk);
+
+            // Example: "kiosk.Kiosk One"
+            $this->setReference('kiosk.' . $raw['label'], $kiosk);
         }
 
         $manager->flush();

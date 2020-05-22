@@ -145,7 +145,7 @@ class SpecimenTest extends TestCase
         $group = ParticipantGroup::buildExample('GRP-1');
         $tubeType = Tube::TYPE_BLOOD;
         $collectedAt = new \DateTime('2020-05-20 15:22:44');
-        $tube->kioskDropoff($drop, $group, $tubeType, $collectedAt);
+        $tube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
 
         $specimen = Specimen::createFromTube($tube, $gen);
 
