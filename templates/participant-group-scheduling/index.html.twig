@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Current Group Drop-off Schedule{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    {% if schedule is empty %}
+                        No drop-off schedule is defined.
+                    {% else %}
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                {# Time of day column #}
+                                <td style="width: 100px;">&nbsp;</td>
+                                {% for dayDate in schedule.getDropOffDaysAsDates() %}
+                                    <th>{{ dayDate|date('l') }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for dailyWindow in schedule.getDailyWindowsAsDates() %}
+                                    <tr>
+                                        <td class="text-right"><strong>{{ dailyWindow.startsAt|date('H:i') }}-{{ dailyWindow.endsAt|date('H:i') }}</strong></td>
+                                        {% for dayDate in schedule.getDropOffDaysAsDates() %}
+                                            <td>
+                                                {% set window = schedule.getWindowByWeekDayAndStartTime(dayDate, dailyWindow.startsAt) %}
+                                                {% if window %}
+                                                    {% for group in window.getParticipantGroups() %}
+                                                        <i class="fa fa-users" title="{{ group.title }}"></i>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    &nbsp;
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
