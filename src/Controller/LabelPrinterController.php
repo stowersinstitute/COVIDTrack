@@ -47,8 +47,8 @@ class LabelPrinterController extends AbstractController
             ])
             ->add('labelType', ChoiceType::class, [
                 'choices' => [
-                    '0.75" x 0.75" Square' => SpecimenIntakeLabelBuilder::class,
-                    '1" x 0.25" MBS Blood Tube' => MBSBloodTubeLabelBuilder::class,
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
                 ],
                 'label' => 'Label Type',
                 'data' => SpecimenIntakeLabelBuilder::class,
@@ -204,8 +204,8 @@ class LabelPrinterController extends AbstractController
             ])
             ->add('labelType', ChoiceType::class, [
                 'choices' => [
-                    '0.75" x 0.75" Square' => SpecimenIntakeLabelBuilder::class,
-                    '1" x 0.25" MBS Blood Tube' => MBSBloodTubeLabelBuilder::class,
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
                 ],
                 'label' => 'Label Type',
                 'data' => SpecimenIntakeLabelBuilder::class,
