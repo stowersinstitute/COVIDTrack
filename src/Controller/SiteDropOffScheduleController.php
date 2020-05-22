@@ -5,7 +5,7 @@ namespace App\Controller;
 
 
 use App\Entity\DropOffWindow;
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Form\SiteDropOffScheduleForm;
 use App\Scheduling\ScheduleCalculator;
 use App\Util\DateUtils;
@@ -90,7 +90,7 @@ class SiteDropOffScheduleController extends AbstractController
         return $dropoffSchedule;
     }
 
-    protected function syncDropOffWindows(SiteDropOffSchedule $schedule)
+    protected function syncDropOffWindows(DropOffSchedule $schedule)
     {
         $calculator = new ScheduleCalculator($schedule);
         $newWindows = $calculator->getWeeklyWindows();
@@ -103,7 +103,7 @@ class SiteDropOffScheduleController extends AbstractController
         }
     }
 
-    protected function windowIsInDatabase(SiteDropOffSchedule $schedule, DropOffWindow $window)
+    protected function windowIsInDatabase(DropOffSchedule $schedule, DropOffWindow $window)
     {
         $dbWindows = $schedule->getCommittedDropOffWindows();
 
@@ -114,22 +114,22 @@ class SiteDropOffScheduleController extends AbstractController
         return false;
     }
 
-    protected function ensureDropOffSchedule(string $label) : SiteDropOffSchedule
+    protected function ensureDropOffSchedule(string $label) : DropOffSchedule
     {
-        $repo = $this->em->getRepository(SiteDropOffSchedule::class);
+        $repo = $this->em->getRepository(DropOffSchedule::class);
 
         // System only supports one schedule at the moment
         $currentSchedules = $repo->findAll();
 
         if ($currentSchedules) return $currentSchedules[0];
 
-        $schedule = new SiteDropOffSchedule($label);
+        $schedule = new DropOffSchedule($label);
         $this->em->persist($schedule);
 
         return $schedule;
     }
 
-    protected function getDefaultSiteDropOffSchedule() : SiteDropOffSchedule
+    protected function getDefaultSiteDropOffSchedule() : DropOffSchedule
     {
         return $this->ensureDropOffSchedule('Default Schedule');
     }

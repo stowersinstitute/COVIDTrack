@@ -4,7 +4,7 @@
 namespace App\Entity;
 
 
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,9 +29,9 @@ class DropOffWindow
 
     /**
      * Schedule that generated this DropOffWindow
-     * @var SiteDropOffSchedule
+     * @var DropOffSchedule
      *
-     * @ORM\ManyToOne(targetEntity="SiteDropOffSchedule", inversedBy="dropOffWindows")
+     * @ORM\ManyToOne(targetEntity="DropOffSchedule", inversedBy="dropOffWindows")
      * @ORM\JoinColumn(name="schedule_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $schedule;
@@ -66,7 +66,7 @@ class DropOffWindow
      */
     protected $particpantGroups;
 
-    public function __construct(SiteDropOffSchedule $schedule, \DateTimeImmutable $startsAt, \DateTimeImmutable $endsAt)
+    public function __construct(DropOffSchedule $schedule, \DateTimeImmutable $startsAt, \DateTimeImmutable $endsAt)
     {
         $this->startsAt = $startsAt;
         $this->endsAt = $endsAt;
@@ -138,12 +138,12 @@ class DropOffWindow
         return $this->id;
     }
 
-    public function getSchedule(): \App\Entity\SiteDropOffSchedule
+    public function getSchedule(): \App\Entity\DropOffSchedule
     {
         return $this->schedule;
     }
 
-    public function setSchedule(\App\Entity\SiteDropOffSchedule $schedule): void
+    public function setSchedule(\App\Entity\DropOffSchedule $schedule): void
     {
         $this->schedule = $schedule;
     }

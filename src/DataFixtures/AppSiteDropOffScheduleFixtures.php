@@ -5,7 +5,7 @@ namespace App\DataFixtures;
 
 
 use App\Entity\Kiosk;
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Scheduling\ScheduleCalculator;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -18,7 +18,7 @@ class AppSiteDropOffScheduleFixtures extends Fixture
     public function load(ObjectManager $manager)
     {
         foreach ($this->getData() as $raw) {
-            $schedule = new SiteDropOffSchedule($raw['label']);
+            $schedule = new DropOffSchedule($raw['label']);
 
             $schedule->setDaysOfTheWeek($raw['daysOfTheWeek']);
             $schedule->setNumExpectedDropOffsPerGroup($raw['numExpectedDropOffsPerGroup']);

@@ -4,7 +4,7 @@
 namespace App\Controller;
 
 
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,10 +33,10 @@ class ParticipantGroupSchedulingController extends AbstractController
         ]);
     }
 
-    protected function getDefaultSiteDropOffSchedule() : ?SiteDropOffSchedule
+    protected function getDefaultSiteDropOffSchedule() : ?DropOffSchedule
     {
         return $this->em
-            ->getRepository(SiteDropOffSchedule::class)
+            ->getRepository(DropOffSchedule::class)
             ->findOneBy([])
         ;
     }

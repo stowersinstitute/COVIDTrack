@@ -6,7 +6,7 @@ namespace App\Scheduling;
 
 use App\Entity\DropOffWindow;
 use App\Entity\ParticipantGroup;
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 
 class ParticipantGroupRoundRobinScheduler
 {
@@ -16,10 +16,10 @@ class ParticipantGroupRoundRobinScheduler
      *  1. The window with the least number of groups in it is used first
      *  2. In the case of a tie, the earliest window is used
      *
-     * @param ParticipantGroup[]  $groups
-     * @param SiteDropOffSchedule $schedule
+     * @param ParticipantGroup[] $groups
+     * @param DropOffSchedule    $schedule
      */
-    public function assignByDays(array $groups, SiteDropOffSchedule $schedule)
+    public function assignByDays(array $groups, DropOffSchedule $schedule)
     {
         $numToAssignPerGroup = $schedule->getNumExpectedDropOffsPerGroup();
 

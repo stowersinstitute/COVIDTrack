@@ -5,17 +5,17 @@ namespace App\Scheduling;
 
 
 use App\Entity\DropOffWindow;
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Util\DateUtils;
 use Recurr\Rule;
 use Recurr\Transformer\ArrayTransformer;
 
 class ScheduleCalculator
 {
-    /** @var SiteDropOffSchedule */
+    /** @var DropOffSchedule */
     protected $schedule;
 
-    public function __construct(SiteDropOffSchedule $schedule)
+    public function __construct(DropOffSchedule $schedule)
     {
         $this->schedule = $schedule;
     }

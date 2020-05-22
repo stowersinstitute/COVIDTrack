@@ -5,7 +5,7 @@ namespace App\tests\Scheduling;
 
 
 use App\Entity\ParticipantGroup;
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Scheduling\ParticipantGroupRoundRobinScheduler;
 use PHPUnit\Framework\TestCase;
 
@@ -18,11 +18,11 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
      */
     public function testTwiceWeekly()
     {
-        $schedule = new SiteDropOffSchedule('Tu Th 8am-5pm');
+        $schedule = new DropOffSchedule('Tu Th 8am-5pm');
 
         $schedule->setDaysOfTheWeek([
-            SiteDropOffSchedule::TUESDAY,
-            SiteDropOffSchedule::THURSDAY,
+            DropOffSchedule::TUESDAY,
+            DropOffSchedule::THURSDAY,
         ]);
         $schedule->setDailyStartTime(new \DateTimeImmutable('09:00:00'));
         $schedule->setDailyEndTime(new \DateTimeImmutable('11:00:00'));

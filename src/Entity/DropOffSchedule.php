@@ -11,9 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
  * Times that the drop off facilities are open
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
- * @ORM\Table(name="site_drop_off_schedules")
+ * @ORM\Table(name="drop_off_schedules")
  */
-class SiteDropOffSchedule
+class DropOffSchedule
 {
     const VALID_DAYS_OF_THE_WEEK = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 

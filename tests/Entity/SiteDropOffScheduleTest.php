@@ -4,7 +4,7 @@
 namespace App\tests\Entity;
 
 
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use PHPUnit\Framework\TestCase;
 
 class SiteDropOffScheduleTest extends TestCase
@@ -14,11 +14,11 @@ class SiteDropOffScheduleTest extends TestCase
      */
     public function testTuesThursWorkdayRrule()
     {
-        $schedule = new SiteDropOffSchedule('Tuesdays and Thursdays 8am - 5pm');
+        $schedule = new DropOffSchedule('Tuesdays and Thursdays 8am - 5pm');
 
         $schedule->setDaysOfTheWeek([
-            SiteDropOffSchedule::TUESDAY,
-            SiteDropOffSchedule::THURSDAY,
+            DropOffSchedule::TUESDAY,
+            DropOffSchedule::THURSDAY,
         ]);
         $schedule->setDailyStartTime(new \DateTimeImmutable('09:00:00'));
         $schedule->setDailyEndTime(new \DateTimeImmutable('17:00:00'));

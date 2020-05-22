@@ -4,7 +4,7 @@
 namespace App\Tests\Scheduling;
 
 
-use App\Entity\SiteDropOffSchedule;
+use App\Entity\DropOffSchedule;
 use App\Scheduling\ScheduleCalculator;
 use App\Util\DateUtils;
 use PHPUnit\Framework\TestCase;
@@ -13,11 +13,11 @@ class ScheduleCalculatorTest extends TestCase
 {
     public function testGenerateWeeklyWindows()
     {
-        $schedule = new SiteDropOffSchedule('Test');
+        $schedule = new DropOffSchedule('Test');
 
         $schedule->setDaysOfTheWeek([
-            SiteDropOffSchedule::TUESDAY,
-            SiteDropOffSchedule::THURSDAY,
+            DropOffSchedule::TUESDAY,
+            DropOffSchedule::THURSDAY,
         ]);
         $schedule->setDailyStartTime(new \DateTimeImmutable('09:00:00'));
         $schedule->setDailyEndTime(new \DateTimeImmutable('17:00:00'));
