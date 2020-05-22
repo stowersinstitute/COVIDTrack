@@ -46,12 +46,12 @@ class LabelPrinterController extends AbstractController
                 'placeholder' => '- Select -'
             ])
             ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
                 'choices' => [
                     'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
                     'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
                 ],
-                'label' => 'Label Type',
-                'data' => SpecimenIntakeLabelBuilder::class,
+                'placeholder' => '- Select -',
                 'required' => true,
             ])
             ->add('numToPrint', IntegerType::class, [
@@ -203,12 +203,12 @@ class LabelPrinterController extends AbstractController
                 'placeholder' => '- None -'
             ])
             ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
                 'choices' => [
                     'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
                     'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
                 ],
-                'label' => 'Label Type',
-                'data' => SpecimenIntakeLabelBuilder::class,
+                'placeholder' => '- Select -',
                 'required' => true,
             ])
             ->add('send', SubmitType::class, [
