@@ -35,6 +35,8 @@ class DropOffScheduleController extends AbstractController
      */
     public function index(Request $request)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $siteSchedule = null;
         $form = $this->createForm(SiteDropOffScheduleForm::class);
 
