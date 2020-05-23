@@ -10,7 +10,7 @@
                     {% if schedule is empty %}
                         No drop-off schedule is defined.
                     {% else %}
-                        <table class="table table-bordered">
+                        <table class="table table-bordered table-hover">
                             <thead>
                             <tr>
                                 {# Time of day column #}
@@ -30,7 +30,7 @@
                                                 {% set window = schedule.getWindowByWeekDayAndStartTime(dayDate, dailyWindow.startsAt) %}
                                                 {% if window %}
                                                     {% for group in window.getParticipantGroups() %}
-                                                        <i class="fa fa-users" title="{{ group.title }}"></i>
+                                                        <i class="fa fa-users" title="{{ group.title }}"></i> ({{ group.title }})
                                                     {% endfor %}
                                                 {% else %}
                                                     &nbsp;
