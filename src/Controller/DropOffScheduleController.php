@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @Route("/drop-off-schedule")
  */
-class SiteDropOffScheduleController extends AbstractController
+class DropOffScheduleController extends AbstractController
 {
     /** @var EntityManagerInterface */
     protected $em;
