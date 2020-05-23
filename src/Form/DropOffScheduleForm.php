@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class SiteDropOffScheduleForm extends AbstractType
+class DropOffScheduleForm extends AbstractType
 {
     const DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 

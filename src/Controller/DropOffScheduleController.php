@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\DropOffWindow;
 use App\Entity\DropOffSchedule;
-use App\Form\SiteDropOffScheduleForm;
+use App\Form\DropOffScheduleForm;
 use App\Scheduling\ScheduleCalculator;
 use App\Util\DateUtils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +38,7 @@ class DropOffScheduleController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $siteSchedule = null;
-        $form = $this->createForm(SiteDropOffScheduleForm::class);
+        $form = $this->createForm(DropOffScheduleForm::class);
 
         $form->handleRequest($request);
 
@@ -72,7 +72,7 @@ class DropOffScheduleController extends AbstractController
         $dropoffSchedule = $this->ensureDropOffSchedule('Default Schedule');
 
         $enabledDays = [];
-        foreach (SiteDropOffScheduleForm::DAYS as $day) { // MO, TU, WE, ...
+        foreach (DropOffScheduleForm::DAYS as $day) { // MO, TU, WE, ...
             // Only process enabled days
             if (!$form->get($day . '_enabled')->getData()) continue;
 
