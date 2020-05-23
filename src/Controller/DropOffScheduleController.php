@@ -42,20 +42,22 @@ class DropOffScheduleController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $siteSchedule = $this->commitSchedule($form);
-        }
         // Set form defaults
-        else {
+        if (!$form->isSubmitted()) {
             $siteSchedule = $this->getDefaultSiteDropOffSchedule();
 
             $form->get('startTime')->setData($siteSchedule->getDailyStartTime());
             $form->get('endTime')->setData($siteSchedule->getDailyEndTime());
             $form->get('interval')->setData($siteSchedule->getWindowIntervalMinutes());
+            $form->get('numExpectedDropOffsPerGroup')->setData($siteSchedule->getNumExpectedDropOffsPerGroup());
 
             foreach ($siteSchedule->getDaysOfTheWeek() as $day) {
                 $form->get($day . '_enabled')->setData(true);
             }
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $siteSchedule = $this->commitSchedule($form);
         }
 
         return $this->render('site-drop-off-schedule/index.html.twig', [
