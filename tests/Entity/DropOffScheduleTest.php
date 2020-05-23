@@ -7,7 +7,7 @@ namespace App\tests\Entity;
 use App\Entity\DropOffSchedule;
 use PHPUnit\Framework\TestCase;
 
-class SiteDropOffScheduleTest extends TestCase
+class DropOffScheduleTest extends TestCase
 {
     /**
      * Tuesdays and Thursdays, 8am - 5pm
