@@ -7,6 +7,7 @@ namespace App\tests\Scheduling;
 use App\Entity\ParticipantGroup;
 use App\Entity\DropOffSchedule;
 use App\Scheduling\ParticipantGroupRoundRobinScheduler;
+use App\Scheduling\ScheduleCalculator;
 use PHPUnit\Framework\TestCase;
 
 class ParticipantGroupRoundRobinSchedulerTest extends TestCase
@@ -18,6 +19,7 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
      */
     public function testTwiceWeekly()
     {
+        print "Starting\n";
         $schedule = new DropOffSchedule('Tu Th 8am-5pm');
 
         $schedule->setDaysOfTheWeek([
@@ -28,6 +30,10 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
         $schedule->setDailyEndTime(new \DateTimeImmutable('11:00:00'));
         $schedule->setWindowIntervalMinutes(30);
         $schedule->setNumExpectedDropOffsPerGroup(2);
+
+        // Calculate windows in the schedule
+        $calculator = new ScheduleCalculator($schedule);
+        $calculator->getWeeklyWindows(); // This adds DropOffWindows to the DropOffSchedule
 
         /** @var ParticipantGroup[] $groups */
         $groups = [
@@ -45,9 +51,8 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
         $scheduler = new ParticipantGroupRoundRobinScheduler();
         $scheduler->assignByDays($groups, $schedule);
 
-        print "\n";
         foreach ($groups as $group) {
-            print $group->getAccessionId() . ': ' . $group->getDropOffWindowDebugString() . "\n";
+            $this->assertCount($schedule->getNumExpectedDropOffsPerGroup(), $group->getDropOffWindows(), 'Group had an unexpected number of drop-off windows');
         }
     }
 }

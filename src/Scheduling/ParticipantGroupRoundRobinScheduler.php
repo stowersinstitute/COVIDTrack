@@ -26,6 +26,8 @@ class ParticipantGroupRoundRobinScheduler
         $windowsByDay = $schedule->getWindowsByWeekday();
         $days = array_keys($windowsByDay);
 
+        if (!$days) throw new \ErrorException('Schedule has no days configured, cannot assign');
+
         foreach ($groups as $group) {
             $numAssigned = 0;
 
