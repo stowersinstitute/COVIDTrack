@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Times that the drop off facilities are open
  *
- * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
+ * @ORM\Entity(repositoryClass="App\Entity\DropOffScheduleRepository")
  * @ORM\Table(name="drop_off_schedules")
  */
 class DropOffSchedule
