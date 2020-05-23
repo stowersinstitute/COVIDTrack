@@ -28,10 +28,10 @@ class ScheduleCalculator
         $schedule = $this->schedule;
         $windows = [];
 
-        // We need a period of time to use as a reference. The exact period doesn't really matter,
-        // but it cannot be "now" because that may generate a partial schedule
+        // We need a period of time to use as a reference. The exact period doesn't matter,
+        // but it must be in the past because otherwise it may generate a partial schedule
         $calculationStartDate = new \DateTimeImmutable('2020-05-10 00:00:00');  // Sunday
-        $calculationEndDate = new \DateTimeImmutable('2020-05-17 00:00:00');    // Following Monday at midnight
+        $calculationEndDate   = new \DateTimeImmutable('2020-05-17 00:00:00');  // Following Sunday at midnight
 
         // Generate an RRULE that will provide times during a week
         $rule = (new Rule($schedule->getRruleString()))
