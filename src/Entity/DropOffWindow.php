@@ -129,6 +129,18 @@ class DropOffWindow
         $group->addDropOffWindow($this);
     }
 
+    public function removeParticipantGroup(ParticipantGroup $group)
+    {
+        if (!$this->hasParticipantGroup($group)) return;
+
+        foreach ($this->particpantGroups as $currGroup) {
+            if (EntityUtils::isSameEntity($currGroup, $group)) {
+                $this->particpantGroups->removeElement($currGroup);
+                $currGroup->removeDropOffWindow($this);
+            }
+        }
+    }
+
     public function hasParticipantGroup(ParticipantGroup $group)
     {
         foreach ($this->particpantGroups as $hasGroup) {

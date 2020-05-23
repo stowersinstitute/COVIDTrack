@@ -207,6 +207,25 @@ class ParticipantGroup
         return false;
     }
 
+    public function removeDropOffWindow(DropOffWindow $window)
+    {
+        if (!$this->hasDropOffWindow($window)) return;
+
+        foreach ($this->dropOffWindows as $currWindow) {
+            if (EntityUtils::isSameEntity($currWindow, $window)) {
+                $this->dropOffWindows->removeElement($currWindow);
+                $currWindow->removeParticipantGroup($this);
+            }
+        }
+    }
+
+    public function clearDropOffWindows()
+    {
+        foreach ($this->dropOffWindows as $window) {
+            $this->removeDropOffWindow($window);
+        }
+    }
+
     public function getId(): int
     {
         return $this->id;
