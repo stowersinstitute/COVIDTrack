@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
+use App\Entity\DropOffSchedule;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\LabelPrinter;
@@ -13,6 +14,7 @@ use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
 use App\Label\ParticipantGroupBadgeLabelBuilder;
 use App\Label\ZplPrinting;
+use App\Scheduling\ParticipantGroupRoundRobinScheduler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -63,6 +65,13 @@ class ParticipantGroupController extends AbstractController
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($group);
+            $em->flush();
+
+            $scheduler = new ParticipantGroupRoundRobinScheduler();
+            $scheduler->assignByDays(
+                [$group],
+                $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
+            );
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_list');
@@ -123,6 +132,44 @@ class ParticipantGroupController extends AbstractController
             'group' => $group,
             'auditLogs' => $auditLogs,
         ]);
+    }
+
+    /**
+     * @Route("/{title}/deactivate", methods={"POST"}, name="app_participant_group_deactivate")
+     */
+    public function deactivate(string $title, EntityManagerInterface $em)
+    {
+        $group = $this->findGroupByTitle($title);
+
+        $group->setIsActive(false);
+        // Clean up any drop off windows this group was using
+        $group->clearDropOffWindows();
+
+        $em->flush();
+
+        return $this->redirectToRoute('app_participant_group_edit', [ 'title' => $group->getTitle() ]);
+    }
+
+    /**
+     * @Route("/{title}/activate", methods={"POST"}, name="app_participant_group_activate")
+     */
+    public function activate(string $title, EntityManagerInterface $em)
+    {
+        $group = $this->findGroupByTitle($title);
+
+        $group->setIsActive(true);
+
+        $em->flush();
+
+        // Assign to the next available dropoff window
+        $scheduler = new ParticipantGroupRoundRobinScheduler();
+        $scheduler->assignByDays(
+            [$group],
+            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
+        );
+        $em->flush();
+
+        return $this->redirectToRoute('app_participant_group_edit', [ 'title' => $group->getTitle() ]);
     }
 
     /**
@@ -272,9 +319,46 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
+        // Update group schedules
+        $this->recalculateGroupSchedules();
+
         return $this->render('participantGroup/excel-import-result.html.twig', [
             'importer' => $importer,
         ]);
+    }
+
+    private function recalculateGroupSchedules()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $groupRepo = $em->getRepository(ParticipantGroup::class);
+
+        // First, remove any groups that are no longer active
+        $inactive = $groupRepo->findInactive();
+        foreach ($inactive as $group) {
+            $group->clearDropOffWindows();
+        }
+
+        // Must flush at this point so scheduler sees accurate view of the database
+        $em->flush();
+
+        // Assign new groups
+        // NOTE: order by ID asc here so that assignment order matches the order they
+        // appeared in the Excel file
+        $active = $groupRepo->findBy(['isActive' => true], ['id' => 'ASC']);
+        $toAssign = [];
+        foreach ($active as $group) {
+            if (count($group->getDropOffWindows()) > 0) continue;
+            $toAssign[] = $group;
+        }
+
+        $scheduler = new ParticipantGroupRoundRobinScheduler();
+        $scheduler->assignByDays(
+            $toAssign,
+            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
+        );
+
+        // Commit changes from the scheduler
+        $em->flush();
     }
 
 
