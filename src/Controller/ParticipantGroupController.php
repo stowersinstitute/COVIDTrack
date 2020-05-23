@@ -139,6 +139,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function deactivate(string $title, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $group = $this->findGroupByTitle($title);
 
         $group->setIsActive(false);
@@ -155,6 +157,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function activate(string $title, EntityManagerInterface $em)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $group = $this->findGroupByTitle($title);
 
         $group->setIsActive(true);
