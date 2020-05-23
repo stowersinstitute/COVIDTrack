@@ -13,7 +13,7 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
     public function getDependencies()
     {
         return [
-            AppSiteDropOffScheduleFixtures::class,
+            AppDropOffScheduleFixtures::class,
         ];
     }
 

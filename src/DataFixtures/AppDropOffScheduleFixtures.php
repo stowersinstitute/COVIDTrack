@@ -13,7 +13,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 /**
  * Times when users are able to drop off specimens
  */
-class AppSiteDropOffScheduleFixtures extends Fixture
+class AppDropOffScheduleFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
