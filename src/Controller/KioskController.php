@@ -133,7 +133,7 @@ class KioskController extends AbstractController
 
         $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
-        if (!$this->useSameKiosk($kioskSession, $kiosk)) {
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
             return $this->redirectToRoute('kiosk_index');
         }
 
@@ -189,7 +189,7 @@ class KioskController extends AbstractController
 
         $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
-        if (!$this->useSameKiosk($kioskSession, $kiosk)) {
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
             return $this->redirectToRoute('kiosk_index');
         }
 
@@ -242,7 +242,7 @@ class KioskController extends AbstractController
 
         $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
-        if (!$this->useSameKiosk($kioskSession, $kiosk)) {
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
             return $this->redirectToRoute('kiosk_index');
         }
 
@@ -365,7 +365,7 @@ class KioskController extends AbstractController
         return $kiosk;
     }
 
-    private function useSameKiosk(KioskSession $kioskSession, Kiosk $kiosk): bool
+    private function usesSameKiosk(KioskSession $kioskSession, Kiosk $kiosk): bool
     {
         return EntityUtils::isSameEntity($kioskSession->getKiosk(), $kiosk);
     }
