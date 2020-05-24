@@ -31,7 +31,10 @@ class SpecimenResultQPCRController extends AbstractController
 
         $results = $this->getDoctrine()
             ->getRepository(SpecimenResultQPCR::class)
-            ->findAll();
+            ->findBy([], [
+                'createdAt' => 'DESC',
+                'id' => 'ASC',
+            ]);
 
         return $this->render('results/qpcr/list.html.twig', [
             'results' => $results,
