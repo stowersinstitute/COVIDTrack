@@ -328,11 +328,6 @@ class KioskController extends AbstractController
         return $session;
     }
 
-    private function requestHasKioskCookie()
-    {
-
-    }
-
     private function getKioskIdFromRequestCookie(Request $request): ?Kiosk
     {
         $kioskId = $request->cookies->get(self::KIOSK_COOKIE_KEY);
