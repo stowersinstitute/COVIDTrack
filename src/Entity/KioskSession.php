@@ -51,6 +51,8 @@ class KioskSession
     private $dropOff;
 
     /**
+     * Screen user most recently completed.
+     *
      * @var string
      * @ORM\Column(name="most_recent_screen", type="string")
      */
