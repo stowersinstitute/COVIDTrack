@@ -169,7 +169,6 @@ class KioskSession
      */
     public function getTubeData(): array
     {
-        // TODO: Controller showing Review screen needs to read this
         return $this->tubeData->getValues();
     }
 
