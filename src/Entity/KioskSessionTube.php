@@ -29,7 +29,7 @@ class KioskSessionTube
     private $kioskSession;
 
     /**
-     * Tube entered
+     * Tube scanned by user
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Tube")
      * @ORM\JoinColumn(name="tube_id", referencedColumnName="id")
@@ -37,12 +37,16 @@ class KioskSessionTube
     private $tube;
 
     /**
+     * Tube::TYPE_* constant, selected by user
+     *
      * @var string
      * @ORM\Column(name="tube_type", type="string")
      */
     private $tubeType;
 
     /**
+     * Date and Time selected by user
+     *
      * @var \DateTimeImmutable
      * @ORM\Column(name="tube_collected_at", type="datetime_immutable")
      */
