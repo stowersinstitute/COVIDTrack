@@ -181,7 +181,7 @@ class KioskController extends AbstractController
      * View previously added Tubes to verify before completion.
      * POST back to this route to complete Kiosk interaction.
      *
-     * @Route(path="/{id}/review", methods={"GET", "POST"}, name="kiosk_review")
+     * @Route(path="/{id<\d+>}/review", methods={"GET", "POST"}, name="kiosk_review")
      */
     public function review(int $id, Request $request, EntityManagerInterface $em)
     {
