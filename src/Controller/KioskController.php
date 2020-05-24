@@ -218,7 +218,7 @@ class KioskController extends AbstractController
     }
 
     /**
-     * Complete this Kiosk interaction.
+     * Completion screen after completing kiosk interaction.
      *
      * @Route(path="/complete", methods={"GET"}, name="kiosk_complete")
      */
