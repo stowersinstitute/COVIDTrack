@@ -19,9 +19,9 @@ class AppLabelPrinterFixtures extends Fixture
     public function load(ObjectManager $manager)
     {
         $printer = new LabelPrinter();
-        $printer->setTitle('Dummy Printer');
+        $printer->setTitle('ZPL Printer ZD420');
         $printer->setDpi('203');
-        $printer->setDescription('Dummy Printer for Image Previewing');
+        $printer->setDescription('Printer for previewing ZPL printing');
         $printer->setHost('none');
         $printer->setMediaWidthIn(4);
         $printer->setMediaHeightIn(1);

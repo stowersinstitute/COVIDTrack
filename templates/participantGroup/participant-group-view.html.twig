@@ -13,7 +13,9 @@
                 <h3 class="box-title">
                     General
                     <a href="{{ path('app_participant_group_edit', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-edit"></i> Edit</a>
+                    {% if is_granted("ROLE_PRINT_GROUP_LABELS") %}
                     <a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a>
+                    {% endif %}
                 </h3>
             </div>
             <div class="box-body">
