@@ -157,6 +157,8 @@ class KioskController extends AbstractController
             $sessionTube = new KioskSessionTube($kioskSession, $tube, $tubeType, $collectedAt);
             $kioskSession->addTubeData($sessionTube);
 
+            $kioskSession->setMostRecentScreen(KioskSession::SCREEN_ADD_TUBES);
+
             $em->persist($sessionTube);
             $em->flush();
 
@@ -197,6 +199,7 @@ class KioskController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $kioskSession->finish($this->specimenIdGen);
+            $kioskSession->setMostRecentScreen(KioskSession::SCREEN_REVIEW_TUBES);
 
             $em->flush();
 
