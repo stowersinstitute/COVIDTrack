@@ -77,7 +77,7 @@ class DropOff
     }
 
     /**
-     * @internal Use ------------ to establish relationship.
+     * @internal Use Tube->kioskDropoffComplete() to establish relationship.
      */
     public function addTube(Tube $tube)
     {
