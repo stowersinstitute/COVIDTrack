@@ -127,6 +127,9 @@ class KioskSession
         return $this->participantGroup;
     }
 
+    /**
+     * When user completes the kiosk screen allowing Participation Group entry.
+     */
     public function setParticipantGroup(?ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
@@ -170,14 +173,6 @@ class KioskSession
     public function getTubeData(): array
     {
         return $this->tubeData->getValues();
-    }
-
-    /**
-     * When user completes the kiosk screen allowing Participation Group entry.
-     */
-    public function completeGroupScreen(ParticipantGroup $group)
-    {
-        $this->setParticipantGroup($group);
     }
 
     /**

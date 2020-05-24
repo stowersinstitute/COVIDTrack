@@ -37,7 +37,7 @@ class KioskSessionTest extends TestCase
 
         // Group badge scanned
         $group = ParticipantGroup::buildExample('GRP-1');
-        $session->completeGroupScreen($group);
+        $session->setParticipantGroup($group);
 
         // Now has group
         $this->assertSame($session->getParticipantGroup(), $group);
@@ -54,7 +54,7 @@ class KioskSessionTest extends TestCase
 
         // Group badge scanned
         $group = ParticipantGroup::buildExample('GRP-1');
-        $session->completeGroupScreen($group);
+        $session->setParticipantGroup($group);
 
         $this->assertCount(0, $session->getTubeData());
 
