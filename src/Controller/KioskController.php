@@ -187,7 +187,11 @@ class KioskController extends AbstractController
     {
         $this->mustHavePermissions();
 
+        $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->useSameKiosk($kioskSession, $kiosk)) {
+            return $this->redirectToRoute('kiosk_index');
+        }
 
         $form = $this->createFormBuilder()
             ->add('finish', SubmitType::class, [
@@ -236,7 +240,11 @@ class KioskController extends AbstractController
     {
         $this->mustHavePermissions();
 
+        $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->useSameKiosk($kioskSession, $kiosk)) {
+            return $this->redirectToRoute('kiosk_index');
+        }
 
         $kioskSession->cancel();
 
