@@ -3,12 +3,10 @@
 namespace App\DataFixtures;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
-use App\Entity\DropOff;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
-use App\Repository\TubeRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;

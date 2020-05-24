@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
-use App\Repository\TubeRepository;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Doctrine\Common\Collections\ArrayCollection;

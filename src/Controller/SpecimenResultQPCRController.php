@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\AuditLog;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultQPCR;
-use App\Form\SpecimenForm;
 use App\Form\SpecimenResultQPCRForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
