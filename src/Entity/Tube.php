@@ -530,9 +530,8 @@ class Tube
 
     /**
      * When a Participant has returned this Tube with their Specimen inside.
-     * @deprecated Use method kioskDropoffComplete(), this will flip private
      */
-    public function markReturned(\DateTimeImmutable $returnedAt = null)
+    private function markReturned(\DateTimeImmutable $returnedAt = null)
     {
         if ($returnedAt === null) $returnedAt = new \DateTimeImmutable();
 
@@ -579,7 +578,7 @@ class Tube
     }
 
     /**
-     * @see markReturned() and other status methods
+     * @see kioskDropoffComplete() and other status methods
      */
     private function setStatus(string $status): void
     {
