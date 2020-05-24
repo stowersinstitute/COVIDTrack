@@ -425,19 +425,6 @@ class Tube
     }
 
     /**
-     * Return Tube to state from before Drop Off began.
-     * @deprecated Will remove
-     */
-    public function kioskDropoffCancel(): void
-    {
-        $this->setTubeType(null);
-        $this->setCollectedAt(null);
-        $this->setReturnedAt(null);
-        $this->setParticipantGroup(null);
-        $this->setStatus(self::STATUS_PRINTED);
-    }
-
-    /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
      */
