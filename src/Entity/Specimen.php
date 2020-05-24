@@ -40,6 +40,8 @@ class Specimen
     const CLIA_REC_NO = "NO";
 
     /**
+     * SPECIMEN_ID_FORMAT_DEPENDENCY - search for this string to find code that depends on this ID format
+     *
      * @var int
      * @ORM\Id()
      * @ORM\Column(name="id", type="integer")
@@ -124,6 +126,16 @@ class Specimen
      * @ORM\OrderBy({"createdAt" = "DESC"})
      */
     private $results;
+
+    /**
+     * @deprecated - for test use only
+     */
+    public static function createWithId(int $id)
+    {
+        $specimen = new Specimen('temp', new ParticipantGroup('temp', 1));
+        $specimen->id = $id;
+        return $specimen;
+    }
 
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
