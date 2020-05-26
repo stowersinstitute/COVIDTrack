@@ -1,0 +1,14 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Accession ID</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for tube in importer.output %}
+        <tr>
+            <td>{{ tube.accessionId }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
