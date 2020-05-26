@@ -3,7 +3,8 @@
 namespace App\DataFixtures;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
-use App\Entity\DropOff;
+use App\Entity\KioskSession;
+use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -12,17 +13,18 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 {
-    /**
-     * @var ParticipantGroup[]
-     */
-    private $allGroups;
-
     public function getDependencies()
     {
         return [
             AppParticipantGroupsFixtures::class,
+            AppKioskFixtures::class,
         ];
     }
+
+    /**
+     * @var ParticipantGroup[]
+     */
+    private $allGroups;
 
     /**
      * Generates Species Accession IDs
@@ -140,19 +142,23 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     /**
      * All the work to simulate a kiosk dropoff.
      */
-    private function doKioskDropoff(ObjectManager $em, Tube $T, \DateTimeInterface $collectedAt)
+    private function doKioskDropoff(ObjectManager $em, Tube $tube, \DateTimeImmutable $collectedAt)
     {
-        // Assume 1 tube per dropoff
-        $dropoff = new DropOff();
-        $em->persist($dropoff);
+        // Assume 1 tube per kiosk interaction
+        $kiosk = $this->getReference('kiosk.Kiosk One');
+        $kioskSession = new KioskSession($kiosk);
+        $em->persist($kioskSession);
 
         $group = $this->getRandomGroup($em);
+        $kioskSession->setParticipantGroup($group);
 
         $possibleTubeTypes = Tube::getValidTubeTypes();
         $tubeType = $possibleTubeTypes[array_rand($possibleTubeTypes)];
 
-        $T->kioskDropoff($dropoff, $group, $tubeType, $collectedAt);
-        $dropoff->markCompleted($this->specimenAccessionIdGen);
+        $sessionTube = new KioskSessionTube($kioskSession, $tube, $tubeType, $collectedAt);
+        $kioskSession->addTubeData($sessionTube);
+
+        $kioskSession->finish($this->specimenAccessionIdGen);
     }
 
     /**

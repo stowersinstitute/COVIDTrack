@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use App\Util\EntityUtils;
@@ -10,7 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Tracks Specimens returned by a Participant at a Kiosk.
+ * Tracks Tubes returned by a Participant at a Kiosk.
  *
  * @ORM\Entity
  * @ORM\Table(name="dropoffs")
@@ -19,23 +18,13 @@ class DropOff
 {
     use TimestampableEntity, SoftDeleteableEntity;
 
-    const STATUS_INPROCESS = "IN_PROCESS";
-    const STATUS_COMPLETE = "COMPLETE";
-
     /**
      * @var integer
-     *
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @var string
-     * @ORM\Column(name="status", type="string")
-     */
-    private $status;
 
     /**
      * @var ParticipantGroup
@@ -51,15 +40,17 @@ class DropOff
     private $tubes;
 
     /**
-     * @var string
-     * @ORM\Column(name="kiosk", type="string", nullable=true)
+     * Kiosk Session when this dropoff took place
+     *
+     * @var KioskSession
+     * @ORM\ManyToOne(targetEntity="App\Entity\KioskSession")
+     * @ORM\JoinColumn(name="kiosk_session_id", referencedColumnName="id", onDelete="SET NULL")
      */
-    private $kiosk;
+    private $kioskSession;
 
     public function __construct()
     {
         $this->tubes = new ArrayCollection();
-        $this->status = self::STATUS_INPROCESS;
     }
 
     public function getId(): ?int
@@ -86,7 +77,7 @@ class DropOff
     }
 
     /**
-     * @internal Use Tube->kioskDropoff(...) to establish relationship.
+     * @internal Use Tube->kioskDropoffComplete() to establish relationship.
      */
     public function addTube(Tube $tube)
     {
@@ -106,30 +97,13 @@ class DropOff
         return false;
     }
 
-    public function getKiosk(): ?string
+    public function getKioskSession(): ?KioskSession
     {
-        return $this->kiosk;
+        return $this->kioskSession;
     }
 
-    public function setKiosk(?string $kiosk): void
+    public function setKioskSession(?KioskSession $session): void
     {
-        $this->kiosk = $kiosk;
+        $this->kioskSession = $session;
     }
-
-    public function markCompleted(SpecimenAccessionIdGenerator $specimenIdGen)
-    {
-        $this->status = self::STATUS_COMPLETE;
-
-        foreach ($this->tubes as $tube) {
-            $tube->kioskDropoffComplete($specimenIdGen);
-        }
-    }
-
-    public function cancel()
-    {
-        foreach ($this->tubes as $tube) {
-            $tube->kioskDropoffCancel();
-        }
-    }
-
 }

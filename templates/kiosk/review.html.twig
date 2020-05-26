@@ -2,12 +2,12 @@
 
 {% block body_content %}
     <div class="box">
-        {% include 'kiosk/review-tabel.html.twig' with {tubes: tubes} %}
+        {% include 'kiosk/review-tabel.html.twig' with {tubeData: tubeData} %}
     </div>
 
     <div class="row">
         <div class="col-xs-6 text-right">
-            <a href="{{ path('kiosk_add_tube', {'id':dropoff.id}) }}" class="btn btn-default">
+            <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-default">
                 <i class="fa fa-fw fa-chevron-left"></i> Go Back
             </a>
         </div>
