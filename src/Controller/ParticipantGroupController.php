@@ -55,6 +55,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        // Requires admin privileges because this can impact assigned drop-off windows
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $form = $this->createForm(ParticipantGroupForm::class);
@@ -90,7 +91,8 @@ class ParticipantGroupController extends AbstractController
      */
     public function edit(string $title, Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+        // Requires admin privileges because this can impact assigned drop-off windows
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $group = $this->findGroupByTitle($title);
 
@@ -139,6 +141,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function deactivate(string $title, EntityManagerInterface $em)
     {
+        // Requires admin privileges because this can impact assigned drop-off windows
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $group = $this->findGroupByTitle($title);
@@ -157,6 +160,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function activate(string $title, EntityManagerInterface $em)
     {
+        // Requires admin privileges because this can impact assigned drop-off windows
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $group = $this->findGroupByTitle($title);
