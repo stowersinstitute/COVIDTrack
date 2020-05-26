@@ -44,7 +44,7 @@ class ParticipantGroupController extends AbstractController
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
-            'groups' => $groupRepo->findAll(),
+            'groups' => $groupRepo->findActive(),
         ]);
     }
 

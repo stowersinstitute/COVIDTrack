@@ -6,7 +6,6 @@
             <th>Title</th>
             <th>Participants</th>
             <th>Drop-off Times</th>
-            <th>Active?</th>
             <th>Created</th>
             <th>Last Modified</th>
             <th></th>
@@ -27,11 +26,6 @@
                     {{ window.getDisplayString() }}
                     {% if not loop.last %}, {% endif %}
                 {% endfor %}
-            </td>
-            <td>
-                {% if group.isActive() %}
-                    <i class="fa fa-check text-green"></i>
-                {% endif %}
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
