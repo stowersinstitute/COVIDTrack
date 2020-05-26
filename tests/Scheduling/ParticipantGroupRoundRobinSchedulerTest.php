@@ -19,7 +19,6 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
      */
     public function testTwiceWeekly()
     {
-        print "Starting\n";
         $schedule = new DropOffSchedule('Tu Th 8am-5pm');
 
         $schedule->setDaysOfTheWeek([
