@@ -236,7 +236,7 @@ class KioskController extends AbstractController
      *
      * @Route(path="/{id<\d+>}/cancel", methods={"POST"}, name="kiosk_cancel")
      */
-    public function cancel(int $id, EntityManagerInterface $em, RouterInterface $router)
+    public function cancel(int $id, Request $request, EntityManagerInterface $em, RouterInterface $router)
     {
         $this->mustHavePermissions();
 
