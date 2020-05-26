@@ -25,10 +25,9 @@ class Specimen
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
-    const STATUS_REJECTED = "REJECTED";
+    const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_IN_PROCESS = "IN_PROCESS";
-    const STATUS_RESULTS = "RESULTS";
-    const STATUS_COMPLETE = "COMPLETE";
+    const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
@@ -267,7 +266,7 @@ class Specimen
         return $return;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -364,8 +363,7 @@ class Specimen
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
             'In Process' => self::STATUS_IN_PROCESS,
-            'Results' => self::STATUS_RESULTS,
-            'Complete' => self::STATUS_COMPLETE,
+            'Results Available' => self::STATUS_RESULTS,
         ];
     }
 
@@ -471,6 +469,8 @@ class Specimen
         $this->results->add($result);
 
         $this->recalculateCliaTestingRecommendation();
+
+        $this->setStatus(self::STATUS_RESULTS);
     }
 
     /**
