@@ -37,14 +37,14 @@ class DropOffWindow
     protected $schedule;
 
     /**
-     * @var \DateTimeImmutable|null Time of day when the window opens
+     * @var \DateTimeImmutable Time of day when the window opens
      *
      * @ORM\Column(name="starts_at", type="datetime_immutable", nullable=false)
      */
     protected $startsAt;
 
     /**
-     * @var \DateTimeImmutable|null Time of day when the window ends
+     * @var \DateTimeImmutable Time of day when the window ends
      *
      * @ORM\Column(name="ends_at", type="datetime_immutable", nullable=false)
      */
@@ -170,22 +170,22 @@ class DropOffWindow
         $this->schedule = $schedule;
     }
 
-    public function getStartsAt(): ?\DateTimeImmutable
+    public function getStartsAt(): \DateTimeImmutable
     {
         return $this->startsAt;
     }
 
-    public function setStartsAt(?\DateTimeImmutable $startsAt): void
+    public function setStartsAt(\DateTimeImmutable $startsAt): void
     {
         $this->startsAt = $startsAt;
     }
 
-    public function getEndsAt(): ?\DateTimeImmutable
+    public function getEndsAt(): \DateTimeImmutable
     {
         return $this->endsAt;
     }
 
-    public function setEndsAt(?\DateTimeImmutable $endsAt): void
+    public function setEndsAt(\DateTimeImmutable $endsAt): void
     {
         $this->endsAt = $endsAt;
     }
