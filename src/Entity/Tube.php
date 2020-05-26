@@ -51,7 +51,7 @@ class Tube
      * Unique public ID for referencing. This is referred to as the "Tube ID"
      *
      * @var string
-     * @ORM\Column(name="accession_id", type="string", unique=true, nullable=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true, length=255, nullable=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
