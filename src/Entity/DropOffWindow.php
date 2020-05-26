@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Windows available within a SiteDropOffSchedule
  *
- * @ORM\Entity(repositoryClass="App\Entity\DropOffWindowRepository")
+ * @ORM\Entity
  * @ORM\Table(name="drop_off_windows")
  */
 class DropOffWindow
