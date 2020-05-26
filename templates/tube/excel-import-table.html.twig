@@ -2,12 +2,16 @@
     <thead>
     <tr>
         <th>Accession ID</th>
+        <th>Tube Type</th>
+        <th>Kit Type</th>
     </tr>
     </thead>
     <tbody>
     {% for tube in importer.output %}
         <tr>
             <td>{{ tube.accessionId }}</td>
+            <td>{{ tube.typeText }}</td>
+            <td>{{ tube.kitType }}</td>
         </tr>
     {% endfor %}
     </tbody>
