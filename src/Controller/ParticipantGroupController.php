@@ -33,16 +33,50 @@ class ParticipantGroupController extends AbstractController
     /**
      * List all Participant Groups
      *
-     * @Route(path="/", methods={"GET"}, name="app_participant_group_list")
+     * @Route(path="/", methods={"GET","POST"}, name="app_participant_group_list")
      */
-    public function list()
+    public function list(Request $request, ZplPrinting $zpl)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
 
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -'
+            ])
+            ->add('print', SubmitType::class, [
+                'label' => 'Re-Print Selected Groups',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $groupIds = $request->request->get('groups', []);
+
+            $printGroups = $groupRepo->findBy(['title' => $groupIds]);
+
+            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($printer);
+
+            foreach ($printGroups as $group) {
+                $builder->setGroup($group);
+                $zpl->printBuilder($builder, $group->getParticipantCount());
+            }
+        }
+
         return $this->render('participantGroup/participant-group-list.html.twig', [
             'groups' => $groupRepo->findAll(),
+            'form' => $form->createView()
         ]);
     }
 
