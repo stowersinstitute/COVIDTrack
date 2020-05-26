@@ -71,7 +71,7 @@ class ParticipantGroup
     /**
      * @var DropOffWindow[]
      *
-     * @ORM\ManyToMany(targetEntity="DropOffWindow", mappedBy="particpantGroups")
+     * @ORM\ManyToMany(targetEntity="DropOffWindow", mappedBy="participantGroups")
      */
     private $dropOffWindows;
 

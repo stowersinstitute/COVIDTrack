@@ -64,7 +64,7 @@ class DropOffWindow
      *     }
      * )
      */
-    protected $particpantGroups;
+    protected $participantGroups;
 
     public function __construct(DropOffSchedule $schedule, \DateTimeImmutable $startsAt, \DateTimeImmutable $endsAt)
     {
@@ -73,7 +73,7 @@ class DropOffWindow
 
         $this->schedule = $schedule;
 
-        $this->particpantGroups = new ArrayCollection();
+        $this->participantGroups = new ArrayCollection();
 
         $schedule->addDropOffWindow($this);
     }
@@ -118,14 +118,14 @@ class DropOffWindow
      */
     public function getParticipantGroups() : array
     {
-        return $this->particpantGroups->getValues();
+        return $this->participantGroups->getValues();
     }
 
     public function addParticipantGroup(ParticipantGroup $group)
     {
         if ($this->hasParticipantGroup($group)) return;
 
-        $this->particpantGroups->add($group);
+        $this->participantGroups->add($group);
         $group->addDropOffWindow($this);
     }
 
@@ -133,9 +133,9 @@ class DropOffWindow
     {
         if (!$this->hasParticipantGroup($group)) return;
 
-        foreach ($this->particpantGroups as $currGroup) {
+        foreach ($this->participantGroups as $currGroup) {
             if (EntityUtils::isSameEntity($currGroup, $group)) {
-                $this->particpantGroups->removeElement($currGroup);
+                $this->participantGroups->removeElement($currGroup);
                 $currGroup->removeDropOffWindow($this);
             }
         }
@@ -143,7 +143,7 @@ class DropOffWindow
 
     public function hasParticipantGroup(ParticipantGroup $group)
     {
-        foreach ($this->particpantGroups as $hasGroup) {
+        foreach ($this->participantGroups as $hasGroup) {
             if (EntityUtils::isSameEntity($hasGroup, $group)) return true;
         }
 
@@ -152,7 +152,7 @@ class DropOffWindow
 
     public function getNumParticipantGroups() : int
     {
-        return $this->particpantGroups->count();
+        return $this->participantGroups->count();
     }
 
     public function getId(): ?int
