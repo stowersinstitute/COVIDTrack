@@ -29,6 +29,9 @@ class FpeSpecimenAccessionIdGenerator
     /** @var Cryptomute */
     protected $encrypter;
 
+    /** @var int */
+    protected $counter;
+
     public function __construct(AppConfiguration $appConfig)
     {
         $this->appConfig = $appConfig;
@@ -50,11 +53,19 @@ class FpeSpecimenAccessionIdGenerator
         );
     }
 
-    public function generate(Specimen $specimen)
+    public function generate()
     {
-        if ($specimen->getId() === null) throw new \InvalidArgumentException('Cannot generate an accession ID until the Specimen is persisted and has an ID');
+        $counterRefId = 'FpeSpecimenAccessionIdGenerator.counter';
+        // Changes must be written to the database immediately to minimize contention with other requests
+        $this->appConfig->setAutoFlush(true);
 
-        $input = $specimen->getId();
+        $counter = 0;
+        if ($this->appConfig->hasReferenceId($counterRefId)) {
+            $counter = $this->appConfig->get($counterRefId);
+        }
+        $this->appConfig->set($counterRefId, ++$counter);
+
+        $input = $counter;
         $encrypted = $this->encrypter->encrypt($input, 10, true, $this->password, $this->iv);
 
         // SPECIMEN_ID_FORMAT_DEPENDENCY - different range of specimen IDs may impact padUntilLength

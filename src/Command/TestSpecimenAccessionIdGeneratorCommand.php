@@ -46,8 +46,7 @@ class TestSpecimenAccessionIdGeneratorCommand extends Command
         $buffer = 4096;
         $cids = [];
         for ($i=1; $i <= $max; $i++) {
-            $specimen = Specimen::createWithId($i);
-            $cids[] = $generator->generate($specimen);
+            $cids[] = $generator->generate();
 
             if ($i % $buffer === 0) {
                 file_put_contents('cids.txt', join("\n", $cids) . "\n", FILE_APPEND);
@@ -55,7 +54,6 @@ class TestSpecimenAccessionIdGeneratorCommand extends Command
             }
 
             $progressBar->advance();
-            unset($specimen);
         }
         $progressBar->finish();
     }
