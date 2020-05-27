@@ -51,7 +51,7 @@ class Tube
      * Unique public ID for referencing. This is referred to as the "Tube ID"
      *
      * @var string
-     * @ORM\Column(name="accession_id", type="string", unique=true, nullable=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true, length=255, nullable=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
@@ -85,7 +85,7 @@ class Tube
 
     /**
      * @var string
-     * @ORM\Column(name="tube_type", type="string", nullable=true)
+     * @ORM\Column(name="tube_type", type="string", length=255, nullable=true)
      * @Gedmo\Versioned
      */
     private $tubeType;
@@ -95,7 +95,7 @@ class Tube
      * is entered by a Technician when the Tubes are checked-in.
      *
      * @var null|string
-     * @ORM\Column(name="kit_type", type="text", nullable=true)
+     * @ORM\Column(name="kit_type", type="text", length=255, nullable=true)
      * @Gedmo\Versioned
      */
     private $kitType;
