@@ -132,7 +132,7 @@ These users are available when fixtures are loaded. Same username/password:
 
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
-* checkintech - Check-in Technician
+* samplecollection - Sample Collection Team
 * kiosk - Kiosk UI
 
 ## Development Environment - Monitoring Sent Email

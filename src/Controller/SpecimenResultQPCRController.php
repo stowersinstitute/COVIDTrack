@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\AuditLog;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultQPCR;
-use App\Form\SpecimenForm;
 use App\Form\SpecimenResultQPCRForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +28,10 @@ class SpecimenResultQPCRController extends AbstractController
 
         $results = $this->getDoctrine()
             ->getRepository(SpecimenResultQPCR::class)
-            ->findAll();
+            ->findBy([], [
+                'createdAt' => 'DESC',
+                'id' => 'ASC',
+            ]);
 
         return $this->render('results/qpcr/list.html.twig', [
             'results' => $results,

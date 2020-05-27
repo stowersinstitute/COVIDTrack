@@ -4,11 +4,13 @@
 namespace App\Controller;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
-use App\Entity\DropOff;
 use App\Entity\Kiosk;
+use App\Entity\KioskSession;
+use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
-use App\Form\TubeType;
+use App\Form\KioskAddTubeForm;
+use App\Util\EntityUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,6 +27,8 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class KioskController extends AbstractController
 {
+    const KIOSK_COOKIE_KEY = 'CT_KIOSK_ID';
+
     /**
      * @var SpecimenAccessionIdGenerator
      */
@@ -59,7 +63,7 @@ class KioskController extends AbstractController
 
             $response = $this->redirectToRoute('kiosk_index');
             // Tag the client with a cookie to track the associated kiosk ID
-            $response->headers->setCookie(new Cookie('CT_KIOSK_ID', $kiosk->getId(), new \DateTimeImmutable('2038-01-01')));
+            $response->headers->setCookie(new Cookie(self::KIOSK_COOKIE_KEY, $kiosk->getId(), new \DateTimeImmutable('2038-01-01')));
 
             return $response;
         }
@@ -72,7 +76,7 @@ class KioskController extends AbstractController
     }
 
     /**
-     * Begin checkin process by selecting a Participant Group.
+     * Begin Kiosk interaction by selecting a Participant Group.
      *
      * @Route(path="/", name="kiosk_index", methods={"GET", "POST"})
      */
@@ -82,10 +86,11 @@ class KioskController extends AbstractController
 
         if ($this->needsToBeProvisioned($request, $em)) return $this->redirectToRoute('kiosk_provision');
 
-        $dropOff = new DropOff();
+        $kiosk = $this->mustFindKiosk($request);
+        $kioskSession = new KioskSession($kiosk);
 
-        $form = $this->createFormBuilder($dropOff)
-            ->add('group', EntityType::class, [
+        $form = $this->createFormBuilder($kioskSession)
+            ->add('participantGroup', EntityType::class, [
                 'class' => ParticipantGroup::class,
                 'choice_name' => 'title',
                 'required' => true,
@@ -99,17 +104,14 @@ class KioskController extends AbstractController
             ])
             ->getForm();
 
-        $dropOff = $form->handleRequest($request);
-
+        $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var DropOff $dropOff */
-            $dropOff = $form->getData();
+            $kioskSession = $form->getData();
 
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($dropOff);
-            $entityManager->flush();
+            $em->persist($kioskSession);
+            $em->flush();
 
-            return $this->redirectToRoute('kiosk_add_tube', ['id' => $dropOff->getId()]);
+            return $this->redirectToRoute('kiosk_add_tube', ['id' => $kioskSession->getId()]);
         }
 
         return $this->render('kiosk/index.html.twig', [
@@ -119,9 +121,9 @@ class KioskController extends AbstractController
     }
 
     /**
-     * Add Tube for check-in.
+     * Add Tube that Participant is returning.
      *
-     * @Route(path="/{id}/add-tube", methods={"GET", "POST"}, name="kiosk_add_tube")
+     * @Route(path="/{id<\d+>}/add-tube", methods={"GET", "POST"}, name="kiosk_add_tube")
      */
     public function tubeInput(int $id, Request $request, EntityManagerInterface $em)
     {
@@ -129,10 +131,13 @@ class KioskController extends AbstractController
 
         if ($this->needsToBeProvisioned($request, $em)) return $this->redirectToRoute('kiosk_provision');
 
-        /** @var DropOff $dropOff */
-        $dropOff = $this->mustFindDropoff($id);
+        $kiosk = $this->mustFindKiosk($request);
+        $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
+            return $this->redirectToRoute('kiosk_index');
+        }
 
-        $form = $this->createForm(TubeType::class);
+        $form = $this->createForm(KioskAddTubeForm::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $form->getData();
@@ -146,38 +151,47 @@ class KioskController extends AbstractController
                 throw new \InvalidArgumentException('Tube ID does not exist');
             }
 
-            $collectedAt = new \DateTime($formData['collectedAtDate'] . $formData['collectedAtTime']);
+            $tubeType = $formData['tubeType'];
+            $collectedAt = new \DateTimeImmutable($formData['collectedAtDate'] . $formData['collectedAtTime']);
 
-            $tube->kioskDropoff($dropOff, $dropOff->getGroup(), $formData['tubeType'], $collectedAt);
+            $sessionTube = new KioskSessionTube($kioskSession, $tube, $tubeType, $collectedAt);
+            $kioskSession->addTubeData($sessionTube);
 
+            $kioskSession->setMostRecentScreen(KioskSession::SCREEN_ADD_TUBES);
+
+            $em->persist($sessionTube);
             $em->flush();
 
             if ($form->get('save')->isClicked()) {
-                return $this->redirectToRoute('kiosk_add_tube', ['id' => $dropOff->getId()]);
-            } else if ($form->get('review')->isClicked()) {
-                return $this->redirectToRoute('kiosk_review', ['id' => $dropOff->getId()]);
+                return $this->redirectToRoute('kiosk_add_tube', ['id' => $kioskSession->getId()]);
+            }
+            if ($form->get('review')->isClicked()) {
+                return $this->redirectToRoute('kiosk_review', ['id' => $kioskSession->getId()]);
             }
         }
 
         return $this->render('kiosk/tube-input.html.twig', [
             'form' => $form->createView(),
-            'dropoff' => $dropOff,
-            'group' => $dropOff->getGroup(),
+            'kioskSession' => $kioskSession,
             'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
         ]);
     }
 
     /**
      * View previously added Tubes to verify before completion.
-     * POST back to this route to complete check-in.
+     * POST back to this route to complete Kiosk interaction.
      *
-     * @Route(path="/{id}/review", methods={"GET", "POST"}, name="kiosk_review")
+     * @Route(path="/{id<\d+>}/review", methods={"GET", "POST"}, name="kiosk_review")
      */
     public function review(int $id, Request $request, EntityManagerInterface $em)
     {
         $this->mustHavePermissions();
 
-        $dropOff = $this->mustFindDropoff($id);
+        $kiosk = $this->mustFindKiosk($request);
+        $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
+            return $this->redirectToRoute('kiosk_index');
+        }
 
         $form = $this->createFormBuilder()
             ->add('finish', SubmitType::class, [
@@ -188,8 +202,8 @@ class KioskController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            // Also creates Specimen
-            $dropOff->markCompleted($this->specimenIdGen);
+            $kioskSession->finish($this->specimenIdGen);
+            $kioskSession->setMostRecentScreen(KioskSession::SCREEN_REVIEW_TUBES);
 
             $em->flush();
 
@@ -197,15 +211,14 @@ class KioskController extends AbstractController
         }
 
         return $this->render('kiosk/review.html.twig', [
-            'dropoff' => $dropOff,
-            'group' => $dropOff->getGroup(),
-            'tubes' => $dropOff->getTubes(),
+            'kioskSession' => $kioskSession,
+            'tubeData' => $kioskSession->getTubeData(),
             'finishButtonForm' => $form->createView(),
         ]);
     }
 
     /**
-     * Drop Off process complete.
+     * Completion screen after completing kiosk interaction.
      *
      * @Route(path="/complete", methods={"GET"}, name="kiosk_complete")
      */
@@ -219,7 +232,7 @@ class KioskController extends AbstractController
     }
 
     /**
-     * Cancel the Drop Off process.
+     * Cancel this Kiosk interaction.
      *
      * @Route(path="/{id<\d+>}/cancel", methods={"POST"}, name="kiosk_cancel")
      */
@@ -227,11 +240,14 @@ class KioskController extends AbstractController
     {
         $this->mustHavePermissions();
 
-        $dropOff = $this->mustFindDropoff($id);
+        $kiosk = $this->mustFindKiosk($request);
+        $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
+            return $this->redirectToRoute('kiosk_index');
+        }
 
-        $dropOff->cancel();
+        $kioskSession->cancel();
 
-        $em->remove($dropOff);
         $em->flush();
 
         return new JsonResponse([
@@ -258,10 +274,18 @@ class KioskController extends AbstractController
      */
     public function heartbeat(Request $request, EntityManagerInterface $em)
     {
-        $kioskId = $request->cookies->get('CT_KIOSK_ID');
+        $kiosk = $this->getKioskIdFromRequestCookie($request);
+        if (!$kiosk) {
+            new JsonResponse([
+                'isError' => true,
+                'message' => self::KIOSK_COOKIE_KEY . ' cookie not present',
+            ]);
+        }
+
+        $kioskId = $request->cookies->get(self::KIOSK_COOKIE_KEY);
         if (!$kioskId) return new JsonResponse(['isError' => true, 'message' => 'CT_KIOSK_ID cookie not present']);
 
-        $kiosk = $em->getRepository(Kiosk::class)->find($kioskId);
+
         if (!$kiosk) return new JsonResponse(['isError' => true, 'message' => 'Invalid kiosk ID']);
         if (!$kiosk->isProvisioned()) return new JsonResponse(['isError' => true, 'message' => 'Tried to heartbeat on an unprovisioned kiosk']);
 
@@ -282,7 +306,7 @@ class KioskController extends AbstractController
     private function needsToBeProvisioned(Request $request, EntityManagerInterface $em)
     {
         // Needs provisioning if there's no ID cookie
-        $kioskId = $request->cookies->get('CT_KIOSK_ID');
+        $kioskId = $request->cookies->get(self::KIOSK_COOKIE_KEY);
         if (!$kioskId) return true;
 
         // Needs provisioning if kiosk ID is no longer valid
@@ -300,15 +324,49 @@ class KioskController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_KIOSK_UI', 'Kiosk Access Required', 'You must have kiosk UI permissions to view this page');
     }
 
-    private function mustFindDropoff(int $id): Dropoff
+    private function mustFindKioskSession(int $id): KioskSession
     {
-        /** @var DropOff $drop */
-        $drop = $this->getDoctrine()->getRepository(DropOff::class)->find($id);
+        /** @var KioskSession $session */
+        $session = $this->getDoctrine()->getRepository(KioskSession::class)->find($id);
 
-        if (!$drop) {
-            throw new NotFoundHttpException('Drop off session not found');
+        if (!$session) {
+            throw new NotFoundHttpException('Kiosk session not found');
         }
 
-        return $drop;
+        return $session;
+    }
+
+    private function getKioskIdFromRequestCookie(Request $request): ?Kiosk
+    {
+        $kioskId = $request->cookies->get(self::KIOSK_COOKIE_KEY);
+        if (!$kioskId) {
+            return null;
+        }
+
+        return $this->getDoctrine()
+            ->getRepository(Kiosk::class)
+            ->find($kioskId);
+    }
+
+    private function mustFindKiosk(Request $request): Kiosk
+    {
+        $kioskId = $request->cookies->get(self::KIOSK_COOKIE_KEY);
+        if (!$kioskId) {
+            throw new \InvalidArgumentException('Cannot find Kiosk using data in Request');
+        }
+
+        $kiosk = $this->getDoctrine()
+            ->getRepository(Kiosk::class)
+            ->find($kioskId);
+        if (!$kiosk) {
+            throw new \InvalidArgumentException('Cannot find Kiosk');
+        }
+
+        return $kiosk;
+    }
+
+    private function usesSameKiosk(KioskSession $kioskSession, Kiosk $kiosk): bool
+    {
+        return EntityUtils::isSameEntity($kioskSession->getKiosk(), $kiosk);
     }
 }

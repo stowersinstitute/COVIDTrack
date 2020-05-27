@@ -18,7 +18,7 @@
             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
         {% endif %}
 
-        <form method="post">
+        <form method="post" autocomplete="off">
             <div class="form-group has-feedback">
                 <input type="text" name="username" class="form-control" placeholder="Username" value="{{ last_username }}" required autofocus autocapitalize="none">
                 <span class="fa fa-user form-control-feedback"></span>

@@ -56,6 +56,7 @@ security:
             - ROLE_REPORTS_GROUP_VIEW
         ROLE_STUDY_COORDINATOR:
             - ROLE_PARTICIPANT_GROUP_EDIT
+            - ROLE_PRINT_GROUP_LABELS
             - ROLE_REPORTS_GROUP_VIEW
         ROLE_KIOSK_UI:
             - ROLE_SPECIMEN_DROP_OFF
