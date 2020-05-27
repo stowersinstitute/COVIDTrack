@@ -7,11 +7,11 @@
     </tr>
     </thead>
     <tbody>
-    {% for tube in tubes %}
+    {% for data in tubeData %}
         <tr>
-            <td>{{ tube.accessionId }}</td>
-            <td>{{ tube.typeText }}</td>
-            <td>{{ tube.collectedAt is empty ? "" : tube.collectedAt|date("F j @ g:ia") }}</td>
+            <td>{{ data.tube.accessionId }}</td>
+            <td>{{ data.tubeType }}</td>
+            <td>{{ data.collectedAt is empty ? "" : data.collectedAt|date("F j @ g:ia") }}</td>
         </tr>
     {% endfor %}
     </tbody>

@@ -30,8 +30,8 @@ class Kiosk
     const STATE_DROPOFF_CONFIRM = 'DROPOFF_CONFIRM';
 
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(name="id", type="integer")
      */
     private $id;

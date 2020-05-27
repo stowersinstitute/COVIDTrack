@@ -34,6 +34,9 @@ class AppConfiguration
 
     public function hasReferenceId(string $referenceId) : bool
     {
+        // Early return if we know the key exists, but if it doesn't we may still need to check the database
+        if (array_key_exists($referenceId, $this->cache)) return true;
+
         if ($this->em) {
             $entry = $this->getRepository()->findOneByReferenceId($referenceId);
             if ($entry) {
@@ -83,6 +86,10 @@ class AppConfiguration
      */
     public function get(string $referenceId)
     {
+        if (array_key_exists($referenceId, $this->cache)) {
+            return $this->cache[$referenceId];
+        }
+
         if ($this->em) {
             $entry = $this->getRepository()->findOneByReferenceId($referenceId);
             if (!$entry) return null;

@@ -30,7 +30,7 @@ class TubeTest extends TestCase
         $gen = $this->getMockAccessionIdGenerator($accessionId);
         $tubeType = Tube::TYPE_BLOOD;
         $collectedAt = new \DateTime('2020-05-20 15:55:26');
-        $tube->kioskDropoff($gen, $drop, $group, $tubeType, $collectedAt);
+        $tube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
 
         // Assert values after action
         $this->assertSame($accessionId, $tube->getSpecimen()->getAccessionId());

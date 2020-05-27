@@ -40,7 +40,7 @@ class SystemConfigurationEntry
      * Human-readable label for this configuration entry
      * @var string|null
      *
-     * @ORM\Column(name="label", type="string", length=255, nullable=true)
+     * @ORM\Column(name="label", type="string", length=255)
      */
     protected $label;
 
