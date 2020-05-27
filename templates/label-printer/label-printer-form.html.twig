@@ -13,6 +13,59 @@
             </div>
         </div>
     </div>
+
+    {# Actions only apply when editing #}
+    {% if printer is not empty %}
+        <div class="col-md-6">
+            <div class="box box-success">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Actions</h3>
+                </div>
+                <div class="box-body">
+                    {# todo: delete
+                    <div class="pull-right">
+                        <form method="post" action="{{ path('app_label_printer_delete', { id: printer.id }) }}" onsubmit="return confirm('Delete printer?');">
+                            <input type="hidden" name="id" value="{{ printer.id }}">
+                            <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                        </form>
+                    </div>
+                    #}
+                    <div>
+                        <button id="btnPrinterInfo" class="btn btn-default">Printer Info</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
+<script>
+    {% if printer is not empty %}
+        $("#btnPrinterInfo").click(getPrinterInfo);
+
+        function getPrinterInfo() {
+            var originalButtonText = $("#btnPrinterInfo").text();
+            $("#btnPrinterInfo").text("Querying...").prop('disabled', true);
+
+            $.ajax('{{ path('app_label_printer_info', { id: printer.id }) }}', {
+                method: 'GET',
+
+                success: function(data) {
+                    console.log(data);
+                    alert(JSON.stringify(data));
+                },
+
+                // Unexpected errors like 500 server or network down
+                error: function(xhr, textStatus, error) {
+                    console.log("Error %o: %o", textStatus, error);
+                    alert("ERROR contacting printer (see console for more details)");
+                },
+
+                complete: function() {
+                    $("#btnPrinterInfo").text(originalButtonText).prop('disabled', false);
+                }
+            });
+        }
+    {% endif %}
+</script>
 {% endblock %}
