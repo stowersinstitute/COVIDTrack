@@ -141,7 +141,6 @@ class TecanConversionController extends AbstractController
         $this->denyAccessUnlessGrantedPermission();
 
         $em = $this->getDoctrine()->getManager();
-//        $form = $this->createForm(GenericExcelImportType::class);
         $form = $this->createFormBuilder()
             ->add('tecanFile', FileType::class, [
                 'label' => 'Tecan Output File',
@@ -243,15 +242,14 @@ class TecanConversionController extends AbstractController
 
         $output = $importer->process();
 
-//        return $this->render('results/qpcr/excel-import-preview.html.twig', [
         return $this->render('tecan/import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
-            'importPreviewTemplate' => 'results/qpcr/excel-import-table.html.twig',
+            'importPreviewTemplate' => 'tecan/import-table.html.twig',
             'importCommitRoute' => 'tecan_import_commit',
-            'importCommitText' => 'Save Results',
+            'importCommitText' => 'Save Results and Download Specimen IDs',
         ]);
     }
 
@@ -262,20 +260,19 @@ class TecanConversionController extends AbstractController
     {
         $this->denyAccessUnlessGrantedPermission();
 
-        $em = $this->getDoctrine()->getManager();
-
         $importingWorkbook = $this->mustFindImport($importId);
-        $excelImporter->userMustHavePermissions($importingWorkbook);
+        $this->userMustHavePermissions($importingWorkbook, $this->getUser());
 
-        $importer = new SpecimenResultQPCRImporter(
+        $em = $this->getDoctrine()->getManager();
+        $importer = new TecanImporter(
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
+
         $importer->process(true);
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);
-
         $em->flush();
 
         return $this->render('results/qpcr/excel-import-result.html.twig', [

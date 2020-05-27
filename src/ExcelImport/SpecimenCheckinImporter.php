@@ -116,7 +116,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             }
 
             $plate = $this->findWellPlateOrMakeNew($rawWellPlateBarcode);
-            $tube->setWellPlate($plate);
+            $tube->addWellPlate($plate);
 
             // Kit Type
             $tube->setKitType($rawKitType);

@@ -76,10 +76,20 @@ class Specimen
     /**
      * Well where this Specimen is located.
      *
-     * @var ?SpecimenWell
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist"})
+     * @var null|SpecimenWell
+     * ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @deprecated Will be removed
      */
     private $well;
+
+    /**
+     * Wells where this Specimen is contained.
+     *
+     * @var SpecimenWell[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"position" = "ASC"})
+     */
+    private $wells;
 
     /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
@@ -400,41 +410,29 @@ class Specimen
         return $map[$rec] ?? '';
     }
 
-    public function removeFromWell()
+    public function addWellPlate(WellPlate $plate, int $position = null): void
     {
-        $well = null;
-        if ($this->well) {
-            $well = $this->well;
-            $this->well = null;
-        }
-        if ($well) {
-            $well->delete();
-        }
+        // TODO: De-dupe by updating if already on same plate
+        $this->wells->add(new SpecimenWell($plate, $this, $position));
     }
 
-    public function setWellPlate(WellPlate $plate, int $position = null): void
+    /**
+     * Get all Well Plates where this Specimen is contained.
+     *
+     * @return WellPlate[]
+     */
+    public function getWellPlates(): array
     {
-        if ($this->well) {
-            $this->well->delete();
+        $plates = [];
+        foreach ($this->wells as $well) {
+            $plate = $well->getWellPlate();
+            if ($plate) {
+                $plates[] = $plate;
+            }
         }
 
-        $this->well = new SpecimenWell($plate, $this, $position);
+        return $plates;
     }
-
-    public function getRnaWellPlateBarcode(): ?string
-    {
-        return $this->well ? $this->well->getWellPlateBarcode() : '';
-    }
-
-//    public function getWellPlate(): ?WellPlate
-//    {
-//        return $this->wellPlate;
-//    }
-//
-//    public function setWellPlate(?WellPlate $wellPlate): void
-//    {
-//        $this->wellPlate = $wellPlate;
-//    }
 
     public function getCollectedAt(): ?\DateTimeInterface
     {
@@ -444,6 +442,22 @@ class Specimen
     public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
+    {
+        $barcodes = [];
+        foreach ($this->wells as $well) {
+            $code = $well->getWellPlateBarcode();
+            if ($code) {
+                $barcodes[] = $code;
+            }
+        }
+
+        return $barcodes;
     }
 
     private function ensureValidType(?string $type): void

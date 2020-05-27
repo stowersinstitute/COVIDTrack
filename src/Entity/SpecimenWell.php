@@ -14,9 +14,16 @@ use Doctrine\ORM\Mapping as ORM;
 class SpecimenWell
 {
     /**
+     * @var int
+     * @ORM\Id()
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
      * Well Plate where this well is located.
      * @var WellPlate
-     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="wells")
      * @ORM\JoinColumn(name="well_plate_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
@@ -26,8 +33,7 @@ class SpecimenWell
      * Specimen held in this well.
      *
      * @var Specimen
-     * @ORM\Id
-     * @ORM\OneToOne(targetEntity="App\Entity\Specimen", inversedBy="well")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="wells")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
     private $specimen;
@@ -43,6 +49,11 @@ class SpecimenWell
         $this->wellPlate = $plate;
         $this->specimen = $specimen;
         $this->position = $position;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     /**

@@ -341,14 +341,21 @@ class Tube
         ];
     }
 
-    public function getRnaWellPlateBarcode(): ?string
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
     {
-        return $this->specimen ? $this->specimen->getRnaWellPlateBarcode() : null;
+        if (!$this->specimen) {
+            return [];
+        }
+
+        return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function setWellPlate(WellPlate $plate, int $position = null): void
+    public function addWellPlate(WellPlate $plate, int $position = null): void
     {
-        $this->specimen->setWellPlate($plate, $position);
+        $this->specimen->addWellPlate($plate, $position);
     }
 
     public function getKitType(): ?string

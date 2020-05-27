@@ -2,7 +2,8 @@
     <thead>
     <tr>
         <th>Tube Accession ID</th>
-        <th>Well Position</th>
+        <th>RNA Well Plate ID</th>
+        <th>RNA Well Position</th>
     </tr>
     </thead>
 
@@ -10,7 +11,8 @@
     {% for coordinates in wellPlateCoordinates  %}
         <tr>
             <td>{{ coordinates.tubeAccessionId }}</td>
-            <td>{{ coordinates.wellPosition }}</td>
+            <td>{{ coordinates.rnaWellPlateId }}</td>
+            <td>{{ coordinates.rnaWellPosition }}</td>
         </tr>
     {% endfor %}
     </tbody>

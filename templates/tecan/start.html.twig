@@ -12,12 +12,19 @@
                         <h3 class="box-title">Usage</h3>
                     </div>
                     <div class="box-body">
-                        <p>Upload Tecan tab-delimited file containing Tube Accession IDs.</p>
+                        <p>Upload Tecan file containing Tube Accession IDs.</p>
                         <p>This upload accomplishes two things:</p>
                         <ol>
                             <li>Import Well Plate and Position information for Specimens into COVIDTrack</li>
                             <li>Transform Tube Accession IDs into Specimen Accession IDs and allow downloading the updated version</li>
                         </ol>
+                        <p>The upload parser has these expectations:</p>
+                        <ul>
+                            <li>Tube data begins on Row 3</li>
+                            <li>Cell I2 (that's i2) contains the RNA Well Plate ID (Such as RPE1P7)</li>
+                            <li>Column A contains the RNA Well Position (Begin at cell A3)</li>
+                            <li>Column F contains the Tube Accession ID (Begin at cell F3)</li>
+                        </ul>
                     </div>
                 </div>
 

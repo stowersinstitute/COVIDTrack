@@ -6,10 +6,13 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
-use App\Entity\SpecimenResultQPCR;
 use App\Entity\Tube;
+use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class TecanImporter extends BaseExcelImporter
@@ -26,11 +29,6 @@ class TecanImporter extends BaseExcelImporter
      */
     private $seenTubes = [];
 
-    /**
-     * @var string[] Keys are internal identifier, Values are Column-Row cells where that data is held
-     */
-    private $cellMap = [];
-
     public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
@@ -43,10 +41,6 @@ class TecanImporter extends BaseExcelImporter
         $this->columnMap = [
             'wellPosition' => 'A', // 1-96 for 96-well position
             'tubeAccessionId' => 'F',
-        ];
-
-        $this->cellMap = [
-            'rnaWellPlateId' => 'I2',
         ];
     }
 
@@ -69,12 +63,28 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public static function createWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser) : ExcelImportWorkbook
+    public static function createWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
     {
-        $reader = new TecanOutputReader();
+        $getReaderForFilepath = function(string $filepath) {
+            $possibleReaders = [
+                new Csv(),
+                new TecanOutputReader(), // Tab-delimited
+                new Xlsx(),
+                new Xls(),
+            ];
 
-        $path = $file->getRealPath();
-        $spreadsheet = $reader->load($path);
+            foreach ($possibleReaders as $reader) {
+                if ($reader->canRead($filepath)) {
+                    return $reader;
+                }
+            }
+
+            throw new \RuntimeException('Cannot find spreadsheet reader capable of parsing file');
+        };
+
+        $filepath = $file->getRealPath();
+        $reader = $getReaderForFilepath($filepath);
+        $spreadsheet = $reader->load($filepath);
 
         $importWorkbook = new ExcelImportWorkbook();
         $importWorkbook->setFilename($file->getClientOriginalName());
@@ -126,49 +136,48 @@ class TecanImporter extends BaseExcelImporter
         if ($this->output !== null) return $this->output;
 
         $output = [
-            'created' => [],
             'updated' => [],
         ];
+
+        $rowIndex = 2;
+        $column = 'I';
+        $rawWellPlateId = $this->worksheet->getCellValue($rowIndex, $column);
+        if (!$rawWellPlateId) {
+            $this->messages[] = ImportMessage::newError(
+                'Well Plate ID cannot be located in uploaded file',
+                $rowIndex,
+                $column
+            );
+        }
+        $wellPlate = $this->findOrCreateWellPlate($rawWellPlateId);
 
         // Created and updated can be figured out from file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeAccessionId']);
-
-            $this->messages[] = ImportMessage::newMessage(
-                sprintf('Row %d found Raw Tube ID "%s"'."\n", $rowNumber, $rawTubeId),
-                $rowNumber,
-                $this->columnMap['tubeAccessionId']
-            );
-            continue; // TODO: Remove and continue parsing when works
-
-            // Case-insensitive so these map directly to entity constants
+            $rawWellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $this->validateTubeId($rawTubeId, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellPosition($rawWellPosition, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            // Tube already validated
+            // Tube / Specimen already validated
             $tube = $this->findTube($rawTubeId);
             $specimen = $tube->getSpecimen();
 
-            var_dump(sprintf("Tube ID %s maps to Specimen ID %s", $tube->getAccessionId(), $specimen->getAccessionId()));
+            $specimen->addWellPlate($wellPlate, $rawWellPosition);
 
-//            // "updated" if adding a new result when one already exists
-//            // "created" if adding first result
-//            $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
-            $resultAction = 'created';
-//
-//            // New Result
-//            $qpcr = new SpecimenResultQPCR($specimen);
-//            $qpcr->setConclusion($rawConclusion);
+            $resultAction = 'updated';
 
-//            $this->getEntityManager()->persist($qpcr);
-//
             // Store in output
-            $output[$resultAction][] = $qpcr;
+            $output[$resultAction][] = [
+                'tubeAccessionId' => $rawTubeId,
+                'rnaWellPlateId' => $rawWellPlateId,
+                'rnaWellPosition' => $rawWellPosition,
+            ];
         }
 
         $this->output = $output;
@@ -186,23 +195,13 @@ class TecanImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateConclusion($rawConclusion, $rowNumber): bool
+    private function validateWellPosition($rawWellPosition, $rowNumber): bool
     {
-        if (!$rawConclusion) {
+        if (!$rawWellPosition) {
             $this->messages[] = ImportMessage::newError(
-                'Conclusion cannot be blank',
+                'Position cannot be blank',
                 $rowNumber,
-                $this->columnMap['conclusion']
-            );
-            return false;
-        }
-
-        // Conclusion must be valid
-        if (!SpecimenResultQPCR::isValidConclusion($rawConclusion)) {
-            $this->messages[] = ImportMessage::newError(
-                'Conclusion value not supported',
-                $rowNumber,
-                $this->columnMap['conclusion']
+                $this->columnMap['wellPosition']
             );
             return false;
         }
@@ -266,5 +265,19 @@ class TecanImporter extends BaseExcelImporter
         $this->seenTubes[$rawTubeAccessionId] = $tube;
 
         return $tube;
+    }
+
+    private function findOrCreateWellPlate(string $rawWellPlateId): WellPlate
+    {
+        $wellPlate = $this->em
+            ->getRepository(WellPlate::class)
+            ->findOneByBarcode($rawWellPlateId);
+
+        if (!$wellPlate) {
+            $wellPlate = new WellPlate($rawWellPlateId);
+            $this->em->persist($wellPlate);
+        }
+
+        return $wellPlate;
     }
 }

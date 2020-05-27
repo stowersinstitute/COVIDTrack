@@ -66,7 +66,7 @@ class AppWellPlateFixtures extends Fixture implements DependentFixtureInterface
             /** @var WellPlate $plate */
             $plate = $this->getReference('wellPlate.' . $data['barcode']);
 
-            $specimen->setWellPlate($plate, $data['position']);
+            $specimen->addWellPlate($plate, $data['position']);
         }
     }
 

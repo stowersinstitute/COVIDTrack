@@ -17,9 +17,9 @@
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
                     <dt>RNA Well Plate</dt><dd>
-                        {% if specimen.rnaWellPlateBarcode %}
-                        <a href="{{ path('well_plate_view', {barcode: specimen.rnaWellPlateBarcode}) }}">{{ specimen.rnaWellPlateBarcode }}</a>
-                        {% endif %}
+                        {% for barcode in specimen.rnaWellPlateBarcodes %}
+                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                        {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
                     <dt>CLIA Testing Recommended?</dt><dd>{{ specimen.cliaTestingRecommendedText }}</dd>
