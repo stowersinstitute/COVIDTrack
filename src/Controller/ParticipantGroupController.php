@@ -33,6 +33,9 @@ class ParticipantGroupController extends AbstractController
     /**
      * List all Participant Groups
      *
+     * When POST for printing the request params should be
+     *  - `groups` an array of group titles to be printed
+     *
      * @Route(path="/", methods={"GET","POST"}, name="app_participant_group_list")
      */
     public function list(Request $request, ZplPrinting $zpl)
@@ -50,7 +53,7 @@ class ParticipantGroupController extends AbstractController
                 'placeholder' => '- None -'
             ])
             ->add('print', SubmitType::class, [
-                'label' => 'Re-Print Selected Groups',
+                'label' => 'Print Selected Group Labels',
                 'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
@@ -59,9 +62,9 @@ class ParticipantGroupController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            $groupIds = $request->request->get('groups', []);
+            $groupTitles = $request->request->get('groups', []);
 
-            $printGroups = $groupRepo->findBy(['title' => $groupIds]);
+            $printGroups = $groupRepo->findBy(['title' => $groupTitles]);
 
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
 
