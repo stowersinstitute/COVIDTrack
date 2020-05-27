@@ -17,9 +17,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Zpl\Printer;
 
 /**
  * Perform actions related to Label Printers.
@@ -178,6 +180,42 @@ class LabelPrinterController extends AbstractController
             'form'=>$form->createView(),
             'printer'=>$printer,
         ]);
+    }
+
+    /**
+     * @Route("/{id<\d+>}/info", methods={"GET"}, name="app_label_printer_info")
+     */
+    public function info(int $id)
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $printerEntity = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($id);
+
+        $plainStatus = [];
+
+        try {
+            $zplPrinter = new Printer($printerEntity->getHost());
+            $status = $zplPrinter->getStatus();
+
+            $plainStatus = [
+                'Baud Rate'             => $status->getBaudRate(),
+                'Paused'                => $status->isPaused(),
+                'Labels Remaining'      => $status->getLabelsRemainingCount(),
+                'Paper Out'             => $status->isPaperOut(),
+                'Buffer Full'           => $status->isBufferFull(),
+                'Ribbon Out'            => $status->isRibbonOut(),
+                'Over Temp'             => $status->isOverTemperature(),
+                'Under Temp'            => $status->isUnderTemperature(),
+            ];
+        } catch (\Exception $e) {
+            $plainStatus = [
+                'isError' => true,
+                'code' => $e->getCode(),
+                'message' => $e->getMessage()
+            ];
+        }
+
+        return new JsonResponse($plainStatus);
     }
 
     /**
