@@ -85,6 +85,35 @@ abstract class BaseExcelImporter
         return false;
     }
 
+    public function hasNonErrors() : bool
+    {
+        foreach ($this->messages as $message) {
+            if ($message->isError() === false) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return ImportMessage[]
+     */
+    public function getErrors(): array
+    {
+        return array_filter($this->messages, function(ImportMessage $m) {
+            return $m->isError();
+        });
+    }
+
+    /**
+     * @return ImportMessage[]
+     */
+    public function getNonErrors(): array
+    {
+        return array_filter($this->messages, function(ImportMessage $m) {
+            return $m->isError() === false;
+        });
+    }
+
     /**
      * @return ImportMessage[]
      */
