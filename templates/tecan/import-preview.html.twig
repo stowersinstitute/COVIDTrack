@@ -1,0 +1,57 @@
+{% extends 'excel-import/base-excel-import-preview.html.twig' %}
+
+{# This information is displayed below #}
+{% block importSourceDescription %}{% endblock %}
+{# This normally includes the count, which doesn't apply since we break it into separate tables #}
+{% block importPreviewHeader %}{% endblock %}
+
+{% block beforeTopConfirmButton %}
+    {% include 'tecan/import-summary-widgets.html.twig' %}
+{% endblock %}
+
+{% block importPreviewSection %}
+    {% if importer.hasGroupsForAction('created') %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="fa fa-plus text-green"></i> New Well Plate Coordinates <span class="badge bg-green">{{ importer.output['created']|length }}</span></h3>
+                    </div>
+                    <div class="box-body">
+                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['created']} %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if importer.hasGroupsForAction('updated') %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="fa fa-edit text-orange"></i> Updated Well Plate Coordinates <span class="badge bg-orange">{{ importer.output['updated']|length }}</span></h3>
+                    </div>
+                    <div class="box-body">
+                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['updated']} %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if importer.hasGroupsForAction('deactivated') %}
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="fa fa-trash text-red"></i> Deactivated Well Plate Coordinates <span class="badge bg-red">{{ importer.output['deactivated']|length }}</span></h3>
+                    </div>
+                    <div class="box-body">
+                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['deactivated']} %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
