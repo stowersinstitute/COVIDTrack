@@ -7,14 +7,11 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
-final class Version20200526213628 extends AbstractMigration
+final class Version101 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Adds kiosk session feature';
     }
 
     public function up(Schema $schema) : void
