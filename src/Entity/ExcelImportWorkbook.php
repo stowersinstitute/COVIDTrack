@@ -7,8 +7,6 @@ namespace App\Entity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * A workbook created by parsing an uploaded Excel file
@@ -25,6 +23,15 @@ class ExcelImportWorkbook
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
+
+    /**
+     * Filepath where workbook was stored when the file was uploaded.
+     * The uploaded file may no longer exist at this path.
+     *
+     * @var null|string
+     * @ORM\Column(name="temp_file_path", type="text", nullable=true)
+     */
+    private $tmpFilePath;
 
     /**
      * Filename provided by the user when the file was uploaded
@@ -73,6 +80,16 @@ class ExcelImportWorkbook
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getTmpFilePath(): ?string
+    {
+        return $this->tmpFilePath;
+    }
+
+    public function setTmpFilePath(?string $tmpFilePath): void
+    {
+        $this->tmpFilePath = $tmpFilePath;
     }
 
     public function getFilename(): ?string
