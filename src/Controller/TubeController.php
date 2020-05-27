@@ -93,7 +93,7 @@ class TubeController extends AbstractController
 
         $form = $this->createFormBuilder()
             ->add('tecanFile', FileType::class, [
-                'label' => 'Tecan File',
+                'label' => 'Tecan Output File',
                 'mapped' => false,
                 'required' => true,
                 'constraints' => [
@@ -103,7 +103,7 @@ class TubeController extends AbstractController
                 ]
             ])
             ->add('upload', SubmitType::class, [
-                'label' => 'Convert and Download',
+                'label' => 'Upload',
                 'attr' => ['class' => 'btn-primary'],
             ])
             ->getForm();
