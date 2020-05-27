@@ -69,7 +69,7 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public function createWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser) : ExcelImportWorkbook
+    public static function createWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser) : ExcelImportWorkbook
     {
         $reader = new TecanOutputReader();
 

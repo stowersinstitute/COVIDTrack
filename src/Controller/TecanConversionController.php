@@ -136,7 +136,7 @@ class TecanConversionController extends AbstractController
     /**
      * @Route("/start", name="tecan_import_start")
      */
-    public function start(Request $request, TecanImporter $tabImporter)
+    public function start(Request $request)
     {
         $this->denyAccessUnlessGrantedPermission();
 
@@ -171,7 +171,7 @@ class TecanConversionController extends AbstractController
             /** @var UploadedFile $importFile */
             $importFile = $form->get('tecanFile')->getData();
 
-            $workbook = $tabImporter->createWorkbookFromUpload($importFile);
+            $workbook = TecanImporter::createWorkbookFromUpload($importFile, $this->getUser());
             $em->persist($workbook);
             $em->flush();
 
