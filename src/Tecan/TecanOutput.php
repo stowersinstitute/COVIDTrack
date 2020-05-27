@@ -3,7 +3,6 @@
 namespace App\Tecan;
 
 use App\Repository\TubeRepository;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Class for working with file output from Tecan hardware.
@@ -14,63 +13,34 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class TecanOutput
 {
     /**
-     * @var string
-     */
-    private $filepath;
-
-    public function __construct(string $filepath)
-    {
-        $this->filepath = $filepath;
-    }
-
-    /**
-     * Create TecanOutput using the uploaded file received through HTTP request.
+     * Find and replace Tube Accession IDs with Specimen Accession IDs
+     * in the given file.
      *
-     * @return TecanOutput
+     * @return string Returns given file with text replaced.
      */
-    public static function fromUploadFile(UploadedFile $file): self
+    public static function convertTubesToSpecimens(string $inputFilePath, TubeRepository $tubeRepo): string
     {
-        return new static($file->getRealPath());
-    }
-
-    /**
-     * Find and replace Tube Accession IDs with Specimen Accession IDs.
-     *
-     * @return string[] Input file lines with Tube IDs replaced. Each line contains original line ending.
-     */
-    public function convertTubesToSpecimens(TubeRepository $tubeRepo): array
-    {
-        // Text lines of original input file. Each array value is a text line.
-        $inputLines = file($this->filepath);
-        if (!$inputLines) {
-            throw new CannotReadOutputFileException('Cannot read Tecan file');
+        // Text of original input file
+        $fileAsString = file_get_contents($inputFilePath);
+        if (!$fileAsString) {
+            throw new \RuntimeException('Cannot read Tecan file');
         }
 
-        /** @var string[] $output */
-        $output = [];
+        // Parse Tube Accession IDs from spreadsheet
+        $rawTubeAccessionIds = TecanImporter::getRawTubeAccessionIds($inputFilePath);
+        foreach ($rawTubeAccessionIds as $rawTubeAccessionId) {
+            $tube = $tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
 
-        foreach ($inputLines as $line) {
-            // Pattern matches: (tab)T00001234
-            preg_match("/\t(T\d{8})/", $line, $matches);
-
-            // If line contains a Tube ID
-            if (!empty($matches)) {
-                // Begin replacing Tube ID with Specimen ID
-                $tubeId = $matches[1];
-
-                // If Specimen ID found
-                $specimenId = $tubeRepo->findSpecimenAccessionIdByTubeAccessionId($tubeId);
-                if (!$specimenId) {
-                    throw new SpecimenIdNotFoundException(sprintf('Cannot find Specimen ID for Tube ID %s', $tubeId));
-                }
-
-                // Replace Tube ID with Specimen ID
-                $line = str_replace($tubeId, $specimenId, $line);
+            if (!$tube && !$tube->getSpecimen()) {
+                throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
             }
 
-            $output[] = $line;
+            // Replace Tube ID with Specimen ID anywhere in file
+            $tubeSearch = $tube->getAccessionId();
+            $specimenReplace = $tube->getSpecimen()->getAccessionId();
+            $fileAsString = str_replace($tubeSearch, $specimenReplace, $fileAsString);
         }
 
-        return $output;
+        return $fileAsString;
     }
 }

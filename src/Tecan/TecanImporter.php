@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ExcelImport;
+namespace App\Tecan;
 
 use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
@@ -8,15 +8,22 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
+use App\ExcelImport\BaseExcelImporter;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
-use PhpOffice\PhpSpreadsheet\Reader\Xls;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class TecanImporter extends BaseExcelImporter
 {
+    const STARTING_ROW = 3;
+
+    const COLUMN_WELL_POSITION = 'A';
+    const COLUMN_TUBE_ACCESSION_ID = 'F';
+
     /**
      * @var TubeRepository
      */
@@ -36,11 +43,11 @@ class TecanImporter extends BaseExcelImporter
 
         parent::__construct($worksheet);
 
-        $this->startingRow = 3; // Tecan output has 2 rows of header info
+        $this->startingRow = self::STARTING_ROW; // Tecan output has 2 rows of header info
 
         $this->columnMap = [
-            'wellPosition' => 'A', // 1-96 for 96-well position
-            'tubeAccessionId' => 'F',
+            'wellPosition' => self::COLUMN_WELL_POSITION, // 1-96 for 96-well position
+            'tubeAccessionId' => self::COLUMN_TUBE_ACCESSION_ID,
         ];
     }
 
@@ -63,14 +70,12 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public static function createWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
+    public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
     {
-        $getReaderForFilepath = function(string $filepath) {
+        $getReaderForFilepath = function(string $filepath): BaseReader {
             $possibleReaders = [
                 new Csv(),
                 new TecanOutputReader(), // Tab-delimited
-                new Xlsx(),
-                new Xls(),
             ];
 
             foreach ($possibleReaders as $reader) {
@@ -82,14 +87,21 @@ class TecanImporter extends BaseExcelImporter
             throw new \RuntimeException('Cannot find spreadsheet reader capable of parsing file');
         };
 
-        $filepath = $file->getRealPath();
         $reader = $getReaderForFilepath($filepath);
-        $spreadsheet = $reader->load($filepath);
+
+        return $reader->load($filepath);
+    }
+
+    public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
+    {
+        $filepath = $file->getRealPath();
+        $spreadsheet = static::createSpreadsheetFromPath($filepath);
 
         $importWorkbook = new ExcelImportWorkbook();
+        $importWorkbook->setTmpFilePath($filepath);
         $importWorkbook->setFilename($file->getClientOriginalName());
+        $importWorkbook->setFileMimeType($file->getMimeType());
         $importWorkbook->setUploadedAt(new \DateTimeImmutable());
-
         $importWorkbook->setUploadedBy($uploadedByUser);
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
@@ -122,6 +134,39 @@ class TecanImporter extends BaseExcelImporter
         }
 
         return $changedItems;
+    }
+
+    /**
+     * Returns the raw value of cells in the column containing Tube Accession IDs.
+     * These values are not guaranteed to be valid Tubes. They are only what is
+     * contained in the file.
+     *
+     * @param string $filepath Full path to the file
+     * @return string[]
+     */
+    public static function getRawTubeAccessionIds(string $filepath): array
+    {
+        $spreadsheet = static::createSpreadsheetFromPath($filepath);
+        $worksheet = $spreadsheet->getActiveSheet();
+
+        $max = $worksheet->getHighestRow(self::COLUMN_TUBE_ACCESSION_ID);
+
+        $tubeAccessionIds = [];
+        for ($rowNumber = static::STARTING_ROW; $rowNumber <= $max; $rowNumber++) {
+            $columnIdx = Coordinate::columnIndexFromString(static::COLUMN_TUBE_ACCESSION_ID);
+
+            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
+            if (!$cell) {
+                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::COLUMN_TUBE_ACCESSION_ID, $rowNumber));
+            }
+
+            $rawTubeId = trim($cell->getValue());
+            if ($rawTubeId) {
+                $tubeAccessionIds[] = $rawTubeId;
+            }
+        }
+
+        return $tubeAccessionIds;
     }
 
     /**

@@ -20,6 +20,7 @@
                         </ol>
                         <p>The upload parser has these expectations:</p>
                         <ul>
+                            <li>Uploaded file is comma-delimited or tab-delimited</li>
                             <li>Tube data begins on Row 3</li>
                             <li>Cell I2 (that's i2) contains the RNA Well Plate ID (Such as RPE1P7)</li>
                             <li>Column A contains the RNA Well Position (Begin at cell A3)</li>
@@ -34,7 +35,7 @@
                         <h3 class="box-title">Conversion Errors</h3>
                     </div>
                     <div class="box-body">
-                        Could not complete conversion:
+                        <p>Could not complete conversion:</p>
 
                         <ul>
                         {% for error in errors %}

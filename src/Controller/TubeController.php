@@ -10,19 +10,13 @@ use App\ExcelImport\TubeImporter;
 use App\Form\GenericExcelImportType;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
-use App\Tecan\CannotReadOutputFileException;
-use App\Tecan\SpecimenIdNotFoundException;
-use App\Tecan\TecanOutput;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\File;
 
 /**
  * Interact with Tubes.
