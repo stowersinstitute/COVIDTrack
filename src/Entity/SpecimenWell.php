@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -44,6 +45,24 @@ class SpecimenWell
         $this->position = $position;
     }
 
+    /**
+     * Check whether this SpecimenWell and another SpecimenWell are the same object.
+     */
+    public function isSame(SpecimenWell $specimenWell): bool
+    {
+        $specimen = $specimenWell->getSpecimen();
+        if (!EntityUtils::isSameEntity($specimen, $this->specimen)) {
+            return false;
+        }
+
+        $wellPlate = $specimenWell->getWellPlate();
+        if (!EntityUtils::isSameEntity($wellPlate, $this->wellPlate)) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function delete()
     {
         // Remove WellPlate relationship
@@ -71,7 +90,7 @@ class SpecimenWell
         }
     }
 
-    public function getWellPlate(): WellPlate
+    public function getWellPlate(): ?WellPlate
     {
         return $this->wellPlate;
     }
@@ -81,7 +100,7 @@ class SpecimenWell
         return $this->wellPlate->getBarcode();
     }
 
-    public function getSpecimen(): Specimen
+    public function getSpecimen(): ?Specimen
     {
         return $this->specimen;
     }

@@ -93,8 +93,9 @@ class WellPlate
 
     public function removeWell(SpecimenWell $wellToRemove): void
     {
+        $removeKey = null;
         foreach ($this->wells as $key => $well) {
-            if (EntityUtils::isSameEntity($wellToRemove, $well)) {
+            if ($wellToRemove->isSame($well)) {
                 $removeKey = $key;
                 break;
             }
