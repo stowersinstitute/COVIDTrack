@@ -74,15 +74,6 @@ class Specimen
     private $participantGroup;
 
     /**
-     * Well where this Specimen is located.
-     *
-     * @var null|SpecimenWell
-     * ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @deprecated Will be removed
-     */
-    private $well;
-
-    /**
      * Wells where this Specimen is contained.
      *
      * @var SpecimenWell[]|ArrayCollection
