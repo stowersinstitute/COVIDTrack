@@ -57,4 +57,42 @@ class StringUtils
 
         return $randomStr;
     }
+
+    /**
+     * Converts a base-10 integer to a custom base20 encoding that avoids ambiguous characters
+     *
+     * Examples:
+     *      0   -> B
+     *      19  -> Z
+     *      20  -> CB
+     *      110 -> HN
+     *
+     * Negative numbers are not supported
+     */
+    public static function base10ToBase20(int $base10, $padUntilLength = null) : string
+    {
+        $base20Alphabet = [ 'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z' ];
+        $base20Str = '';
+
+        if ($base10 < 0) throw new \InvalidArgumentException('Negative numbers are not supported');
+        if ($padUntilLength !== null && $padUntilLength <= 0) throw new \InvalidArgumentException('padUntilLength must be greater than 0');
+
+        do {
+            $mod = $base10 % 20;
+            $remainder = floor($base10 / 20);
+            $base10 = $remainder;
+
+            $base20Str = $base20Alphabet[$mod] . $base20Str;
+        } while ($base10 > 0);
+
+        // Apply padding, if requested
+        if ($padUntilLength !== null) {
+            $numPaddingNeeded = $padUntilLength - strlen($base20Str);
+            if ($numPaddingNeeded > 0) {
+                $base20Str = str_repeat($base20Alphabet[0], $numPaddingNeeded) . $base20Str;
+            }
+        }
+
+        return $base20Str;
+    }
 }

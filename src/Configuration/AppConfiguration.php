@@ -53,6 +53,10 @@ class AppConfiguration
 
         if ($this->em) {
             $entry = $this->getRepository()->findOneByReferenceId($referenceId);
+            if (!$entry) {
+                $entry = new SystemConfigurationEntry($referenceId);
+                $this->em->persist($entry);
+            }
             $entry->setValue($value);
             if ($this->autoFlush) $this->em->flush();
         }

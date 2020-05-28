@@ -32,7 +32,7 @@ class SystemConfigurationEntry
      *
      * @var string|null
      *
-     * @ORM\Column(name="reference_id", type="string", length=255, nullable=true, unique=true)
+     * @ORM\Column(name="reference_id", type="string", length=255, nullable=false, unique=true)
      */
     protected $referenceId;
 
@@ -40,7 +40,7 @@ class SystemConfigurationEntry
      * Human-readable label for this configuration entry
      * @var string|null
      *
-     * @ORM\Column(name="label", type="string", length=255)
+     * @ORM\Column(name="label", type="string", length=255, nullable=true)
      */
     protected $label;
 
