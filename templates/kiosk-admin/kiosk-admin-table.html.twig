@@ -29,11 +29,6 @@
             {% endif %}
         {% endif %}
 
-        {% set prnIdleTime = '' %}
-        {% if kiosk.lastHeartbeatIdleSeconds %}
-            {% set prnIdleTime = kiosk.lastHeartbeatIdleSeconds ~ ' seconds' %}
-        {% endif %}
-
         <tr>
             <td>
                 <a href="{{ path('kiosk_admin_edit', {kioskId: kiosk.id}) }}">Edit</a>
@@ -42,7 +37,7 @@
             <td>{{ kiosk.location }}</td>
             <td>{{ prnHealth|raw }}</td>
             <td>{{ kiosk.lastHeartbeatState }}</td>
-            <td>{{ prnIdleTime }}</td>
+            <td>{{ kiosk.getPrnIdleTime() }}</td>
             <td>{{ kiosk.lastHeartbeatVersionId }}</td>
             <td>{{ kiosk.lastHeartbeatIp }}</td>
         </tr>

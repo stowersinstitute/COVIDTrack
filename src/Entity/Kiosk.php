@@ -3,6 +3,7 @@
 
 namespace App\Entity;
 
+use App\Util\DateUtils;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
 use App\Traits\SoftDeleteableEntity;
@@ -115,6 +116,13 @@ class Kiosk
         $heartbeatStaleBefore = (new \DateTimeImmutable(sprintf('-%s seconds', $gracePeriod)));
 
         return $this->lastHeartbeatAt < $heartbeatStaleBefore;
+    }
+
+    public function getPrnIdleTime() : string
+    {
+        if ($this->lastHeartbeatIdleSeconds === null) return '';
+
+        return DateUtils::getPrnElapsedSeconds($this->lastHeartbeatIdleSeconds);
     }
 
     public function getId() : ?int
