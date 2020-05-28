@@ -68,7 +68,6 @@ class TecanImporter extends BaseExcelImporter
      * $action can be:
      *  - created
      *  - updated
-     *  - deactivated
      *
      * See process()
      */
@@ -193,6 +192,7 @@ class TecanImporter extends BaseExcelImporter
         if ($this->output !== null) return $this->output;
 
         $output = [
+            'created' => [],
             'updated' => [],
         ];
 
@@ -226,9 +226,11 @@ class TecanImporter extends BaseExcelImporter
             $tube = $this->findTube($rawTubeId);
             $specimen = $tube->getSpecimen();
 
-            $specimen->addWellPlate($wellPlate, $rawWellPosition);
+            // Whether created or updated
+            $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
-            $resultAction = 'updated';
+            // Add Specimen to Well Plate at Position from upload
+            $specimen->addWellPlate($wellPlate, $rawWellPosition);
 
             // Store in output
             $output[$resultAction][] = [

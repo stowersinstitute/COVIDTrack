@@ -421,6 +421,14 @@ class Specimen
     }
 
     /**
+     * Whether Specimen is on the given Well Plate.
+     */
+    public function isOnWellPlate(WellPlate $plate): bool
+    {
+        return (bool) $this->getWellOnPlate($plate);
+    }
+
+    /**
      * Get SpecimenWell if this Specimen already on given WellPlate.
      */
     private function getWellOnPlate(WellPlate $plate): ?SpecimenWell

@@ -45,22 +45,4 @@
             </div>
         </div>
     </div>
-
-    {# Deactivated Well Plate Coordinates #}
-    {% if importer.hasGroupsForAction('deactivated') %}
-        {% set bgColor = 'bg-red' %}
-        {% set actionCount = importer.output['deactivated']|length %}
-    {% else %}
-        {% set bgColor = 'bg-gray' %}
-        {% set actionCount = '-- None --' %}
-    {% endif %}
-    <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box">
-            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-trash"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Deactivated Well Plate Coordinates</span>
-                <span class="info-box-number">{{ actionCount }}</span>
-            </div>
-        </div>
-    </div>
 </div>
