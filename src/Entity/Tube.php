@@ -166,7 +166,7 @@ class Tube
 
     public function __toString()
     {
-        return $this->getAccessionId();
+        return $this->getAccessionId() ?: 'None';
     }
 
     /**
