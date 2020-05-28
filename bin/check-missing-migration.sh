@@ -31,11 +31,11 @@ if [ -e "${DIR}/../.env.local" ]; then
 fi
 
 if [ -z ${SCHEMA_CHECK_DB_NAME+x} ]; then echo "SCHEMA_CHECK_DB_NAME is required"; exit 1; fi
-if [ -z ${SCHEMA_CHECK_HOST+x} ]; then echo "SCHEMA_CHECK_HOST is required"; fi
-if [ -z ${SCHEMA_CHECK_USER+x} ]; then echo "SCHEMA_CHECK_USER is required"; fi
+if [ -z ${SCHEMA_CHECK_HOST+x} ]; then echo "SCHEMA_CHECK_HOST is required"; exit 1; fi
+if [ -z ${SCHEMA_CHECK_USER+x} ]; then echo "SCHEMA_CHECK_USER is required"; exit 1; fi
 
-if [ -z ${SCHEMA_COMPARISON_URL+x} ]; then echo "SCHEMA_COMPARISON_URL is required"; fi
-if [ -z ${SCHEMA_CURRENT_VERSIONS_URL+x} ]; then echo "SCHEMA_CURRENT_VERSIONS_URL is required"; fi
+if [ -z ${SCHEMA_COMPARISON_URL+x} ]; then echo "SCHEMA_COMPARISON_URL is required"; exit 1; fi
+if [ -z ${SCHEMA_CURRENT_VERSIONS_URL+x} ]; then echo "SCHEMA_CURRENT_VERSIONS_URL is required"; exit 1; fi
 
 if [[ "$SCHEMA_CHECK_PASSWORD" != "" ]]; then
   SCHEMA_CHECK_PASSWORD = ":${SCHEMA_CHECK_PASSWORD}"
