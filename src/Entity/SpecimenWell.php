@@ -39,6 +39,8 @@ class SpecimenWell
     private $specimen;
 
     /**
+     * Well number, 1 thru 96
+     *
      * @var int
      * @ORM\Column(name="position", type="smallint", options={"unsigned":true}, nullable=true)
      */
@@ -87,6 +89,15 @@ class SpecimenWell
     public function getSpecimen(): ?Specimen
     {
         return $this->specimen;
+    }
+
+    public function setPosition(int $position): void
+    {
+        if ($position <= 0) {
+            throw new \InvalidArgumentException('Position must be greater than 0');
+        }
+
+        $this->position = $position;
     }
 
     public function getPosition(): ?int

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
@@ -401,10 +402,36 @@ class Specimen
         return $map[$rec] ?? '';
     }
 
+    /**
+     * Add this Specimen to given Well Plate at given position.
+     *
+     * If Specimen is already on this Well Plate, it will be updated to being
+     * at the given position.
+     */
     public function addWellPlate(WellPlate $plate, int $position = null): void
     {
-        // TODO: De-dupe by updating if already on same plate
-        $this->wells->add(new SpecimenWell($plate, $this, $position));
+        $existingWell = $this->getWellOnPlate($plate);
+        if ($existingWell) {
+            // Update position on existing Well Plate
+            $existingWell->setPosition($position);
+        } else {
+            // Add new
+            $this->wells->add(new SpecimenWell($plate, $this, $position));
+        }
+    }
+
+    /**
+     * Get SpecimenWell if this Specimen already on given WellPlate.
+     */
+    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    {
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return $well;
+            }
+        }
+
+        return null;
     }
 
     /**
