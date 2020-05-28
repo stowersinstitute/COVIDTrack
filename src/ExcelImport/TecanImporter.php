@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tecan;
+namespace App\ExcelImport;
 
 use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
@@ -8,8 +8,6 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
-use App\ExcelImport\BaseExcelImporter;
-use App\ExcelImport\ImportMessage;
 use App\ExcelImport\Reader\TecanOutputReader;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;

@@ -2,6 +2,7 @@
 
 namespace App\Tecan;
 
+use App\ExcelImport\TecanImporter;
 use App\Repository\TubeRepository;
 
 /**

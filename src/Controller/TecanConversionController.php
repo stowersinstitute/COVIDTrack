@@ -6,7 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\ExcelImporter;
-use App\Tecan\TecanImporter;
+use App\ExcelImport\TecanImporter;
 use App\Tecan\TecanOutput;
 use App\Util\EntityUtils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
