@@ -14,7 +14,7 @@ class SpecimenAccessionIdGenerator
 {
     const BASE_KEY_CONFIG_ID    = 'SpecimenAccessionIdGenerator.baseKey';
     const PASSWORD_CONFIG_ID    = 'SpecimenAccessionIdGenerator.password';
-    const IV_CONFIG_ID          = 'SpecimenAccessionIdGenerator.id';
+    const IV_CONFIG_ID          = 'SpecimenAccessionIdGenerator.iv';
 
     /** @var string */
     protected $baseKey;
@@ -80,7 +80,7 @@ class SpecimenAccessionIdGenerator
         $randomValueSettings = [
             self::BASE_KEY_CONFIG_ID,
             self::PASSWORD_CONFIG_ID,
-            self::PASSWORD_CONFIG_ID,
+            self::IV_CONFIG_ID,
         ];
 
         // Create new random values if the settings don't exist
