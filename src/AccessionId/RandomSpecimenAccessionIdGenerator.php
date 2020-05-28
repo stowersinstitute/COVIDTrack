@@ -8,9 +8,9 @@ use App\Util\StringUtils;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Generates unique Specimen Accession ID
+ * Generates unique Specimen Accession ID by generating a random value
  */
-class SpecimenAccessionIdGenerator
+class RandomSpecimenAccessionIdGenerator
 {
     /**
      * @var SpecimenRepository
