@@ -8,7 +8,6 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
-use App\ExcelImport\Reader\TecanOutputReader;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -82,7 +81,6 @@ class TecanImporter extends BaseExcelImporter
         $getReaderForFilepath = function(string $filepath): BaseReader {
             $possibleReaders = [
                 new Csv(),
-                new TecanOutputReader(), // Tab-delimited
             ];
 
             foreach ($possibleReaders as $reader) {
