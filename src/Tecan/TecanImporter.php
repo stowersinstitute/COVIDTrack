@@ -17,14 +17,23 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class TecanImporter extends BaseExcelImporter
 {
     const STARTING_ROW = 3;
 
-    const COLUMN_WELL_POSITION = 'A';
-    const COLUMN_TUBE_ACCESSION_ID = 'F';
+    const WELL_POSITION_ROW = 1;
+    const WELL_POSITION_COLUMN = 'B';
+    const WELL_POSITION_HEADER = 'Position';
+
+    const TUBE_ID_ROW = 1;
+    const TUBE_ID_COLUMN = 'G';
+    const TUBE_ID_HEADER = 'SRCTubeID';
+
+    const BARCODE_ROW = 2;
+    const BARCODE_COLUMN = 'J';
 
     /**
      * @var TubeRepository
@@ -48,8 +57,8 @@ class TecanImporter extends BaseExcelImporter
         $this->startingRow = self::STARTING_ROW; // Tecan output has 2 rows of header info
 
         $this->columnMap = [
-            'wellPosition' => self::COLUMN_WELL_POSITION, // 1-96 for 96-well position
-            'tubeAccessionId' => self::COLUMN_TUBE_ACCESSION_ID,
+            'wellPosition' => self::WELL_POSITION_COLUMN, // 1-96 for 96-well position
+            'tubeAccessionId' => self::TUBE_ID_COLUMN,
         ];
     }
 
@@ -119,6 +128,8 @@ class TecanImporter extends BaseExcelImporter
             }
         }
 
+        self::mustMeetFileFormatExpectations($importWorkbook->getFirstWorksheet());
+
         return $importWorkbook;
     }
 
@@ -150,15 +161,15 @@ class TecanImporter extends BaseExcelImporter
         $spreadsheet = static::createSpreadsheetFromPath($filepath);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $max = $worksheet->getHighestRow(self::COLUMN_TUBE_ACCESSION_ID);
+        $max = $worksheet->getHighestRow(self::TUBE_ID_COLUMN);
 
         $tubeAccessionIds = [];
         for ($rowNumber = static::STARTING_ROW; $rowNumber <= $max; $rowNumber++) {
-            $columnIdx = Coordinate::columnIndexFromString(static::COLUMN_TUBE_ACCESSION_ID);
+            $columnIdx = Coordinate::columnIndexFromString(static::TUBE_ID_COLUMN);
 
             $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
             if (!$cell) {
-                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::COLUMN_TUBE_ACCESSION_ID, $rowNumber));
+                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::TUBE_ID_COLUMN, $rowNumber));
             }
 
             $rawTubeId = trim($cell->getValue());
@@ -185,8 +196,9 @@ class TecanImporter extends BaseExcelImporter
             'updated' => [],
         ];
 
-        $rowIndex = 2;
-        $column = 'I';
+        // Well Plate Barcode
+        $rowIndex = self::BARCODE_ROW;
+        $column = self::BARCODE_COLUMN;
         $rawWellPlateId = $this->worksheet->getCellValue($rowIndex, $column);
         if (!$rawWellPlateId) {
             $this->messages[] = ImportMessage::newError(
@@ -325,5 +337,27 @@ class TecanImporter extends BaseExcelImporter
         }
 
         return $wellPlate;
+    }
+
+    /**
+     * Throws Exception if uploaded file does not have data in assumed location.
+     */
+    private static function mustMeetFileFormatExpectations(ExcelImportWorksheet $worksheet)
+    {
+        // Position
+        $row = self::WELL_POSITION_ROW;
+        $column = self::WELL_POSITION_COLUMN;
+        $found = $worksheet->getCellValue($row, $column);
+        if (self::WELL_POSITION_HEADER !== $found) {
+            throw new \RuntimeException(sprintf('Cannot find column %s. Expected to find at cell %s%d', self::WELL_POSITION_HEADER, $column, $row));
+        }
+
+        // Tube Accession ID
+        $row = self::TUBE_ID_ROW;
+        $column = self::TUBE_ID_COLUMN;
+        $found = $worksheet->getCellValue($row, $column);
+        if (self::TUBE_ID_HEADER !== $found) {
+            throw new \RuntimeException(sprintf('Cannot find column %s. Expected to find at cell %s%d', self::TUBE_ID_HEADER, $column, $row));
+        }
     }
 }

@@ -99,6 +99,21 @@ class TecanConversionController extends AbstractController
             'itemLabel' => 'Results',
             'form' => $form->createView(),
             'errors' => $errors,
+            'coordinates' => [
+                'firstTubeRow' => TecanImporter::STARTING_ROW,
+                'wellPlateBarcode' => [
+                    'column' => TecanImporter::BARCODE_COLUMN,
+                    'row' => TecanImporter::BARCODE_ROW,
+                ],
+                'wellPosition' => [
+                    'column' => TecanImporter::WELL_POSITION_COLUMN,
+                    'row' => TecanImporter::WELL_POSITION_ROW,
+                ],
+                'tubeAccessionId' => [
+                    'column' => TecanImporter::TUBE_ID_COLUMN,
+                    'row' => TecanImporter::TUBE_ID_ROW,
+                ],
+            ],
         ]);
     }
 

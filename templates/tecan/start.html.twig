@@ -16,10 +16,10 @@
                         <p>Uploaded file must follow these rules:</p>
                         <ul>
                             <li><strong>Comma-delimited or tab-delimited format</strong></li>
-                            <li>Tube data begins on Row 3</li>
-                            <li>Cell I2 (that's i2) contains the RNA Well Plate ID (Such as RPE1P7)</li>
-                            <li>Column A contains the RNA Well Position (Begin at cell A3)</li>
-                            <li>Column F contains the Tube Accession ID (Begin at cell F3)</li>
+                            <li>Tube data begins on Row {{ coordinates.firstTubeRow }}</li>
+                            <li>Cell {{ coordinates.wellPlateBarcode.column }}{{ coordinates.wellPlateBarcode.row }} contains the RNA Well Plate ID (Such as RPE1P7)</li>
+                            <li>Column {{ coordinates.wellPosition.column }} contains the RNA Well Position (Begin at cell {{ coordinates.wellPosition.column }}{{ coordinates.firstTubeRow }})</li>
+                            <li>Column {{ coordinates.tubeAccessionId.column }} contains the Tube Accession ID (Begin at cell {{ coordinates.tubeAccessionId.column }}{{ coordinates.firstTubeRow }})</li>
                         </ul>
                         <p>This upload accomplishes two things:</p>
                         <ol>
