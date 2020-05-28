@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\AccessionId\FpeSpecimenAccessionIdGenerator;
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -17,11 +17,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class SpecimenForm extends AbstractType
 {
     /**
-     * @var FpeSpecimenAccessionIdGenerator
+     * @var SpecimenAccessionIdGenerator
      */
     private $specimenIdGen;
 
-    public function __construct(FpeSpecimenAccessionIdGenerator $specimenIdGen)
+    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
     {
         $this->specimenIdGen = $specimenIdGen;
     }

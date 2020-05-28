@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\AccessionId\FpeSpecimenAccessionIdGenerator;
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -404,7 +404,7 @@ class Tube
      * @param string             $tubeType Tube::TYPE_* constant
      * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
      */
-    public function kioskDropoffComplete(FpeSpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
+    public function kioskDropoffComplete(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
         // Setup DropOff <==> Tube relationship
         $this->dropOff = $drop;

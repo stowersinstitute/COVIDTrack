@@ -3,7 +3,7 @@
 
 namespace App\Controller;
 
-use App\AccessionId\FpeSpecimenAccessionIdGenerator;
+use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\Kiosk;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
@@ -30,11 +30,11 @@ class KioskController extends AbstractController
     const KIOSK_COOKIE_KEY = 'CT_KIOSK_ID';
 
     /**
-     * @var FpeSpecimenAccessionIdGenerator
+     * @var SpecimenAccessionIdGenerator
      */
     private $specimenIdGen;
 
-    public function __construct(FpeSpecimenAccessionIdGenerator $specimenIdGen)
+    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
     {
         $this->specimenIdGen = $specimenIdGen;
     }

@@ -10,8 +10,12 @@ use Cryptomute\Cryptomute;
 /**
  * Generates specimen accession IDs by encrypting the tube accession ID
  */
-class FpeSpecimenAccessionIdGenerator
+class SpecimenAccessionIdGenerator
 {
+    const BASE_KEY_CONFIG_ID    = 'SpecimenAccessionIdGenerator.baseKey';
+    const PASSWORD_CONFIG_ID    = 'SpecimenAccessionIdGenerator.password';
+    const IV_CONFIG_ID          = 'SpecimenAccessionIdGenerator.id';
+
     /** @var string */
     protected $baseKey;
 
@@ -74,9 +78,9 @@ class FpeSpecimenAccessionIdGenerator
     protected function loadEncryptionParameters(AppConfiguration $appConfig)
     {
         $randomValueSettings = [
-            'FpeSpecimenAccessionIdGenerator.baseKey',
-            'FpeSpecimenAccessionIdGenerator.password',
-            'FpeSpecimenAccessionIdGenerator.iv',
+            self::BASE_KEY_CONFIG_ID,
+            self::PASSWORD_CONFIG_ID,
+            self::PASSWORD_CONFIG_ID,
         ];
 
         // Create new random values if the settings don't exist
@@ -89,9 +93,9 @@ class FpeSpecimenAccessionIdGenerator
         }
 
         // Load settings from configuration
-        $this->baseKey  = hex2bin($appConfig->get('FpeSpecimenAccessionIdGenerator.baseKey'));
-        $this->password = hex2bin($appConfig->get('FpeSpecimenAccessionIdGenerator.password'));
-        $this->iv       = hex2bin($appConfig->get('FpeSpecimenAccessionIdGenerator.iv'));
+        $this->baseKey  = hex2bin($appConfig->get(self::BASE_KEY_CONFIG_ID));
+        $this->password = hex2bin($appConfig->get(self::PASSWORD_CONFIG_ID));
+        $this->iv       = hex2bin($appConfig->get(self::IV_CONFIG_ID));
 
         if (!$this->baseKey)  throw new \LogicException('Unable to get baseKey');
         if (!$this->password) throw new \LogicException('Unable to get password');
