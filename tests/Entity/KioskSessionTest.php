@@ -2,7 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\FpeSpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\Kiosk;
 use App\Entity\KioskSession;
@@ -109,11 +109,11 @@ class KioskSessionTest extends TestCase
 
     /**
      * @param string[] $accessionId Accession IDs to return when calling ->generate() each time
-     * @return MockObject|SpecimenAccessionIdGenerator
+     * @return MockObject|FpeSpecimenAccessionIdGenerator
      */
     private function getMockSpecimenAccIdGenerator(array $accessionIds): MockObject
     {
-        $mock = $this->getMockBuilder(SpecimenAccessionIdGenerator::class)
+        $mock = $this->getMockBuilder(FpeSpecimenAccessionIdGenerator::class)
             ->disableOriginalConstructor()
             ->getMock();
 

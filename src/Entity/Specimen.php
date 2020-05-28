@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\FpeSpecimenAccessionIdGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
@@ -152,7 +152,7 @@ class Specimen
      *
      * @return Specimen
      */
-    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen): self
+    public static function createNew(ParticipantGroup $group, FpeSpecimenAccessionIdGenerator $gen): self
     {
         $accessionId = $gen->generate();
 
@@ -164,7 +164,7 @@ class Specimen
      *
      * @return Specimen
      */
-    public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
+    public static function createFromTube(Tube $tube, FpeSpecimenAccessionIdGenerator $gen): self
     {
         // Use Tube's Participant Group
         $group = $tube->getParticipantGroup();

@@ -2,7 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\FpeSpecimenAccessionIdGenerator;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
@@ -29,11 +29,11 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     /**
      * Generates Species Accession IDs
      *
-     * @var SpecimenAccessionIdGenerator
+     * @var FpeSpecimenAccessionIdGenerator
      */
     private $specimenAccessionIdGen;
 
-    public function __construct(SpecimenAccessionIdGenerator $specIdGen)
+    public function __construct(FpeSpecimenAccessionIdGenerator $specIdGen)
     {
         $this->specimenAccessionIdGen = $specIdGen;
     }

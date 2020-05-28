@@ -2,7 +2,7 @@
 
 namespace App\Tests\Entity;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\FpeSpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
@@ -42,11 +42,11 @@ class TubeTest extends TestCase
 
     /**
      * @param string $accessionId Accession ID to return when calling ->generate() on the mock
-     * @return MockObject|SpecimenAccessionIdGenerator
+     * @return MockObject|FpeSpecimenAccessionIdGenerator
      */
     private function getMockAccessionIdGenerator(string $accessionId): MockObject
     {
-        $mock = $this->getMockBuilder(SpecimenAccessionIdGenerator::class)
+        $mock = $this->getMockBuilder(FpeSpecimenAccessionIdGenerator::class)
             ->disableOriginalConstructor()
             ->getMock();
 

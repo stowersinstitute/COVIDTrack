@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\AccessionId\FpeSpecimenAccessionIdGenerator;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -178,7 +178,7 @@ class KioskSession
     /**
      * When user clicks Finish to complete their kiosk interaction.
      */
-    public function finish(SpecimenAccessionIdGenerator $gen): void
+    public function finish(FpeSpecimenAccessionIdGenerator $gen): void
     {
         if ($this->mostRecentScreen === self::SCREEN_COMPLETED) {
             // Already finished
