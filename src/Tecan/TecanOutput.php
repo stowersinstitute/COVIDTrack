@@ -31,7 +31,7 @@ class TecanOutput
         foreach ($rawTubeAccessionIds as $rawTubeAccessionId) {
             $tube = $tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
 
-            if (!$tube && !$tube->getSpecimen()) {
+            if (!$tube || !$tube->getSpecimen()) {
                 throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
             }
 
