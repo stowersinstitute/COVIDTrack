@@ -74,33 +74,6 @@ class SpecimenWell
         return true;
     }
 
-    public function delete()
-    {
-        // Remove WellPlate relationship
-        /** @var WellPlate $wellPlate */
-        $wellPlate = null;
-        if ($this->wellPlate) {
-            $wellPlate = $this->wellPlate;
-            $this->wellPlate = null;
-        }
-
-        // Remove Specimen relationship
-        /** @var Specimen $specimen */
-        $specimen = null;
-        if ($this->specimen) {
-            $specimen = $this->specimen;
-            $this->specimen = null;
-        }
-
-        // Cleanup entity-side
-        if ($wellPlate) {
-            $wellPlate->removeWell($this);
-        }
-        if ($specimen) {
-            $specimen->removeFromWell();
-        }
-    }
-
     public function getWellPlate(): ?WellPlate
     {
         return $this->wellPlate;
