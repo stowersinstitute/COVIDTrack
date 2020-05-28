@@ -9,6 +9,7 @@ use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\ExcelImport\BaseExcelImporter;
+use App\ExcelImport\ImportMessage;
 use App\ExcelImport\TecanOutputReader;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
