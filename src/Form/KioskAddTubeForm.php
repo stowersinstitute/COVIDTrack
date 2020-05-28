@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class KioskAddTubeForm extends AbstractType
 {
@@ -39,19 +40,22 @@ class KioskAddTubeForm extends AbstractType
                     'Swab' => Tube::TYPE_SWAB,
                     'Blood' => Tube::TYPE_BLOOD,
                 ],
-                'required' => true
+                'required' => true,
+                'constraints' => [new NotBlank()],
             ])
             ->add('collectedAtDate', RadioButtonGroupType::class, [
                 'choices' => $days,
                 'layout' => 'vertical',
                 'label' => 'Collection Date',
                 'required' => true,
+                'constraints' => [new NotBlank()],
             ])
             ->add('collectedAtTime', RadioButtonGroupType::class, [
                 'choices' => $times,
                 'layout' => 'vertical',
                 'label' => 'Approximate Collection Time',
                 'required' => true,
+                'constraints' => [new NotBlank()],
             ])
             ->add('save', SubmitType::class, [
                 'label' => '+ Save and Add Another',
