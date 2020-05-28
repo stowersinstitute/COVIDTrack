@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
