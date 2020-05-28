@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
@@ -68,6 +69,13 @@ class ParticipantGroup
     private $specimens;
 
     /**
+     * @var DropOffWindow[]
+     *
+     * @ORM\ManyToMany(targetEntity="DropOffWindow", mappedBy="participantGroups")
+     */
+    private $dropOffWindows;
+
+    /**
      * @var boolean If true, the system expects specimens for this group
      *
      * @ORM\Column(name="is_active", type="boolean", nullable=true)
@@ -81,6 +89,8 @@ class ParticipantGroup
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->isActive = true;
+
+        $this->dropOffWindows = new ArrayCollection();
     }
 
     /**
@@ -153,6 +163,67 @@ class ParticipantGroup
         }
 
         return $return;
+    }
+
+    public function getDropOffWindowDebugString()
+    {
+        $strings = [];
+        foreach ($this->dropOffWindows as $window) {
+            $strings[] = sprintf(
+                '[%s %s-%s]',
+                $window->getStartsAt()->format('D'),
+                $window->getStartsAt()->format('H:i'),
+                $window->getEndsAt()->format('H:i')
+            );
+        }
+
+        if (!$strings) return '-- None --';
+
+        return join(' ', $strings);
+    }
+
+    /**
+     * @return DropOffWindow[]
+     */
+    public function getDropOffWindows() : array
+    {
+        return $this->dropOffWindows->getValues();
+    }
+
+    public function addDropOffWindow(DropOffWindow $dropOffWindow)
+    {
+        if ($this->hasDropOffWindow($dropOffWindow)) return;
+
+        $this->dropOffWindows->add($dropOffWindow);
+        $dropOffWindow->addParticipantGroup($this);
+    }
+
+    public function hasDropOffWindow(DropOffWindow $dropOffWindow)
+    {
+        foreach ($this->dropOffWindows as $window) {
+            if (EntityUtils::isSameEntity($window, $dropOffWindow)) return true;
+        }
+
+        return false;
+    }
+
+    public function removeDropOffWindow(DropOffWindow $window)
+    {
+        if (!$this->hasDropOffWindow($window)) return;
+
+        foreach ($this->dropOffWindows as $currWindow) {
+            if (EntityUtils::isSameEntity($currWindow, $window)) {
+                $this->dropOffWindows->removeElement($currWindow);
+                $currWindow->removeParticipantGroup($this);
+            }
+        }
+    }
+
+    public function clearDropOffWindows()
+    {
+        foreach ($this->dropOffWindows as $window) {
+            $this->removeDropOffWindow($window);
+        }
     }
 
     public function getId(): ?int

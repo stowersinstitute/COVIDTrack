@@ -1,68 +1,104 @@
 <?php
 
+
 namespace App\AccessionId;
 
-use App\Entity\Specimen;
-use App\Entity\SpecimenRepository;
+use App\Configuration\AppConfiguration;
 use App\Util\StringUtils;
-use Doctrine\ORM\EntityManagerInterface;
+use Cryptomute\Cryptomute;
 
 /**
- * Generates unique Specimen Accession ID
+ * Generates specimen accession IDs by encrypting the tube accession ID
  */
 class SpecimenAccessionIdGenerator
 {
-    /**
-     * @var SpecimenRepository
-     */
-    private $repository;
+    const BASE_KEY_CONFIG_ID    = 'SpecimenAccessionIdGenerator.baseKey';
+    const PASSWORD_CONFIG_ID    = 'SpecimenAccessionIdGenerator.password';
+    const IV_CONFIG_ID          = 'SpecimenAccessionIdGenerator.iv';
 
-    /**
-     * @var string[] IDs generated during the lifetime of this object
-     */
-    private $generatedThisInstance = [];
+    /** @var string */
+    protected $baseKey;
 
-    public function __construct(EntityManagerInterface $em)
+    /** @var string  */
+    protected $password;
+
+    /** @var string  */
+    protected $iv;
+
+    /** @var AppConfiguration */
+    protected $appConfig;
+
+    /** @var Cryptomute */
+    protected $encrypter;
+
+    /** @var int unsigned integer in the range 0 - 4294967295 */
+    protected $counter;
+
+    public function __construct(AppConfiguration $appConfig)
     {
-        $this->repository = $em->getRepository(Specimen::class);
+        $this->appConfig = $appConfig;
+
+        $this->loadEncryptionParameters($appConfig);
+
+        // Configure encrypter
+        $this->encrypter = new Cryptomute(
+            'aes-128-cbc', // changes to this may require changes to how IV is generated
+            $this->baseKey,
+            7
+        );
+
+        $this->encrypter->setValueRange(
+            // 10 digits
+            '0000000000',
+            '4294967295'
+        );
     }
 
-    /**
-     * Generate a unique Specimen Accession ID not currently used
-     */
-    public function generate(): string
+    public function generate()
     {
-        // Sanity check to prevent infinite loop
-        $maxTries = 1000;
+        $counterRefId = 'FpeSpecimenAccessionIdGenerator.counter';
+        // Changes must be written to the database immediately to minimize contention with other requests
+        $this->appConfig->setAutoFlush(true);
 
-        $id = null;
+        $counter = 0;
+        if ($this->appConfig->hasReferenceId($counterRefId)) {
+            $counter = $this->appConfig->get($counterRefId);
+        }
+        $this->appConfig->set($counterRefId, ++$counter);
 
-        do {
-            // Accumulate from previous loop, if exists
-            if ($id) {
-                $this->generatedThisInstance[] = $id;
-            }
+        $input = $counter;
+        $encrypted = $this->encrypter->encrypt($input, 10, true, $this->password, $this->iv);
 
-            // Generate a new ID
-            $id = sprintf('C' . StringUtils::generateRandomString(8, true));
+        $numBase20DigitsRequired = ceil(log(intval(4294967295), 20));
+        $encrypted = StringUtils::base10ToBase20($encrypted, $numBase20DigitsRequired);
 
-            $maxTries--;
-        } while ($this->idExists($id) && $maxTries > 0);
-
-        if ($maxTries === 0) throw new \ErrorException('Unable to generate a Specimen ID (exceeded max tries)');
-
-        return $id;
+        return sprintf('C%s', $encrypted);
     }
 
-    private function idExists(string $id): bool
+    protected function loadEncryptionParameters(AppConfiguration $appConfig)
     {
-        // Consider it existing if we've generated it already.
-        // This makes working with unpersisted entities easier.
-        if (in_array($id, $this->generatedThisInstance)) return true;
+        $randomValueSettings = [
+            self::BASE_KEY_CONFIG_ID,
+            self::PASSWORD_CONFIG_ID,
+            self::IV_CONFIG_ID,
+        ];
 
-        // ID exists if it's attached to an existing record in the database
-        $found = $this->repository->findOneBy(['accessionId' => $id]);
+        // Create new random values if the settings don't exist
+        foreach ($randomValueSettings as $referenceId) {
+            if ($appConfig->hasReferenceId($referenceId)) continue;
 
-        return $found ? true : false;
+            // Note: aes-128-cbc IV requires 16 bytes, going with 16 for everything since this is a best-effort obfuscation
+            $randomValue = bin2hex(random_bytes(16));
+            $appConfig->create($referenceId, $randomValue);
+        }
+
+        // Load settings from configuration
+        $this->baseKey  = hex2bin($appConfig->get(self::BASE_KEY_CONFIG_ID));
+        $this->password = hex2bin($appConfig->get(self::PASSWORD_CONFIG_ID));
+        $this->iv       = hex2bin($appConfig->get(self::IV_CONFIG_ID));
+
+        if (!$this->baseKey)  throw new \LogicException('Unable to get baseKey');
+        if (!$this->password) throw new \LogicException('Unable to get password');
+        if (!$this->iv)       throw new \LogicException('Unable to get iv');
     }
 }

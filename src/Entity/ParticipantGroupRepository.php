@@ -71,4 +71,14 @@ class ParticipantGroupRepository extends EntityRepository
             ->where('g.isActive = true')
             ->getQuery()->getSingleScalarResult();
     }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function findInactive()
+    {
+        return $this->createQueryBuilder('g')
+            ->where('g.isActive = false')
+            ->getQuery()->getResult();
+    }
 }
