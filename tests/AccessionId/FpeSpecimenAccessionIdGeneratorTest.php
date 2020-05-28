@@ -30,20 +30,21 @@ class FpeSpecimenAccessionIdGeneratorTest extends TestCase
         $this->generator = new FpeSpecimenAccessionIdGenerator($this->appConfig);
     }
 
-    public function testGenerateSpecimenAccessionId()
+    /**
+     * Smoke test to ensure no duplicate IDs are generated
+     */
+    public function testGeneratesUniqueIds()
     {
-        $testData = [
-            '1'          => 'CDNFZFWSN',
-            '12345678'   => 'CCSNPWRBR',
-            '2147483647' => 'CDCXVSYLR',
-            '4294967295' => 'CCWCZYPWJ',
-        ];
+        $generator = new FpeSpecimenAccessionIdGenerator($this->appConfig);
+        $numToGenerate = 1024;
+        $generated = [];
 
-        foreach ($testData as $specimenId => $expectedAccessionId) {
-            $specimen = Specimen::createWithId(intval($specimenId));
-
-            $this->assertEquals($expectedAccessionId, $this->generator->generate($specimen));
+        for ($i=0; $i < $numToGenerate; $i++) {
+            $generated[] = $generator->generate();
         }
+
+        // All entries must be unique
+        $this->assertCount($numToGenerate, array_unique($generated));
     }
 
 }
