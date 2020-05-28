@@ -5,7 +5,7 @@
             <th>&nbsp;</th>
             <th>Title</th>
             <th>Participants</th>
-            <th>Active?</th>
+            <th>Drop-off Times</th>
             <th>Created</th>
             <th>Last Modified</th>
             {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
@@ -24,9 +24,10 @@
             </td>
             <td>{{ group.participantCount }}</td>
             <td>
-                {% if group.isActive() %}
-                    <i class="fa fa-check text-green"></i>
-                {% endif %}
+                {% for window in group.getDropOffWindows() %}
+                    {{ window.getDisplayString() }}
+                    {% if not loop.last %}, {% endif %}
+                {% endfor %}
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>

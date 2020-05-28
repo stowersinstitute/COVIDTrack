@@ -23,6 +23,14 @@
                     <dt>Title</dt><dd>{{ group.title }}</dd>
                     <dt>Accession ID</dt><dd>{{ group.accessionId }}</dd>
                     <dt>Participants</dt><dd>{{ group.participantCount }}</dd>
+                    <dt>Drop-off Times</dt>
+                    <dd>
+                        <ul>
+                            {% for window in group.getDropOffWindows() %}
+                                <li>{{ window.getDisplayString() }}</li>
+                            {% endfor %}
+                        </ul>
+                    </dd>
                 </dl>
             </div>
         </div>
