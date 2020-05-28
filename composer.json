@@ -7,6 +7,7 @@
         "ext-iconv": "*",
         "phpoffice/phpspreadsheet": "^1.12",
         "sensio/framework-extra-bundle": "^5.1",
+        "simshaun/recurr": "^4.0",
         "stof/doctrine-extensions-bundle": "^1.4",
         "stowers-lims/zpl": "dev-master",
         "symfony/asset": "4.4.*",

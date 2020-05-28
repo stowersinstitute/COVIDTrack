@@ -758,4 +758,46 @@ class DateUtils
 
         return $endDate;
     }
+
+    /**
+     * Reads time of day fields (hour, minute, second) in $to and sets them on $from
+     *
+     * The new date is returned as a \DateTimeImmutable
+     */
+    public static function copyTimeOfDay(\DateTimeInterface $from, \DateTimeInterface $to) : \DateTimeImmutable
+    {
+        // Start with a date that's a copy of the target
+        $tmpDate = \DateTime::createFromFormat(DATE_ATOM, $to->format(DATE_ATOM));
+
+        // Update the time fields to match the source
+        $tmpDate->setTime($from->format('H'), $from->format('i'), $from->format('s'));
+
+        // Return as an immutable
+        return \DateTimeImmutable::createFromFormat(DATE_ATOM, $tmpDate->format(DATE_ATOM));
+    }
+
+    /**
+     * Converts $source to a \DateTimeImmutable
+     *
+     * The optional $modification parameter is applied to $source
+     *
+     * Examples:
+     *      toImmutable($dateTime) -> returns a \DateTimeImmutable created from $dateTime
+     *
+     *      toImmutable($dateTime, '+1 day') -> returns a \DateTimeImmutable one day ahead of $dateTime
+     */
+    public static function toImmutable(\DateTimeInterface $source, string $modification = null) : \DateTimeImmutable
+    {
+        if ($modification === null) {
+            return \DateTimeImmutable::createFromFormat(DATE_ATOM, $source->format(DATE_ATOM));
+        }
+
+        // Modification requires creating a temporary date object
+        $tmp = \DateTime::createFromFormat(DATE_ATOM, $source->format(DATE_ATOM));
+
+        $tmp->modify($modification);
+
+        // Return as an immutable
+        return \DateTimeImmutable::createFromFormat(DATE_ATOM, $tmp->format(DATE_ATOM));
+    }
 }
