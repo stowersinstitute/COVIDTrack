@@ -126,16 +126,6 @@ class Specimen
      */
     private $results;
 
-    /**
-     * @deprecated - for test use only
-     */
-    public static function createWithId(int $id)
-    {
-        $specimen = new Specimen('temp', new ParticipantGroup('temp', 1));
-        $specimen->id = $id;
-        return $specimen;
-    }
-
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
