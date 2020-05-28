@@ -18,7 +18,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  */
 class ParticipantGroup
 {
-    public const MIN_PARTICIPANT_COUNT = 1;
+    public const MIN_PARTICIPANT_COUNT = 0;
     public const MAX_PARTICIPANT_COUNT = 65000;
 
     use TimestampableEntity, SoftDeleteableEntity;
