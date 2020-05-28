@@ -23,6 +23,8 @@ class WellPlateController extends AbstractController
      */
     public function list()
     {
+        $this->mustHavePermissions();
+
         $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
 
         return $this->render('well-plate/list.html.twig', [
@@ -37,6 +39,8 @@ class WellPlateController extends AbstractController
      */
     public function view(string $barcode)
     {
+        $this->mustHavePermissions();
+
         $wellPlate = $this->getDoctrine()
             ->getRepository(WellPlate::class)
             ->findOneByAnyId($barcode);
@@ -47,5 +51,10 @@ class WellPlateController extends AbstractController
         return $this->render('well-plate/view.html.twig', [
             'wellPlate' => $wellPlate,
         ]);
+    }
+
+    private function mustHavePermissions()
+    {
+        $this->denyAccessUnlessGranted('ROLE_WELL_PLATE_VIEW');
     }
 }
