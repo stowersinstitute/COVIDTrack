@@ -45,7 +45,7 @@ class WellPlate
     public function __construct(string $barcode)
     {
         $this->wells = new ArrayCollection();
-        $this->barcode = $barcode;
+        $this->setBarcode($barcode);
     }
 
     public function __toString()
@@ -65,6 +65,11 @@ class WellPlate
 
     public function setBarcode(string $barcode)
     {
+        $barcode = trim($barcode);
+        if (strlen($barcode) === 0) {
+            throw new \InvalidArgumentException('WellPlate barcode cannot be empty');
+        }
+
         $this->barcode = $barcode;
     }
 
