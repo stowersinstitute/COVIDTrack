@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints\File;
 /**
  * Import data from Tecan output file
  *
- * @Route(path="/results/tecan/import")
+ * @Route(path="/tecan/import")
  */
 class TecanConversionController extends AbstractController
 {
