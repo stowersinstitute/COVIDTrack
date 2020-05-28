@@ -6,7 +6,7 @@
 {% block importPreviewHeader %}{% endblock %}
 
 {% block beforeTopConfirmButton %}
-    {% include 'tecan/import-summary-widgets.html.twig' %}
+    {% include 'tecan-conversion/import-summary-widgets.html.twig' %}
 {% endblock %}
 
 {% block importPreviewSection %}
@@ -18,7 +18,7 @@
                         <h3 class="box-title"><i class="fa fa-plus text-green"></i> New Well Plate Coordinates <span class="badge bg-green">{{ importer.output['created']|length }}</span></h3>
                     </div>
                     <div class="box-body">
-                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['created']} %}
+                        {% include 'tecan-conversion/import-table.html.twig' with { wellPlateCoordinates: importer.output['created']} %}
                     </div>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                         <h3 class="box-title"><i class="fa fa-edit text-orange"></i> Updated Well Plate Coordinates <span class="badge bg-orange">{{ importer.output['updated']|length }}</span></h3>
                     </div>
                     <div class="box-body">
-                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['updated']} %}
+                        {% include 'tecan-conversion/import-table.html.twig' with { wellPlateCoordinates: importer.output['updated']} %}
                     </div>
                 </div>
             </div>
@@ -48,7 +48,7 @@
                         <h3 class="box-title"><i class="fa fa-trash text-red"></i> Deactivated Well Plate Coordinates <span class="badge bg-red">{{ importer.output['deactivated']|length }}</span></h3>
                     </div>
                     <div class="box-body">
-                        {% include 'tecan/import-table.html.twig' with { wellPlateCoordinates: importer.output['deactivated']} %}
+                        {% include 'tecan-conversion/import-table.html.twig' with { wellPlateCoordinates: importer.output['deactivated']} %}
                     </div>
                 </div>
             </div>

@@ -95,7 +95,7 @@ class TecanConversionController extends AbstractController
             // Fall through to display errors
         }
 
-        return $this->render('tecan/start.html.twig', [
+        return $this->render('tecan-conversion/start.html.twig', [
             'itemLabel' => 'Results',
             'form' => $form->createView(),
             'errors' => $errors,
@@ -134,12 +134,12 @@ class TecanConversionController extends AbstractController
 
         $output = $importer->process();
 
-        return $this->render('tecan/import-preview.html.twig', [
+        return $this->render('tecan-conversion/import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
-            'importPreviewTemplate' => 'tecan/import-table.html.twig',
+            'importPreviewTemplate' => 'tecan-conversion/import-table.html.twig',
             'importCommitRoute' => 'tecan_import_commit',
             'importCommitText' => 'Save Well Plate Data',
         ]);
@@ -165,7 +165,7 @@ class TecanConversionController extends AbstractController
 
         $em->flush();
 
-        return $this->render('tecan/import-saved.html.twig', [
+        return $this->render('tecan-conversion/import-saved.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
             'createdResults' => $output['created'] ?? [],
