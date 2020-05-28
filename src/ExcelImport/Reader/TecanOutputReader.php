@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ExcelImport;
+namespace App\ExcelImport\Reader;
 
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
