@@ -41,6 +41,13 @@ class ParticipantGroup
     private $accessionId;
 
     /**
+     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     *
+     * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     */
+    private $externalId;
+
+    /**
      * Human-readable title to identify this group. Used instead of accessionId
      * so participants don't need to remember a number.
      *
@@ -298,5 +305,15 @@ class ParticipantGroup
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+    }
+
+    public function getExternalId(): ?string
+    {
+        return $this->externalId;
+    }
+
+    public function setExternalId(?string $externalId): void
+    {
+        $this->externalId = $externalId;
     }
 }
