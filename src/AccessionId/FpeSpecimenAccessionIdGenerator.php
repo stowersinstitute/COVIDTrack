@@ -4,8 +4,6 @@
 namespace App\AccessionId;
 
 use App\Configuration\AppConfiguration;
-use App\Entity\Specimen;
-use App\Entity\Tube;
 use App\Util\StringUtils;
 use Cryptomute\Cryptomute;
 
@@ -29,7 +27,7 @@ class FpeSpecimenAccessionIdGenerator
     /** @var Cryptomute */
     protected $encrypter;
 
-    /** @var int */
+    /** @var int unsigned integer in the range 0 - 4294967295 */
     protected $counter;
 
     public function __construct(AppConfiguration $appConfig)
@@ -45,7 +43,6 @@ class FpeSpecimenAccessionIdGenerator
             7
         );
 
-        // SPECIMEN_ID_FORMAT_DEPENDENCY - this assumes maximum specimen ID is an unsigned 32-bit int in the range 0-4294967295
         $this->encrypter->setValueRange(
             // 10 digits
             '0000000000',
@@ -68,7 +65,6 @@ class FpeSpecimenAccessionIdGenerator
         $input = $counter;
         $encrypted = $this->encrypter->encrypt($input, 10, true, $this->password, $this->iv);
 
-        // SPECIMEN_ID_FORMAT_DEPENDENCY - different range of specimen IDs may impact padUntilLength
         $numBase20DigitsRequired = ceil(log(intval(4294967295), 20));
         $encrypted = StringUtils::base10ToBase20($encrypted, $numBase20DigitsRequired);
 

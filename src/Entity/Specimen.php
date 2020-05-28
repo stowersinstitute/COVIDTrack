@@ -39,8 +39,6 @@ class Specimen
     const CLIA_REC_NO = "NO";
 
     /**
-     * SPECIMEN_ID_FORMAT_DEPENDENCY - search for this string to find code that depends on this ID format
-     *
      * @var int
      * @ORM\Id()
      * @ORM\Column(name="id", type="integer")
