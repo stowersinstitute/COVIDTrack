@@ -63,15 +63,14 @@ class TecanConversionController extends AbstractController
             /** @var UploadedFile $importFile */
             $importFile = $form->get('tecanFile')->getData();
 
-            // Create Workbook for import
-            $workbook = TecanImporter::createExcelImportWorkbookFromUpload($importFile, $this->getUser());
-            $em->persist($workbook);
-
-            // Create conversion of uploaded file, replacing Tube IDs with Specimen IDs
             // Exceptions report errors back to user
             $errors = [];
             try {
-                // Convert to Accession IDs
+                // Create Workbook for import
+                $workbook = TecanImporter::createExcelImportWorkbookFromUpload($importFile, $this->getUser());
+                $em->persist($workbook);
+
+                // Create conversion of uploaded file, replacing Tube IDs with Specimen IDs
                 $path = $importFile->getRealPath();
                 $tubeRepo = $this->getDoctrine()->getManager()->getRepository(Tube::class);
                 $rawConversionOutput = TecanOutput::convertTubesToSpecimens($path, $tubeRepo);
