@@ -39,7 +39,7 @@ class WellPlateController extends AbstractController
 
         $wellPlate = $this->getDoctrine()
             ->getRepository(WellPlate::class)
-            ->findOneByAnyId($barcode);
+            ->findOneByBarcode($barcode);
         if (!$wellPlate) {
             throw new NotFoundHttpException('Cannot find Well Plate');
         }
