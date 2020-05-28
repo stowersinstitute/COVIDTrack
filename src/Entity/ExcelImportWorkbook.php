@@ -25,15 +25,6 @@ class ExcelImportWorkbook
     private $id;
 
     /**
-     * Filepath where workbook was stored when the file was uploaded.
-     * The uploaded file may no longer exist at this path.
-     *
-     * @var null|string
-     * @ORM\Column(name="temp_file_path", type="text", nullable=true)
-     */
-    private $tmpFilePath;
-
-    /**
      * Filename provided by the user when the file was uploaded
      *
      * @var string
@@ -88,16 +79,6 @@ class ExcelImportWorkbook
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTmpFilePath(): ?string
-    {
-        return $this->tmpFilePath;
-    }
-
-    public function setTmpFilePath(?string $tmpFilePath): void
-    {
-        $this->tmpFilePath = $tmpFilePath;
     }
 
     public function getFilename(): ?string

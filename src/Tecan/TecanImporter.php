@@ -98,7 +98,6 @@ class TecanImporter extends BaseExcelImporter
         $spreadsheet = static::createSpreadsheetFromPath($filepath);
 
         $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setTmpFilePath($filepath);
         $importWorkbook->setFilename($file->getClientOriginalName());
         $importWorkbook->setFileMimeType($file->getMimeType());
         $importWorkbook->setUploadedAt(new \DateTimeImmutable());
