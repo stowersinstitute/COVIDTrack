@@ -4,13 +4,22 @@ namespace App\Form;
 
 use App\Entity\Tube;
 use App\Form\Type\RadioButtonGroupType;
+use App\Util\DateUtils;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class KioskAddTubeForm extends AbstractType
 {
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefault('numDaysInPastForCollectionDate', 3);
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $days = [];
@@ -62,5 +71,59 @@ class KioskAddTubeForm extends AbstractType
                 'attr' => ['class' => 'btn-lg btn-success'],
             ])
             ->getForm();
+    }
+
+    /**
+     * Returns an array with the following keys:
+     *
+     *  day \DateTimeImmutable representing the day
+     *  collectionTimes[] array of \DateTimeImmutable representing hours within that day
+     *
+     * The earliest date appears first in the array
+     *
+     * For example (dates converted to strings):
+     *
+     * [
+     *   [
+     *     'day' => '5/27/20',
+     *     'collectionTimes' => ['06:00 AM', '08:00 AM', '10:00 AM', ... ]
+     *   ],
+     *   [
+     *     'day' => '5/28/20',
+     *     'collectionTimes' => ['06:00 AM', '08:00 AM', '10:00 AM', ... ]
+     *   ],
+     * ]
+     *
+     */
+    protected function buildCollectedAtTimes($numDaysToDisplay)
+    {
+        $timesByDay = [];
+
+        // 6am - 10pm in two-hour blocks
+        $firstDay = (new \DateTimeImmutable())->modify(sprintf('-%s days', $numDaysToDisplay));
+        $firstWindowAt = DateUtils::copyTimeOfDay(new \DateTimeImmutable('06:00:00'), $firstDay);
+        $windowSizeHours = 2;
+        $numWindowsPerDay = 9;
+
+        $refDate = $firstWindowAt;
+        // Populate each day
+        for ($currDayIdx = 0; $currDayIdx < $numDaysToDisplay; $currDayIdx++) {
+            $dayTimes = [
+                'day' => $refDate,
+                'collectionTimes' => [],
+            ];
+
+            // Generate hours for current day
+            for ($hourIdx = 0; $hourIdx < $numWindowsPerDay; $hourIdx++) {
+                $refTime = $refDate->modify(sprintf('+%s hours', ($hourIdx * $windowSizeHours)));
+
+                $dayTimes['collectionTimes'][] = $refTime;
+            }
+
+            $refDate = $refDate->modify('+1 day');
+            $timesByDay[] = $dayTimes;
+        }
+
+        return $timesByDay;
     }
 }
