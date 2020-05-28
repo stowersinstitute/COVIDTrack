@@ -76,36 +76,6 @@ class WellPlate
         return $this->wells->getValues();
     }
 
-    public function removeSpecimen(Specimen $specimen): void
-    {
-        $removeKey = null;
-        foreach ($this->wells as $key => $well) {
-            if (EntityUtils::isSameEntity($specimen, $well->getSpecimen())) {
-                $removeKey = $key;
-                break;
-            }
-        }
-
-        if ($removeKey !== null) {
-            $this->wells->remove($removeKey);
-        }
-    }
-
-    public function removeWell(SpecimenWell $wellToRemove): void
-    {
-        $removeKey = null;
-        foreach ($this->wells as $key => $well) {
-            if ($wellToRemove->isSame($well)) {
-                $removeKey = $key;
-                break;
-            }
-        }
-
-        if ($removeKey !== null) {
-            $this->wells->remove($removeKey);
-        }
-    }
-
     /**
      * @return Specimen[]
      */
