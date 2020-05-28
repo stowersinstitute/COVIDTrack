@@ -14,7 +14,7 @@
         <tr>
             <td>{{ checkin.accessionId }}</td>
             <td>{{ checkin.checkInDecisionText }}</td>
-            <td>{{ checkin.rnaWellPlateBarcode }}</td>
+            <td>{{ checkin.rnaWellPlateBarcodes|length > 0 ? checkin.rnaWellPlateBarcodes|join(", ") : '' }}</td>
             <td>{{ checkin.kitType }}</td>
             <td>{{ checkin.checkedInByUsername }}</td>
         </tr>
