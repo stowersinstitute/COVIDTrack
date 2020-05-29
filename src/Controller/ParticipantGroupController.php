@@ -35,16 +35,53 @@ class ParticipantGroupController extends AbstractController
     /**
      * List all Participant Groups
      *
-     * @Route(path="/", methods={"GET"}, name="app_participant_group_list")
+     * When POST for printing the request params should be
+     *  - `groups` an array of group titles to be printed
+     *
+     * @Route(path="/", methods={"GET","POST"}, name="app_participant_group_list")
      */
-    public function list()
+    public function list(Request $request, ZplPrinting $zpl)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
 
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -'
+            ])
+            ->add('print', SubmitType::class, [
+                'label' => 'Print Selected Group Labels',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $groupTitles = $request->request->get('groups', []);
+
+            $printGroups = $groupRepo->findBy(['title' => $groupTitles]);
+
+            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($printer);
+
+            foreach ($printGroups as $group) {
+                $builder->setGroup($group);
+                $zpl->printBuilder($builder, $group->getParticipantCount());
+            }
+        }
+
         return $this->render('participantGroup/participant-group-list.html.twig', [
             'groups' => $groupRepo->findActive(),
+            'form' => $form->createView(),
         ]);
     }
 
