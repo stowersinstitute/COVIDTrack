@@ -131,9 +131,19 @@ class StudyCoordinatorNotification
         return $this->recommendedGroups->getValues();
     }
 
+    public function getFrom(): ?string
+    {
+        return $this->from;
+    }
+
     public function setFrom(?string $from): void
     {
         $this->from = $from;
+    }
+
+    public function getRecipients(): ?string
+    {
+        return $this->recipients;
     }
 
     public function setRecipients(?string $recipients): void
@@ -141,9 +151,19 @@ class StudyCoordinatorNotification
         $this->recipients = $recipients;
     }
 
+    public function getSubject(): ?string
+    {
+        return $this->subject;
+    }
+
     public function setSubject(?string $subject): void
     {
         $this->subject = $subject;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
     }
 
     public function setMessage(?string $message): void
