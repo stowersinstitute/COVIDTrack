@@ -31,7 +31,7 @@
     {# Updated Results #}
     {% if updatedResults|length > 0 %}
         {% set bgColor = 'bg-orange' %}
-        {% set actionCount = updatedResults %}
+        {% set actionCount = updatedResults|length %}
     {% else %}
         {% set bgColor = 'bg-gray' %}
         {% set actionCount = '-- None --' %}
