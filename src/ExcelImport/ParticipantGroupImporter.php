@@ -101,7 +101,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
                 $group = new ParticipantGroup(
                     $accessionId,
-                    $rawParticipantCount ?? 0
+                    $rawParticipantCount ?? ParticipantGroup::MIN_PARTICIPANT_COUNT
                 );
 
                 $result['created'][] = $group;
@@ -163,9 +163,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     protected function validateParticipantCount($raw, $rowNumber): bool
     {
-        if ($raw < 0) {
+        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT) {
             $this->messages[] = ImportMessage::newError(
-                'Participant count cannot be less than 0',
+                'Participant count cannot be less than ' . ParticipantGroup::MIN_PARTICIPANT_COUNT,
                 $rowNumber,
                 $this->columnMap['participantCount']
             );
