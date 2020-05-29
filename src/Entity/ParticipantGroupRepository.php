@@ -54,13 +54,24 @@ class ParticipantGroupRepository extends EntityRepository
      */
     public function findActiveNotIn(array $groups)
     {
+        /*
+         * This looks weird but covers two cases:
+         *  - An empty array of groups. When passed [] this returns nothing
+         *  - Groups that are not persisted yet (they don't have an ID)
+         */
+        $groupIds = [ -1 ];
+        foreach ($groups as $group) {
+            if ($group->getId() === null) continue;
+            $groupIds[] = $group->getId();
+        }
+
         return $this->createQueryBuilder('g')
             ->where('
                 g.isActive = true
                 AND
                 g.id NOT IN (:groups)
             ')
-            ->setParameter('groups', $groups)
+            ->setParameter('groups', $groupIds)
             ->getQuery()->getResult();
     }
 

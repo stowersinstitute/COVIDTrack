@@ -20,8 +20,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
         $this->idGenerator = $idGenerator;
 
         $this->columnMap = [
-            'title' => 'A',
-            'participantCount' => 'B',
+            'externalId' => 'C',
+            'title' => 'J',
+            'participantCount' => 'H',
         ];
     }
 
@@ -55,7 +56,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-
     /**
      * Processes the import
      *
@@ -77,18 +77,20 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
         // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
+            $rawExternalId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['externalId']);
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
+            $rowOk = $this->validateExternalId($rawExternalId, $rowNumber) && $rowOk;
             $rowOk = $this->validateTitle($rawTitle, $rowNumber) && $rowOk;
             $rowOk = $this->validateParticipantCount($rawParticipantCount, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            $group = $groupRepo->findOneBy(['title' => $rawTitle]);
+            $group = $groupRepo->findOneBy(['externalId' => $rawExternalId]);
             // New group
             if (!$group) {
                 // Make it clear when previewing that this field is automatic
@@ -99,7 +101,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
                 $group = new ParticipantGroup(
                     $accessionId,
-                    $rawParticipantCount
+                    $rawParticipantCount ?? ParticipantGroup::MIN_PARTICIPANT_COUNT
                 );
 
                 $result['created'][] = $group;
@@ -116,6 +118,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 if (!$commit) $this->em->detach($group);
             }
 
+            $group->setExternalId($rawExternalId);
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
@@ -135,15 +138,34 @@ class ParticipantGroupImporter extends BaseExcelImporter
     }
 
     /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateExternalId($raw, $rowNumber): bool
+    {
+        if (!$raw) {
+            $this->messages[] = ImportMessage::newError(
+                'Sys ID cannot be blank',
+                $rowNumber,
+                $this->columnMap['externalId']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns true if $raw is a participant count
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
     protected function validateParticipantCount($raw, $rowNumber): bool
     {
-        if (!$raw) {
+        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT) {
             $this->messages[] = ImportMessage::newError(
-                'Participant count cannot be blank or less than 1',
+                'Participant count cannot be less than ' . ParticipantGroup::MIN_PARTICIPANT_COUNT,
                 $rowNumber,
                 $this->columnMap['participantCount']
             );
