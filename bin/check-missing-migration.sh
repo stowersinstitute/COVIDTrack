@@ -15,7 +15,7 @@
 #   SCHEMA_CHECK_DB_NAME database name to use when doing schema checks, will have all data removed!
 #   SCHEMA_CHECK_HOST database host to connect to
 #   SCHEMA_CHECK_USER database user
-#   SCHEMA_CHECK_PASSWORD database password, do not set if there's no password
+#   SCHEMA_CHECK_PASSWORD database password, optional. Do not set if there's no password
 #
 #   SCHEMA_COMPARISON_URL URL to a dump of the current production database's schema
 #   SCHEMA_CURRENT_VERSIONS_URL URL to a dump of migrations that have been installed to production
