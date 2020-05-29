@@ -19,9 +19,6 @@ class StudyCoordinatorNotification
 {
     use TimestampableEntity;
 
-    const STATUS_CREATED = "CREATED";
-    const STATUS_SENT = "SENT"; // Possible Final Status
-
     /**
      * @var int
      * @ORM\Id()
@@ -29,12 +26,6 @@ class StudyCoordinatorNotification
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @var string
-     * @ORM\Column(name="status", type="string", length=255)
-     */
-    private $status;
 
     /**
      * Participant Groups that were recommended for testing by this notification.
@@ -77,7 +68,6 @@ class StudyCoordinatorNotification
 
     public function __construct()
     {
-        $this->status = self::STATUS_CREATED;
         $this->recommendedGroups = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -113,24 +103,6 @@ class StudyCoordinatorNotification
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): void
-    {
-        $valid = [
-            self::STATUS_CREATED,
-            self::STATUS_SENT,
-        ];
-        if (!in_array($status, $valid)) {
-            throw new \InvalidArgumentException('Invalid status');
-        }
-
-        $this->status = $status;
     }
 
     public function addRecommendedGroup(ParticipantGroup $group): void
