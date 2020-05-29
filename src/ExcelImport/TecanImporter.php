@@ -11,8 +11,7 @@ use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
-use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -78,23 +77,7 @@ class TecanImporter extends BaseExcelImporter
 
     public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
     {
-        $getReaderForFilepath = function(string $filepath): BaseReader {
-            $possibleReaders = [
-                new Csv(),
-            ];
-
-            foreach ($possibleReaders as $reader) {
-                if ($reader->canRead($filepath)) {
-                    return $reader;
-                }
-            }
-
-            throw new \RuntimeException('Cannot find spreadsheet reader capable of parsing file');
-        };
-
-        $reader = $getReaderForFilepath($filepath);
-
-        return $reader->load($filepath);
+        return IOFactory::load($filepath);
     }
 
     public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
