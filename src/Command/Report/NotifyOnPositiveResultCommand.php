@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Command;
+namespace App\Command\Report;
 
+use App\Email\EmailBuilder;
 use App\Entity\AppUser;
 use App\Entity\ParticipantGroup;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,17 +16,16 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Notifies Users that should be notified of a Participant Group having a
- * recommend testing conclusion from testing results.
+ * Notifies users that should be notified when a new Positive Result is available.
  */
-class NotifyStudyCoordinatorGroupTestingCommand extends Command
+class NotifyOnPositiveResultCommand extends Command
 {
     /**
      * Users who explicitly have this role will be notified.
      */
     const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
 
-    protected static $defaultName = 'app:notify:study-coordinator-group-testing';
+    protected static $defaultName = 'app:report:notify-on-positive-result';
 
     /** @var EntityManagerInterface */
     private $em;
@@ -54,7 +54,7 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Notifies users that a Participant Group is recommended for further testing based on results.')
+            ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
         ;
     }
 
@@ -83,21 +83,17 @@ class NotifyStudyCoordinatorGroupTestingCommand extends Command
             return sprintf('<li>%s</li>', $g->getTitle());
         }, $this->getNewGroupsRecommendedTesting());
 
-        $email = (new Email())
-            ->from($_ENV['CT_DEFAULT_FROM_ADDRESS'])
-            ->to(...$recipients)
-            ->subject('TEST: New Group Testing Recommendation')
-            ->html(sprintf("
-                <p>These groups require testing:</p>\n
+        // TODO: Move to a specific email class
+        $subject = 'New Group Testing Recommendation';
+        $html = sprintf("<p>These groups require testing:</p>\n
                 <ul>
                     %s
                 </ul>\n
-            ", implode("\n", $groupsRecTestingOutput)));
+        ", implode("\n", $groupsRecTestingOutput));
 
-        if ($_ENV['CT_DEFAULT_REPLY_TO_ADDRESS']) {
-            $email->replyTo($_ENV['CT_DEFAULT_REPLY_TO_ADDRESS']);
-        }
+        $email = EmailBuilder::createHtml($recipients, $subject, $html);
 
+        // Debug output
         $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
         $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
         $this->outputDebug('From: ' . implode(', ', $fromOutput));
