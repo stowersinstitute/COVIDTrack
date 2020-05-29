@@ -45,7 +45,7 @@ class KioskSession
      * DropOff generated if this Session was finalized.
      *
      * @var null|DropOff
-     * @ORM\ManyToOne(targetEntity="App\Entity\DropOff")
+     * @ORM\ManyToOne(targetEntity="App\Entity\DropOff", cascade={"persist"})
      * @ORM\JoinColumn(name="drop_off_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $dropOff;

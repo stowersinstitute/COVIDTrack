@@ -61,12 +61,18 @@ Renders a top-level navigation node in the tree navigation.
         {{
             _self.treenode('Participant Groups', 'fa-users', [
                 {
+                    text: 'Drop-off Schedule',
+                    iconClass: 'fa-calendar',
+                    route: 'participant_group_scheduling_index'
+                },
+                {
                     text: 'List',
                     iconClass: 'fa-list',
                     route: 'app_participant_group_list'
                 },
                 {
                     text: 'New',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                     iconClass: 'fa-plus',
                     route: 'app_participant_group_new'
                 },
@@ -88,6 +94,11 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'Print New Labels',
                     iconClass: 'fa-print',
                     route: 'app_label_printer_print_tube_labels'
+                },
+                {
+                    text: 'Import Pre-labeled Tubes',
+                    iconClass: 'fa-upload',
+                    route: 'tube_excel_import'
                 },
             ], ['ROLE_PRINT_TUBE_LABELS'])
         }}
@@ -119,13 +130,23 @@ Renders a top-level navigation node in the tree navigation.
                 },
             ], ['ROLE_TUBE_CHECK_IN'])
         }}
+
+        {{
+            _self.treenode('Well Plates', 'fa-th', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'well_plate_list'
+                },
+            ], ['ROLE_WELL_PLATE_VIEW'])
+        }}
         {{
             _self.treenode('Results', 'fa-th', [
                 {
                     text: 'Tecan to Specimen IDs',
                     mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-recycle',
-                    route: 'tecan_to_specimen_ids'
+                    route: 'tecan_import_start'
                 },
                 {
                     text: 'List',
@@ -200,6 +221,16 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'kiosk_admin_new'
                 },
             ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
+        }}
+        {{
+            _self.treenode('Configuration', 'fa-cog', [
+                {
+                    text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-calendar-week',
+                    route: 'site_drop_off_schedule_index'
+                },
+            ], ['ROLE_ADMIN'])
         }}
     </ul>
 </section>

@@ -1,0 +1,19 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Tube Accession ID</th>
+        <th>RNA Well Plate</th>
+        <th>RNA Well Position</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for coordinates in wellPlateCoordinates  %}
+        <tr>
+            <td>{{ coordinates.tubeAccessionId }}</td>
+            <td>{{ coordinates.rnaWellPlateId }}</td>
+            <td>{{ coordinates.rnaWellPosition }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

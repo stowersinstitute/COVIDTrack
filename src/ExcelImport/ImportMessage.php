@@ -31,14 +31,21 @@ class ImportMessage
      */
     protected $isError = false;
 
-    public static function newError(string $message, $rowNumber = null, $columnLetter = null)
+    public static function newMessage(string $message, $rowNumber = null, $columnLetter = null)
     {
         $object = new static();
-        $object->setIsError(true);
 
         $object->setDetails($message);
         $object->setRowNumber($rowNumber);
         $object->setColumnLetter($columnLetter);
+
+        return $object;
+    }
+
+    public static function newError(string $message, $rowNumber = null, $columnLetter = null)
+    {
+        $object = static::newMessage($message, $rowNumber, $columnLetter);
+        $object->setIsError(true);
 
         return $object;
     }
