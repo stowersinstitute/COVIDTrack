@@ -37,12 +37,15 @@ if [ -z ${SCHEMA_CHECK_USER+x} ]; then echo "SCHEMA_CHECK_USER is required"; exi
 if [ -z ${SCHEMA_COMPARISON_URL+x} ]; then echo "SCHEMA_COMPARISON_URL is required"; exit 1; fi
 if [ -z ${SCHEMA_CURRENT_VERSIONS_URL+x} ]; then echo "SCHEMA_CURRENT_VERSIONS_URL is required"; exit 1; fi
 
+SCHEMA_CHECK_PASSWORD_IN_URL=""
+SCHEMA_CHECK_PASSWORD_IN_COMMAND=""
 if [[ "$SCHEMA_CHECK_PASSWORD" != "" ]]; then
-  SCHEMA_CHECK_PASSWORD="${SCHEMA_CHECK_PASSWORD}"
+  SCHEMA_CHECK_PASSWORD_IN_URL=":${SCHEMA_CHECK_PASSWORD}"
+  SCHEMA_CHECK_PASSWORD_IN_COMMAND="-p${SCHEMA_CHECK_PASSWORD}"
 fi
 
 # Build temporarty database URL from environment variables
-export DATABASE_URL="mysql://${SCHEMA_CHECK_USER}${SCHEMA_CHECK_PASSWORD}@${SCHEMA_CHECK_HOST}/${SCHEMA_CHECK_DB_NAME}?charset=UTF-8"
+export DATABASE_URL="mysql://${SCHEMA_CHECK_USER}${SCHEMA_CHECK_PASSWORD_IN_URL}@${SCHEMA_CHECK_HOST}/${SCHEMA_CHECK_DB_NAME}?charset=UTF-8"
 
 ##################################################
 # No configuration necessary past here
@@ -55,9 +58,9 @@ bin/console doctrine:database:create
 
 # copy schema from prod
 echo "Getting latest schema"
-curl --silent "$SCHEMA_COMPARISON_URL" | mysql -u "$SCHEMA_CHECK_USER" -h "$SCHEMA_CHECK_HOST" "$SCHEMA_CHECK_DB_NAME"
+curl --silent "$SCHEMA_COMPARISON_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" "$SCHEMA_CHECK_PASSWORD_IN_COMMAND" "$SCHEMA_CHECK_DB_NAME"
 echo "Getting current database versions"
-curl --silent "$SCHEMA_CURRENT_VERSIONS_URL" | mysql -u "$SCHEMA_CHECK_USER" -h "$SCHEMA_CHECK_HOST" "$SCHEMA_CHECK_DB_NAME"
+curl --silent "$SCHEMA_CURRENT_VERSIONS_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" "$SCHEMA_CHECK_PASSWORD_IN_COMMAND" "$SCHEMA_CHECK_DB_NAME"
 
 # run migrations that exist but have not been applied to production yet
 echo "Running pending migrations"
