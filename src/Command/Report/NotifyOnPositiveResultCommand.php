@@ -6,6 +6,7 @@ use App\Email\EmailBuilder;
 use App\Entity\AppUser;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\StudyCoordinatorNotification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -110,6 +111,11 @@ class NotifyOnPositiveResultCommand extends Command
 
         $this->mailer->send($email);
 
+        // Log
+        $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
+        $this->em->persist($notif);
+        $this->em->flush();
+
         return 0;
     }
 
@@ -152,18 +158,33 @@ class NotifyOnPositiveResultCommand extends Command
      */
     private function getNewGroupsRecommendedTesting(): array
     {
-        // TODO: Only report on same group once per day
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
             ->getRepository(SpecimenResultQPCR::class)
             ->findTestingRecommendedResultCreatedAfter(new \DateTimeImmutable('-5 minutes'));
 
+        // Get Groups recommended for testing
         $groups = [];
         foreach ($results as $result) {
             $group = $result->getSpecimen()->getParticipantGroup();
-            $groups[$group->getAccessionId()] = $group;
+            $groups[$group->getId()] = $group;
         }
 
+        // Get Groups the Study Coordinator was already notified about today
+        $now = new \DateTime();
+        /** @var StudyCoordinatorNotification[] $groupsNotifiedToday */
+        $groupsNotifiedToday = $this->em
+            ->getRepository(StudyCoordinatorNotification::class)
+            ->getGroupsNotifiedOnDate($now);
+
+        // Remove Groups notified today
+        foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
+            $id = $groupPreviouslyNotified->getId();
+            unset($groups[$id]);
+        }
+
+        // Remaining are Groups the Study Coordinator has
+        // not been notified about yet today
         return array_values($groups);
     }
 }

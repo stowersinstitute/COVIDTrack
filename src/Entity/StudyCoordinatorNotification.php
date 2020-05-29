@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
@@ -11,7 +12,7 @@ use Symfony\Component\Mime\Email;
  * Log of notifications sent to Study Coordinator, notifying them about
  * Participant Groups that are recommended for testing.
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
  * @ORM\Table(name="study_coordinator_notifications")
  */
 class StudyCoordinatorNotification
@@ -52,6 +53,12 @@ class StudyCoordinatorNotification
 
     /**
      * @var string|null
+     * @ORM\Column(name="from", type="text", nullable=true)
+     */
+    private $from;
+
+    /**
+     * @var string|null
      * @ORM\Column(name="recipients", type="text", nullable=true)
      */
     private $recipients;
@@ -72,6 +79,35 @@ class StudyCoordinatorNotification
     {
         $this->status = self::STATUS_CREATED;
         $this->recommendedGroups = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    /**
+     * @param ParticipantGroup[] $groups
+     */
+    public static function createFromEmail(Email $email, array $groups): self
+    {
+        $from = [];
+        foreach ($email->getFrom() as $address) {
+            $from[] = $address->toString();
+        }
+
+        $recipients = [];
+        foreach ($email->getTo() as $address) {
+            $recipients[] = $address->toString();
+        }
+
+        $n = new static();
+        $n->setFrom(implode(', ', $from));
+        $n->setRecipients(implode(', ', $recipients));
+        $n->setSubject($email->getSubject());
+        $n->setMessage($email->getHtmlBody());
+
+        foreach ($groups as $group) {
+            $n->addRecommendedGroup($group);
+        }
+
+        return $n;
     }
 
     public function getId(): ?int
@@ -97,29 +133,48 @@ class StudyCoordinatorNotification
         $this->status = $status;
     }
 
-    public function setValuesFromEmail(Email $email): void
+    public function addRecommendedGroup(ParticipantGroup $group): void
     {
-        $recipients = [];
-        foreach ($email->getTo() as $address) {
-            $recipients[] = $address->toString();
-        }
-        $this->setRecipients(implode(', ', $recipients));
+        if ($this->hasRecommendedGroup($group)) return;
 
-        $this->setSubject($email->getSubject());
-        $this->setMessage($email->getHtmlBody());
+        $this->recommendedGroups->add($group);
     }
 
-    public function setRecipients(string $recipients): void
+    public function hasRecommendedGroup(ParticipantGroup $group): bool
+    {
+        foreach ($this->recommendedGroups as $existingGroup) {
+            if (EntityUtils::isSameEntity($existingGroup, $group)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return ParticipantGroup[]
+     */
+    public function getRecommendedGroups(): array
+    {
+        return $this->recommendedGroups->getValues();
+    }
+
+    public function setFrom(?string $from): void
+    {
+        $this->from = $from;
+    }
+
+    public function setRecipients(?string $recipients): void
     {
         $this->recipients = $recipients;
     }
 
-    public function setSubject(string $subject): void
+    public function setSubject(?string $subject): void
     {
         $this->subject = $subject;
     }
 
-    public function setMessage(string $message): void
+    public function setMessage(?string $message): void
     {
         $this->message = $message;
     }
