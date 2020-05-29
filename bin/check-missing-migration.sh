@@ -38,7 +38,7 @@ if [ -z ${SCHEMA_COMPARISON_URL+x} ]; then echo "SCHEMA_COMPARISON_URL is requir
 if [ -z ${SCHEMA_CURRENT_VERSIONS_URL+x} ]; then echo "SCHEMA_CURRENT_VERSIONS_URL is required"; exit 1; fi
 
 if [[ "$SCHEMA_CHECK_PASSWORD" != "" ]]; then
-  SCHEMA_CHECK_PASSWORD = ":${SCHEMA_CHECK_PASSWORD}"
+  SCHEMA_CHECK_PASSWORD="${SCHEMA_CHECK_PASSWORD}"
 fi
 
 # Build temporarty database URL from environment variables
