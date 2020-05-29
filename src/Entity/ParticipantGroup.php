@@ -18,7 +18,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  */
 class ParticipantGroup
 {
-    public const MIN_PARTICIPANT_COUNT = 1;
+    public const MIN_PARTICIPANT_COUNT = 0;
     public const MAX_PARTICIPANT_COUNT = 65000;
 
     use TimestampableEntity, SoftDeleteableEntity;
@@ -39,6 +39,13 @@ class ParticipantGroup
      * @Gedmo\Versioned
      */
     private $accessionId;
+
+    /**
+     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     *
+     * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     */
+    private $externalId;
 
     /**
      * Human-readable title to identify this group. Used instead of accessionId
@@ -298,5 +305,15 @@ class ParticipantGroup
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+    }
+
+    public function getExternalId(): ?string
+    {
+        return $this->externalId;
+    }
+
+    public function setExternalId(?string $externalId): void
+    {
+        $this->externalId = $externalId;
     }
 }
