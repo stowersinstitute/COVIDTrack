@@ -9,6 +9,7 @@ use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use App\Util\EntityUtils;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -26,8 +27,7 @@ class ExcelImporter
 
     public function createWorkbookFromUpload(UploadedFile $file) : ExcelImportWorkbook
     {
-        $reader = new Xlsx();
-        $spreadsheet = $reader->load($file->getRealPath());
+        $spreadsheet = IOFactory::load($file->getRealPath());
 
         $importWorkbook = new ExcelImportWorkbook();
         $importWorkbook->setFilename($file->getClientOriginalName());

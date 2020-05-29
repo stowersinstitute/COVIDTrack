@@ -1,7 +1,12 @@
 {% block body %}
+{{ form_start(form) }}
+{{ form_row(form.printer) }}
+{{ form_row(form.print) }}
+
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
+            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
             <th>&nbsp;</th>
             <th>Title</th>
             <th>Participants</th>
@@ -16,6 +21,9 @@
     <tbody>
     {% for group in groups %}
         <tr>
+            <td>
+                <input type="checkbox" class="tube-checkbox" name="groups[]" value="{{ group.title }}">
+            </td>
             <td>
                 <a href="{{ path('app_participant_group_edit', {title: group.title}) }}">Edit</a>
             </td>
@@ -38,4 +46,11 @@
     {% endfor %}
     </tbody>
 </table>
+{{ form_end(form) }}
+<script type="application/javascript">
+    $('#check-all').change(function() {
+        $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+</script>
+
 {% endblock %}

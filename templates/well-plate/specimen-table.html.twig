@@ -1,0 +1,18 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Specimen</th>
+        <th>Position</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for well in wells %}
+        <tr>
+            <td>
+                <a href="{{ path('app_specimen_view', {accessionId: well.specimen.accessionId}) }}">{{ well.specimen.accessionId }}</a>
+            </td>
+            <td>{{ well.position }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -35,13 +35,19 @@ class TubeRepository extends EntityRepository
      */
     public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
     {
-        return $this->createQueryBuilder('t')
+        $tubes = $this->createQueryBuilder('t')
             ->addSelect('s')
             ->join('t.specimen', 's')
             ->where('t.accessionId = :accessionId')
             ->setParameter('accessionId', $accessionId)
-            ->setMaxResults(1)
-            ->getQuery()->getSingleResult();
+            ->getQuery()
+            ->execute();
+
+        if (count($tubes) === 0) {
+            return null;
+        }
+
+        return array_shift($tubes);
     }
 
     public function getReturnedCount() : int

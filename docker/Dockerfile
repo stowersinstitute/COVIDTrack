@@ -16,10 +16,12 @@ RUN apt-get update && apt-get install -y \
         libzip-dev \
         libpq-dev \
         libldap-dev \
+        libgmp-dev \
         nodejs \
         yarn \
     && docker-php-ext-install -j$(nproc) iconv \
     && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install -j$(nproc) gmp \
     && docker-php-ext-install -j$(nproc) zip \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) ldap \

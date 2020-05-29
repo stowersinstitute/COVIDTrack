@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
@@ -74,19 +75,13 @@ class Specimen
     private $participantGroup;
 
     /**
-     * @var WellPlate
-     * ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
-     */
-    private $wellPlate;
-
-    /**
-     * Well Plate ID where original RNA is held.
+     * Wells where this Specimen is contained.
      *
-     * @var string
-     * @ORM\Column(name="rna_well_plate_id", type="string", nullable=true)
-     * @Gedmo\Versioned
+     * @var SpecimenWell[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"position" = "ASC"})
      */
-    private $rnaWellPlateId;
+    private $wells;
 
     /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
@@ -223,7 +218,6 @@ class Specimen
             'accessionId' => 'Accession ID',
             'type' => 'Type',
             'collectedAt' => 'Collection Time',
-            'rnaWellPlateId' => 'RNA Well Plate ID',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
@@ -408,25 +402,63 @@ class Specimen
         return $map[$rec] ?? '';
     }
 
-    public function getRnaWellPlateId(): ?string
+    /**
+     * Add this Specimen to given Well Plate at given position.
+     *
+     * If Specimen is already on this Well Plate, it will be updated to being
+     * at the given position.
+     */
+    public function addWellPlate(WellPlate $plate, int $position = null): void
     {
-        return $this->rnaWellPlateId;
+        $existingWell = $this->getWellOnPlate($plate);
+        if ($existingWell) {
+            // Update position on existing Well Plate
+            $existingWell->setPosition($position);
+        } else {
+            // Add new
+            $this->wells->add(new SpecimenWell($plate, $this, $position));
+        }
     }
 
-    public function setRnaWellPlateId(?string $rnaWellPlateId): void
+    /**
+     * Whether Specimen is on the given Well Plate.
+     */
+    public function isOnWellPlate(WellPlate $plate): bool
     {
-        $this->rnaWellPlateId = $rnaWellPlateId;
+        return (bool) $this->getWellOnPlate($plate);
     }
 
-//    public function getWellPlate(): ?WellPlate
-//    {
-//        return $this->wellPlate;
-//    }
-//
-//    public function setWellPlate(?WellPlate $wellPlate): void
-//    {
-//        $this->wellPlate = $wellPlate;
-//    }
+    /**
+     * Get SpecimenWell if this Specimen already on given WellPlate.
+     */
+    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    {
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return $well;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all Well Plates where this Specimen is contained.
+     *
+     * @return WellPlate[]
+     */
+    public function getWellPlates(): array
+    {
+        $plates = [];
+        foreach ($this->wells as $well) {
+            $plate = $well->getWellPlate();
+            if ($plate) {
+                $plates[] = $plate;
+            }
+        }
+
+        return $plates;
+    }
 
     public function getCollectedAt(): ?\DateTimeInterface
     {
@@ -436,6 +468,22 @@ class Specimen
     public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
+    {
+        $barcodes = [];
+        foreach ($this->wells as $well) {
+            $code = $well->getWellPlateBarcode();
+            if ($code) {
+                $barcodes[] = $code;
+            }
+        }
+
+        return $barcodes;
     }
 
     private function ensureValidType(?string $type): void

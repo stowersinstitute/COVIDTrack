@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    {# New Groups to be created #}
+    {# New Well Plate Coordinates to be created #}
     {% if importer.hasGroupsForAction('created') %}
         {% set bgColor = 'bg-green' %}
         {% set actionCount = importer.output['created']|length %}
@@ -22,13 +22,13 @@
         <div class="info-box">
             <span class="info-box-icon {{ bgColor }}"><i class="fa fa-plus"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">New Groups</span>
+                <span class="info-box-text">New Well Plate Coordinates</span>
                 <span class="info-box-number">{{ actionCount }}</span>
             </div>
         </div>
     </div>
 
-    {# Updated groups #}
+    {# Updated Well Plate Coordinates #}
     {% if importer.hasGroupsForAction('updated') %}
         {% set bgColor = 'bg-orange' %}
         {% set actionCount = importer.output['updated']|length %}
@@ -40,25 +40,7 @@
         <div class="info-box">
             <span class="info-box-icon {{ bgColor }}"><i class="fa fa-edit"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Updated Groups</span>
-                <span class="info-box-number">{{ actionCount }}</span>
-            </div>
-        </div>
-    </div>
-
-    {# Deactivated groups #}
-    {% if importer.hasGroupsForAction('deactivated') %}
-        {% set bgColor = 'bg-red' %}
-        {% set actionCount = importer.output['deactivated']|length %}
-    {% else %}
-        {% set bgColor = 'bg-gray' %}
-        {% set actionCount = '-- None --' %}
-    {% endif %}
-    <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box">
-            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-trash"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Deactivated Groups</span>
+                <span class="info-box-text">Updated Well Plate Coordinates</span>
                 <span class="info-box-number">{{ actionCount }}</span>
             </div>
         </div>

@@ -82,7 +82,7 @@ class ExcelImportWorksheet
     /**
      * @return \DateTimeImmutable|string|null
      */
-    public function getCellValue($rowIndex, $column)
+    public function getCellValue(int $rowIndex, string $column)
     {
         $cell = $this->getCell($rowIndex, $column);
         if (!$cell) return null;
@@ -90,7 +90,7 @@ class ExcelImportWorksheet
         return $cell->getValue();
     }
 
-    public function getCell($rowIndex, $column) : ?ExcelImportCell
+    public function getCell(int $rowIndex, string $column) : ?ExcelImportCell
     {
         foreach ($this->cells as $cell) {
             if ($cell->getRowIndex() === $rowIndex && $cell->getColIndex() === $column) {

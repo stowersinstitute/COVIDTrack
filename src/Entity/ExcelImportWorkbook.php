@@ -7,8 +7,6 @@ namespace App\Entity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * A workbook created by parsing an uploaded Excel file
@@ -28,11 +26,19 @@ class ExcelImportWorkbook
 
     /**
      * Filename provided by the user when the file was uploaded
-     * @var string
      *
+     * @var string
      * @ORM\Column(name="filename", type="string", length=255, nullable=true)
      */
     protected $filename;
+
+    /**
+     * File MIME-type provided by uploaded file
+     *
+     * @var string
+     * @ORM\Column(name="file_mime_type", type="string", length=255, nullable=true)
+     */
+    protected $fileMimeType;
 
     /**
      * When the file was uploaded
@@ -83,6 +89,16 @@ class ExcelImportWorkbook
     public function setFilename(?string $filename): void
     {
         $this->filename = $filename;
+    }
+
+    public function getFileMimeType(): ?string
+    {
+        return $this->fileMimeType;
+    }
+
+    public function setFileMimeType(?string $mime): void
+    {
+        $this->fileMimeType = $mime;
     }
 
     public function getUploadedAt(): ?\DateTimeImmutable
