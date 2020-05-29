@@ -40,10 +40,6 @@ class SpecimenForm extends AbstractType
                 'placeholder' => '- Select -',
                 'required' => false,
             ])
-            ->add('rnaWellPlateId', TextType::class, [
-                'label' => 'RNA Well Plate ID',
-                'required' => false,
-            ])
             ->add('status', ChoiceType::class, [
                 'choices' => Specimen::getFormStatuses(),
             ])

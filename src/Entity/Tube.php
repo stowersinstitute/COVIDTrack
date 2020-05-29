@@ -341,18 +341,21 @@ class Tube
         ];
     }
 
-    public function getRnaWellPlateId(): ?string
-    {
-        return $this->specimen ? $this->specimen->getRnaWellPlateId() : null;
-    }
-
-    public function setRnaWellPlateId(?string $rnaWellPlateId): void
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
     {
         if (!$this->specimen) {
-            throw new \RuntimeException('Cannot set Tube RNA Well Plate until its Specimen is created');
+            return [];
         }
 
-        $this->specimen->setRnaWellPlateId($rnaWellPlateId);
+        return $this->specimen->getRnaWellPlateBarcodes();
+    }
+
+    public function addWellPlate(WellPlate $plate, int $position = null): void
+    {
+        $this->specimen->addWellPlate($plate, $position);
     }
 
     public function getKitType(): ?string
