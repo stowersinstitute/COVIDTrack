@@ -33,6 +33,9 @@ class TubeImporter extends BaseExcelImporter
 
         // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
+            // If all values are blank assume it's just empty excel data
+            if ($this->rowDataBlank($rowNumber)) continue;
+
             $rawAccessionId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['accessionId']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)

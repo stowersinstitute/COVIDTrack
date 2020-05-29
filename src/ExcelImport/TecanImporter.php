@@ -189,6 +189,9 @@ class TecanImporter extends BaseExcelImporter
 
         // Created and updated can be figured out from file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
+            // If all values are blank assume it's just empty excel data
+            if ($this->rowDataBlank($rowNumber)) continue;
+
             $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeAccessionId']);
             $rawWellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
 
