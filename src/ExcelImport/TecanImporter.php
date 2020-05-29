@@ -20,15 +20,15 @@ class TecanImporter extends BaseExcelImporter
     const STARTING_ROW = 3;
 
     const WELL_POSITION_ROW = 1;
-    const WELL_POSITION_COLUMN = 'B';
+    const WELL_POSITION_COLUMN = 'A';
     const WELL_POSITION_HEADER = 'Position';
 
     const TUBE_ID_ROW = 1;
-    const TUBE_ID_COLUMN = 'G';
+    const TUBE_ID_COLUMN = 'F';
     const TUBE_ID_HEADER = 'SRCTubeID';
 
     const BARCODE_ROW = 2;
-    const BARCODE_COLUMN = 'J';
+    const BARCODE_COLUMN = 'I';
 
     /**
      * @var TubeRepository
