@@ -5,6 +5,7 @@ namespace App\Command\Report;
 use App\Email\EmailBuilder;
 use App\Entity\AppUser;
 use App\Entity\ParticipantGroup;
+use App\Entity\SpecimenResultQPCR;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,7 +13,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -75,13 +75,19 @@ class NotifyOnPositiveResultCommand extends Command
     {
         $recipients = $this->getEmailRecipients();
         if (empty($recipients)) {
-            $this->outputDebug('No users to email');
+            $this->outputDebug('No email recipients');
+            return 0;
+        }
+
+        $groups = $this->getNewGroupsRecommendedTesting();
+        if (count($groups) < 1) {
+            $this->outputDebug('No new Participant Groups need contacting');
             return 0;
         }
 
         $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
             return sprintf('<li>%s</li>', $g->getTitle());
-        }, $this->getNewGroupsRecommendedTesting());
+        }, $groups);
 
         // TODO: Move to a specific email class
         $subject = 'New Group Testing Recommendation';
@@ -146,8 +152,18 @@ class NotifyOnPositiveResultCommand extends Command
      */
     private function getNewGroupsRecommendedTesting(): array
     {
-        // TODO: Real report data based on Results upload date
         // TODO: Only report on same group once per day
-        return $this->em->getRepository(ParticipantGroup::class)->findAll();
+        /** @var SpecimenResultQPCR[] $results */
+        $results = $this->em
+            ->getRepository(SpecimenResultQPCR::class)
+            ->findTestingRecommendedResultCreatedAfter(new \DateTimeImmutable('-5 minutes'));
+
+        $groups = [];
+        foreach ($results as $result) {
+            $group = $result->getSpecimen()->getParticipantGroup();
+            $groups[$group->getAccessionId()] = $group;
+        }
+
+        return array_values($groups);
     }
 }
