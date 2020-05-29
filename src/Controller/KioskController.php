@@ -8,6 +8,7 @@ use App\Entity\Kiosk;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
+use App\Entity\ParticipantGroupRepository;
 use App\Entity\Tube;
 use App\Form\KioskAddTubeForm;
 use App\Util\EntityUtils;
@@ -92,6 +93,12 @@ class KioskController extends AbstractController
         $form = $this->createFormBuilder($kioskSession)
             ->add('participantGroup', EntityType::class, [
                 'class' => ParticipantGroup::class,
+                'query_builder' => function(ParticipantGroupRepository $repository) {
+                    return $repository->createQueryBuilder('g')
+                        ->where('g.isActive = true')
+                        ->orderBy('g.title', 'ASC')
+                    ;
+                },
                 'choice_name' => 'title',
                 'required' => true,
                 'empty_data' => "",

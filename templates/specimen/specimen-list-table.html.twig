@@ -6,7 +6,7 @@
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
-            <th>RNA Well Plate ID</th>
+            <th>RNA Well Plate</th>
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
         </tr>
@@ -22,7 +22,11 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
-            <td>{{ specimen.rnaWellPlateId }}</td>
+            <td>
+                {% for barcode in specimen.rnaWellPlateBarcodes %}
+                <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                {% endfor %}
+            </td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>
             <td>{{ specimen.statusText }}</td>
         </tr>
