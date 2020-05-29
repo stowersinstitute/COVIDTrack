@@ -51,9 +51,11 @@ export DATABASE_URL="mysql://${SCHEMA_CHECK_USER}${SCHEMA_CHECK_PASSWORD_IN_URL}
 # No configuration necessary past here
 
 # drop database
+echo "Dropping local database"
 bin/console doctrine:database:drop --if-exists --force
 
 # start over with production database
+echo "Creating local database"
 bin/console doctrine:database:create
 
 # copy schema from prod
