@@ -10,20 +10,6 @@ use Doctrine\ORM\EntityRepository;
  */
 class SpecimenResultQPCRRepository extends EntityRepository
 {
-
-    /**
-     * @return SpecimenResultQPCR[]
-     */
-    public function findPositiveGroups(\DateTimeInterface $datetime): array
-    {
-        return $this->createQueryBuilder('r')
-            ->where('r.createdAt > :since')
-            ->setParameter('since', $datetime)
-            ->orderBy('r.createdAt')
-            ->getQuery()
-            ->execute();
-    }
-
     /**
      * Find Results whose conclusion recommends for testing,
      * and result was created after a certain time.
