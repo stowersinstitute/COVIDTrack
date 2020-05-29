@@ -8,6 +8,7 @@ use App\Entity\Tube;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\TubeImporter;
 use App\Form\GenericExcelImportType;
+use App\Label\MBSBloodTubeLabelBuilder;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
 use App\Tecan\CannotReadOutputFileException;
@@ -16,6 +17,7 @@ use App\Tecan\TecanOutput;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -52,6 +54,15 @@ class TubeController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- None -'
             ])
+            ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
+                'choices' => [
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
             ->add('print', SubmitType::class, [
                 'label' => 'Re-Print Selected Tubes',
                 'attr' => ['class' => 'btn-primary'],
@@ -67,8 +78,9 @@ class TubeController extends AbstractController
             $printTubes = $em->getRepository(Tube::class)->findBy(['accessionId' => $tubesIds]);
 
             $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $builderClass = $data['labelType'];
 
-            $builder = new SpecimenIntakeLabelBuilder();
+            $builder = new $builderClass;
             $builder->setPrinter($printer);
 
             foreach ($printTubes as $tube) {

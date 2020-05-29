@@ -62,10 +62,13 @@ class MBSBloodTubeLabelBuilder extends AbstractLabelBuilder
         }
 
         $zpl->drawCode128(2, 0, 8, $accessionId, 1);
+        $zpl->drawText(20, 2, substr($this->tube->getAccessionId(), -4, 4), "R");
 
         $zpl->newPage();
 
         $zpl->setFont($font, $fontSize);
+
+        $zpl->drawRect(0, 0, 24, .25, .25);
         $zpl->drawText(2, 5, $accessionId, 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
         $zpl->drawText(2, 7, $date->format('Y.m.d H:i:s'), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
