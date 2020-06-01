@@ -29,6 +29,11 @@ class NotifyOnPositiveResultCommand extends Command
      */
     const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
 
+    /**
+     * Date format for printing results in email
+     */
+    const RESULTS_DATETIME_FORMAT = 'F j, Y @ g:ip';
+
     protected static $defaultName = 'app:report:notify-on-positive-result';
 
     /** @var EntityManagerInterface */
@@ -84,7 +89,10 @@ class NotifyOnPositiveResultCommand extends Command
             return 0;
         }
 
-        $groups = $this->getNewGroupsRecommendedTesting();
+        $recommendations = $this->getNewTestingRecommendations();
+        $groups = $recommendations['groups'];
+        $timestamps = $recommendations['timestamps'];
+
         if (count($groups) < 1) {
             $this->outputDebug('No new Participant Groups need contacting');
             return 0;
@@ -94,17 +102,29 @@ class NotifyOnPositiveResultCommand extends Command
             return sprintf('<li>%s</li>', $g->getTitle());
         }, $groups);
 
+        $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
+            return sprintf("<li>%s</li>", $dt->format(self::RESULTS_DATETIME_FORMAT));
+        }, $timestamps);
+
         $subject = 'New Group Testing Recommendation';
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
-            <p>The following Participant Groups have been recommended for diagnostic testing.</p>\n
+            <p>Participant Groups have been recommended for diagnostic testing.</p>
+
+            <p>Results published:</p>
+            <ul>
+            %s
+            </ul>
+
+            <p>Participant Groups:</p>
             <ul>
                 %s
-            </ul>\n
+            </ul>
+
             <p>
                 View more details in COVIDTrack:<br>%s
             </p>
-        ", implode("\n", $groupsRecTestingOutput), $url);
+        ", implode("\n", $timestampsOutput), implode("\n", $groupsRecTestingOutput), $url);
 
         $email = EmailBuilder::createHtml($recipients, $subject, $html);
 
@@ -166,10 +186,25 @@ class NotifyOnPositiveResultCommand extends Command
     }
 
     /**
-     * @return ParticipantGroup[]
+     * Get Participant Groups and the timestamp when their recommended result
+     * was uploaded.
+     *
+     * Usage:
+     *
+     * $rec = $this->getNewTestingRecommendations();
+     * $groups = $rec['groups'];
+     * $timestamps = $rec['timestamps'];
+     *
+     * $groups === ParticipantGroup[] - Unique list of groups recommended for further testing
+     * $resultsUploadedAt === \DateTimeImmutable[] - Unique list of times found results were uploaded
      */
-    private function getNewGroupsRecommendedTesting(): array
+    private function getNewTestingRecommendations(): array
     {
+        $output = [
+            'groups' => [],
+            'timestamps' => [],
+        ];
+
         $lastNotificationSent = $this->em
             ->getRepository(StudyCoordinatorNotification::class)
             ->getMostRecentSentAt();
@@ -186,16 +221,25 @@ class NotifyOnPositiveResultCommand extends Command
             ->getRepository(SpecimenResultQPCR::class)
             ->findTestingRecommendedResultCreatedAfter($lastNotificationSent);
         if (!$results) {
-            return [];
+            return $output;
         }
 
         $this->outputDebug('Found new recommended results: ' . count($results));
 
-        // Get Groups recommended for testing
+        // Get recommendations for testing
         $groups = [];
+        $resultsTimestamps = [];
         foreach ($results as $result) {
+            // Group
             $group = $result->getSpecimen()->getParticipantGroup();
             $groups[$group->getId()] = $group;
+
+            // Result timestamp
+            $timestamp = $result->getCreatedAt();
+            if ($timestamp) {
+                $idx = $timestamp->format(self::RESULTS_DATETIME_FORMAT);
+                $resultsTimestamps[$idx] = $timestamp;
+            }
         }
 
         // Get Groups the Study Coordinator was already notified about today
@@ -213,6 +257,9 @@ class NotifyOnPositiveResultCommand extends Command
 
         // Remaining are Groups the Study Coordinator has
         // not been notified about yet today
-        return array_values($groups);
+        $output['groups'] = array_values($groups);
+        $output['timestamps'] = array_values($resultsTimestamps);
+
+        return $output;
     }
 }
