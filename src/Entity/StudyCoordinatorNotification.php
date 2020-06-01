@@ -45,15 +45,15 @@ class StudyCoordinatorNotification
 
     /**
      * @var string|null
-     * @ORM\Column(name="from", type="text", nullable=true)
+     * @ORM\Column(name="fromAddresses", type="text", nullable=true)
      */
-    private $from;
+    private $fromAddresses;
 
     /**
      * @var string|null
-     * @ORM\Column(name="recipients", type="text", nullable=true)
+     * @ORM\Column(name="toAddresses", type="text", nullable=true)
      */
-    private $recipients;
+    private $toAddresses;
 
     /**
      * @var string|null
@@ -83,14 +83,14 @@ class StudyCoordinatorNotification
             $from[] = $address->toString();
         }
 
-        $recipients = [];
+        $to = [];
         foreach ($email->getTo() as $address) {
-            $recipients[] = $address->toString();
+            $to[] = $address->toString();
         }
 
         $n = new static();
-        $n->setFrom(implode(', ', $from));
-        $n->setRecipients(implode(', ', $recipients));
+        $n->setFromAddressesString(implode(', ', $from));
+        $n->setToAddressesString(implode(', ', $to));
         $n->setSubject($email->getSubject());
         $n->setMessage($email->getHtmlBody());
 
@@ -132,24 +132,24 @@ class StudyCoordinatorNotification
         return $this->recommendedGroups->getValues();
     }
 
-    public function getFrom(): ?string
+    public function getFromAddressesString(): ?string
     {
-        return $this->from;
+        return $this->fromAddresses;
     }
 
-    public function setFrom(?string $from): void
+    public function setFromAddressesString(?string $from): void
     {
-        $this->from = $from;
+        $this->fromAddresses = $from;
     }
 
-    public function getRecipients(): ?string
+    public function getToAddressesString(): ?string
     {
-        return $this->recipients;
+        return $this->toAddresses;
     }
 
-    public function setRecipients(?string $recipients): void
+    public function setToAddressesString(?string $to): void
     {
-        $this->recipients = $recipients;
+        $this->toAddresses = $to;
     }
 
     public function getSubject(): ?string
