@@ -124,7 +124,11 @@ class NotifyOnPositiveResultCommand extends Command
             <p>
                 View more details in COVIDTrack:<br>%s
             </p>
-        ", implode("\n", $timestampsOutput), implode("\n", $groupsRecTestingOutput), $url);
+        ",
+            implode("\n", $timestampsOutput),
+            implode("\n", $groupsRecTestingOutput),
+            sprintf('<a href="%s">%s</a>', $url, $url)
+        );
 
         $email = EmailBuilder::createHtml($recipients, $subject, $html);
 
