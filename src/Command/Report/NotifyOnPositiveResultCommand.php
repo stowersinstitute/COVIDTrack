@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -94,11 +95,16 @@ class NotifyOnPositiveResultCommand extends Command
 
         // TODO: Move to a specific email class
         $subject = 'New Group Testing Recommendation';
-        $html = sprintf("<p>These groups require testing:</p>\n
-                <ul>
-                    %s
-                </ul>\n
-        ", implode("\n", $groupsRecTestingOutput));
+        $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
+        $html = sprintf("
+            <p>The following Participant Groups have been recommended for diagnostic testing.</p>\n
+            <ul>
+                %s
+            </ul>\n
+            <p>
+                View more details in COVIDTrack:<br>%s
+            </p>
+        ", implode("\n", $groupsRecTestingOutput), $url);
 
         $email = EmailBuilder::createHtml($recipients, $subject, $html);
 
