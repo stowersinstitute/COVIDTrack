@@ -84,6 +84,7 @@ class DropOffScheduleController extends AbstractController
         $dropoffSchedule->setDailyStartTime(DateUtils::toImmutable($form->get('startTime')->getData()));
         $dropoffSchedule->setDailyEndTime(DateUtils::toImmutable($form->get('endTime')->getData()));
         $dropoffSchedule->setWindowIntervalMinutes($form->get('interval')->getData());
+        $dropoffSchedule->setNumExpectedDropOffsPerGroup($form->get('numExpectedDropOffsPerGroup')->getData());
 
         $dropoffSchedule->setDaysOfTheWeek($enabledDays);
 
