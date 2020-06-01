@@ -18,6 +18,8 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Notifies users that should be notified when a new Positive Result is available.
+ *
+ * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
 class NotifyOnPositiveResultCommand extends Command
 {
