@@ -32,7 +32,7 @@ class NotifyOnPositiveResultCommand extends Command
     /**
      * Date format for printing results in email
      */
-    const RESULTS_DATETIME_FORMAT = 'F j, Y @ g:ip';
+    const RESULTS_DATETIME_FORMAT = 'F j, Y @ g:ia';
 
     protected static $defaultName = 'app:report:notify-on-positive-result';
 
