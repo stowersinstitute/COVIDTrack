@@ -93,7 +93,6 @@ class NotifyOnPositiveResultCommand extends Command
             return sprintf('<li>%s</li>', $g->getTitle());
         }, $groups);
 
-        // TODO: Move to a specific email class
         $subject = 'New Group Testing Recommendation';
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
