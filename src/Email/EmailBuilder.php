@@ -2,10 +2,14 @@
 
 namespace App\Email;
 
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 class EmailBuilder
 {
+    /**
+     * @param Address[]|string[]  $toAddresses
+     */
     public static function createHtml(array $toAddresses, string $subject, string $html): Email
     {
         $email = static::createBase($toAddresses, $subject);
@@ -14,6 +18,9 @@ class EmailBuilder
         return $email;
     }
 
+    /**
+     * @param Address[]|string[]  $toAddresses
+     */
     public static function createText(array $toAddresses, string $subject, string $text): Email
     {
         $email = static::createBase($toAddresses, $subject);
@@ -22,6 +29,9 @@ class EmailBuilder
         return $email;
     }
 
+    /**
+     * @param Address[]|string[]  $toAddresses
+     */
     private static function createBase(array $toAddresses, string $subject): Email
     {
         $email = new Email();

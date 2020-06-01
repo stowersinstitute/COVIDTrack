@@ -13,6 +13,20 @@ use Doctrine\ORM\EntityRepository;
 class StudyCoordinatorNotificationRepository extends EntityRepository
 {
     /**
+     * Get the most recent timestamp when the Study Coordinator Notification
+     * was last sent.
+     */
+    public function getMostRecentSentAt(): ?\DateTimeImmutable
+    {
+        $mostRecent = $this->findOneBy([], ['createdAt' => 'DESC']);
+        if (!$mostRecent) {
+            return null;
+        }
+
+        return $mostRecent->getCreatedAt();
+    }
+
+    /**
      * Find list of Participant Groups that the Study Coordinator was
      * notified about on a specific date.
      *

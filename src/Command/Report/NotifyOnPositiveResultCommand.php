@@ -158,10 +158,26 @@ class NotifyOnPositiveResultCommand extends Command
      */
     private function getNewGroupsRecommendedTesting(): array
     {
+        $lastNotificationSent = $this->em
+            ->getRepository(StudyCoordinatorNotification::class)
+            ->getMostRecentSentAt();
+        if (!$lastNotificationSent) {
+            // Study Coordinator has never been notified.
+            // Assume since earliest possible time.
+            $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
+        }
+
+        $this->outputDebug('Searching for new recommended results since ' . $lastNotificationSent->format("Y-m-d H:i:s"));
+
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
             ->getRepository(SpecimenResultQPCR::class)
-            ->findTestingRecommendedResultCreatedAfter(new \DateTimeImmutable('-5 minutes'));
+            ->findTestingRecommendedResultCreatedAfter($lastNotificationSent);
+        if (!$results) {
+            return [];
+        }
+
+        $this->outputDebug('Founds new recommended results: ' . count($results));
 
         // Get Groups recommended for testing
         $groups = [];
