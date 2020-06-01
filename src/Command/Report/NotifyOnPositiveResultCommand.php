@@ -59,6 +59,7 @@ class NotifyOnPositiveResultCommand extends Command
     {
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
+            ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save a record of this notification being sent. Useful when testing.')
         ;
     }
 
@@ -120,9 +121,12 @@ class NotifyOnPositiveResultCommand extends Command
         $this->mailer->send($email);
 
         // Log
-        $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
-        $this->em->persist($notif);
-        $this->em->flush();
+        $save = !$input->getOption('skip-saving');
+        if ($save) {
+            $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
+            $this->em->persist($notif);
+            $this->em->flush();
+        }
 
         return 0;
     }
