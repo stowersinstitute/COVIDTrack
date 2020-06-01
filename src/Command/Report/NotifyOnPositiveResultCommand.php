@@ -100,7 +100,8 @@ class NotifyOnPositiveResultCommand extends Command
 
         $email = EmailBuilder::createHtml($recipients, $subject, $html);
 
-        // Debug output
+        // Debug output email
+        $this->outputDebug('------');
         $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
         $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
         $this->outputDebug('From: ' . implode(', ', $fromOutput));
@@ -177,7 +178,7 @@ class NotifyOnPositiveResultCommand extends Command
             return [];
         }
 
-        $this->outputDebug('Founds new recommended results: ' . count($results));
+        $this->outputDebug('Found new recommended results: ' . count($results));
 
         // Get Groups recommended for testing
         $groups = [];
