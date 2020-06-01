@@ -113,12 +113,12 @@ class NotifyOnPositiveResultCommand extends Command
 
             <p>Results published:</p>
             <ul>
-            %s
+%s
             </ul>
 
             <p>Participant Groups:</p>
             <ul>
-                %s
+%s
             </ul>
 
             <p>
