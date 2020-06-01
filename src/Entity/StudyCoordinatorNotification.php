@@ -31,12 +31,13 @@ class StudyCoordinatorNotification
      * Participant Groups that were recommended for testing by this notification.
      *
      * @ORM\ManyToMany(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinTable(name="study_coordinator_notification_recommended_groups",
+     * @ORM\JoinTable(
+     *     name="study_coordinator_notification_recommended_groups",
      *     joinColumns={
-     *         @ORM\JoinColumn(name="notification_id", referencedColumnName="id")
+     *         @ORM\JoinColumn(name="notification_id", referencedColumnName="id", onDelete="CASCADE")
      *     },
      *     inverseJoinColumns={
-     *         @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id")
+     *         @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id", onDelete="CASCADE")
      *     }
      * )
      */
