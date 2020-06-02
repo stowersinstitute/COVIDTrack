@@ -145,7 +145,7 @@ class TubeController extends AbstractController
             'importer' => $importer,
             'importPreviewTemplate' => 'tube/excel-import-table.html.twig',
             'importCommitRoute' => 'tube_excel_import_commit',
-            'importCommitText' => 'Import Tubes',
+            'importCommitText' => 'Save Tubes',
         ]);
     }
 
