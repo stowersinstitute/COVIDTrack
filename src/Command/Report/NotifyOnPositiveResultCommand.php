@@ -64,6 +64,7 @@ class NotifyOnPositiveResultCommand extends Command
     {
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
+            ->addOption('testing', null, InputOption::VALUE_NONE, 'Use to ignore the last time the notification was sent to Study Coordinator, and ignore if Groups have already been recommended today. Useful for triggering a test email.')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save a record of this notification being sent. Useful when testing.')
         ;
     }
@@ -145,7 +146,7 @@ class NotifyOnPositiveResultCommand extends Command
         $this->mailer->send($email);
 
         // Log
-        $save = !$input->getOption('skip-saving');
+        $save = (!$input->getOption('skip-saving') && !$input->getOption('testing'));
         if ($save) {
             $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
             $this->em->persist($notif);
@@ -212,7 +213,7 @@ class NotifyOnPositiveResultCommand extends Command
         $lastNotificationSent = $this->em
             ->getRepository(StudyCoordinatorNotification::class)
             ->getMostRecentSentAt();
-        if (!$lastNotificationSent) {
+        if (!$lastNotificationSent || $this->input->getOption('testing')) {
             // Study Coordinator has never been notified.
             // Assume since earliest possible time.
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
@@ -246,17 +247,19 @@ class NotifyOnPositiveResultCommand extends Command
             }
         }
 
-        // Get Groups the Study Coordinator was already notified about today
-        $now = new \DateTime();
-        /** @var StudyCoordinatorNotification[] $groupsNotifiedToday */
-        $groupsNotifiedToday = $this->em
-            ->getRepository(StudyCoordinatorNotification::class)
-            ->getGroupsNotifiedOnDate($now);
+        // Only contact about Groups not yet notified today
+        if (!$this->input->getOption('testing')) {
+            $now = new \DateTime();
+            /** @var StudyCoordinatorNotification[] $groupsNotifiedToday */
+            $groupsNotifiedToday = $this->em
+                ->getRepository(StudyCoordinatorNotification::class)
+                ->getGroupsNotifiedOnDate($now);
 
-        // Remove Groups notified today
-        foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
-            $id = $groupPreviouslyNotified->getId();
-            unset($groups[$id]);
+            // Remove Groups notified today
+            foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
+                $id = $groupPreviouslyNotified->getId();
+                unset($groups[$id]);
+            }
         }
 
         // Remaining are Groups the Study Coordinator has
