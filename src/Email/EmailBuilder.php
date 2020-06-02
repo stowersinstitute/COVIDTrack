@@ -5,14 +5,21 @@ namespace App\Email;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
+/**
+ * Creates Email objects compatible with Symfony Notifier.
+ */
 class EmailBuilder
 {
     /**
+     * Emails built by this class will appear with "From:" this email address.
+     *
      * @var string
      */
     private $fromAddress;
 
     /**
+     * Emails built by this class will appear with "Reply-To:" this email address.
+     *
      * @var string
      */
     private $replyToAddress;
@@ -30,6 +37,8 @@ class EmailBuilder
     }
 
     /**
+     * Create an email with an HTML body.
+     *
      * @param Address[]|string[]  $toAddresses
      */
     public function createHtml(array $toAddresses, string $subject, string $html): Email
@@ -41,6 +50,8 @@ class EmailBuilder
     }
 
     /**
+     * Create an email with a plain-text body.
+     *
      * @param Address[]|string[]  $toAddresses
      */
     public function createText(array $toAddresses, string $subject, string $text): Email
@@ -52,6 +63,8 @@ class EmailBuilder
     }
 
     /**
+     * Common logic for all created emails.
+     *
      * @param Address[]|string[]  $toAddresses
      */
     private function createBase(array $toAddresses, string $subject): Email
