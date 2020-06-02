@@ -40,7 +40,7 @@ class UserController extends AbstractController
      */
     public function list()
     {
-        $this->denyAcessUnlessPermissions();
+        $this->denyAccessUnlessPermissions();
 
         $users = $this->getDoctrine()
             ->getManager()
@@ -64,7 +64,7 @@ class UserController extends AbstractController
      */
     public function new(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->denyAcessUnlessPermissions();
+        $this->denyAccessUnlessPermissions();
 
         // If LDAP is enabled redirect to the LDAP workflow
         if (AppConfiguration::isLdapEnabled() && !$request->query->has('forceLocal')) {
@@ -138,7 +138,7 @@ class UserController extends AbstractController
      */
     public function edit(string $username, Request $request)
     {
-        $this->denyAcessUnlessPermissions();
+        $this->denyAccessUnlessPermissions();
 
         $user = $this->mustFindUser($username);
 
@@ -175,7 +175,7 @@ class UserController extends AbstractController
      */
     public function changePassword(string $username, Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->denyAcessUnlessPermissions();
+        $this->denyAccessUnlessPermissions();
         $user = $this->mustFindUser($username);
         if ($user->isLdapUser()) throw new \InvalidArgumentException('Cannot change password for LDAP users');
 
@@ -244,7 +244,7 @@ class UserController extends AbstractController
         $user->setRoles($newUserRoles);
     }
 
-    protected function denyAcessUnlessPermissions()
+    protected function denyAccessUnlessPermissions()
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN', 'Access Denied', 'You must be a system administrator to access this page');
     }
