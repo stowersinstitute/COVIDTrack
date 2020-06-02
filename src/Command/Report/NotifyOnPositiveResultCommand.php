@@ -128,7 +128,7 @@ class NotifyOnPositiveResultCommand extends Command
         ",
             implode("\n", $timestampsOutput),
             implode("\n", $groupsRecTestingOutput),
-            sprintf('<a href="%s">%s</a>', $url, $url)
+            sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
         );
 
         $email = EmailBuilder::createHtml($recipients, $subject, $html);
