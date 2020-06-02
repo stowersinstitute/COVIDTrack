@@ -46,6 +46,11 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
+    App\Email\EmailBuilder:
+        arguments:
+            $fromAddress: '%env(CT_DEFAULT_FROM_ADDRESS)%'
+            $replyToAddress: '%env(CT_DEFAULT_REPLY_TO_ADDRESS)%'
+
     App\Security\LoginFormAuthenticator:
         arguments:
             $ldapAuthUserDnFormat: '%env(default:default_ldap_auth_user_dn_format:LDAP_AUTH_USER_DN_FORMAT)%'

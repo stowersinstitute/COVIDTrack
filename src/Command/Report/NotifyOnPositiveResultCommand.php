@@ -39,6 +39,9 @@ class NotifyOnPositiveResultCommand extends Command
     /** @var EntityManagerInterface */
     private $em;
 
+    /** @var EmailBuilder */
+    private $emailBuilder;
+
     /** @var MailerInterface */
     private $mailer;
 
@@ -51,11 +54,12 @@ class NotifyOnPositiveResultCommand extends Command
     /** @var OutputInterface */
     private $output;
 
-    public function __construct(EntityManagerInterface $em, MailerInterface $mailer, RouterInterface $router)
+    public function __construct(EntityManagerInterface $em, EmailBuilder $emailBuilder, MailerInterface $mailer, RouterInterface $router)
     {
         parent::__construct();
 
         $this->em = $em;
+        $this->emailBuilder = $emailBuilder;
         $this->mailer = $mailer;
         $this->router = $router;
     }
@@ -131,13 +135,15 @@ class NotifyOnPositiveResultCommand extends Command
             sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
         );
 
-        $email = EmailBuilder::createHtml($recipients, $subject, $html);
+        $email = $this->emailBuilder->createHtml($recipients, $subject, $html);
 
         // Debug output email
         $this->outputDebug('------');
         $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
+        $replyToOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getReplyTo());
         $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
         $this->outputDebug('From: ' . implode(', ', $fromOutput));
+        $this->outputDebug('Reply-To: ' . implode(', ', $replyToOutput));
         $this->outputDebug('To: ' . implode(', ', $toOutput));
         $this->outputDebug('Subject: ' . $email->getSubject());
         $this->outputDebug('------');
