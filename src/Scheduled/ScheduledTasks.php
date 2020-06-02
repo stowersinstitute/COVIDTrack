@@ -16,6 +16,10 @@ class ScheduledTasks implements ScheduleBuilder
         $schedule->addCommand('app:cleanup:excel-import-data', '--force')
             ->description('Clean up unfinished Excel imports')
             ->dailyAt('03:00');
+
+        $schedule->addCommand('app:report:notify-on-positive-result')
+            ->description('Notify Study Coordinator when a new result indicates a Participant Group needs testing')
+            ->everyFiveMinutes();
     }
 
 }

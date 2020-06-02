@@ -67,6 +67,9 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
         // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
+            // If all values are blank assume it's just empty excel data
+            if ($this->rowDataBlank($rowNumber)) continue;
+
             $rawSpecimenId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenId']);
 
             // Case-insensitive so these map directly to entity constants
