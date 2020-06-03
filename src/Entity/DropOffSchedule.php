@@ -3,9 +3,13 @@
 
 namespace App\Entity;
 
+use App\Util\DateUtils;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Recurr\Rule;
+use Recurr\Transformer\ArrayTransformer;
+use Recurr\Transformer\ArrayTransformerConfig;
 
 /**
  * Times that the drop off facilities are open
@@ -165,6 +169,18 @@ class DropOffSchedule
         return join(';', $rruleParts);
     }
 
+    public function getNextDropOffWindowStartsAt() : ?\DateTimeImmutable
+    {
+        $rule = new Rule($this->getRruleString(), new \DateTimeImmutable(), new \DateTimeImmutable('+1 week'));
+
+        $config = new ArrayTransformerConfig();
+        $config->setVirtualLimit(1);
+        $transformer = new ArrayTransformer($config);
+        $upcoming = $transformer->transform($rule);
+
+        return $upcoming ? DateUtils::toImmutable($upcoming[0]->getStart()) : null;
+    }
+
     /**
      * Returns an array of dates representing the week days this schedule is enabled on
      *
@@ -240,6 +256,37 @@ class DropOffSchedule
         }
 
         return $byWeekday;
+    }
+
+    /**
+     * Returns an array with the following keys:
+     *  numParticpants - total number of participants across all groups
+     *  numGroups - total number of groups
+     *
+     * @param string $filterDay a day represented by PHP's 'D' format
+     */
+    public function getParticipantTotalsOn(string $filterDay) : array
+    {
+        $filterDay = self::normalizeWeekday($filterDay);
+        self::mustBeValidWeekday($filterDay);
+
+        $totals = [
+            'numParticipants' => 0,
+            'numGroups' => 0,
+        ];
+
+        foreach ($this->dropOffWindows as $window) {
+            $windowDay = self::normalizeWeekday($window->getStartsAt()->format('D'));
+            if ($windowDay !== $filterDay) continue;
+
+            foreach ($window->getParticipantGroups() as $group) {
+                $totals['numParticipants'] += $group->getParticipantCount();
+            }
+
+            $totals['numGroups'] += count($window->getParticipantGroups());
+        }
+
+        return $totals;
     }
 
     /**
