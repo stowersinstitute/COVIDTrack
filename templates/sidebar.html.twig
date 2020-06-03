@@ -107,14 +107,16 @@ Renders a top-level navigation node in the tree navigation.
                 {
                     text: 'List',
                     iconClass: 'fa-list',
-                    route: 'app_specimen_list'
+                    route: 'app_specimen_list',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_VIEW'],
                 },
                 {
                     text: 'New',
                     iconClass: 'fa-plus',
-                    route: 'app_specimen_new'
+                    route: 'app_specimen_new',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_EDIT'],
                 },
-            ], ['ROLE_SPECIMEN_EDIT'])
+            ], ['ROLE_SPECIMEN_VIEW', 'ROLE_SPECIMEN_EDIT'])
         }}
         {{
             _self.treenode('Check-In', 'fa-clipboard-check', [
