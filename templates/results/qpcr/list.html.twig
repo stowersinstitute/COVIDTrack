@@ -9,6 +9,9 @@
             <a href="{{ path('app_results_qpcr_new') }}" class="btn btn-primary"><i class="fa fa-fw fa-plus"></i> New Result</a>
             <a href="{{ path('qpcr_excel_import') }}" class="btn btn-primary"><i class="fa fa-fw fa-upload"></i> Import from Excel</a>
         </div>
+        <div class="pull-left">
+            {{ form(filterForm) }}
+        </div>
     </div>
 </div>
 
