@@ -23,7 +23,7 @@
                                 {{ log.toAddressesString }}
                             </td>
                             <td>
-                                {{ log.message|raw }}
+                                {{ log.message|striptags("<ul><li><br><p>")|raw }}
                             </td>
                         </tr>
                     {% else %}
