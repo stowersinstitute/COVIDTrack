@@ -266,8 +266,6 @@ class DropOffSchedule
      * Returns an array with the following keys:
      *  numParticpants - total number of participants across all groups
      *  numGroups - total number of groups
-     *
-     * @param string $filterDay a day represented by PHP's 'D' format
      */
     public function getParticipantTotalsOn(\DateTimeInterface $filterDay) : array
     {
