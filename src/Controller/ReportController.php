@@ -31,12 +31,14 @@ class ReportController extends AbstractController
             'ROLE_REPORTS_GROUP_VIEW',
         ]);
 
+        $limit = 100;
         $logs = $this->getDoctrine()
             ->getRepository(StudyCoordinatorNotification::class)
-            ->findBy([], ['createdAt' => 'DESC']);
+            ->findMostRecent($limit);
 
         return $this->render('reports/coordinator-notifications/index.html.twig', [
             'logs' => $logs,
+            'limit' => $limit,
         ]);
     }
 
