@@ -27,7 +27,7 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
 
             // group.Red
             $referenceId = 'group.' . $g->getTitle();
-            $this->setReference($referenceId, $g);
+            $this->addReference($referenceId, $g);
 
             $em->persist($g);
             $groups[] = $g;
