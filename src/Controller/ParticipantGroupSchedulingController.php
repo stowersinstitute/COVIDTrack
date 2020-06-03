@@ -32,7 +32,7 @@ class ParticipantGroupSchedulingController extends AbstractController
         $schedule = $this->getDefaultSiteDropOffSchedule();
 
         $nextDropOffWindowStartsAt = $schedule->getNextDropOffWindowStartsAt();
-        $nextWindowParticipantTotals = $schedule->getParticipantTotalsOn($nextDropOffWindowStartsAt->format('D'));
+        $nextWindowParticipantTotals = $schedule->getParticipantTotalsOn($nextDropOffWindowStartsAt);
 
         return $this->render('participant-group-scheduling/index.html.twig', [
             'nextDropOffWindowStartsAt' => $nextDropOffWindowStartsAt,

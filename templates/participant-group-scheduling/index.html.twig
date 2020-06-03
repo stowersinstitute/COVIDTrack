@@ -77,7 +77,7 @@
                                 <td class="text-right"><strong>TOTALS</strong></td>
                                 {% for dayDate in schedule.getDropOffDaysAsDates() %}
                                     <td>
-                                        {% set dailyParticipantTotals = schedule.getParticipantTotalsOn(dayDate|date('D')) %}
+                                        {% set dailyParticipantTotals = schedule.getParticipantTotalsOn(dayDate) %}
                                         <span class="badge bg-blue"><i class="fa fa-user"></i> {{ dailyParticipantTotals.numParticipants }}</span> Participant(s)
                                         <span class="badge bg-aqua"><i class="fa fa-users"></i> {{ dailyParticipantTotals.numGroups }}</span> Group(s)
                                     </td>

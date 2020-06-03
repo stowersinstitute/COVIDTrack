@@ -269,19 +269,16 @@ class DropOffSchedule
      *
      * @param string $filterDay a day represented by PHP's 'D' format
      */
-    public function getParticipantTotalsOn(string $filterDay) : array
+    public function getParticipantTotalsOn(\DateTimeInterface $filterDay) : array
     {
-        $filterDay = self::normalizeWeekday($filterDay);
-        self::mustBeValidWeekday($filterDay);
-
         $totals = [
             'numParticipants' => 0,
             'numGroups' => 0,
         ];
 
         foreach ($this->dropOffWindows as $window) {
-            $windowDay = self::normalizeWeekday($window->getStartsAt()->format('D'));
-            if ($windowDay !== $filterDay) continue;
+            $windowDay = $window->getStartsAt()->format('D');
+            if ($windowDay !== $filterDay->format('D')) continue;
 
             foreach ($window->getParticipantGroups() as $group) {
                 $totals['numParticipants'] += $group->getParticipantCount();
@@ -450,21 +447,5 @@ class DropOffSchedule
                 join(', ', static::VALID_DAYS_OF_THE_WEEK)
             ));
         }
-    }
-
-    /**
-     * Converts PHP date strings supported by date() to the internal representation of a weekday
-     */
-    public static function normalizeWeekday($day)
-    {
-        if (in_array($day, ['Mon', 'Monday']))      return self::MONDAY;
-        if (in_array($day, ['Tue', 'Tuesday']))     return self::TUESDAY;
-        if (in_array($day, ['Wed', 'Wednesday']))   return self::WEDNESDAY;
-        if (in_array($day, ['Thu', 'Thursday']))    return self::THURSDAY;
-        if (in_array($day, ['Fri', 'Friday']))      return self::FRIDAY;
-        if (in_array($day, ['Sat', 'Saturday']))    return self::SATURDAY;
-        if (in_array($day, ['Sun', 'Sunday']))      return self::SUNDAY;
-
-        throw new \InvalidArgumentException('Invalid weekday: ' . $day);
     }
 }
