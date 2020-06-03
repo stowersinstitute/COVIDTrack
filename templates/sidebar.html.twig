@@ -167,12 +167,18 @@ Renders a top-level navigation node in the tree navigation.
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
                 {
-                    text: 'Group Results',
-                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW'],
-                    iconClass: 'fa-list',
-                    route: 'app_report_group_results'
+                    text: 'Coordinator Notifications',
+                    iconClass: 'fa-envelope',
+                    route: 'report_coordinator_notifications',
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'],
                 },
-            ], ['ROLE_REPORTS_GROUP_VIEW'])
+                {
+                    text: 'Group Results',
+                    iconClass: 'fa-list',
+                    route: 'app_report_group_results',
+                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW']
+                },
+            ], ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [

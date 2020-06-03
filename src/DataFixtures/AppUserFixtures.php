@@ -28,7 +28,11 @@ class AppUserFixtures extends Fixture
         $this->buildUser($manager, 'ctadmin', ['ROLE_ADMIN']);
 
         // Study Coordinator (with explicit notification role)
-        $this->buildUser($manager, 'coordinator', ['ROLE_STUDY_COORDINATOR', 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING']);
+        $this->buildUser($manager, 'coordinator', [
+            'ROLE_PARTICIPANT_GROUP_EDIT',
+            'ROLE_PRINT_GROUP_LABELS',
+            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+        ]);
 
         // Specimen Collection Team
         $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN']);

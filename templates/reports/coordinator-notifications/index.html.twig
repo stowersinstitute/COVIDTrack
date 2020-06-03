@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Study Coordinator Notifications (Limit {{ limit }} most recent){% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Sent At</th>
+                        <th>To</th>
+                        <th>Message</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td>{{ log.createdAt is not empty ? log.createdAt|date("Y-m-d g:ia") : 'Not Sent' }}</td>
+                            <td>
+                                {{ log.toAddressesString }}
+                            </td>
+                            <td>
+                                {{ log.message|striptags("<ul><li><br><p>")|raw }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">0 notifications have been sent</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
