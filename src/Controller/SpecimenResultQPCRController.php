@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\SpecimenResultQPCRForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,19 +23,25 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * @Route(path="/", methods={"GET"}, name="app_results_qpcr_list")
      */
-    public function list()
+    public function list(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
 
-        $results = $this->getDoctrine()
-            ->getRepository(SpecimenResultQPCR::class)
-            ->findBy([], [
-                'createdAt' => 'DESC',
-                'id' => 'ASC',
-            ]);
+        $formFilterData = [];
+        $repo = $this->getDoctrine()->getRepository(SpecimenResultQPCR::class);
+
+        $filterForm = $this->createForm(SpecimenResultQPCRFilterForm::class);
+        $filterForm->handleRequest($request);
+
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            $formFilterData = $filterForm->getData();
+        }
+
+        $results = $repo->filterByFormData($formFilterData);
 
         return $this->render('results/qpcr/list.html.twig', [
             'results' => $results,
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 
