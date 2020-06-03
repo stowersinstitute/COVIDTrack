@@ -7,7 +7,7 @@
         <tr>
             {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
             <th>Specimen</th>
-            <th>RNA Well Plate Barcodes</th>
+            <th>RNA Well Plates</th>
             <th>Conclusion</th>
             <th>Reported At</th>
         </tr>
@@ -28,11 +28,19 @@
                 {% endif %}
             </td>
             <td>
-                {% for barcode in result.specimen.rnaWellPlateBarcodes %}
+                {% for well in result.specimen.wells %}
+                    {% set barcode = well.wellPlateBarcode %}
+                    {% set position = well.position %}
+
+                    {% set displayString = '' %}
+                    {% if barcode %}
+                        {% set displayString = position ? barcode ~ ' / ' ~ position : barcode %}
+                    {% endif %}
+
                     {% if userCanViewWellPlates %}
-                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a>
+                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ displayString }}</a>
                     {% else %}
-                        {{ barcode }}
+                        {{ displayString }}
                     {% endif %}
                     <br>
                 {% endfor %}
