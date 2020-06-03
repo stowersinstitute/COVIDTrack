@@ -1,4 +1,5 @@
 {% block body %}
+{% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 <table class="table table-bordered table-hover">
     <thead>
@@ -18,7 +19,11 @@
             </td>
             {% endif %}
             <td>
-                <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>
+                {% if userCanViewSpecimens %}
+                    <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>
+                {% else %}
+                    {{ result.specimen.accessionId }}
+                {% endif %}
             </td>
             <td>{{ result.conclusionText }}</td>
             <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
