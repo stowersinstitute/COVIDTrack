@@ -1,8 +1,9 @@
 {% block body %}
+{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th>&nbsp;</th>
+            {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
             <th>Specimen</th>
             <th>Conclusion</th>
             <th>Created At</th>
@@ -11,9 +12,11 @@
     <tbody>
     {% for result in results %}
         <tr>
+            {% if userCanEditResults %}
             <td>
                 <a href="{{ path('app_results_qpcr_edit', {id: result.id}) }}">Edit</a>
             </td>
+            {% endif %}
             <td>
                 <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>
             </td>

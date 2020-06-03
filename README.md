@@ -133,7 +133,8 @@ These users are available when fixtures are loaded. Same username/password:
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
 * samplecollection - Sample Collection Team
-* analysistech - Viral Testing Team / Results
+* testingtech - Viral Testing Team / Results
+* analysistech - Viral Analysis Team
 * kiosk - Kiosk UI
 
 ## Development Environment - Monitoring Sent Email
