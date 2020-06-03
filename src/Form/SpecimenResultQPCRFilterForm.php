@@ -28,7 +28,7 @@ class SpecimenResultQPCRFilterForm extends AbstractType
             ])
             ->add('createdAtOn', DateType::class, [
                 'widget' => 'single_text', // HTML5 text field
-                'label' => 'Results Uploaded On',
+                'label' => 'Results Reported At',
                 'placeholder' => ' - Any -',
                 'required' => false,
             ])
