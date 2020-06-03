@@ -38,7 +38,7 @@ class AppDropOffScheduleFixtures extends Fixture
 
 
             $manager->persist($schedule);
-            if (isset($raw['referenceId'])) $this->addReference($raw['referenceId'], $schedule);
+            if (isset($raw['referenceId'])) $this->setReference($raw['referenceId'], $schedule);
         }
 
         $manager->flush();
