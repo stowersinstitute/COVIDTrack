@@ -43,7 +43,6 @@ class SpecimenResultQPCRRepository extends EntityRepository
      */
     public function filterByFormData($data)
     {
-        dump($data);
         $qb = $this->createDefaultQueryBuilder();
 
         if (isset($data['conclusion'])) {
