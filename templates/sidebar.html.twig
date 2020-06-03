@@ -79,7 +79,8 @@ Renders a top-level navigation node in the tree navigation.
                 {
                     text: 'Import',
                     iconClass: 'fa-upload',
-                    route: 'group_excel_import'
+                    route: 'group_excel_import',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                 },
             ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
         }}
