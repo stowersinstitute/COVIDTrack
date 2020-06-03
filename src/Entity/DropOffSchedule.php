@@ -3,9 +3,13 @@
 
 namespace App\Entity;
 
+use App\Util\DateUtils;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Recurr\Rule;
+use Recurr\Transformer\ArrayTransformer;
+use Recurr\Transformer\ArrayTransformerConfig;
 
 /**
  * Times that the drop off facilities are open
@@ -166,6 +170,22 @@ class DropOffSchedule
     }
 
     /**
+     * Returns a \DateTimeImmutable representing when the first drop off window on the next
+     * drop off day starts. This is relative to the current time.
+     */
+    public function getNextDropOffWindowStartsAt() : ?\DateTimeImmutable
+    {
+        $rule = new Rule($this->getRruleString(), new \DateTimeImmutable(), new \DateTimeImmutable('+1 week'));
+
+        $config = new ArrayTransformerConfig();
+        $config->setVirtualLimit(1);
+        $transformer = new ArrayTransformer($config);
+        $upcoming = $transformer->transform($rule);
+
+        return $upcoming ? DateUtils::toImmutable($upcoming[0]->getStart()) : null;
+    }
+
+    /**
      * Returns an array of dates representing the week days this schedule is enabled on
      *
      * @return \DateTimeImmutable[]
@@ -240,6 +260,32 @@ class DropOffSchedule
         }
 
         return $byWeekday;
+    }
+
+    /**
+     * Returns an array with the following keys:
+     *  numParticpants - total number of participants across all groups
+     *  numGroups - total number of groups
+     */
+    public function getParticipantTotalsOn(\DateTimeInterface $filterDay) : array
+    {
+        $totals = [
+            'numParticipants' => 0,
+            'numGroups' => 0,
+        ];
+
+        foreach ($this->dropOffWindows as $window) {
+            $windowDay = $window->getStartsAt()->format('D');
+            if ($windowDay !== $filterDay->format('D')) continue;
+
+            foreach ($window->getParticipantGroups() as $group) {
+                $totals['numParticipants'] += $group->getParticipantCount();
+            }
+
+            $totals['numGroups'] += count($window->getParticipantGroups());
+        }
+
+        return $totals;
     }
 
     /**
@@ -380,14 +426,24 @@ class DropOffSchedule
         }
 
         foreach ($daysOfTheWeek as $day) {
-            if (!in_array($day, static::VALID_DAYS_OF_THE_WEEK)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Invalid day of the week: "%s". Valid days are: %s',
-                    $day,
-                    join(', ', static::VALID_DAYS_OF_THE_WEEK)
-                ));
-            }
+            self::mustBeValidWeekday($day);
         }
         $this->daysOfTheWeek = $daysOfTheWeek;
+    }
+
+    public static function isValidDayOfTheWeek($day) : bool
+    {
+        return in_array($day, static::VALID_DAYS_OF_THE_WEEK);
+    }
+
+    public static function mustBeValidWeekday($day)
+    {
+        if (!self::isValidDayOfTheWeek($day)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid day of the week: "%s". Valid days are: %s',
+                $day,
+                join(', ', static::VALID_DAYS_OF_THE_WEEK)
+            ));
+        }
     }
 }
