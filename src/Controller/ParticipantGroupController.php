@@ -160,7 +160,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function view(string $title)
     {
-        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
 
         $group = $this->findGroupByTitle($title);
 
