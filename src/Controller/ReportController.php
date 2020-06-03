@@ -25,7 +25,7 @@ class ReportController extends AbstractController
      */
     public function coordinatorNotifications()
     {
-        $this->denyAccessUnlessGranted('ROLE_REPORTS_GROUP_VIEW');
+        $this->denyAccessUnlessGranted('ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING');
 
         $logs = $this->getDoctrine()
             ->getRepository(StudyCoordinatorNotification::class)
