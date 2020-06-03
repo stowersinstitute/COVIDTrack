@@ -63,6 +63,7 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
             $data = $form->getData();
             $groupTitles = $request->request->get('groups', []);
 
