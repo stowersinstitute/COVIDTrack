@@ -1,4 +1,5 @@
 {% block body %}
+{% set userCanPrintLabels = is_granted('ROLE_PRINT_GROUP_LABELS') %}
 {{ form_start(form) }}
 {{ form_row(form.printer) }}
 {{ form_row(form.print) }}
@@ -13,7 +14,7 @@
             <th>Drop-off Times</th>
             <th>Created</th>
             <th>Last Modified</th>
-            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
+            {% if userCanPrintLabels %}
             <th></th>
             {% endif %}
         </tr>
@@ -39,7 +40,7 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
+            {% if userCanPrintLabels %}
             <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a></td>
             {% endif %}
         </tr>
