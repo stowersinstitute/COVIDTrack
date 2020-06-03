@@ -37,7 +37,7 @@ class AppUserFixtures extends Fixture
         $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);
 
         // Sequencing technicians
-        $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_EDIT']);
+        $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_EDIT', 'ROLE_WELL_PLATE_VIEW']);
 
         $manager->flush();;
     }

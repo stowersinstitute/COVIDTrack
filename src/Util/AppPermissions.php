@@ -48,6 +48,9 @@ class AppPermissions
 
         // Tubes
         'ROLE_TUBE_CHECK_IN',
+
+        // Well Plates
+        'ROLE_WELL_PLATE_VIEW',
     ];
 
     /**
