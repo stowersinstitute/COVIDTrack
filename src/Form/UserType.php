@@ -32,9 +32,6 @@ class UserType extends AbstractType
         $this->accessDecisionManager = $accessDecisionManager;
     }
 
-    /**
-     * Search for DEPENDS_ON_AVAILABLE_ROLES
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if ($options['data'] instanceof AppUser) {
@@ -66,6 +63,7 @@ class UserType extends AbstractType
             ])
         ;
 
+        // Search DEPENDS_ON_AVAILABLE_ROLES for other places needing updates when changing this list
         // Permissions
         $this->addRoleField($builder, 'ROLE_ADMIN', 'System Admin');
 
@@ -79,6 +77,8 @@ class UserType extends AbstractType
 
         $this->addRoleField($builder, 'ROLE_RESULTS_EDIT', 'Results: Upload and Edit');
         $this->addRoleField($builder, 'ROLE_RESULTS_VIEW', 'Results: View');
+
+        $this->addRoleField($builder, 'ROLE_WELL_PLATE_VIEW', 'Well Plates: View');
 
         $this->addRoleField($builder, 'ROLE_PRINT_TUBE_LABELS', 'Print: Tube Labels');
         $this->addRoleField($builder, 'ROLE_PRINT_GROUP_LABELS', 'Print: Group Labels');

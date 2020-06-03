@@ -1,8 +1,10 @@
 {% extends 'base.html.twig' %}
+{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 
 {% block page_title %}Results{% endblock %}
 
 {% block body %}
+{% if userCanEditResults %}
 <div class="row margin-bottom">
     <div class="col-md-12">
         <div class="pull-right">
@@ -11,6 +13,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <div class="row">
     <div class="col-xs-12">

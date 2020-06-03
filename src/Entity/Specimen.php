@@ -403,6 +403,14 @@ class Specimen
     }
 
     /**
+     * @return SpecimenWell[]
+     */
+    public function getWells(): array
+    {
+        return $this->wells->getValues();
+    }
+
+    /**
      * Add this Specimen to given Well Plate at given position.
      *
      * If Specimen is already on this Well Plate, it will be updated to being
