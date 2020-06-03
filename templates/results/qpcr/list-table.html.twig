@@ -1,11 +1,13 @@
 {% block body %}
 {% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
+{% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
             {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
             <th>Specimen</th>
+            <th>RNA Well Plate Barcodes</th>
             <th>Conclusion</th>
             <th>Reported At</th>
         </tr>
@@ -24,6 +26,16 @@
                 {% else %}
                     {{ result.specimen.accessionId }}
                 {% endif %}
+            </td>
+            <td>
+                {% for barcode in result.specimen.rnaWellPlateBarcodes %}
+                    {% if userCanViewWellPlates %}
+                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a>
+                    {% else %}
+                        {{ barcode }}
+                    {% endif %}
+                    <br>
+                {% endfor %}
             </td>
             <td>{{ result.conclusionText }}</td>
             <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
