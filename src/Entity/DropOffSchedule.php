@@ -169,6 +169,10 @@ class DropOffSchedule
         return join(';', $rruleParts);
     }
 
+    /**
+     * Returns a \DateTimeImmutable representing when the first drop off window on the next
+     * drop off day starts. This is relative to the current time.
+     */
     public function getNextDropOffWindowStartsAt() : ?\DateTimeImmutable
     {
         $rule = new Rule($this->getRruleString(), new \DateTimeImmutable(), new \DateTimeImmutable('+1 week'));
