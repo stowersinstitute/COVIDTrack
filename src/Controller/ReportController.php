@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\StudyCoordinatorNotification;
 use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,6 +16,26 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ReportController extends AbstractController
 {
+    /**
+     * List notifications previously sent to the Study Coordinator that
+     * recommend Participant Groups with a positive test should undergo
+     * further testing.
+     *
+     * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
+     */
+    public function coordinatorNotifications()
+    {
+        $this->denyAccessUnlessGranted('ROLE_REPORTS_GROUP_VIEW');
+
+        $logs = $this->getDoctrine()
+            ->getRepository(StudyCoordinatorNotification::class)
+            ->findBy([], ['createdAt' => 'DESC']);
+
+        return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'logs' => $logs,
+        ]);
+    }
+
     /**
      * CLIA Testing Recommendations by Participant Group
      *

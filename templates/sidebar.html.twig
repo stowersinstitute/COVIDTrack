@@ -167,8 +167,12 @@ Renders a top-level navigation node in the tree navigation.
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
                 {
+                    text: 'Coordinator Notifications',
+                    iconClass: 'fa-envelope',
+                    route: 'report_coordinator_notifications'
+                },
+                {
                     text: 'Group Results',
-                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_report_group_results'
                 },
