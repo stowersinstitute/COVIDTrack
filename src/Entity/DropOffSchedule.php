@@ -380,14 +380,40 @@ class DropOffSchedule
         }
 
         foreach ($daysOfTheWeek as $day) {
-            if (!in_array($day, static::VALID_DAYS_OF_THE_WEEK)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Invalid day of the week: "%s". Valid days are: %s',
-                    $day,
-                    join(', ', static::VALID_DAYS_OF_THE_WEEK)
-                ));
-            }
+            self::mustBeValidWeekday($day);
         }
         $this->daysOfTheWeek = $daysOfTheWeek;
+    }
+
+    public static function isValidDayOfTheWeek($day) : bool
+    {
+        return in_array($day, static::VALID_DAYS_OF_THE_WEEK);
+    }
+
+    public static function mustBeValidWeekday($day)
+    {
+        if (!self::isValidDayOfTheWeek($day)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid day of the week: "%s". Valid days are: %s',
+                $day,
+                join(', ', static::VALID_DAYS_OF_THE_WEEK)
+            ));
+        }
+    }
+
+    /**
+     * Converts PHP date strings supported by date() to the internal representation of a weekday
+     */
+    public static function normalizeWeekday($day)
+    {
+        if (in_array($day, ['Mon', 'Monday']))      return self::MONDAY;
+        if (in_array($day, ['Tue', 'Tuesday']))     return self::TUESDAY;
+        if (in_array($day, ['Wed', 'Wednesday']))   return self::WEDNESDAY;
+        if (in_array($day, ['Thu', 'Thursday']))    return self::THURSDAY;
+        if (in_array($day, ['Fri', 'Friday']))      return self::FRIDAY;
+        if (in_array($day, ['Sat', 'Saturday']))    return self::SATURDAY;
+        if (in_array($day, ['Sun', 'Sunday']))      return self::SUNDAY;
+
+        throw new \InvalidArgumentException('Invalid weekday: ' . $day);
     }
 }
