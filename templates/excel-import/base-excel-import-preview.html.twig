@@ -29,7 +29,7 @@ importPreviewSection
 
     {% if importer.hasErrors() %}
         <div class="callout callout-danger">
-            <p>Cannot import: {{ importer.messages|length }} error(s) found</p>
+            <p>Cannot import: {{ importer.errors|length }} error(s) found</p>
             <p>
                 Fix the errors in the Excel file and then <a href="javascript:history.back()">click here to upload the file again</a>.
             </p>
@@ -50,11 +50,11 @@ importPreviewSection
                     </thead>
 
                     <tbody>
-                    {% for message in importer.messages %}
+                    {% for error in importer.errors %}
                         <tr>
-                            <td class="text-right">{{ message.rowNumber }}</td>
-                            <td>{{ message.columnLetter }}</td>
-                            <td>{{ message.details }}</td>
+                            <td class="text-right">{{ error.rowNumber }}</td>
+                            <td>{{ error.columnLetter }}</td>
+                            <td>{{ error.details }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -62,6 +62,40 @@ importPreviewSection
             </div>
         </div>
     {% else %}
+        {% if importer.hasNonErrors() %}
+            {% set nonErrors = importer.nonErrors %}
+        <div class="callout callout-warning">
+            <p>{{ nonErrors|length }} messages</p>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Import Messages</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th class="text-right" style="width: 16px;">Row</th>
+                        <th style="width: 50px;">Column</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for nonError in nonErrors %}
+                        <tr>
+                            <td class="text-right">{{ nonError.rowNumber }}</td>
+                            <td>{{ nonError.columnLetter }}</td>
+                            <td>{{ nonError.details }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
         {% block beforeTopConfirmButton %}{% endblock %}
 
         <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">

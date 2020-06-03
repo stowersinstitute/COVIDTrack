@@ -4,6 +4,7 @@ namespace App\ExcelImport;
 
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
+use App\Entity\WellPlate;
 use Doctrine\ORM\EntityManager;
 
 class SpecimenCheckinImporter extends BaseExcelImporter
@@ -23,6 +24,12 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      */
     private $tubeCache = [];
 
+    /**
+     * Local cache for WellPlate lookup
+     * @var array Keys WellPlate.barcode; Values WellPlate
+     */
+    private $platesCache = [];
+
     public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
@@ -32,7 +39,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         $this->columnMap = [
             'tubeId' => 'A',
             'acceptedStatus' => 'B',
-            'rnaWellPlateId' => 'C',
+            'rnaWellPlateBarcode' => 'C',
             'kitType' => 'D',
             'username' => 'E',
         ];
@@ -78,7 +85,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
             $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
             $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
-            $rawWellPlateId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['rnaWellPlateId']);
+            $rawWellPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['rnaWellPlateBarcode']);
             $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
             $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
 
@@ -86,7 +93,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             $rowOk = true;
             $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
-            $rowOk = $this->validateWellPlateId($rawWellPlateId, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber) && $rowOk;
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
             $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
@@ -108,7 +115,11 @@ class SpecimenCheckinImporter extends BaseExcelImporter
                     break;
             }
 
-            $tube->setRnaWellPlateId($rawWellPlateId);
+            // Create Well Plate if given
+            if (strlen($rawWellPlateBarcode) > 0) {
+                $plate = $this->findWellPlateOrMakeNew($rawWellPlateBarcode);
+                $tube->addWellPlate($plate);
+            }
 
             // Kit Type
             $tube->setKitType($rawKitType);
@@ -203,7 +214,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateWellPlateId($rawWellPlateId, $rowNumber): bool
+    private function validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber): bool
     {
         // No validation rules
         return true;
@@ -266,5 +277,24 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         $this->tubeCache[$accessionId] = $tube;
 
         return $tube;
+    }
+
+    private function findWellPlateOrMakeNew(string $rawWellPlateId): WellPlate
+    {
+        if (isset($this->platesCache[$rawWellPlateId])) {
+            return $this->platesCache[$rawWellPlateId];
+        }
+
+        $plate = $this->em
+            ->getRepository(WellPlate::class)
+            ->findOneByBarcode($rawWellPlateId);
+        if (!$plate) {
+            $plate = new WellPlate($rawWellPlateId);
+            $this->em->persist($plate);
+
+            $this->platesCache[$rawWellPlateId] = $plate;
+        }
+
+        return $plate;
     }
 }

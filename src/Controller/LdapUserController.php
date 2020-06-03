@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Ldap\Security\LdapUserProvider;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -112,9 +113,18 @@ class LdapUserController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_ADMIN', 'Access Denied', 'You must be a system administrator to access this page');
     }
 
+    /**
+     * Returns the AppLdapuser for $username or null if $username was not found
+     */
     protected function findLdapUser(string $username) : ?AppLdapUser
     {
-        $ldapUser = $this->ldapUserProvider->loadUserByUsername($username);
+        $ldapUser = null;
+        try {
+            $ldapUser = $this->ldapUserProvider->loadUserByUsername($username);
+        } catch (UsernameNotFoundException $e) {
+            // no-op, $ldapUser will remain null and be returned
+        }
+
         if (!$ldapUser) return null;
 
         return AppLdapUser::fromLdapUser($ldapUser);

@@ -31,17 +31,17 @@
     {# Updated Results #}
     {% if updatedResults|length > 0 %}
         {% set bgColor = 'bg-orange' %}
-        {% set actionCount = createdResults|length %}
+        {% set actionCount = updatedResults|length %}
     {% else %}
         {% set bgColor = 'bg-gray' %}
         {% set actionCount = '-- None --' %}
     {% endif %}
     <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-            <span class="info-box-icon bg-orange"><i class="fa fa-edit"></i></span>
+            <span class="info-box-icon {{ bgColor }}"><i class="fa fa-edit"></i></span>
             <div class="info-box-content">
                 <span class="info-box-text">Updated</span>
-                <span class="info-box-number">{{ updatedResults|length }}</span>
+                <span class="info-box-number">{{ actionCount }}</span>
             </div>
         </div>
     </div>

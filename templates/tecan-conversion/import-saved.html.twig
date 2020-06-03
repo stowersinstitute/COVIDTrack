@@ -1,0 +1,9 @@
+{% extends 'tecan-conversion/start.html.twig' %}
+
+{% block body %}
+    {% include 'tecan-conversion/import-summary-widgets.html.twig' %}
+
+    <h4 style="margin-bottom:28px">Data Saved</h4>
+
+    <a class="btn btn-success" href="{{ path('tecan_download_conversion', {importId: importId}) }}"><i class="fa fa-file-download" style="margin-right:4px"></i> Download with Specimen Accession IDs</a>
+{% endblock %}

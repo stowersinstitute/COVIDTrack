@@ -71,7 +71,7 @@ class KioskSession
      * Holds Tube data user has entered on the Add Tube screen.
      *
      * @var ArrayCollection|KioskSessionTube[]
-     * @ORM\OneToMany(targetEntity="App\Entity\KioskSessionTube", mappedBy="kioskSession", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="App\Entity\KioskSessionTube", mappedBy="kioskSession", cascade={"persist"}, orphanRemoval=true)
      */
     private $tubeData;
 
@@ -163,7 +163,18 @@ class KioskSession
 
     public function addTubeData(KioskSessionTube $sessionTube)
     {
-        // TODO: This can de-dupe duplicate entry based on Tube!
+        /** @var KioskSessionTube[] $foundSessionTubes */
+        $foundSessionTubes = $this->tubeData->filter(function (KioskSessionTube $existingTube) use ($sessionTube) {
+            return $existingTube->getTube()->getAccessionId() === $sessionTube->getTube()->getAccessionId();
+        });
+
+        // If this session tube is already on this session, delete it first then add the new one.
+        if (!$foundSessionTubes->isEmpty()) {
+            foreach ($foundSessionTubes as $foundSessionTube) {
+                $this->tubeData->removeElement($foundSessionTube);
+            }
+        }
+
         $this->tubeData->add($sessionTube);
     }
 

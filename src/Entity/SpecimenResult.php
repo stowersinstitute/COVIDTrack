@@ -5,13 +5,18 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Result of analyzing a Specimen. Subclass and specify unique fields.
  *
  * @ORM\Entity
- * @ORM\Table(name="specimen_results")
+ * @ORM\Table(
+ *     name="specimen_results",
+ *     indexes={
+ *         @ORM\Index(name="specimen_results_created_at_idx", columns={"created_at"}),
+ *         @ORM\Index(name="specimen_results_conclusion_idx", columns={"conclusion"})
+ *     },
+ * )
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
