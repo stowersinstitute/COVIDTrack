@@ -1,13 +1,18 @@
 {% block body %}
 {% set userCanPrintLabels = is_granted('ROLE_PRINT_GROUP_LABELS') %}
+
+{% if userCanPrintLabels %}
 {{ form_start(form) }}
 {{ form_row(form.printer) }}
 {{ form_row(form.print) }}
+{% endif %}
 
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
+            {% if userCanPrintLabels %}
             <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            {% endif %}
             <th>&nbsp;</th>
             <th>Title</th>
             <th>Participants</th>
@@ -22,9 +27,11 @@
     <tbody>
     {% for group in groups %}
         <tr>
+            {% if userCanPrintLabels %}
             <td>
                 <input type="checkbox" class="tube-checkbox" name="groups[]" value="{{ group.title }}">
             </td>
+            {% endif %}
             <td>
                 <a href="{{ path('app_participant_group_edit', {title: group.title}) }}">Edit</a>
             </td>
@@ -47,11 +54,14 @@
     {% endfor %}
     </tbody>
 </table>
+
+{% if userCanPrintLabels %}
 {{ form_end(form) }}
 <script type="application/javascript">
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
     });
 </script>
+{% endif %}
 
 {% endblock %}
