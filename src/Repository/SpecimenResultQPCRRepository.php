@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\SpecimenResultQPCR;
+use App\Form\SpecimenResultQPCRFilterForm;
+use App\Util\DateUtils;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -34,5 +36,35 @@ class SpecimenResultQPCRRepository extends EntityRepository
 
             ->getQuery()
             ->execute();
+    }
+
+    /**
+     * @see SpecimenResultQPCRFilterForm
+     */
+    public function filterByFormData($data)
+    {
+        dump($data);
+        $qb = $this->createDefaultQueryBuilder();
+
+        if (isset($data['conclusion'])) {
+            $qb->andWhere('r.conclusion = :f_conclusion');
+            $qb->setParameter('f_conclusion', $data['conclusion']);
+        }
+
+        if (isset($data['createdAtOn'])) {
+            $qb->andWhere('r.createdAt BETWEEN :f_createdAtStart AND :f_createdAtEnd');
+            $qb->setParameter('f_createdAtStart', DateUtils::dayFloor($data['createdAtOn']));
+            $qb->setParameter('f_createdAtEnd', DateUtils::dayCeil($data['createdAtOn']));
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    protected function createDefaultQueryBuilder()
+    {
+        return $this->createQueryBuilder('r')
+            ->orderBy('r.createdAt', 'DESC')
+            ->addOrderBy('r.id', 'ASC')
+        ;
     }
 }
