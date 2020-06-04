@@ -297,7 +297,7 @@ class TecanImporter extends BaseExcelImporter
             return $this->seenTubes[$rawTubeAccessionId];
         }
 
-        $tube = $this->tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
+        $tube = $this->tubeRepo->findOneByAccessionId($rawTubeAccessionId);
         if (!$tube) {
             return null;
         }

@@ -24,30 +24,14 @@ class TubeRepository extends EntityRepository
             ]);
         }
 
-        return $this->findOneBy([
-            'accessionId' => $id,
-        ]);
+        return $this->findOneByAccessionId($id);
     }
 
-    /**
-     * Find a Tube and join its Specimen record, so it doesn't trigger a second
-     * query later.
-     */
-    public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
+    public function findOneByAccessionId(string $accessionId): ?Tube
     {
-        $tubes = $this->createQueryBuilder('t')
-            ->addSelect('s')
-            ->join('t.specimen', 's')
-            ->where('t.accessionId = :accessionId')
-            ->setParameter('accessionId', $accessionId)
-            ->getQuery()
-            ->execute();
-
-        if (count($tubes) === 0) {
-            return null;
-        }
-
-        return array_shift($tubes);
+        return $this->findOneBy([
+            'accessionId' => $accessionId,
+        ]);
     }
 
     public function getReturnedCount() : int
