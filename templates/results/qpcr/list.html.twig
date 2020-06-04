@@ -1,10 +1,10 @@
 {% extends 'base.html.twig' %}
-{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+{% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 
 {% block page_title %}Results{% endblock %}
 
 {% block body %}
-{% if userCanEditResults %}
+{% if userCanViewResults %}
 <div class="row margin-bottom">
     <div class="col-md-12">
         <div class="pull-left">
