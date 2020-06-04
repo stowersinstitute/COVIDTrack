@@ -84,15 +84,16 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             if (!$rowOk) continue;
 
             // Specimen already validated
+            // TODO: Must update to find Well Plate
             $specimen = $this->findSpecimen($rawSpecimenId);
+            $specimenWell = '';
 
             // "updated" if adding a new result when one already exists
             // "created" if adding first result
             $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
 
             // New Result
-            $qpcr = new SpecimenResultQPCR($specimen);
-            $qpcr->setConclusion($rawConclusion);
+            $qpcr = new SpecimenResultQPCR($specimenWell, $rawConclusion);
 
             $this->getEntityManager()->persist($qpcr);
 

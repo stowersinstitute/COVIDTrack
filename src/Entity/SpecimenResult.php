@@ -21,8 +21,6 @@ use App\Traits\TimestampableEntity;
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
  *     "qpcr" = "SpecimenResultQPCR",
- *     "ddpcr" = "SpecimenResultDDPCR",
- *     "sequencing" = "SpecimenResultSequencing",
  * })
  */
 abstract class SpecimenResult
@@ -43,6 +41,7 @@ abstract class SpecimenResult
      * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="results")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="CASCADE")
+     * @deprecated Will be removed
      */
     private $specimen;
 
@@ -54,10 +53,28 @@ abstract class SpecimenResult
      */
     private $isFailure = false;
 
-    public function __construct(Specimen $specimen)
+    /**
+     * Subclass should define its own annotations for how it maps to SpecimenWell,
+     * and return SpecimenWell from it.
+     *
+     * @return SpecimenWell
+     */
+    abstract public function getWell(): SpecimenWell;
+
+    /**
+     * Subclass should decide how to return the related Specimen,
+     * usually through the SpecimenWell.
+     *
+     * For example:
+     *
+     *     return $this->getWell()->getSpecimen();
+     *
+     * @return Specimen
+     */
+    abstract public function getSpecimen(): Specimen;
+
+    public function __construct()
     {
-        $specimen->addResult($this);
-        $this->specimen = $specimen;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -71,14 +88,9 @@ abstract class SpecimenResult
         return $this->id;
     }
 
-    public function getSpecimen(): Specimen
-    {
-        return $this->specimen;
-    }
-
     public function getSpecimenAccessionId(): string
     {
-        return $this->specimen->getAccessionId();
+        return $this->getSpecimen()->getAccessionId();
     }
 
     public function setIsFailure(bool $bool): void

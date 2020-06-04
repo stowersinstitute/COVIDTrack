@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
@@ -47,6 +48,11 @@ class WellPlate
         $this->setBarcode($barcode);
     }
 
+    public static function buildExample(string $barcode = 'ABC100'): self
+    {
+        return new static($barcode);
+    }
+
     public function __toString()
     {
         return $this->barcode;
@@ -70,6 +76,26 @@ class WellPlate
         }
 
         $this->barcode = $barcode;
+    }
+
+    /**
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
+     */
+    public function addWell(SpecimenWell $well): void
+    {
+        // If Specimen already exists on this Plate,
+        // remove that Well because the new one is replacing it
+        foreach ($this->wells as $key => $existingWell) {
+            $existingSpecimen = $existingWell->getSpecimen();
+            $newSpecimen = $well->getSpecimen();
+
+            if (EntityUtils::isSameEntity($existingSpecimen, $newSpecimen)) {
+                // TODO: Cleanup Specimen too?
+                $this->wells->remove($key);
+            }
+        }
+
+        $this->wells->add($well);
     }
 
     /**

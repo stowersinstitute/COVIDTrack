@@ -17,6 +17,8 @@ class SpecimenResultQPCRForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        throw new \RuntimeException('SpecimenResultQPCRForm no longer supported');
+
         $builder
             ->add('specimen', EntityType::class, [
                 'class' => Specimen::class,
@@ -44,9 +46,11 @@ class SpecimenResultQPCRForm extends AbstractType
         $resolver->setDefaults([
             'data_class' => SpecimenResultQPCR::class,
             'empty_data' => function(FormInterface $form) {
+                /** @var Specimen $specimen */
                 $specimen = $form->get('specimen')->getData();
+                $conclusion = $form->get('conclusion')->getData();
 
-                return new SpecimenResultQPCR($specimen);
+                return new SpecimenResultQPCR($specimen, $conclusion);
             }
         ]);
     }

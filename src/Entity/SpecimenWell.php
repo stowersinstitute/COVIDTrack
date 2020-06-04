@@ -39,6 +39,14 @@ class SpecimenWell
     private $specimen;
 
     /**
+     * Result of qPCR testing Specimen contained in this well.
+     *
+     * @var SpecimenResultQPCR|null
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="well")
+     */
+    private $resultQPCR;
+
+    /**
      * Well number, 1 thru 96
      *
      * @var int
@@ -49,8 +57,23 @@ class SpecimenWell
     public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
     {
         $this->wellPlate = $plate;
+        $plate->addWell($this);
+
         $this->specimen = $specimen;
+        $specimen->addWell($this);
+
         $this->position = $position;
+    }
+
+    /**
+     * Will generate a fake WellPlate if not given.
+     * $position is optional.
+     */
+    public static function buildExample(Specimen $specimen, WellPlate $plate = null, int $position = null): self
+    {
+        $plate = null !== $plate ? $plate : WellPlate::buildExample('PLATE001');
+
+        return new static($plate, $specimen, $position);
     }
 
     public function getId(): ?int
@@ -103,5 +126,22 @@ class SpecimenWell
     public function getPosition(): ?int
     {
         return $this->position;
+    }
+
+    /**
+     * @internal Do not call directly. Instead call new SpecimenResultQPCR($specimen);
+     */
+    public function setQPCRResult(?SpecimenResultQPCR $result)
+    {
+        if ($result && $this->resultQPCR) {
+            throw new \InvalidArgumentException('Cannot assign new qPCR result when one already exists');
+        }
+
+        $this->resultQPCR = $result;
+    }
+
+    public function getResultQPCR(): ?SpecimenResultQPCR
+    {
+        return $this->resultQPCR;
     }
 }

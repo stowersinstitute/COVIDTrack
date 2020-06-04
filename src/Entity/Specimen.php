@@ -116,6 +116,7 @@ class Specimen
      * @var SpecimenResult[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
      * @ORM\OrderBy({"createdAt" = "DESC"})
+     * @deprecated Relationship moving to Specimen.wells
      */
     private $results;
 
@@ -125,6 +126,7 @@ class Specimen
         $this->participantGroup = $group;
 
         $this->status = self::STATUS_CREATED;
+        $this->wells = new ArrayCollection();
         $this->results = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
@@ -403,29 +405,31 @@ class Specimen
     }
 
     /**
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
+     */
+    public function addWell(SpecimenWell $well): void
+    {
+        // If Specimen already exists on same Plate,
+        // remove that Well because the new one is replacing it
+        foreach ($this->wells as $key => $existingWell) {
+            $existingPlate = $existingWell->getWellPlate();
+            $newPlate = $well->getWellPlate();
+
+            if (EntityUtils::isSameEntity($existingPlate, $newPlate)) {
+                // TODO: Cleanup WellPlate too?
+                $this->wells->remove($key);
+            }
+        }
+
+        $this->wells->add($well);
+    }
+
+    /**
      * @return SpecimenWell[]
      */
     public function getWells(): array
     {
         return $this->wells->getValues();
-    }
-
-    /**
-     * Add this Specimen to given Well Plate at given position.
-     *
-     * If Specimen is already on this Well Plate, it will be updated to being
-     * at the given position.
-     */
-    public function addWellPlate(WellPlate $plate, int $position = null): void
-    {
-        $existingWell = $this->getWellOnPlate($plate);
-        if ($existingWell) {
-            // Update position on existing Well Plate
-            $existingWell->setPosition($position);
-        } else {
-            // Add new
-            $this->wells->add(new SpecimenWell($plate, $this, $position));
-        }
     }
 
     /**
@@ -510,6 +514,7 @@ class Specimen
      * List of all Results collected on this Specimen.
      *
      * @return SpecimenResult[]
+     * @deprecated Replace with getResultsQPCR()
      */
     public function getResults(): array
     {
@@ -518,6 +523,7 @@ class Specimen
 
     /**
      * @internal Call new SpecimenResults($specimen) to associate
+     * @deprecated Not sure how yet
      */
     public function addResult(SpecimenResult $result): void
     {
@@ -537,13 +543,16 @@ class Specimen
      */
     public function getQPCRResults(int $limit = null): array
     {
-        $results = $this->results
-            ->filter(function(SpecimenResult $r) {
-                return ($r instanceof SpecimenResultQPCR);
-            })->getValues();
+        $results = [];
+        foreach ($this->wells as $well) {
+            $result = $well->getResultQPCR();
+            if ($result) {
+                $results[] = $result;
+            }
+        }
 
         // Sort most recent createdAt first
-        uasort($results, function (SpecimenResult $a, SpecimenResult $b) {
+        uasort($results, function (SpecimenResultQPCR $a, SpecimenResultQPCR $b) {
             return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
         });
 
@@ -556,28 +565,6 @@ class Specimen
         $results = $this->getQPCRResults(1);
 
         return array_shift($results);
-    }
-
-    /**
-     * @return SpecimenResultDDPCR[]
-     */
-    public function getDDPCRResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultDDPCR);
-        })->getValues();
-    }
-
-    /**
-     * @return SpecimenResultSequencing[]
-     */
-    public function getSequencingResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultSequencing);
-        })->getValues();
     }
 
     /**

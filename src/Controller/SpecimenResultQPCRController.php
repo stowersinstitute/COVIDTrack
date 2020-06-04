@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\SpecimenResultQPCRForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -57,6 +58,8 @@ class SpecimenResultQPCRController extends AbstractController
     public function new(Request $request) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
+        throw new \RuntimeException('This feature not currently supported');
 
         $result = null;
 
