@@ -6,7 +6,7 @@
         <th>&nbsp;</th>
         <th class="text-center bg-gray">System Admin</th>
         <th class="text-center">Kiosk Access</th>
-        <th colspan="2" class="text-center bg-gray">Participant Groups</th>
+        <th colspan="3" class="text-center bg-gray">Participant Groups</th>
         <th colspan="2" class="text-center">Specimens</th>
         <th colspan="2" class="text-center bg-gray">Results</th>
         <th class="text-center">Well Plates</th>
@@ -21,6 +21,7 @@
         {# Participant Groups #}
         <th class="text-center bg-gray">Edit</th>
         <th class="text-center bg-gray">View</th>
+        <th class="text-center bg-gray">View Sched.</th>
         {# Specimens #}
         <th class="text-center">Drop Off</th>
         <th class="text-center">Check In</th>
@@ -50,6 +51,7 @@
             {# Participant Groups #}
             <td class="text-center bg-gray">{% if 'ROLE_PARTICIPANT_GROUP_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             <td class="text-center bg-gray">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Specimens #}
             <td class="text-center">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             <td class="text-center">{% if 'ROLE_TUBE_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
