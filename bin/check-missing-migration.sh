@@ -42,10 +42,8 @@ if [ -z ${SCHEMA_CURRENT_VERSIONS_URL+x} ]; then echo "SCHEMA_CURRENT_VERSIONS_U
 
 # Private vars used for password in different contexts
 SCHEMA_CHECK_PASSWORD_IN_URL=""
-SCHEMA_CHECK_PASSWORD_IN_COMMAND=""
 if [[ "$SCHEMA_CHECK_PASSWORD" != "" ]]; then
   SCHEMA_CHECK_PASSWORD_IN_URL=":${SCHEMA_CHECK_PASSWORD}"
-  SCHEMA_CHECK_PASSWORD_IN_COMMAND="\"-p${SCHEMA_CHECK_PASSWORD}\""
 fi
 
 # Build temporarty database URL from environment variables
@@ -61,9 +59,9 @@ bin/console doctrine:database:create
 
 # copy schema from prod
 echo "Getting latest schema"
-curl --silent "$SCHEMA_COMPARISON_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" $SCHEMA_CHECK_PASSWORD_IN_COMMAND "$SCHEMA_CHECK_DB_NAME"
+curl --silent "$SCHEMA_COMPARISON_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" --password="$SCHEMA_CHECK_PASSWORD" "$SCHEMA_CHECK_DB_NAME"
 echo "Getting current database versions"
-curl --silent "$SCHEMA_CURRENT_VERSIONS_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" $SCHEMA_CHECK_PASSWORD_IN_COMMAND "$SCHEMA_CHECK_DB_NAME"
+curl --silent "$SCHEMA_CURRENT_VERSIONS_URL" | mysql -h "$SCHEMA_CHECK_HOST" -u "$SCHEMA_CHECK_USER" --password="$SCHEMA_CHECK_PASSWORD" "$SCHEMA_CHECK_DB_NAME"
 
 # run migrations that exist but have not been applied to production yet
 echo "Running pending migrations"
