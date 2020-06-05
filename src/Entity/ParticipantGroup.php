@@ -329,7 +329,7 @@ class ParticipantGroup
 
     public function isControl(): bool
     {
-        return $this->isControl ?: false;
+        return $this->isControl;
     }
 
     public function setIsControl(bool $isControl): void
