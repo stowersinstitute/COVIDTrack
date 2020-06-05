@@ -34,6 +34,7 @@ class AppPermissions
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',
         'ROLE_PARTICIPANT_GROUP_VIEW',
+        'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW',
 
         // Printing
         'ROLE_PRINT_TUBE_LABELS',

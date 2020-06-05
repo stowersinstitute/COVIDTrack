@@ -46,6 +46,9 @@ class AppUserFixtures extends Fixture
         // Viral Analysis Team
         $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_VIEW', 'ROLE_WELL_PLATE_VIEW']);
 
+        // Media Prep
+        $this->buildUser($manager, 'mediaprep', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW']);
+
         $manager->flush();
     }
 
