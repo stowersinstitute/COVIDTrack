@@ -157,6 +157,7 @@ class ParticipantGroup
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
+            'isActive' => 'Is Active?',
             'isControl' => 'Is Control Group?',
         ];
 
@@ -165,6 +166,9 @@ class ParticipantGroup
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            'isActive' => function($isControl) {
+                return $isControl ? 'Yes' : 'No';
+            },
             'isControl' => function($isControl) {
                 return $isControl ? 'Yes' : 'No';
             },
