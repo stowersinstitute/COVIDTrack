@@ -62,11 +62,7 @@
                                                 {% set window = schedule.getWindowByWeekDayAndStartTime(dayDate, dailyWindow.startsAt) %}
                                                 {% if window %}
                                                     {% for group in window.getParticipantGroups() %}
-                                                        {% set tooltip = '' %}
-                                                        {% if userCanViewGroupName %}
-                                                            {% set tooltip = group.title %}
-                                                        {% endif %}
-                                                        <i class="fa fa-users" title="{{ tooltip }}" data-toggle="tooltip"></i>
+                                                        <i class="fa fa-users" title="{% if userCanViewGroupName %}{{ group.title }}{% endif %}" data-toggle="tooltip"></i>
                                                     {% endfor %}
                                                 {% else %}
                                                     &nbsp;
