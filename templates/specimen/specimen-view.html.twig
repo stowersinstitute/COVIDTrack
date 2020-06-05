@@ -62,6 +62,8 @@
                     <thead>
                     <tr>
                         {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        <th>RNA Well Plate Barcode</th>
+                        <th>RNA Well Plate Position</th>
                         <th>Conclusion</th>
                         <th>Reported At</th>
                     </tr>
@@ -74,6 +76,8 @@
                                 <a href="{{ path('app_results_qpcr_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
                             {% endif %}
+                            <td>{{ result.wellPlateBarcode }}</td>
+                            <td>{{ result.position }}</td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
                         </tr>

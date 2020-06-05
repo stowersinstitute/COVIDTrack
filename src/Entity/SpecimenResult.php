@@ -109,6 +109,11 @@ abstract class SpecimenResult
         return $this->getSpecimen()->getAccessionId();
     }
 
+    public function getWellPlateBarcode(): string
+    {
+        return $this->getWellPlate()->getBarcode();
+    }
+
     public function setIsFailure(bool $bool): void
     {
         $this->isFailure = $bool;
