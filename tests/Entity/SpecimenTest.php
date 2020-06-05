@@ -150,8 +150,8 @@ class SpecimenTest extends TestCase
 
         // Add Pending Result
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_PENDING);
-        $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
+        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
 
         // Add Negative Result
         $well2 = SpecimenWell::buildExample($specimen);

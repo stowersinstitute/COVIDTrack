@@ -587,7 +587,6 @@ class Specimen
 
             // conclusion ==> CLIA Recommendation
             $map = [
-                SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
