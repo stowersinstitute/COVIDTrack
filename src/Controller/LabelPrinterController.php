@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
 use App\Form\LabelPrinterType;
+use App\Label\GenericTextLabelBuilder;
 use App\Label\MBSBloodTubeLabelBuilder;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplImage;
@@ -17,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -216,6 +218,78 @@ class LabelPrinterController extends AbstractController
         }
 
         return new JsonResponse($plainStatus);
+    }
+
+    /**
+     * @Route("/generic", methods={"GET", "POST"})
+     */
+    public function genericPrint(Request $request, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $form = $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- None -'
+            ])
+            ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
+                'choices' => [
+                    'Generic Text: Yellow 1" x 2.5"' => GenericTextLabelBuilder::class,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
+            ->add('text', TextType::class, [
+                'label' => 'Text',
+                'required' => true,
+            ])
+            ->add('copies', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => 1,
+                'required' => true,
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $b64Image = null;
+        $zplText = null;
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            $builderClass = $data['labelType'];
+
+            $labelBuilder = new $builderClass($printer);
+            $labelBuilder->setText($data['text']);
+
+            $zpl->printBuilder($labelBuilder, $data['copies']);
+
+            $result = $zpl->getLastPrinterResponse();
+
+            if($result->getPrinterType() === 'image') {
+                /** @var ZplImage $data */
+                $data = $result->getData();
+                $image = file_get_contents($data->serverPath);
+                $b64Image = base64_encode($image);
+            } else if ($result->getPrinterType() === 'text') {
+                $zplText = $result->getData();
+            }
+        }
+
+        return $this->render('label-printer/label-printer-generic-print.html.twig', [
+            'form' => $form->createView(),
+            'b64_image' => $b64Image,
+            'zpl_text' => $zplText,
+        ]);
     }
 
     /**
