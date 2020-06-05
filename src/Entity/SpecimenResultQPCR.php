@@ -54,13 +54,7 @@ class SpecimenResultQPCR extends SpecimenResult
         $this->well = $well;
         $well->setQPCRResult($this);
 
-        if (!self::isValidConclusion($conclusion)) {
-            throw new \InvalidArgumentException('Cannot set invalid qPCR Result Conclusion');
-        }
-        $this->conclusion = $conclusion;
-
-        // Specimen recommendation depends on conclusion
-        $this->getSpecimen()->recalculateCliaTestingRecommendation();
+        $this->setConclusion($conclusion);
     }
 
     public function getWell(): SpecimenWell
@@ -73,9 +67,30 @@ class SpecimenResultQPCR extends SpecimenResult
         return $this->well->getSpecimen();
     }
 
+    public function getWellPlate(): WellPlate
+    {
+        return $this->well->getWellPlate();
+    }
+
+    public function getPosition(): int
+    {
+        return $this->well->getPosition();
+    }
+
     public function getConclusion(): string
     {
         return $this->conclusion;
+    }
+
+    public function setConclusion(string $conclusion): void
+    {
+        if (!self::isValidConclusion($conclusion)) {
+            throw new \InvalidArgumentException('Cannot set invalid qPCR Result Conclusion');
+        }
+        $this->conclusion = $conclusion;
+
+        // Specimen recommendation depends on conclusion
+        $this->getSpecimen()->recalculateCliaTestingRecommendation();
     }
 
     public static function isValidConclusion(string $conclusion): bool

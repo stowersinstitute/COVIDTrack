@@ -4,31 +4,51 @@ namespace App\Form;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\WellPlate;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SpecimenResultQPCRForm extends AbstractType
+class QPCRResultsForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        throw new \RuntimeException('SpecimenResultQPCRForm no longer supported');
+        $isEditing = $options['edit'];
 
         $builder
             ->add('specimen', EntityType::class, [
+                'label' => 'Specimen',
                 'class' => Specimen::class,
                 'placeholder' => '- Select -',
                 'required' => true,
+                'disabled' => $isEditing,
                 // Sort by Accession ID
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('s')
                         ->orderBy('s.accessionId', 'ASC');
                 },
+            ])
+            ->add('wellPlate', EntityType::class, [
+                'label' => 'Well Plate',
+                'class' => WellPlate::class,
+                'placeholder' => '- Select -',
+                'required' => true,
+                'disabled' => $isEditing,
+                // Sort by Barcode
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('p')
+                        ->orderBy('p.barcode', 'ASC');
+                },
+            ])
+            ->add('position', IntegerType::class, [
+                'label' => 'Position Number',
+                'required' => false,
+                'disabled' => $isEditing,
             ])
             ->add('conclusion', ChoiceType::class, [
                 'choices' => SpecimenResultQPCR::getFormConclusions(),
@@ -44,14 +64,7 @@ class SpecimenResultQPCRForm extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => SpecimenResultQPCR::class,
-            'empty_data' => function(FormInterface $form) {
-                /** @var Specimen $specimen */
-                $specimen = $form->get('specimen')->getData();
-                $conclusion = $form->get('conclusion')->getData();
-
-                return new SpecimenResultQPCR($specimen, $conclusion);
-            }
+            'edit' => false,
         ]);
     }
 }

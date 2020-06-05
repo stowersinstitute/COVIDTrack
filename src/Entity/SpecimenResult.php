@@ -56,8 +56,6 @@ abstract class SpecimenResult
     /**
      * Subclass should define its own annotations for how it maps to SpecimenWell,
      * and return SpecimenWell from it.
-     *
-     * @return SpecimenWell
      */
     abstract public function getWell(): SpecimenWell;
 
@@ -68,10 +66,28 @@ abstract class SpecimenResult
      * For example:
      *
      *     return $this->getWell()->getSpecimen();
-     *
-     * @return Specimen
      */
     abstract public function getSpecimen(): Specimen;
+
+    /**
+     * Subclass should decide how to return the related WellPlate,
+     * usually through the SpecimenWell.
+     *
+     * For example:
+     *
+     *     return $this->getWell()->getWellPlate();
+     */
+    abstract public function getWellPlate(): WellPlate;
+
+    /**
+     * Subclass should decide how to return the related Well Position,
+     * usually through the SpecimenWell.
+     *
+     * For example:
+     *
+     *     return $this->getWell()->getPosition();
+     */
+    abstract public function getPosition(): int;
 
     public function __construct()
     {
