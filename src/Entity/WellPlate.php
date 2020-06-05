@@ -63,7 +63,7 @@ class WellPlate
         return $this->id;
     }
 
-    public function getBarcode(): ?string
+    public function getBarcode(): string
     {
         return $this->barcode;
     }
