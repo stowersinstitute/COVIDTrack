@@ -91,7 +91,7 @@ class ParticipantGroup
     private $isActive;
 
     /**
-     * @var boolean If true, group will be considered a control group and affect notifications and scheduling.
+     * @var boolean If true, group will be considered a control group and not generate notifications or import scheduling.
      *
      * @ORM\Column(name="is_control", type="boolean", nullable=true)
      * @Gedmo\Versioned
