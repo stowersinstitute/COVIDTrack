@@ -24,7 +24,7 @@ class SpecimenWell
     /**
      * Well Plate where this well is located.
      * @var WellPlate
-     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="wells")
+     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="wells", fetch="EAGER")
      * @ORM\JoinColumn(name="well_plate_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
     private $wellPlate;
@@ -33,7 +33,7 @@ class SpecimenWell
      * Specimen held in this well.
      *
      * @var Specimen
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="wells")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="wells", fetch="EAGER")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
     private $specimen;

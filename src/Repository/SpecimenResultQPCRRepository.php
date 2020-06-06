@@ -43,7 +43,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
      */
     public function filterByFormData($data)
     {
-        $qb = $this->createDefaultQueryBuilder();
+        $qb = $this->createDefaultQueryBuilder('r');
+        $qb->join('r.well', 'w')->addSelect('w');
 
         if (isset($data['conclusion'])) {
             $qb->andWhere('r.conclusion = :f_conclusion');
@@ -59,11 +60,11 @@ class SpecimenResultQPCRRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    protected function createDefaultQueryBuilder()
+    protected function createDefaultQueryBuilder($alias = 'r')
     {
-        return $this->createQueryBuilder('r')
-            ->orderBy('r.createdAt', 'DESC')
-            ->addOrderBy('r.id', 'ASC')
+        return $this->createQueryBuilder($alias)
+            ->orderBy($alias.'.createdAt', 'DESC')
+            ->addOrderBy($alias.'.id', 'ASC')
         ;
     }
 }
