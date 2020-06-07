@@ -29,6 +29,7 @@ class ParticipantGroupSchedulingController extends AbstractController
      */
     public function index()
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW');
         $schedule = $this->getDefaultSiteDropOffSchedule();
 
         $nextDropOffWindowStartsAt = $schedule->getNextDropOffWindowStartsAt();

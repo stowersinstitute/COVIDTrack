@@ -14,7 +14,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
 {
     /**
      * Find Results whose conclusion recommends for testing,
-     * and result was created after a certain time.
+     * and result was created after a certain time. This excludes
+     * results from control group specimen.
      *
      * @return SpecimenResultQPCR[]
      */
@@ -28,6 +29,10 @@ class SpecimenResultQPCRRepository extends EntityRepository
         return $this->createQueryBuilder('r')
             ->where('r.createdAt >= :since')
             ->setParameter('since', $datetime)
+
+            ->join('r.specimen', 's')
+            ->join('s.participantGroup', 'g')
+            ->andWhere('g.isControl = false')
 
             ->andWhere('r.conclusion IN (:conclusions)')
             ->setParameter('conclusions', $conclusionRecommendingTesting)

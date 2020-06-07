@@ -132,6 +132,7 @@ These users are available when fixtures are loaded. Same username/password:
 
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
+* mediaprep - Media Prep Team (specimen collection kit management)
 * samplecollection - Sample Collection Team
 * testingtech - Viral Testing Team / Results
 * analysistech - Viral Analysis Team

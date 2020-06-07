@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% set userCanViewGroupName = is_granted('ROLE_PARTICIPANT_GROUP_VIEW') %}
 
 {% block page_title %}Group Drop-off Schedule{% endblock %}
 
@@ -61,7 +62,7 @@
                                                 {% set window = schedule.getWindowByWeekDayAndStartTime(dayDate, dailyWindow.startsAt) %}
                                                 {% if window %}
                                                     {% for group in window.getParticipantGroups() %}
-                                                        <i class="fa fa-users" title="{{ group.title }}" data-toggle="tooltip"></i>
+                                                        <i class="fa fa-users" title="{% if userCanViewGroupName %}{{ group.title }}{% endif %}" data-toggle="tooltip"></i>
                                                     {% endfor %}
                                                 {% else %}
                                                     &nbsp;
