@@ -30,6 +30,7 @@ class SpecimenResultQPCRRepository extends EntityRepository
             ->where('r.createdAt >= :since')
             ->setParameter('since', $datetime)
 
+            // TODO: Update relationship
             ->join('r.specimen', 's')
             ->join('s.participantGroup', 'g')
             ->andWhere('g.isControl = false')
