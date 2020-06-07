@@ -138,6 +138,10 @@ class SpecimenWell
         }
 
         $this->resultQPCR = $result;
+
+        if ($this->getSpecimen()) {
+            $this->getSpecimen()->updateStatusWhenResultsSet();
+        }
     }
 
     public function getResultQPCR(): ?SpecimenResultQPCR

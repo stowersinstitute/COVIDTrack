@@ -349,6 +349,38 @@ class Specimen
     }
 
     /**
+     * Update current status after results have been added.
+     * Should not change status if already in a final status
+     * such as deleted.
+     *
+     * @return string Current status after latest update
+     */
+    public function updateStatusWhenResultsSet(): string
+    {
+        if ($this->isDeleted()) {
+            // Do not change
+            return $this->status;
+        }
+
+        if (self::STATUS_REJECTED === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
+        $updateIfInStatus = [
+            self::STATUS_CREATED,
+            self::STATUS_RETURNED,
+            self::STATUS_ACCEPTED,
+        ];
+        if (in_array($this->status, $updateIfInStatus)) {
+            $newStatus = self::STATUS_RESULTS;
+            $this->setStatus($newStatus);
+        }
+
+        return $this->getStatus();
+    }
+
+    /**
      * @return string[]
      */
     public static function getFormStatuses(): array

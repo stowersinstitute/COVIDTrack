@@ -23,6 +23,7 @@ class SpecimenTest extends TestCase
 
         $this->assertSame('CID123', $s->getAccessionId());
         $this->assertSame($s->getParticipantGroup(), $group);
+        $this->assertSame(Specimen::STATUS_CREATED, $s->getStatus());
     }
 
     public function testSpecimenOnlyExistsOnceOnSameWellPlate()
@@ -64,7 +65,7 @@ class SpecimenTest extends TestCase
         $this->assertSame($conclusion2, $specimen->getQPCRResults(1)[0]->getConclusion());
     }
 
-    public function testGetQPCRResultsWhenEmpty()
+    public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExample('C100');
 
@@ -88,6 +89,17 @@ class SpecimenTest extends TestCase
         $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
 
         $this->assertSame($r2, $specimen->getMostRecentQPCRResult());
+    }
+
+    public function testSpecimenStatusUpdatedWhenQPCRResultsAdded()
+    {
+        $specimen = Specimen::buildExample('C100');
+
+        $well1 = SpecimenWell::buildExample($specimen);
+        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
+
+        $this->assertSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
     }
 
     public function testGetQPCRResultsOrderedByDate()
