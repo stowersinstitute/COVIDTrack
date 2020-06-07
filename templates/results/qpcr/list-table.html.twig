@@ -28,9 +28,9 @@
                     {{ result.specimen.accessionId }}
                 {% endif %}
             </td>
+            <td>{{ result.conclusionText }}</td>
             <td>{{ result.wellPlateBarcode }}</td>
             <td>{{ result.wellPosition }}</td>
-            <td>{{ result.conclusionText }}</td>
             <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
         </tr>
     {% endfor %}
