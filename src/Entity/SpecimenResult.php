@@ -41,9 +41,14 @@ abstract class SpecimenResult
      * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="results")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="CASCADE")
-     * @deprecated Will be removed
+     * @deprecated Relationship moving to SpecimenResults.well after data migrated
      */
     private $specimen;
+
+    public function getSpecimenForDataMigration(): ?Specimen
+    {
+        return $this->specimen;
+    }
 
     /**
      * Whether this analysis result encountered a failure.

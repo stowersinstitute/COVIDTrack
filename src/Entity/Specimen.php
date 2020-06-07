@@ -116,9 +116,14 @@ class Specimen
      * @var SpecimenResult[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
      * @ORM\OrderBy({"createdAt" = "DESC"})
-     * @deprecated Relationship moving to Specimen.wells
+     * @deprecated Relationship moving to Specimen.wells after data migrated
      */
     private $results;
+
+    public function getResultsForDataMigration(): array
+    {
+        return $this->results->getValues();
+    }
 
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
@@ -539,31 +544,6 @@ class Specimen
         if (!in_array($type, $valid, true)) {
             throw new \InvalidArgumentException('Unknown Specimen type');
         }
-    }
-
-    /**
-     * List of all Results collected on this Specimen.
-     *
-     * @return SpecimenResult[]
-     * @deprecated Replace with getResultsQPCR()
-     */
-    public function getResults(): array
-    {
-        return $this->results->getValues();
-    }
-
-    /**
-     * @internal Call new SpecimenResults($specimen) to associate
-     * @deprecated Not sure how yet
-     */
-    public function addResult(SpecimenResult $result): void
-    {
-        // TODO: Add de-duplicating logic
-        $this->results->add($result);
-
-        $this->recalculateCliaTestingRecommendation();
-
-        $this->setStatus(self::STATUS_RESULTS);
     }
 
     /**
