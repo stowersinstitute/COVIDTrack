@@ -90,7 +90,6 @@ class WellPlate
             $newSpecimen = $well->getSpecimen();
 
             if (EntityUtils::isSameEntity($existingSpecimen, $newSpecimen)) {
-                // TODO: Cleanup Specimen too?
                 $this->wells->remove($key);
             }
         }

@@ -416,7 +416,6 @@ class Specimen
             $newPlate = $well->getWellPlate();
 
             if (EntityUtils::isSameEntity($existingPlate, $newPlate)) {
-                // TODO: Cleanup WellPlate too?
                 $this->wells->remove($key);
             }
         }
