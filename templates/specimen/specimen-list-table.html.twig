@@ -26,8 +26,8 @@
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
             <td>
-                {% for barcode in specimen.rnaWellPlateBarcodes %}
-                <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                {% for well in specimen.wells %}
+                <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.position ? well.wellPlateBarcode ~ ' / ' ~ well.position : well.wellPlateBarcode }}</a><br>
                 {% endfor %}
             </td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>
