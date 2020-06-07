@@ -442,7 +442,7 @@ class Specimen
     /**
      * Get SpecimenWell if this Specimen already on given WellPlate.
      */
-    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    public function getWellOnPlate(WellPlate $plate): ?SpecimenWell
     {
         foreach ($this->wells as $well) {
             if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {

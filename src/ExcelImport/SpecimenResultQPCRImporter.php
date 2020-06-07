@@ -5,6 +5,8 @@ namespace App\ExcelImport;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
+use App\Entity\WellPlate;
 use Doctrine\ORM\EntityManagerInterface;
 
 class SpecimenResultQPCRImporter extends BaseExcelImporter
@@ -15,22 +17,37 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
     private $specimenRepo;
 
     /**
+     * @var \App\Repository\WellPlateRepository
+     */
+    private $plateRepo;
+
+    /**
      * Cache of found Specimen used instead of query caching
      *
      * @var array Keys Specimen.id; Values Specimen entity
      */
     private $seenSpecimens = [];
 
+    /**
+     * Cache of found WellPlate used instead of query caching
+     *
+     * @var array Keys WellPlate.barcode; Values WellPlate entity
+     */
+    private $seenPlates = [];
+
     public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
         $this->specimenRepo = $em->getRepository(Specimen::class);
+        $this->plateRepo = $em->getRepository(WellPlate::class);
 
         parent::__construct($worksheet);
 
         $this->columnMap = [
             'specimenId' => 'A',
             'conclusion' => 'B',
+            'position' => 'C',
+            'plateBarcode' => 'E',
         ];
     }
 
@@ -75,25 +92,29 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             // Case-insensitive so these map directly to entity constants
             $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
 
+            $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
+            $rawPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['position']);
+
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
             $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
+            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenId, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
             // Specimen already validated
-            // TODO: Must update to find Well Plate
             $specimen = $this->findSpecimen($rawSpecimenId);
-            $specimenWell = '';
+            $plate = $this->findPlate($rawPlateBarcode);
+            $well = $specimen->getWellOnPlate($plate);
 
             // "updated" if adding a new result when one already exists
             // "created" if adding first result
             $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
 
             // New Result
-            $qpcr = new SpecimenResultQPCR($specimenWell, $rawConclusion);
+            $qpcr = new SpecimenResultQPCR($well, $rawConclusion);
 
             $this->getEntityManager()->persist($qpcr);
 
@@ -185,5 +206,65 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         $this->seenSpecimens[$rawSpecimenId] = $specimen;
 
         return $specimen;
+    }
+
+    private function findPlate($rawPlateBarcode): ?WellPlate
+    {
+        // Cached?
+        if (isset($this->seenPlates[$rawPlateBarcode])) {
+            return $this->seenPlates[$rawPlateBarcode];
+        }
+
+        $plate = $this->plateRepo->findOneByBarcode($rawPlateBarcode);
+        if (!$plate) {
+            return null;
+        }
+
+        // Cache
+        $this->seenPlates[$rawPlateBarcode] = $plate;
+
+        return $plate;
+    }
+
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validatePlateAndPosition(string $rawPlateBarcode, $rawPosition, string $specimenId, int $rowNumber): bool
+    {
+        $wellPlate = $this->findPlate($rawPlateBarcode);
+        if (!$wellPlate) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Cannot find RNA Well Plate "%s"', $rawPlateBarcode),
+                $rowNumber,
+                $this->columnMap['plateBarcode']
+            );
+            return false;
+        }
+
+        // Specimen must already be in a Well on this Well Plate
+        $specimen = $this->findSpecimen($specimenId); // Specimen ID already validated
+        $well = $specimen->getWellOnPlate($wellPlate);
+        if (!$well) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Specimen "%s" not currently on RNA Well Plate "%s"', $specimenId, $rawPlateBarcode),
+                $rowNumber,
+                $this->columnMap['position']
+            );
+            return false;
+        }
+
+        $currentPosition = $well->getPosition();
+        if ($rawPosition != $currentPosition) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Specimen "%s" currently in Well "%s" but results tried importing at Well "%s"', $specimenId, $currentPosition, $rawPosition),
+                $rowNumber,
+                $this->columnMap['position']
+            );
+            return false;
+        }
+
+        return true;
     }
 }
