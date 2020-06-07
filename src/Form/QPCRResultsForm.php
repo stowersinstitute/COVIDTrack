@@ -22,7 +22,7 @@ class QPCRResultsForm extends AbstractType
 
         $builder
             ->add('specimen', EntityType::class, [
-                'label' => 'Specimen',
+                'label' => 'Specimen Accession ID',
                 'class' => Specimen::class,
                 'placeholder' => '- Select -',
                 'required' => true,
@@ -34,7 +34,7 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('wellPlate', EntityType::class, [
-                'label' => 'Well Plate',
+                'label' => 'RNA Well Plate Barcode',
                 'class' => WellPlate::class,
                 'placeholder' => '- Select -',
                 'required' => true,
@@ -46,7 +46,7 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('position', IntegerType::class, [
-                'label' => 'Position Number',
+                'label' => 'RNA Well Position',
                 'required' => false,
                 'disabled' => $isEditing,
             ])
