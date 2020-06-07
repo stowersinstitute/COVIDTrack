@@ -63,7 +63,7 @@
                     <tr>
                         {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
                         <th>RNA Well Plate Barcode</th>
-                        <th>RNA Well Plate Position</th>
+                        <th>RNA Well Position</th>
                         <th>Conclusion</th>
                         <th>Reported At</th>
                     </tr>
@@ -77,7 +77,7 @@
                             </td>
                             {% endif %}
                             <td>{{ result.wellPlateBarcode }}</td>
-                            <td>{{ result.position }}</td>
+                            <td>{{ result.wellPosition }}</td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
                         </tr>

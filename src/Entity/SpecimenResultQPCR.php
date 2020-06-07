@@ -72,7 +72,7 @@ class SpecimenResultQPCR extends SpecimenResult
         return $this->well->getWellPlate();
     }
 
-    public function getPosition(): int
+    public function getWellPosition(): int
     {
         return $this->well->getPosition();
     }

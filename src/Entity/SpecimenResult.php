@@ -87,7 +87,7 @@ abstract class SpecimenResult
      *
      *     return $this->getWell()->getPosition();
      */
-    abstract public function getPosition(): int;
+    abstract public function getWellPosition(): int;
 
     public function __construct()
     {

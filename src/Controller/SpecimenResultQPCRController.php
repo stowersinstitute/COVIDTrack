@@ -120,7 +120,7 @@ class SpecimenResultQPCRController extends AbstractController
         $data = [
             'specimen' => $result->getSpecimen(),
             'wellPlate' => $result->getWellPlate(),
-            'position' => $result->getPosition(),
+            'position' => $result->getWellPosition(),
             'conclusion' => $result->getConclusion(),
         ];
 
