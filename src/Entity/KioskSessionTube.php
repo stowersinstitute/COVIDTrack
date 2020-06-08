@@ -24,7 +24,7 @@ class KioskSessionTube
      * Kiosk Session where this data was entered.
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\KioskSession", inversedBy="tubeData")
-     * @ORM\JoinColumn(name="kiosk_session_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="kiosk_session_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $kioskSession;
 
