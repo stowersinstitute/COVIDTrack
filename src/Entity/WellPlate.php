@@ -92,7 +92,7 @@ class WellPlate
         if ($atPosition && $this->hasWellAtPosition($atPosition)) {
             $wellAtPosition = $this->getWellAtPosition($atPosition);
             $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
-            throw new \InvalidArgumentException(sprintf('Cannot add a new Well at Position %d. Well with Specimen "%s" already exists at that Position.', $atPosition, $specimenId));
+            throw new \InvalidArgumentException(sprintf('Cannot add a new Well at Position %s. Well with Specimen "%s" already exists at that Position.', $atPosition, $specimenId));
         }
 
         $this->wells->add($well);
