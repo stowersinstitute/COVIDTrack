@@ -356,6 +356,11 @@ class Specimen
             return $this->status;
         }
 
+        if (self::STATUS_RESULTS === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
         $updateIfInStatus = [
             self::STATUS_CREATED,
             self::STATUS_RETURNED,
