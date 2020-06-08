@@ -83,18 +83,26 @@ class WellPlate
      */
     public function addWell(SpecimenWell $well): void
     {
-        // If Specimen already exists on this Plate,
-        // remove that Well because the new one is replacing it
-        foreach ($this->wells as $key => $existingWell) {
-            $existingSpecimen = $existingWell->getSpecimen();
-            $newSpecimen = $well->getSpecimen();
-
-            if (EntityUtils::isSameEntity($existingSpecimen, $newSpecimen)) {
-                $this->wells->remove($key);
-            }
+        if ($this->hasWell($well)) {
+            // Abort adding
+            return;
         }
 
         $this->wells->add($well);
+    }
+
+    /**
+     * Whether given Well is already associated with this Well Plate
+     */
+    public function hasWell(SpecimenWell $well): bool
+    {
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -113,9 +121,10 @@ class WellPlate
         $specimens = [];
 
         foreach ($this->wells as $well) {
-            $specimens[] = $well->getSpecimen();
+            $s = $well->getSpecimen();
+            $specimens[$s->getAccessionId()] = $s;
         }
 
-        return $specimens;
+        return array_values($specimens);
     }
 }

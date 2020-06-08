@@ -96,6 +96,10 @@ class SpecimenWell
             return false;
         }
 
+        if ($this->position != $specimenWell->getPosition()) {
+            return false;
+        }
+
         return true;
     }
 

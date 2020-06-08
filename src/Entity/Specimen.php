@@ -441,14 +441,10 @@ class Specimen
      */
     public function addWell(SpecimenWell $well): void
     {
-        // If Specimen already exists on same Plate,
-        // remove that Well because the new one is replacing it
-        foreach ($this->wells as $key => $existingWell) {
-            $existingPlate = $existingWell->getWellPlate();
-            $newPlate = $well->getWellPlate();
-
-            if (EntityUtils::isSameEntity($existingPlate, $newPlate)) {
-                $this->wells->remove($key);
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                // Abort adding
+                return;
             }
         }
 
@@ -496,11 +492,12 @@ class Specimen
         foreach ($this->wells as $well) {
             $plate = $well->getWellPlate();
             if ($plate) {
-                $plates[] = $plate;
+                // Indexed to make unique array
+                $plates[$plate->getBarcode()] = $plate;
             }
         }
 
-        return $plates;
+        return array_values($plates);
     }
 
     public function getCollectedAt(): ?\DateTimeInterface

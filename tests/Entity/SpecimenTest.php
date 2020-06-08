@@ -26,7 +26,7 @@ class SpecimenTest extends TestCase
         $this->assertSame(Specimen::STATUS_CREATED, $s->getStatus());
     }
 
-    public function testSpecimenOnlyExistsOnceOnSameWellPlate()
+    public function testSpecimenCanExistMultipleTimesOnSameWellPlate()
     {
         $specimen = Specimen::buildExample('C100');
 
@@ -55,14 +55,31 @@ class SpecimenTest extends TestCase
         $conclusion2 = SpecimenResultQPCR::CONCLUSION_POSITIVE;
         $result2 = new SpecimenResultQPCR($well2, $conclusion2);
 
-        // Still only on 1 Plate and 1 Well
-        // Verify Specimen only has one Well
-        // Verify Specimen in expected Position
-        $this->assertCount(1, $specimen->getWells());
-        $this->assertSame($position2, $specimen->getWells()[0]->getPosition());
+        // On 1 Plate and 2 Wells
+        $this->assertTrue(EntityUtils::isSameEntity($well2, $specimen->getWells()[1]));
+        $this->assertCount(2, $specimen->getWells());
+        $this->assertSame($position2, $specimen->getWells()[1]->getPosition());
         $this->assertCount(1, $specimen->getWellPlates());
-        $this->assertCount(1, $specimen->getQPCRResults());
-        $this->assertSame($conclusion2, $specimen->getQPCRResults(1)[0]->getConclusion());
+        $this->assertCount(2, $specimen->getQPCRResults());
+        $this->assertSame($conclusion2, $specimen->getQPCRResults()[1]->getConclusion());
+    }
+
+    public function testSameWellCanOnlyExistOnceOnSpecimen()
+    {
+        $specimen = Specimen::buildExample('C100');
+        $this->assertCount(0, $specimen->getWells());
+
+        $plate = WellPlate::buildExample('ABC');
+        $well = new SpecimenWell($plate, $specimen, 10);
+
+        // Specimen and Well now related
+        $this->assertCount(1, $specimen->getWells());
+
+        // Adding multiple more times shouldn't change anything
+        $specimen->addWell($well);
+        $specimen->addWell($well);
+
+        $this->assertCount(1, $specimen->getWells());
     }
 
     public function testGetQPCRResultsAfterAddingResults()
