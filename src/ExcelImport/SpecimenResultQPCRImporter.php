@@ -107,7 +107,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             // Specimen already validated
             $specimen = $this->findSpecimen($rawSpecimenId);
             $plate = $this->findPlate($rawPlateBarcode);
-            $well = $specimen->getWellOnPlate($plate);
+            $well = $specimen->getWellAtPosition($plate, $rawPosition);
 
             // "updated" if adding a new result when one already exists
             // "created" if adding first result
@@ -245,20 +245,34 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
         // Specimen must already be in a Well on this Well Plate
         $specimen = $this->findSpecimen($specimenId); // Specimen ID already validated
-        $well = $specimen->getWellOnPlate($wellPlate);
-        if (!$well) {
+        if (!$specimen->isOnWellPlate($wellPlate)) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('Specimen "%s" not currently on RNA Well Plate "%s"', $specimenId, $rawPlateBarcode),
                 $rowNumber,
-                $this->columnMap['position']
+                $this->columnMap['plateBarcode']
             );
             return false;
         }
 
-        $currentPosition = $well->getPosition();
-        if ($rawPosition != $currentPosition) {
+        // Get the specific Well at reported Position
+        $well = $specimen->getWellAtPosition($wellPlate, $rawPosition);
+        if (!$well) {
+            // Specimen not at this position on plate in Results file.
+
+            // Build list of positions to display in error message
+            $wellPositions = [];
+            foreach ($specimen->getWellsOnPlate($wellPlate) as $well) {
+                if ($well->getPosition()) {
+                    $wellPositions[] = $well->getPosition();
+                }
+            }
+            $prnCurrentPositions = implode(', ', $wellPositions);
+            if (count($wellPositions) === 0) {
+                $prnCurrentPositions = 'but does not have any positions saved';
+            }
+
             $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" currently in Well "%s" but results tried importing at Well "%s"', $specimenId, $currentPosition, $rawPosition),
+                sprintf('Specimen "%s" currently in Well(s) %s. Results cannot be saved for Well "%s"', $specimenId, $prnCurrentPositions, $rawPosition),
                 $rowNumber,
                 $this->columnMap['position']
             );

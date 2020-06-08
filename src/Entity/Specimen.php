@@ -458,21 +458,45 @@ class Specimen
      */
     public function isOnWellPlate(WellPlate $plate): bool
     {
-        return (bool) $this->getWellOnPlate($plate);
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Get SpecimenWell if this Specimen already on given WellPlate.
+     * Get Well where Specimen stored on given WellPlate at given position.
      */
-    public function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    public function getWellAtPosition(WellPlate $plate, int $position): ?SpecimenWell
     {
-        foreach ($this->wells as $well) {
-            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+        $wells = $this->getWellsOnPlate($plate);
+        foreach ($wells as $well) {
+            if ($well->getPosition() === $position) {
                 return $well;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Get Wells where Specimen is stored on given WellPlate.
+     *
+     * @return SpecimenWell[]
+     */
+    public function getWellsOnPlate(WellPlate $plate): array
+    {
+        $found = [];
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                $found[] = $well;
+            }
+        }
+
+        return $found;
     }
 
     /**

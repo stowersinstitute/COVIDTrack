@@ -82,6 +82,37 @@ class SpecimenTest extends TestCase
         $this->assertCount(1, $specimen->getWells());
     }
 
+    public function testGetWellsAtPosition()
+    {
+        $specimen = Specimen::buildExample('C100');
+
+        // Wells on test plate
+        $plate1 = WellPlate::buildExample('ABC');
+        $well1 = new SpecimenWell($plate1, $specimen, 12);
+        $well2 = new SpecimenWell($plate1, $specimen, 24);
+        $well3 = new SpecimenWell($plate1, $specimen, 36);
+
+        // Wells on a second plate
+        $plate2 = WellPlate::buildExample('SOMEOTHER');
+        $well4 = new SpecimenWell($plate2, $specimen, 48);
+        $well5 = new SpecimenWell($plate2, $specimen, 59);
+
+        // Specimen and Wells are related
+        $this->assertCount(5, $specimen->getWells());
+
+        // Wells on each plate
+        $this->assertCount(3, $specimen->getWellsOnPlate($plate1));
+        $this->assertCount(2, $specimen->getWellsOnPlate($plate2));
+
+        // Wells on Plate 1
+        $this->assertSame($well3, $specimen->getWellAtPosition($plate1, 36));
+        $this->assertSame($well2, $specimen->getWellAtPosition($plate1, 24));
+        $this->assertSame($well1, $specimen->getWellAtPosition($plate1, 12));
+
+        // Test when no Well exists at given Position
+        $this->assertNull($specimen->getWellAtPosition($plate1, 88));
+    }
+
     public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExample('C100');
