@@ -36,21 +36,6 @@ abstract class SpecimenResult
     private $id;
 
     /**
-     * Specimen analyzed to generate these results.
-     *
-     * @var Specimen
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="results")
-     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="CASCADE")
-     * @deprecated Relationship moving to SpecimenResults.well after data migrated
-     */
-    private $specimen;
-
-    public function getSpecimenForDataMigration(): ?Specimen
-    {
-        return $this->specimen;
-    }
-
-    /**
      * Whether this analysis result encountered a failure.
      *
      * @var bool

@@ -110,16 +110,6 @@ class Specimen
      */
     private $status;
 
-    /**
-     * Results of analyzing a Specimen.
-     *
-     * @var SpecimenResult[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
-     * @ORM\OrderBy({"createdAt" = "DESC"})
-     * @deprecated Relationship moving to Specimen.wells after data migrated
-     */
-    private $results;
-
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
@@ -127,7 +117,6 @@ class Specimen
 
         $this->status = self::STATUS_CREATED;
         $this->wells = new ArrayCollection();
-        $this->results = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
     }
