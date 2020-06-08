@@ -120,6 +120,9 @@ class Specimen
      */
     private $results;
 
+    /**
+     * @return SpecimenResultQPCR[]
+     */
     public function getResultsForDataMigration(): array
     {
         return $this->results->getValues();
