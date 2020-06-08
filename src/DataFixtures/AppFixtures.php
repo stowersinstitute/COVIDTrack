@@ -83,8 +83,6 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
                         $result = new SpecimenResultQPCR($well, $conclusion);
                         $result->setCreatedAt($resultDate);
 
-                        $specimen->setStatus(Specimen::STATUS_RESULTS);
-
                         $em->persist($result);
                     }
                 }
