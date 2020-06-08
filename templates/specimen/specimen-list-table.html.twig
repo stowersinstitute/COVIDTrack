@@ -1,5 +1,6 @@
 {% block body %}
     {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
+    {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
@@ -27,7 +28,12 @@
             <td>{{ specimen.typeText }}</td>
             <td>
                 {% for well in specimen.wells %}
-                <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.position ? well.wellPlateBarcode ~ ' / ' ~ well.position : well.wellPlateBarcode }}</a><br>
+                    {% if userCanViewWellPlates %}
+                    <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a>
+                    {% else %}
+                    {{ well.wellPlatePositionDisplayString }}
+                    {% endif %}
+                    <br>
                 {% endfor %}
             </td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>

@@ -133,6 +133,21 @@ class SpecimenWell
     }
 
     /**
+     * Display condensed string with Well Plate Barcode and Well Position, if available.
+     */
+    public function getWellPlatePositionDisplayString(): string
+    {
+        $barcode = $this->getWellPlateBarcode();
+        $output = $barcode;
+
+        if ($this->position !== null) {
+            $output .= ' / ' . $this->position;
+        }
+
+        return $output;
+    }
+
+    /**
      * @internal Do not call directly. Instead call new SpecimenResultQPCR($specimen);
      */
     public function setQPCRResult(?SpecimenResultQPCR $result)

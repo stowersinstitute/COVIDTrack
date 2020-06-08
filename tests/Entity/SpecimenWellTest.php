@@ -53,4 +53,21 @@ class SpecimenWellTest extends TestCase
         // Has position
         $this->assertSame($position, $well->getPosition());
     }
+
+    public function testGetWellPlatePositionDisplayString()
+    {
+        $plateBarcode = 'BC101';
+        $plate = WellPlate::buildExample($plateBarcode);
+
+        $specimen = Specimen::buildExample('SPEC888');
+
+        $well = new SpecimenWell($plate, $specimen);
+
+        // Verify display string when doesn't have Position
+        $this->assertSame($plateBarcode, $well->getWellPlatePositionDisplayString());
+
+        // Now add position and verify display string includes it
+        $well->setPosition(56);
+        $this->assertSame('BC101 / 56', $well->getWellPlatePositionDisplayString());
+    }
 }
