@@ -50,8 +50,8 @@ class SpecimenTest extends TestCase
         $this->assertSame($conclusion1, $specimen->getQPCRResults(1)[0]->getConclusion());
 
         // Add second result on Plate ABC
-        $position2 = 10;
-        $well2 = new SpecimenWell($plateABC, $specimen, $position1);
+        $position2 = 20;
+        $well2 = new SpecimenWell($plateABC, $specimen, $position2);
         $conclusion2 = SpecimenResultQPCR::CONCLUSION_POSITIVE;
         $result2 = new SpecimenResultQPCR($well2, $conclusion2);
 

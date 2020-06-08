@@ -54,6 +54,57 @@ class SpecimenWellTest extends TestCase
         $this->assertSame($position, $well->getPosition());
     }
 
+    public function testPlatePreventsWellsAtSamePosition()
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen1 = Specimen::buildExample('SPEC1');
+        $specimen2 = Specimen::buildExample('SPEC2');
+
+        // Add Specimen to a specific position
+        $position = 10;
+        $well1 = new SpecimenWell($plate, $specimen1, $position);
+
+        // Add Specimen to duplicate position should throw Exception
+        $this->expectException(\InvalidArgumentException::class);
+        new SpecimenWell($plate, $specimen2, $position);
+    }
+
+    public function testPlateAllowsMultipleSameSpecimenWithoutPosition()
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen = Specimen::buildExample('SPEC1');
+
+        // Add Specimen but without a position
+        $well1 = new SpecimenWell($plate, $specimen);
+        $well2 = new SpecimenWell($plate, $specimen);
+        $well3 = new SpecimenWell($plate, $specimen);
+
+        $this->assertFalse($well1->isSame($well2));
+        $this->assertFalse($well1->isSame($well3));
+        $this->assertFalse($well2->isSame($well3));
+    }
+
+    public function testPreventsEditingWellPositionCollisions()
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen = Specimen::buildExample('SPEC1');
+
+        // Add Specimen but without a position
+        $well1 = new SpecimenWell($plate, $specimen);
+        $well2 = new SpecimenWell($plate, $specimen);
+        $well3 = new SpecimenWell($plate, $specimen, 30);
+
+        // OK to position in an open well
+        $well1->setPosition(10);
+
+        // But assigning to occupied well not allowed
+        $this->expectException(\InvalidArgumentException::class);
+        $well2->setPosition(10);
+    }
+
     public function testGetWellPlatePositionDisplayString()
     {
         $plateBarcode = 'BC101';

@@ -57,7 +57,7 @@ class SpecimenWell
     public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
     {
         $this->wellPlate = $plate;
-        $plate->addWell($this);
+        $plate->addWell($this, $position);
 
         $this->specimen = $specimen;
         $specimen->addWell($this);
@@ -100,7 +100,7 @@ class SpecimenWell
             return false;
         }
 
-        return true;
+        return $specimenWell === $this;
     }
 
     public function getWellPlate(): ?WellPlate
@@ -122,6 +122,10 @@ class SpecimenWell
     {
         if ($position <= 0) {
             throw new \InvalidArgumentException('Position must be greater than 0');
+        }
+
+        if ($this->wellPlate->hasWellAtPosition($position)) {
+            throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
         }
 
         $this->position = $position;

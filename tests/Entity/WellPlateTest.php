@@ -29,13 +29,11 @@ class WellPlateTest extends TestCase
         $well = new SpecimenWell($plate, $specimen, 10);
 
         // Well Plate and Well now related
-        $this->assertCount(1, $plate->getWells());
+        $this->assertSame($well, $plate->getWellAtPosition(10));
 
-        // Adding multiple more times shouldn't change anything
+        // Adding multiple more times throws Exception
+        $this->expectException(\InvalidArgumentException::class);
         $plate->addWell($well);
-        $plate->addWell($well);
-
-        $this->assertCount(1, $plate->getWells());
     }
 
     public function testGetSpecimensMethodAccountsForSameSpecimenMultipleTimesOnPlate()

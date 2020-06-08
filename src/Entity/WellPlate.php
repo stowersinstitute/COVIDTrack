@@ -81,11 +81,18 @@ class WellPlate
     /**
      * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
      */
-    public function addWell(SpecimenWell $well): void
+    public function addWell(SpecimenWell $well, int $atPosition = null): void
     {
+        // Same Well can't be added twice
         if ($this->hasWell($well)) {
-            // Abort adding
-            return;
+            throw new \InvalidArgumentException('Cannot add same SpecimenWell to WellPlate multiple times');
+        }
+
+        // Prevent adding Wells at currently occupied positions
+        if ($atPosition && $this->hasWellAtPosition($atPosition)) {
+            $wellAtPosition = $this->getWellAtPosition($atPosition);
+            $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
+            throw new \InvalidArgumentException(sprintf('Cannot add a new Well at Position %d. Well with Specimen "%s" already exists at that Position.', $atPosition, $specimenId));
         }
 
         $this->wells->add($well);
@@ -103,6 +110,22 @@ class WellPlate
         }
 
         return false;
+    }
+
+    public function hasWellAtPosition(int $atPosition): bool
+    {
+        return (bool) $this->getWellAtPosition($atPosition);
+    }
+
+    public function getWellAtPosition(int $atPosition): ?SpecimenWell
+    {
+        foreach ($this->wells as $well) {
+            if ($well->getPosition() === $atPosition) {
+                return $well;
+            }
+        }
+
+        return null;
     }
 
     /**
