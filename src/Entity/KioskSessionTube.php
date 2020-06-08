@@ -32,7 +32,7 @@ class KioskSessionTube
      * Tube scanned by user
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Tube", cascade={"persist"})
-     * @ORM\JoinColumn(name="tube_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="tube_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $tube;
 
