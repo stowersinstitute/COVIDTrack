@@ -269,7 +269,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         /** @var Tube $tube */
         $tube = $this->em
             ->getRepository(Tube::class)
-            ->findOneWithSpecimenLoaded($accessionId);
+            ->findOneByAnyId($accessionId);
         if (!$tube) {
             return null;
         }

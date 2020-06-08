@@ -32,6 +32,7 @@ class TubeRepository extends EntityRepository
     /**
      * Find a Tube and join its Specimen record, so it doesn't trigger a second
      * query later.
+     * @deprecated Can lead to not finding a Tube when its Specimen does not exist
      */
     public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
     {
