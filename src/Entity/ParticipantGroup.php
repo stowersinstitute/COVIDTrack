@@ -93,7 +93,7 @@ class ParticipantGroup
     /**
      * @var boolean If true, group will be considered a control group and not generate notifications or impact scheduling.
      *
-     * @ORM\Column(name="is_control", type="boolean", nullable=false)
+     * @ORM\Column(name="is_control", type="boolean", nullable=false, options={"default":0})
      * @Gedmo\Versioned
      */
     private $isControl;
