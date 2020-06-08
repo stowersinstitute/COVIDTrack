@@ -1,13 +1,18 @@
 {% extends 'base.html.twig' %}
+{% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 
-{% block page_title %}qPCR Results{% endblock %}
+{% block page_title %}Results{% endblock %}
 
 {% block body %}
-<div class="row">
-    <div class="col-xs-12">
-        <a href="{{ path('app_results_qpcr_new') }}" class="btn btn-primary pull-right"><i class="fa fa-fw fa-plus"></i> New qPCR Result</a>
+{% if userCanViewResults %}
+<div class="row margin-bottom">
+    <div class="col-md-12">
+        <div class="pull-left">
+            {{ form(filterForm) }}
+        </div>
     </div>
 </div>
+{% endif %}
 
 <div class="row">
     <div class="col-xs-12">

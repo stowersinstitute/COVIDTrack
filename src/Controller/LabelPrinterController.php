@@ -5,37 +5,40 @@ namespace App\Controller;
 
 
 use App\Entity\LabelPrinter;
-use App\Entity\Specimen;
+use App\Entity\Tube;
 use App\Form\LabelPrinterType;
+use App\Label\MBSBloodTubeLabelBuilder;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplImage;
-use App\Label\ZplPrinterResponse;
 use App\Label\ZplPrinting;
-use App\Label\ZplTextPrinter;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Zpl\Printer;
 
 /**
- * Class LabelPrinterController
- * @package App\Controller
+ * Perform actions related to Label Printers.
  *
  * @Route(path="/label-printers")
  */
 class LabelPrinterController extends AbstractController
 {
-
     /**
-     * @Route("/print-specimen-labels", name="app_label_printer_print_specimen_labels")
+     * Form to print new labels for collection Tubes distributed to Participants.
+     *
+     * @Route("/print-tube-labels", name="app_label_printer_print_tube_labels")
      */
-    public function printSpecimenLabels(Request $request, ZplPrinting $zpl)
+    public function printTubeLabels(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
+
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
                 'class' => LabelPrinter::class,
@@ -44,12 +47,21 @@ class LabelPrinterController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- Select -'
             ])
+            ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
+                'choices' => [
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
             ->add('numToPrint', IntegerType::class, [
                 'label' => 'Number of Labels',
                 'data' => 1,
                 'attr' => [
                     'min' => 1,
-                    'max' => 100, // todo: max # per roll? reasonable batch size?
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
                 ],
             ])
             ->add('send', SubmitType::class, [
@@ -60,18 +72,46 @@ class LabelPrinterController extends AbstractController
 
         $form->handleRequest($request);
 
-        $b64Image = null;
-        $zplText = null;
-
+        $printer = null;
+        $numToPrint = null;
+        $displaySuccessfulPrintAlert = false;
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $builderClass = $data['labelType'];
+            $numToPrint = $data['numToPrint'];
 
-            // todo: rest of the owl
+            $tubes = [];
+            for ($i = 1; $i <= $numToPrint; $i++) {
+                $tube = new Tube();
+                $em->persist($tube);
+
+                $tubes[] = $tube;
+            }
+
+            // Assigns Tube IDs
+            $em->flush();
+
+            // Print out the saved tubes
+            $builder = new $builderClass();
+            $builder->setPrinter($printer);
+
+            foreach ($tubes as $tube) {
+                $builder->setTube($tube);
+                $zpl->printBuilder($builder);
+                $tube->markPrinted();
+
+                $em->flush();
+            }
+
+            $displaySuccessfulPrintAlert = true;
         }
 
-        return $this->render('label-printer/print-specimen-labels.html.twig', [
+        return $this->render('label-printer/print-tube-labels.html.twig', [
             'form' => $form->createView(),
+            'previousSelectedPrinter' => $printer,
+            'previousNumToPrint' => $numToPrint,
+            'displaySuccessfulPrintAlert' => $displaySuccessfulPrintAlert,
         ]);
     }
 
@@ -80,6 +120,8 @@ class LabelPrinterController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printers = $this->getDoctrine()->getRepository(LabelPrinter::class)->findAll();
 
         return $this->render('label-printer/label-printer-list.html.twig', [
@@ -92,6 +134,8 @@ class LabelPrinterController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printer = new LabelPrinter();
 
         $form = $this->createForm(LabelPrinterType::class, $printer);
@@ -116,6 +160,8 @@ class LabelPrinterController extends AbstractController
      */
     public function update(int $id, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($id);
         
         $form = $this->createForm(LabelPrinterType::class, $printer);
@@ -137,13 +183,51 @@ class LabelPrinterController extends AbstractController
     }
 
     /**
+     * @Route("/{id<\d+>}/info", methods={"GET"}, name="app_label_printer_info")
+     */
+    public function info(int $id)
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $printerEntity = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($id);
+
+        $plainStatus = [];
+
+        try {
+            $zplPrinter = new Printer($printerEntity->getHost());
+            $status = $zplPrinter->getStatus();
+
+            $plainStatus = [
+                'Baud Rate'             => $status->getBaudRate(),
+                'Paused'                => $status->isPaused(),
+                'Labels Remaining'      => $status->getLabelsRemainingCount(),
+                'Paper Out'             => $status->isPaperOut(),
+                'Buffer Full'           => $status->isBufferFull(),
+                'Ribbon Out'            => $status->isRibbonOut(),
+                'Over Temp'             => $status->isOverTemperature(),
+                'Under Temp'            => $status->isUnderTemperature(),
+            ];
+        } catch (\Exception $e) {
+            $plainStatus = [
+                'isError' => true,
+                'code' => $e->getCode(),
+                'message' => $e->getMessage()
+            ];
+        }
+
+        return new JsonResponse($plainStatus);
+    }
+
+    /**
      * @Route("/test", methods={"GET", "POST"})
      */
     public function testPrint(Request $request, ZplPrinting $zpl)
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $form = $this->createFormBuilder()
-            ->add('specimen', EntityType::class, [
-                'class' => Specimen::class,
+            ->add('tube', EntityType::class, [
+                'class' => Tube::class,
                 'choice_name' => 'accessionId',
                 'required' => true,
                 'empty_data' => "",
@@ -156,7 +240,19 @@ class LabelPrinterController extends AbstractController
                 'empty_data' => "",
                 'placeholder' => '- None -'
             ])
-            ->add('send', SubmitType::class)
+            ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
+                'choices' => [
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
             ->getForm();
 
         $form->handleRequest($request);
@@ -167,11 +263,12 @@ class LabelPrinterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
-            $specimen = $this->getDoctrine()->getRepository(Specimen::class)->find($data['specimen']);
+            $tube = $this->getDoctrine()->getRepository(Tube::class)->find($data['tube']);
+            $builderClass = $data['labelType'];
 
-            $labelBuilder = new SpecimenIntakeLabelBuilder($printer);
-            $labelBuilder->setParticipantGroup($specimen->getParticipantGroup());
-            $labelBuilder->setSpecimen($specimen);
+            $labelBuilder = new $builderClass($printer);
+            $labelBuilder->setTube($tube);
+
             $zpl->printBuilder($labelBuilder);
 
             $result = $zpl->getLastPrinterResponse();

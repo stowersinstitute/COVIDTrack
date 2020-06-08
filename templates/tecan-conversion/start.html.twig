@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Tecan to Specimen IDs{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body">
+                <div class="box box-solid box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Usage</h3>
+                    </div>
+                    <div class="box-body">
+                        <p>Upload file containing Tube Accession IDs read by Tecan instrument.</p>
+                        <p>Uploaded file must follow these rules:</p>
+                        <ul>
+                            <li><strong>Comma-delimited CSV file</strong></li>
+                            <li>Tube data begins on Row {{ coordinates.firstTubeRow }}</li>
+                            <li>Cell {{ coordinates.wellPlateBarcode.column }}{{ coordinates.wellPlateBarcode.row }} contains the RNA Well Plate ID (Such as RPE1P7)</li>
+                            <li>Column {{ coordinates.wellPosition.column }} contains the RNA Well Position (Begin at cell {{ coordinates.wellPosition.column }}{{ coordinates.firstTubeRow }})</li>
+                            <li>Column {{ coordinates.tubeAccessionId.column }} contains the Tube Accession ID (Begin at cell {{ coordinates.tubeAccessionId.column }}{{ coordinates.firstTubeRow }})</li>
+                        </ul>
+                        <p>This upload accomplishes two things:</p>
+                        <ol>
+                            <li>Import Well Plate and Position of Specimens into COVIDTrack</li>
+                            <li>Transform Tube Accession IDs into Specimen Accession IDs and downloading the updated version</li>
+                        </ol>
+                    </div>
+                </div>
+
+                {% if errors|length > 0 %}
+                <div class="box box-solid box-danger">
+                    <div class="box-header">
+                        <h3 class="box-title">Conversion Errors</h3>
+                    </div>
+                    <div class="box-body">
+                        <p>Could not complete conversion:</p>
+
+                        <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                {{ form(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

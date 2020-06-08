@@ -1,0 +1,129 @@
+{#
+
+## Available blocks
+
+importSourceDescription
+    Appears at the top of the page and includes the file and worksheet being read
+
+beforeTopConfirmButton
+    Appears above the first "confirm" button and below the "importSourceDescription" block
+
+importPreviewSection
+    Contains the outer row used to display the default import preview
+
+    Use this if you need to override the entire preview of import results instead of just
+    customizing the table
+#}
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Import Preview{% endblock %}
+
+{% block body %}
+
+    {% block importSourceDescription %}
+        <dl>
+            <dt>Importing From</dt>
+            <dd>{{ importer.sourceLabel }} ({{ importer.worksheetTitle }})</dd>
+        </dl>
+    {% endblock %}
+
+    {% if importer.hasErrors() %}
+        <div class="callout callout-danger">
+            <p>Cannot import: {{ importer.errors|length }} error(s) found</p>
+            <p>
+                Fix the errors in the Excel file and then <a href="javascript:history.back()">click here to upload the file again</a>.
+            </p>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Import Errors</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th class="text-right" style="width: 16px;">Row</th>
+                        <th style="width: 50px;">Column</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for error in importer.errors %}
+                        <tr>
+                            <td class="text-right">{{ error.rowNumber }}</td>
+                            <td>{{ error.columnLetter }}</td>
+                            <td>{{ error.details }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        {% if importer.hasNonErrors() %}
+            {% set nonErrors = importer.nonErrors %}
+        <div class="callout callout-warning">
+            <p>{{ nonErrors|length }} messages</p>
+        </div>
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Import Messages</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed table-hover">
+                    <thead>
+                    <tr>
+                        <th class="text-right" style="width: 16px;">Row</th>
+                        <th style="width: 50px;">Column</th>
+                        <th>Details</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for nonError in nonErrors %}
+                        <tr>
+                            <td class="text-right">{{ nonError.rowNumber }}</td>
+                            <td>{{ nonError.columnLetter }}</td>
+                            <td>{{ nonError.details }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% block beforeTopConfirmButton %}{% endblock %}
+
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
+            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
+        </form>
+
+        {% block importPreviewSection %}
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="box">
+                        {% block importPreviewHeader %}
+                            <div class="box-header">
+                                <h3 class="box-title">{{ importer.numImportedItems }} items to import</h3>
+                            </div>
+                        {% endblock %}
+                        <div class="box-body">
+
+                            {% include importPreviewTemplate %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+
+        <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-top">
+            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
+        </form>
+    {% endif %}
+
+{% endblock %}

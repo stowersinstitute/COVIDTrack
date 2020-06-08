@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <title>{% block title %}COVIDTrack Login{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
+    <link rel="manifest" href="/manifest-kiosk.json">
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+</head>
+
+<body class="hold-transition {{ extraBodyClasses|default('skin-blue') }}">
+    {% block body %}{% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+</body>
+</html>

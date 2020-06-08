@@ -1,6 +1,11 @@
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
 
+imports:
+    # Build process writes version information to this file
+    # Active version number is stored in the app_current_version parameter
+    - { resource: version.yaml }
+
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
@@ -14,6 +19,15 @@ parameters:
     default_ldap_auth_search_password: ''
     default_ldap_auth_user_dn_format: ''
 
+    # Default values for environment variables
+    env(CT_USER_SUPPORT_EMAIL): ''
+    env(CT_USER_SUPPORT_HTML): ''
+
+    # Allow Symfony router to generate correct URLs in Command classes
+    router.request_context.host: '%env(APP_HOST)%'
+    router.request_context.base_url: '%env(APP_BASE_URL)%'
+    asset.request_context.base_path: '%router.request_context.base_url%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -26,16 +40,16 @@ services:
         resource: '../src/*'
         exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
-    App\Command\DebugLdapUserCommand:
-        arguments:
-            # Cannot autowire based on LdapUserProvider so must use the concrete service
-            Symfony\Component\Ldap\Security\LdapUserProvider: '@security.user.provider.concrete.app_ldap_user_provider'
-
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    App\Email\EmailBuilder:
+        arguments:
+            $fromAddress: '%env(CT_DEFAULT_FROM_ADDRESS)%'
+            $replyToAddress: '%env(CT_DEFAULT_REPLY_TO_ADDRESS)%'
 
     App\Security\LoginFormAuthenticator:
         arguments:

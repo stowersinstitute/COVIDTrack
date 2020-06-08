@@ -5,25 +5,11 @@ security:
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        chain_provider:
-            chain:
-                providers: [app_user_provider, app_ldap_user_provider]
-
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
-            id: App\Security\LocalUserProvider
-#            entity:
-#                class: App\Entity\AppUser
-#                property: username
-
-        app_ldap_user_provider:
-            id: App\Security\OptionalLdapUserProvider
-            # This configuration applies to the default LdapUserProvider, leaving here as a reference
-#            service: Symfony\Component\Ldap\Ldap
-#            base_dn: '%env(LDAP_AUTH_BASE_DN)%'
-#            search_dn: '%env(LDAP_AUTH_SEARCH_DN)%'
-#            search_password: '%env(LDAP_AUTH_SEARCH_PASSWORD)%'
-#            default_roles: ROLE_USER
+            entity:
+                class: App\Entity\AppUser
+                property: username
 
     firewalls:
         dev:
@@ -31,7 +17,7 @@ security:
             security: false
         main:
             anonymous: lazy
-            provider: chain_provider
+            provider: app_user_provider
             guard:
                 authenticators:
                     - App\Security\LoginFormAuthenticator
@@ -50,5 +36,33 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Must be authenticated as someone to access the system
+        - { path: ^/, roles: ROLE_USER }
+        # Additional permission checks in controller methods
+
+    # Search for DEPENDS_ON_AVAILABLE_ROLES
+    role_hierarchy:
+        ROLE_ADMIN:
+            - ROLE_ALLOWED_TO_SWITCH
+            - ROLE_KIOSK_UI
+            - ROLE_PARTICIPANT_GROUP_EDIT
+            - ROLE_PRINT_TUBE_LABELS
+            - ROLE_PRINT_GROUP_LABELS
+            - ROLE_SPECIMEN_VIEW
+            - ROLE_SPECIMEN_EDIT
+            - ROLE_RESULTS_EDIT
+            - ROLE_RESULTS_VIEW
+            - ROLE_SPECIMEN_DROP_OFF
+            - ROLE_TUBE_CHECK_IN
+            - ROLE_REPORTS_GROUP_VIEW
+            - ROLE_WELL_PLATE_VIEW
+        ROLE_KIOSK_UI:
+            - ROLE_SPECIMEN_DROP_OFF
+        ROLE_PARTICIPANT_GROUP_EDIT:
+            - ROLE_PARTICIPANT_GROUP_VIEW
+        ROLE_PARTICIPANT_GROUP_VIEW:
+            - ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW
+        ROLE_RESULTS_EDIT:
+            - ROLE_RESULTS_VIEW
+        ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING:
+            ~

@@ -2,21 +2,23 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
+ * @ORM\Table(name="participant_groups")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
 {
-    public const MIN_PARTICIPANT_COUNT = 1;
+    public const MIN_PARTICIPANT_COUNT = 0;
     public const MAX_PARTICIPANT_COUNT = 65000;
 
     use TimestampableEntity, SoftDeleteableEntity;
@@ -24,7 +26,7 @@ class ParticipantGroup
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -33,10 +35,17 @@ class ParticipantGroup
      * Unique public ID for referencing this group.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string")
+     * @ORM\Column(name="accession_id", type="string")
      * @Gedmo\Versioned
      */
     private $accessionId;
+
+    /**
+     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     *
+     * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     */
+    private $externalId;
 
     /**
      * Human-readable title to identify this group. Used instead of accessionId
@@ -52,7 +61,7 @@ class ParticipantGroup
      * Number of Participants in this group.
      *
      * @var integer
-     * @ORM\Column(name="participantCount", type="smallint", options={"unsigned":true}, nullable=false)
+     * @ORM\Column(name="participant_count", type="smallint", options={"unsigned":true}, nullable=false)
      * @Gedmo\Versioned
      */
     private $participantCount;
@@ -66,12 +75,39 @@ class ParticipantGroup
      */
     private $specimens;
 
+    /**
+     * @var DropOffWindow[]
+     *
+     * @ORM\ManyToMany(targetEntity="DropOffWindow", mappedBy="participantGroups")
+     */
+    private $dropOffWindows;
+
+    /**
+     * @var boolean If true, the system expects specimens for this group
+     *
+     * @ORM\Column(name="is_active", type="boolean", nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $isActive;
+
+    /**
+     * @var boolean If true, group will be considered a control group and not generate notifications or impact scheduling.
+     *
+     * @ORM\Column(name="is_control", type="boolean", nullable=false)
+     * @Gedmo\Versioned
+     */
+    private $isControl;
+
     public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
         $this->setParticipantCount($participantCount);
         $this->specimens = new ArrayCollection();
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->isActive = true;
+        $this->isControl = false;
+
+        $this->dropOffWindows = new ArrayCollection();
     }
 
     /**
@@ -121,6 +157,8 @@ class ParticipantGroup
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
+            'isActive' => 'Is Active?',
+            'isControl' => 'Is Control Group?',
         ];
 
         /**
@@ -128,6 +166,12 @@ class ParticipantGroup
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            'isActive' => function($isControl) {
+                return $isControl ? 'Yes' : 'No';
+            },
+            'isControl' => function($isControl) {
+                return $isControl ? 'Yes' : 'No';
+            },
         ];
 
         $return = [];
@@ -146,7 +190,68 @@ class ParticipantGroup
         return $return;
     }
 
-    public function getId(): int
+    public function getDropOffWindowDebugString()
+    {
+        $strings = [];
+        foreach ($this->dropOffWindows as $window) {
+            $strings[] = sprintf(
+                '[%s %s-%s]',
+                $window->getStartsAt()->format('D'),
+                $window->getStartsAt()->format('H:i'),
+                $window->getEndsAt()->format('H:i')
+            );
+        }
+
+        if (!$strings) return '-- None --';
+
+        return join(' ', $strings);
+    }
+
+    /**
+     * @return DropOffWindow[]
+     */
+    public function getDropOffWindows() : array
+    {
+        return $this->dropOffWindows->getValues();
+    }
+
+    public function addDropOffWindow(DropOffWindow $dropOffWindow)
+    {
+        if ($this->hasDropOffWindow($dropOffWindow)) return;
+
+        $this->dropOffWindows->add($dropOffWindow);
+        $dropOffWindow->addParticipantGroup($this);
+    }
+
+    public function hasDropOffWindow(DropOffWindow $dropOffWindow)
+    {
+        foreach ($this->dropOffWindows as $window) {
+            if (EntityUtils::isSameEntity($window, $dropOffWindow)) return true;
+        }
+
+        return false;
+    }
+
+    public function removeDropOffWindow(DropOffWindow $window)
+    {
+        if (!$this->hasDropOffWindow($window)) return;
+
+        foreach ($this->dropOffWindows as $currWindow) {
+            if (EntityUtils::isSameEntity($currWindow, $window)) {
+                $this->dropOffWindows->removeElement($currWindow);
+                $currWindow->removeParticipantGroup($this);
+            }
+        }
+    }
+
+    public function clearDropOffWindows()
+    {
+        foreach ($this->dropOffWindows as $window) {
+            $this->removeDropOffWindow($window);
+        }
+    }
+
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -208,5 +313,35 @@ class ParticipantGroup
         }
 
         throw new \OutOfBoundsException(sprintf('participantCount must be between %d and %d', $min, $max));
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
+    }
+
+    public function getExternalId(): ?string
+    {
+        return $this->externalId;
+    }
+
+    public function setExternalId(?string $externalId): void
+    {
+        $this->externalId = $externalId;
+    }
+
+    public function isControl(): bool
+    {
+        return $this->isControl;
+    }
+
+    public function setIsControl(bool $isControl): void
+    {
+        $this->isControl = $isControl;
     }
 }

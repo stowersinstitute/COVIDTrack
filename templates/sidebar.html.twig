@@ -13,8 +13,20 @@ Renders a top-level navigation node in the tree navigation.
 @param childrenItem.text (string) Navigation link text
 @param childrenItem.iconClass (string) CSS classes for Font Awesome icon next to nav item (i.e. fa-list)
 @param childrenItem.route (string) Name of Controller route linked to
+@param mustHaveOnePermissionToView (array) Optional. Array of strings. User must have one or more of these roles to view.
 #}
-{% macro treenode(parentText, parentIconClass, children) %}
+{% macro treenode(parentText, parentIconClass, children, mustHaveOneRoleToView) %}
+    {% set canView = true %}
+    {% if mustHaveOneRoleToView|length > 0 %}
+        {% set canView = false %}
+        {% for requiredRole in mustHaveOneRoleToView %}
+            {% if not canView and is_granted(requiredRole) %}
+                {% set canView = true %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if canView %}
     <li class="treeview {% for child in children %}{{ _self.activeClass(child.route) }}{% endfor %}">
         <a href="#">
             <i class="fa {{ parentIconClass }}"></i> <span>{{ parentText }}</span>
@@ -24,89 +36,212 @@ Renders a top-level navigation node in the tree navigation.
         </a>
         <ul class="treeview-menu">
             {% for child in children %}
-            <li class="{{ _self.activeClass(child.route) }}"><a href="{{ path(child.route) }}"><i class="fa {{ child.iconClass }}"></i> {{ child.text }}</a></li>
+                {% set canViewChild = true %}
+                {% if child.mustHaveOneRoleToView is defined %}
+                    {% set canViewChild = false %}
+                    {% for requiredRole in child.mustHaveOneRoleToView %}
+                        {% if not canViewChild and is_granted(requiredRole) %}
+                            {% set canViewChild = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if canViewChild %}
+                    <li class="{{ _self.activeClass(child.route) }}"><a href="{{ path(child.route) }}"><i class="fa {{ child.iconClass }}"></i> {{ child.text }}</a></li>
+                {% endif %}
             {% endfor %}
         </ul>
     </li>
+    {% endif %}
 {% endmacro %}
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu" data-widget="tree" data-animation-speed="150" data-accordion="false">
         {{
-            _self.treenode('Specimens', 'fa-flask', [
-                {
-                    text: 'List',
-                    iconClass: 'fa-list',
-                    route: 'app_specimen_list'
-                },
-                {
-                    text: 'Check-in',
-                    iconClass: 'fa-check-square',
-                    route: 'specimen_intake_start'
-                },
-                {
-                    text: 'New',
-                    iconClass: 'fa-plus',
-                    route: 'app_specimen_new'
-                },
-            ])
-        }}
-        {{
             _self.treenode('Participant Groups', 'fa-users', [
                 {
+                    text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'],
+                    iconClass: 'fa-calendar',
+                    route: 'participant_group_scheduling_index'
+                },
+                {
                     text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_participant_group_list'
                 },
                 {
                     text: 'New',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                     iconClass: 'fa-plus',
                     route: 'app_participant_group_new'
                 },
                 {
                     text: 'Import',
                     iconClass: 'fa-upload',
-                    route: 'group_excel_import'
+                    route: 'group_excel_import',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                 },
-            ])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'])
+        }}
+        {{
+            _self.treenode('Tubes', 'fa-vial', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_tube_list'
+                },
+                {
+                    text: 'Print New Labels',
+                    iconClass: 'fa-print',
+                    route: 'app_label_printer_print_tube_labels'
+                },
+                {
+                    text: 'Import Pre-labeled Tubes',
+                    iconClass: 'fa-upload',
+                    route: 'tube_excel_import'
+                },
+            ], ['ROLE_PRINT_TUBE_LABELS'])
+        }}
+        {{
+            _self.treenode('Specimens', 'fa-flask', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'app_specimen_list',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_VIEW'],
+                },
+                {
+                    text: 'New',
+                    iconClass: 'fa-plus',
+                    route: 'app_specimen_new',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_EDIT'],
+                },
+            ], ['ROLE_SPECIMEN_VIEW', 'ROLE_SPECIMEN_EDIT'])
+        }}
+        {{
+            _self.treenode('Check-In', 'fa-clipboard-check', [
+                {
+                    text: 'Queue',
+                    iconClass: 'fa-list',
+                    route: 'checkin_queue'
+                },
+                {
+                    text: 'Import Accepted/Rejected',
+                    iconClass: 'fa-upload',
+                    route: 'checkin_import_start'
+                },
+            ], ['ROLE_TUBE_CHECK_IN'])
+        }}
+
+        {{
+            _self.treenode('Well Plates', 'fa-th', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'well_plate_list'
+                },
+            ], ['ROLE_WELL_PLATE_VIEW'])
         }}
         {{
             _self.treenode('Results', 'fa-th', [
                 {
+                    text: 'Tecan to Specimen IDs',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
+                    iconClass: 'fa-recycle',
+                    route: 'tecan_import_start'
+                },
+                {
                     text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_results_qpcr_list'
                 },
-            ])
+                {
+                    text: 'Import',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
+                    iconClass: 'fa-upload',
+                    route: 'qpcr_excel_import'
+                },
+            ], ['ROLE_RESULTS_VIEW', 'ROLE_RESULTS_EDIT'])
         }}
         {{
-            _self.treenode('Reports', 'fa-bar-chart', [
+            _self.treenode('Reports', 'fa-chart-bar', [
+                {
+                    text: 'Coordinator Notifications',
+                    iconClass: 'fa-envelope',
+                    route: 'report_coordinator_notifications',
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'],
+                },
                 {
                     text: 'Group Results',
                     iconClass: 'fa-list',
-                    route: 'app_report_group_results'
+                    route: 'app_report_group_results',
+                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW']
                 },
-            ])
+            ], ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Label Printers', 'fa-print', [
-                {
-                    text: 'Print Specimen Labels',
-                    iconClass: 'fa-print',
-                    route: 'app_label_printer_print_specimen_labels'
-                },
                 {
                     text: 'List',
                     iconClass: 'fa-list',
                     route: 'app_labelprinter_list'
                 },
                 {
-                    text: 'Test',
+                    text: 'Print Test Label',
                     iconClass: 'fa-plus',
                     route: 'app_labelprinter_testprint'
                 },
-            ])
+            ], ['ROLE_ADMIN'])
+        }}
+        {{
+            _self.treenode('Users', 'fa-users', [
+                {
+                    text: 'List',
+                    iconClass: 'fa-list',
+                    route: 'user_list'
+                },
+                {
+                    text: 'Add User',
+                    iconClass: 'fa-plus',
+                    route: 'user_new'
+                },
+            ], ['ROLE_ADMIN'])
+        }}
+        {{
+            _self.treenode('Kiosks', 'fa-tablet-alt', [
+                {
+                    text: 'Kiosk UI',
+                    mustHaveOneRoleToView: ['ROLE_KIOSK_UI'],
+                    iconClass: 'fa-barcode',
+                    route: 'kiosk_index'
+                },
+                {
+                    text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-list',
+                    route: 'kiosk_admin_list'
+                },
+                {
+                    text: 'New',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-plus',
+                    route: 'kiosk_admin_new'
+                },
+            ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
+        }}
+        {{
+            _self.treenode('Configuration', 'fa-cog', [
+                {
+                    text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    iconClass: 'fa-calendar-week',
+                    route: 'site_drop_off_schedule_index'
+                },
+            ], ['ROLE_ADMIN'])
         }}
     </ul>
 </section>

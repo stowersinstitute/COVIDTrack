@@ -3,19 +3,30 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Physical container that holds a Specimen.
  *
  * @ORM\Entity(repositoryClass="App\Repository\TubeRepository")
  * @ORM\Table(name="tubes")
+ * @ORM\HasLifecycleCallbacks
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Tube
 {
-    use SoftDeleteableEntity;
+    use TimestampableEntity, SoftDeleteableEntity;
 
+    /**
+     * Text prefix added to numeric part of Accession ID
+     */
+    const ACCESSION_ID_PREFIX = 'T';
+
+    const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
@@ -25,10 +36,13 @@ class Tube
     const TYPE_SALIVA = "SALIVA";
     const TYPE_SWAB = "SWAB";
 
+    const CHECKED_IN_ACCEPTED = "ACCEPTED";
+    const CHECKED_IN_REJECTED = "REJECTED";
+
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -37,7 +51,8 @@ class Tube
      * Unique public ID for referencing. This is referred to as the "Tube ID"
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string", unique=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true, length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $accessionId;
 
@@ -46,15 +61,16 @@ class Tube
      *
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $participantGroup;
 
     /**
      * Specimen created as result of Tube being checked in.
      *
+     * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
-     * @ORM\JoinColumn(name="specimenId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $specimen;
 
@@ -63,66 +79,214 @@ class Tube
      *
      * @var string
      * @ORM\Column(name="status", type="string")
+     * @Gedmo\Versioned
      */
     private $status;
 
     /**
      * @var string
-     * @ORM\Column(name="tubeType", type="string", nullable=true)
+     * @ORM\Column(name="tube_type", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $tubeType;
+
+    /**
+     * Describes the distribution kit given to the Participant. Normally this
+     * is entered by a Technician when the Tubes are checked-in.
+     *
+     * @var null|string
+     * @ORM\Column(name="kit_type", type="text", length=255, nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $kitType;
 
     /**
      * Date/Time when Tube was returned by the Participant.
      *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="returnedAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="returned_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $returnedAt;
 
     /**
      * @var DropOff
-     * @ORM\ManyToOne(targetEntity="App\Entity\DropOff", inversedBy="tubes")
-     * @ORM\JoinColumn(name="dropOffId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\ManyToOne(targetEntity="App\Entity\DropOff", inversedBy="tubes", cascade={"persist"})
+     * @ORM\JoinColumn(name="drop_off_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $dropOff;
+
+    /**
+     * What Check-in Technician decided when observing Tube and Specimen
+     * during check-in process.
+     *
+     * Values are self::CHECK_IN_* constants.
+     *
+     * @var string
+     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $checkInDecision;
 
     /**
      * Date/Time when Tube was processed for check-in by Check-in Technician.
      *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="checkedInAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="checked_in_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $checkedInAt;
 
     /**
-     * Check-in Tech that processed this Tube during Check-In.
+     * Username of the Check-in Tech that processed this Tube during Check-In.
+     *
+     * NOTE: Username may not exist in the system, this is not a guaranteed AppUser association
      *
      * @var string
-     * @ORM\Column(name="checkedInBy", type="string", nullable=true)
+     * @ORM\Column(name="checked_in_by_username", type="string", nullable=true, length=255)
+     * @Gedmo\Versioned
      */
-    private $checkedInBy;
+    private $checkedInByUsername;
 
     /**
+     * Date and Time when this Specimen was extracted (collected) from the Participant.
+     * For example, when they spit in the tube or did a blood draw.
+     *
      * @var \DateTimeImmutable
-     * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="collected_at", type="datetime", nullable=true)
+     * @Gedmo\Versioned
      */
     private $collectedAt;
 
-    public function __construct(?string $accessionId = null)
+    public function __construct(string $accessionId = null)
     {
         $this->accessionId = $accessionId;
-        $this->status = self::STATUS_PRINTED;
+        $this->status = self::STATUS_CREATED;
     }
 
     public function __toString()
     {
-        return $this->getAccessionId();
+        return $this->getAccessionId() ?: 'None';
     }
 
-    public function getId(): int
+    /**
+     * We consider the created-at time when it was printed. Under normal use
+     * a Tube record is created when its Label is printed.
+     */
+    public function getPrintedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt ?: null;
+    }
+
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * Audit Logging tracks field/value changes using entity property names
+     * and values like this:
+     *
+     *     [
+     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "Status" => "In Process",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable values
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $keyConverter = [
+            // Specimen.propertyNameHere => Human-Readable Description
+            'accessionId' => 'Accession ID',
+            'status' => 'Status',
+            'tubeType' => 'Type',
+            'kitType' => 'Kit Type',
+            'collectedAt' => 'Collected At',
+            'returnedAt' => 'Returned At',
+            'checkInDecision' => 'Check-in Decision',
+            'checkedInAt' => 'Checked-in At',
+            'checkedInByUsername' => 'Checked-in By',
+        ];
+
+        $dateTimeConvert = function(?\DateTimeInterface $value) {
+            return $value ? $value->format('Y-m-d g:ia') : null;
+        };
+
+        /**
+         * Keys are array key from $changes
+         * Values are callbacks to convert $changes[$key] value
+         */
+        $valueConverter = [
+            // Convert STATUS_* constants into human-readable text
+            'status' => function($value) {
+                return self::lookupStatusText($value);
+            },
+            'collectedAt' => $dateTimeConvert,
+            'returnedAt' => $dateTimeConvert,
+            'checkedInAt' => $dateTimeConvert,
+        ];
+
+        $return = [];
+        foreach ($changes as $fieldId => $value) {
+            // If mapping fieldId to human-readable string, use it
+            // Else fallback to original fieldId
+            $key = $keyConverter[$fieldId] ?? $fieldId;
+
+            // If mapping callback defined for fieldId, use it
+            // Else fallback to current value
+            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
+
+            $return[$key] = $value;
+        }
+
+        return $return;
+    }
+
+    public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * Create the Accession ID for this Tube.
+     *
+     * @ORM\PostPersist
+     * @internal
+     */
+    public function createAccessionId(LifecycleEventArgs $e): void
+    {
+        // Exit early if already exists
+        if (null !== $this->accessionId) {
+            return;
+        }
+
+        if (!$this->id) {
+            throw new \RuntimeException('Not all data present to create Tube Accession ID');
+        }
+
+        // Accession ID based on database ID, which is guaranteed unique
+        $newInt = $this->id;
+
+        $maxIntLength = 8;
+        if (strlen($newInt) > $maxIntLength) {
+            throw new \RuntimeException('Tube Accession ID generation exceeded maximum value');
+        }
+
+        // Convert to string and re-pad with leading zeros
+        // 1235 => "00001235"
+        $padWithChar = '0';
+        $newNumber = str_pad($newInt, $maxIntLength, $padWithChar, STR_PAD_LEFT);
+
+        // Prepend prefix
+        $this->accessionId = self::ACCESSION_ID_PREFIX . $newNumber;
+
+        $e->getEntityManager()->flush();
     }
 
     public function getAccessionId(): ?string
@@ -130,10 +294,6 @@ class Tube
         return $this->accessionId;
     }
 
-    public function setAccessionId(?string $accessionId): void
-    {
-        $this->accessionId = $accessionId;
-    }
 
     public function getStatus(): string
     {
@@ -147,7 +307,65 @@ class Tube
 
     public function setTubeType(?string $tubeType): void
     {
+        $this->mustBeValidTubeType($tubeType);
+
         $this->tubeType = $tubeType;
+    }
+
+    /**
+     * Get human-readable text of selected Type
+     */
+    public function getTypeText(): string
+    {
+        if ($this->tubeType === null) {
+            return '';
+        }
+
+        $types = self::getValidTubeTypes();
+
+        // Key by TYPE_* constant
+        $types = array_flip($types);
+
+        return $types[$this->tubeType];
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidTubeTypes(): array
+    {
+        return [
+            'Blood' => self::TYPE_BLOOD,
+            'Swab' => self::TYPE_SWAB,
+            'Saliva' => self::TYPE_SALIVA,
+        ];
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
+    {
+        if (!$this->specimen) {
+            return [];
+        }
+
+        return $this->specimen->getRnaWellPlateBarcodes();
+    }
+
+    public function addWellPlate(WellPlate $plate, int $position = null): void
+    {
+        $this->specimen->addWellPlate($plate, $position);
+    }
+
+    public function getKitType(): ?string
+    {
+        return $this->kitType;
+    }
+
+    public function setKitType(?string $kitType): void
+    {
+        $this->kitType = $kitType;
     }
 
     public function getParticipantGroup(): ?ParticipantGroup
@@ -158,7 +376,7 @@ class Tube
     /**
      * Set the Participant Group scanned when returning this tube.
      */
-    public function setParticipantGroup(ParticipantGroup $group): void
+    public function setParticipantGroup(?ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
     }
@@ -182,26 +400,84 @@ class Tube
     }
 
     /**
-     * Call when a Tube is being dropped off by a Participant at a Kiosk.
+     * Call when a Tube is being returned by a Participant at a Kiosk.
      *
-     * @param SpecimenAccessionIdGenerator $gen
      * @param DropOff            $drop
-     * @param ParticipantGroup   $gropu
+     * @param ParticipantGroup   $group
      * @param string             $tubeType Tube::TYPE_* constant
      * @param \DateTimeInterface $collectedAt DateTime when Participant collected their Specimen
      */
-    public function kioskDropoff(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
+    public function kioskDropoffComplete(SpecimenAccessionIdGenerator $gen, DropOff $drop, ParticipantGroup $group, string $tubeType, \DateTimeInterface $collectedAt): void
     {
+        // Setup DropOff <==> Tube relationship
         $this->dropOff = $drop;
         $drop->addTube($this);
 
+        // Data entered during kiosk dropoff
         $this->setParticipantGroup($group);
         $this->setTubeType($tubeType);
         $this->setCollectedAt($collectedAt);
 
+        // Mark returned status
+        $this->setReturnedAt(new \DateTimeImmutable());
+        $this->setStatus(self::STATUS_RETURNED);
+
         // Create Specimen
         $this->specimen = Specimen::createFromTube($this, $gen);
-        $this->specimen->setStatus(Specimen::STATUS_DROPPED_OFF);
+        $this->specimen->setStatus(Specimen::STATUS_RETURNED);
+    }
+
+    /**
+     * Whether this Tube is in the correct state to be processed for a check-in
+     * by a Check-in Technician.
+     */
+    public function willAllowCheckinDecision(): bool
+    {
+        // Has a check-in decision, but not yet further along
+        // Accepted
+        if ($this->status === self::STATUS_ACCEPTED) {
+            return true;
+        }
+        // Rejected
+        if ($this->status === self::STATUS_REJECTED) {
+            return true;
+        }
+
+        // Status before Accepted/Rejected
+        return $this->status === self::STATUS_RETURNED;
+    }
+
+    public function getCheckInDecision(): ?string
+    {
+        return $this->checkInDecision;
+    }
+
+    /**
+     * @param string $decision self::CHECKED_IN_* constant
+     */
+    public function setCheckInDecision(string $decision)
+    {
+        $valid = [
+            self::CHECKED_IN_ACCEPTED,
+            self::CHECKED_IN_REJECTED,
+        ];
+        if (!in_array($decision, $valid)) {
+            throw new \InvalidArgumentException('Invalid check-in decision');
+        }
+
+        $this->checkInDecision = $decision;
+    }
+
+    public function getCheckInDecisionText(): string
+    {
+        switch ($this->checkInDecision) {
+            case self::CHECKED_IN_ACCEPTED:
+                return 'Accepted';
+            case self::CHECKED_IN_REJECTED:
+                return 'Rejected';
+            default:
+                return '';
+        }
     }
 
     /**
@@ -217,14 +493,14 @@ class Tube
         return $this->checkedInAt;
     }
 
-    public function getCheckedInBy(): ?string
+    public function getCheckedInByUsername(): ?string
     {
-        return $this->checkedInBy;
+        return $this->checkedInByUsername;
     }
 
-    public function setCheckedInBy(?string $checkedInBy): void
+    public function setCheckedInByUsername(?string $checkedInByUsername): void
     {
-        $this->checkedInBy = $checkedInBy;
+        $this->checkedInByUsername = $checkedInByUsername;
     }
 
     public function setSpecimen(Specimen $specimen): void
@@ -248,40 +524,64 @@ class Tube
     }
 
     /**
+     * When a label is printed for this tube
+     */
+    public function markPrinted()
+    {
+        $this->setStatus(self::STATUS_PRINTED);
+    }
+
+    /**
      * When a Participant has returned this Tube with their Specimen inside.
      */
-    public function markReturned(\DateTimeImmutable $returnedAt)
+    private function markReturned(\DateTimeImmutable $returnedAt = null)
     {
+        if ($returnedAt === null) $returnedAt = new \DateTimeImmutable();
+
         $this->setStatus(self::STATUS_RETURNED);
         $this->setReturnedAt($returnedAt);
     }
 
     /**
-     * Intake technician has confirmed the specimen is acceptable and checked it in
+     * Check-In Technician confirms the Tube and Specimen appear in acceptable
+     * condition to perform further research.
      */
-    public function markAccepted(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
+    public function markAccepted(string $checkedInBy, \DateTimeImmutable $checkedInAt = null): void
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
+        // Tube
         $this->setStatus(self::STATUS_ACCEPTED);
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
-        $this->setCheckedInBy($checkedInBy);
+        $this->setCheckedInByUsername($checkedInBy);
+
+        // Specimen
+        $this->specimen->setStatus(Specimen::STATUS_ACCEPTED);
     }
 
     /**
-     * Intake technician has rejected the specimen
+     * Check-In Technician observes condition of the Tube or Specimen that
+     * would compromise further research.
+     *
+     * Conditions like the Specimen has leaked out of the tube into the surrounding bag.
      */
-    public function markRejected(string $checkedInBy, ?\DateTimeImmutable $checkedInAt = null): void
+    public function markRejected(string $checkedInBy, \DateTimeImmutable $checkedInAt = null): void
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
+        // Tube
         $this->setStatus(self::STATUS_REJECTED);
+        $this->setCheckInDecision(self::CHECKED_IN_REJECTED);
         $this->setCheckedInAt($checkedInAt);
-        $this->setCheckedInBy($checkedInBy);
+        $this->setCheckedInByUsername($checkedInBy);
+
+        // Specimen
+        $this->specimen->setStatus(Specimen::STATUS_REJECTED);
     }
 
     /**
-     * @see markReturned() and other status methods
+     * @see kioskDropoffComplete() and other status methods
      */
     private function setStatus(string $status): void
     {
@@ -298,6 +598,7 @@ class Tube
     private static function getValidStatuses(): array
     {
         return [
+            'Created' => self::STATUS_CREATED,
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,
@@ -315,5 +616,14 @@ class Tube
         $statuses = array_flip(static::getValidStatuses());
 
         return $statuses[$statusConstant];
+    }
+
+    private function mustBeValidTubeType(?string $tubeType)
+    {
+        if ($tubeType === null) return;
+
+        if (!in_array($tubeType, self::getValidTubeTypes())) {
+            throw new \InvalidArgumentException('Invalid Tube Type');
+        }
     }
 }

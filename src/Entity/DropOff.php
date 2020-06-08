@@ -2,40 +2,34 @@
 
 namespace App\Entity;
 
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Tracks Specimens dropped off by a Participant at a Kiosk.
+ * Tracks Tubes returned by a Participant at a Kiosk.
  *
  * @ORM\Entity
  * @ORM\Table(name="dropoffs")
  */
 class DropOff
 {
-    const STATUS_INPROCESS = "IN_PROCESS";
-    const STATUS_COMPLETE = "COMPLETE";
+    use TimestampableEntity, SoftDeleteableEntity;
 
     /**
      * @var integer
-     *
      * @ORM\Id
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="status")
-     */
-    private $status;
-
-    /**
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $group;
 
@@ -46,15 +40,17 @@ class DropOff
     private $tubes;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="kiosk", nullable=true)
+     * Kiosk Session when this dropoff took place
+     *
+     * @var KioskSession
+     * @ORM\ManyToOne(targetEntity="App\Entity\KioskSession")
+     * @ORM\JoinColumn(name="kiosk_session_id", referencedColumnName="id", onDelete="SET NULL")
      */
-    private $kiosk;
+    private $kioskSession;
 
     public function __construct()
     {
         $this->tubes = new ArrayCollection();
-        $this->status = self::STATUS_INPROCESS;
     }
 
     public function getId(): ?int
@@ -81,7 +77,7 @@ class DropOff
     }
 
     /**
-     * @internal Use Tube->kioskDropoff(...) to establish relationship.
+     * @internal Use Tube->kioskDropoffComplete() to establish relationship.
      */
     public function addTube(Tube $tube)
     {
@@ -101,23 +97,13 @@ class DropOff
         return false;
     }
 
-    public function getKiosk(): ?string
+    public function getKioskSession(): ?KioskSession
     {
-        return $this->kiosk;
+        return $this->kioskSession;
     }
 
-    public function setKiosk(?string $kiosk): void
+    public function setKioskSession(?KioskSession $session): void
     {
-        $this->kiosk = $kiosk;
+        $this->kioskSession = $session;
     }
-
-    public function markCompleted()
-    {
-        $this->status = self::STATUS_COMPLETE;
-        $returnedAt = new \DateTimeImmutable();
-        foreach ($this->tubes as $tube) {
-            $tube->markReturned($returnedAt);
-        }
-    }
-
 }

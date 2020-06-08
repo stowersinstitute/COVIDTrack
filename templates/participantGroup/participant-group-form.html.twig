@@ -1,20 +1,60 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Participant Group {% else %} Edit Participant Group {{ group.accessionId }} {% endif %}
+    {% if new %}
+        New Participant Group
+    {% else %}
+        Edit Participant Group {{ group.title }} ({% if group.isActive %}Active{% else %}Inactive{% endif %})
+    {% endif %}
 {% endblock %}
 
 {% block body %}
 <div class="row">
     <div class="col-md-6">
         <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">General</h3>
-            </div>
             <div class="box-body">
                 {{ form(form) }}
             </div>
         </div>
     </div>
+
+    {# Actions only apply when editing #}
+    {% if group is defined %}
+        <div class="col-md-6">
+            <div class="box box-success margin-bottom">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Actions</h3>
+                </div>
+                <div class="box-body">
+                    <div class="pull-right">
+                        {% if group.isActive %}
+                            <form method="post" action="{{ path('app_participant_group_deactivate', { title: group.title }) }}" onsubmit="return confirm('Deactivate Group?');">
+                                <input type="hidden" name="title" value="{{ group.title }}">
+                                <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Deactivate</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{{ path('app_participant_group_activate', { title: group.title }) }}" onsubmit="return confirm('Activate Group?');">
+                                <input type="hidden" name="title" value="{{ group.title }}">
+                                <button type="submit" class="btn btn-success"><i class="fa fa-trash-restore"></i> Activate</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Drop-off Windows</h3>
+                </div>
+                <div class="box-body">
+                    {% for window in group.dropOffWindows %}
+                        <p>{{ window.displayString }}</p>
+                    {% else %}
+                        <p>-- None Assigned --</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

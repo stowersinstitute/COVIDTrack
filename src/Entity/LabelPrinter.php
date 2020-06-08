@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Network connected label printer
  *
  * @ORM\Entity
+ * @ORM\Table(name="label_printers")
  */
 class LabelPrinter
 {
@@ -20,7 +21,7 @@ class LabelPrinter
      * @var integer
      *
      * @ORM\Id
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -28,7 +29,7 @@ class LabelPrinter
     /**
      * @var string
      *
-     * @ORM\Column(type="string", name="title")
+     * @ORM\Column(name="title", type="string")
      */
     private $title;
 
@@ -37,42 +38,42 @@ class LabelPrinter
      *
      * @var string
      *
-     * @ORM\Column(type="string", name="host")
+     * @ORM\Column(name="host", type="string")
      */
     private $host;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="text", name="description", nullable=true)
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="dpi", nullable=true)
+     * @ORM\Column(name="dpi", type="integer", nullable=true)
      */
     private $dpi;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", name="mediaWidthIn")
+     * @ORM\Column(name="media_width_in", type="float")
      */
     private $mediaWidthIn;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", name="mediaHeightIn")
+     * @ORM\Column(name="media_height_in", type="float")
      */
     private $mediaHeightIn;
 
     /**
      * @var bool
      *
-     * @ORM\Column(type="boolean", name="isActive")
+     * @ORM\Column(name="is_active", type="boolean")
      */
     private $isActive;
 
@@ -93,7 +94,7 @@ class LabelPrinter
     /**
      * @return int
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

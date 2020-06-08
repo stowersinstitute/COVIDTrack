@@ -1,21 +1,42 @@
 {% extends 'base.html.twig' %}
+{% set userCanEditGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 
 {% block page_title %}
-    Participant Group {{ group.accessionId }}
+    Participant Group {{ group.title }}
 {% endblock %}
 
 {% block body %}
+
 <div class="row">
     <div class="col-md-6">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">General <a href="{{ path('app_participant_group_edit', {accessionId: group.accessionId}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-edit"></i> Edit</a></h3>
+                <h3 class="box-title">
+                    General
+
+                    {% if userCanEditGroups %}
+                    <a href="{{ path('app_participant_group_edit', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-edit"></i> Edit</a>
+                    {% endif %}
+
+                    {% if is_granted("ROLE_PRINT_GROUP_LABELS") %}
+                    <a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a>
+                    {% endif %}
+                </h3>
             </div>
             <div class="box-body">
                 <dl class="dl-horizontal">
-                    <dt>Accession ID</dt><dd>{{ group.accessionId }}</dd>
                     <dt>Title</dt><dd>{{ group.title }}</dd>
+                    <dt>Accession ID</dt><dd>{{ group.accessionId }}</dd>
                     <dt>Participants</dt><dd>{{ group.participantCount }}</dd>
+                    <dt>Is Control Group?</dt><dd>{{ group.isControl ? 'Yes' : 'No' }}</dd>
+                    <dt>Drop-off Times</dt>
+                    <dd>
+                        <ul>
+                            {% for window in group.getDropOffWindows() %}
+                                <li>{{ window.getDisplayString() }}</li>
+                            {% endfor %}
+                        </ul>
+                    </dd>
                 </dl>
             </div>
         </div>

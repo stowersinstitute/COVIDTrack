@@ -7,76 +7,63 @@ namespace App\Entity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * A workbook created by parsing an uploaded Excel file
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Entity\ExcelImportWorkbookRepository")
+ * @ORM\Table(name="excel_import_workbooks")
  */
 class ExcelImportWorkbook
 {
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * Filename provided by the user when the file was uploaded
-     * @var string
      *
+     * @var string
      * @ORM\Column(name="filename", type="string", length=255, nullable=true)
      */
     protected $filename;
 
     /**
+     * File MIME-type provided by uploaded file
+     *
+     * @var string
+     * @ORM\Column(name="file_mime_type", type="string", length=255, nullable=true)
+     */
+    protected $fileMimeType;
+
+    /**
      * When the file was uploaded
      * @var \DateTimeImmutable
      *
-     * @ORM\Column(name="uploadedAt", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="uploaded_at", type="datetime_immutable", nullable=true)
      */
     protected $uploadedAt;
+
+    /**
+     * @var AppUser The user who uploaded this file
+     *
+     * @ORM\ManyToOne(targetEntity="AppUser")
+     * @ORM\JoinColumn(name="uploaded_by_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    protected $uploadedBy;
 
     /**
      * Worksheets associated with this workbook
      * @var ExcelImportWorksheet[]
      *
      * @ORM\OneToMany(targetEntity="ExcelImportWorksheet", cascade={"persist", "remove"}, orphanRemoval=true, mappedBy="workbook")
-     * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbookId")
+     * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbook_id")
      */
     protected $worksheets;
-
-    /**
-     * Populates an ExcelImportWorkbook from data contained within an uploaded file
-     */
-    public static function createFromUpload(UploadedFile $file) : ExcelImportWorkbook
-    {
-        $reader = new Xlsx();
-        $spreadsheet = $reader->load($file->getRealPath());
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
-
-        return $importWorkbook;
-    }
 
     public function __construct()
     {
@@ -104,6 +91,16 @@ class ExcelImportWorkbook
         $this->filename = $filename;
     }
 
+    public function getFileMimeType(): ?string
+    {
+        return $this->fileMimeType;
+    }
+
+    public function setFileMimeType(?string $mime): void
+    {
+        $this->fileMimeType = $mime;
+    }
+
     public function getUploadedAt(): ?\DateTimeImmutable
     {
         return $this->uploadedAt;
@@ -129,5 +126,15 @@ class ExcelImportWorkbook
         }
 
         return false;
+    }
+
+    public function getUploadedBy(): ?AppUser
+    {
+        return $this->uploadedBy;
+    }
+
+    public function setUploadedBy(?AppUser $uploadedBy): void
+    {
+        $this->uploadedBy = $uploadedBy;
     }
 }

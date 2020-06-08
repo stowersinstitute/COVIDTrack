@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Group Results{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th colspan="{{ resultDates|length }}" style="text-align:center">Date Specimen Results Reported</th>
+                    </tr>
+                    <tr>
+                        <th>Group</th>
+                        {% for resultDate in resultDates %}
+                        <th>{{ resultDate|date("F j, Y") }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for group in allGroups %}
+                        {# Not all groups have report data #}
+                        {% if reportData[group.title] is defined %}
+                            {% set groupResults = reportData[group.title] %}
+                            <tr>
+                                <td>{{ group.title }}</td>
+
+                                {% for resultDate in resultDates %}
+                                    {% set key = resultDate|date("Y-m-d") %}
+                                <td>
+                                    {{ groupResults[key] }}
+                                </td>
+                                {% endfor %}
+
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

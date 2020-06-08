@@ -1,0 +1,3 @@
+parameters:
+  # NOTE: this is overwritten by the build process
+  app_current_version: 'DEVELOPMENT'

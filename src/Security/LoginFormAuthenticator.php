@@ -3,6 +3,8 @@
 namespace App\Security;
 
 use App\Entity\AppUser;
+use App\Ldap\AppLdapUser;
+use App\Ldap\AppLdapUserSynchronizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,12 +49,16 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
      */
     private $ldapAuthUserDnFormat = '';
 
+    /** @var AppLdapUserSynchronizer */
+    private $ldapUserSynchronizer;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
         UserPasswordEncoderInterface $passwordEncoder,
         Ldap $ldap,
+        AppLdapUserSynchronizer $ldapUserSynchronizer,
         $ldapAuthUserDnFormat = ''
     ) {
         $this->entityManager = $entityManager;
@@ -60,6 +66,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->ldap = $ldap;
+        $this->ldapUserSynchronizer = $ldapUserSynchronizer;
         $this->ldapAuthUserDnFormat = $ldapAuthUserDnFormat;
     }
 
@@ -81,6 +88,8 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
             $credentials['username']
         );
 
+        if (!$credentials['password']) throw new \InvalidArgumentException('Password cannot be blank');
+
         return $credentials;
     }
 
@@ -101,11 +110,16 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         return $user;
     }
 
+    /**
+     * @param mixed         $credentials
+     * @param AppUser $user
+     * @return bool
+     */
     public function checkCredentials($credentials, UserInterface $user)
     {
         // Authenticate against LDAP for LdapUsers
-        if ($user instanceof LdapUser) {
-            return $this->isLdapPasswordValid($credentials, $user);
+        if ($user->isLdapUser()) {
+            return $this->isLdapPasswordValid($credentials);
         }
 
         // Fall back to local password authentication
@@ -123,11 +137,20 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // When an LdapUser logs in sync their record in the local database
+        // The object type here is determined by the user provider. It may be an AppUser or an LdapUser
+        /** @var AppUser $authenticatedUser */
         $authenticatedUser = $token->getUser();
-        if ($authenticatedUser instanceof LdapUser) {
-            $this->syncLocalUserFromLdapUser($authenticatedUser);
+
+        if ($authenticatedUser->isLdapUser()) {
+            $this->ldapUserSynchronizer->synchronize($authenticatedUser);
         }
+
+        // Update login tracking fields
+        $authenticatedUser->setHasLoggedIn(true);
+        $authenticatedUser->setLastLoggedInAt(new \DateTimeImmutable());
+
+        // Commit any changes from the sync and updating last login details
+        $this->entityManager->flush();
 
         // Redirect to where they were going or the home page
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
@@ -143,7 +166,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }
 
-    protected function isLdapPasswordValid($credentials, LdapUser $user)
+    protected function isLdapPasswordValid($credentials)
     {
         $username = $this->ldap->escape($credentials['username'], '', LdapInterface::ESCAPE_DN);
 
@@ -152,6 +175,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         $dn = str_replace('{username}', $username, $this->ldapAuthUserDnFormat);
 
         try {
+            // Passing an empty password to bind() is an anonymous bind and will succeed!
+            if (!$credentials['password']) {
+                return false;
+            }
+
             // Throws an exception if password is invalid
             $this->ldap->bind($dn, $credentials['password']);
         } catch (ConnectionException $e) {
@@ -159,25 +187,5 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
         }
 
         return true;
-    }
-
-    protected function syncLocalUserFromLdapUser(LdapUser $ldapUser)
-    {
-        $localUser = $this->entityManager
-            ->getRepository(AppUser::class)
-            ->findOneBy(['username' => $ldapUser->getUsername()]);
-
-        if (!$localUser) {
-            $localUser = new AppUser($ldapUser->getUsername());
-
-            $localUser->setIsLdapUser(true);
-            $localUser->setRoles($ldapUser->getRoles());
-
-            $this->entityManager->persist($localUser);
-        }
-
-        // Add additional field syncs here
-
-        $this->entityManager->flush();
     }
 }

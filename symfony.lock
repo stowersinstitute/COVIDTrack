@@ -93,6 +93,9 @@
     "doctrine/reflection": {
         "version": "1.2.1"
     },
+    "dragonmantank/cron-expression": {
+        "version": "v2.3.0"
+    },
     "egulias/email-validator": {
         "version": "2.1.17"
     },
@@ -101,6 +104,9 @@
     },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
+    },
+    "loostro/cryptomute": {
+        "version": "v1.0.3"
     },
     "markbaker/complex": {
         "version": "1.4.8"
@@ -121,7 +127,7 @@
         "version": "2.1.1"
     },
     "php": {
-        "version": "7.1.3"
+        "version": "7.2"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.0.0"
@@ -161,6 +167,9 @@
         "files": [
             "config/packages/sensio_framework_extra.yaml"
         ]
+    },
+    "simshaun/recurr": {
+        "version": "v4.0.2"
     },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",
@@ -562,5 +571,8 @@
     },
     "zendframework/zend-eventmanager": {
         "version": "3.2.1"
+    },
+    "zenstruck/schedule-bundle": {
+        "version": "v1.0.0"
     }
 }

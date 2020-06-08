@@ -1,0 +1,46 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Label</th>
+        <th>Location</th>
+        <th>Healthy?</th>
+        <th>State</th>
+        <th>Idle</th>
+        <th>Version</th>
+        <th>Device IP</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for kiosk in kiosks %}
+        {% set prnHealth = '-- Unknown --' %}
+        {% if not kiosk.provisioned %}
+            {% set prnHealth = '<i class="fa fa-exclamation-triangle text-yellow"></i> Not Provisioned' %}
+        {% else %}
+            {% set prnLastHeartbeatAt = kiosk.lastHeartbeatAt|date('Y-m-d g:ia') %}
+            {% if kiosk.lastHeartbeatAt is empty %}
+                {% set prnLastHeartbeatAt = '-- Never Reported --' %}
+            {% else %}
+                {% if kiosk.isStaleHeartbeat() %}
+                    {% set prnHealth = '<i class="fa fa-exclamation-triangle text-yellow"></i> Last heartbeat: ' ~ prnLastHeartbeatAt %}
+                {% else %}
+                    {% set prnHealth = '<i class="fa fa-check-circle text-green"></i>' %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
+        <tr>
+            <td>
+                <a href="{{ path('kiosk_admin_edit', {kioskId: kiosk.id}) }}">Edit</a>
+            </td>
+            <td>{{ kiosk.label }}</td>
+            <td>{{ kiosk.location }}</td>
+            <td>{{ prnHealth|raw }}</td>
+            <td>{{ kiosk.lastHeartbeatState }}</td>
+            <td>{{ kiosk.getPrnIdleTime() }}</td>
+            <td>{{ kiosk.lastHeartbeatVersionId }}</td>
+            <td>{{ kiosk.lastHeartbeatIp }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

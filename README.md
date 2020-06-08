@@ -106,11 +106,11 @@ Instead of using Docker, develop with tools installed directly on the host machi
 
 ## Running Automated Tests
 
-Tests written using [PHPUnit](https://phpunit.de/) and [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
+Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
 
 Run test suite from command-line:
 
-    bin/phpunit
+    ./vendor/bin/simple-phpunit
 
 ## Data Fixtures
 
@@ -126,8 +126,35 @@ Or add the `--append` flag to keep existing database data and append fake data:
 
 Create new fixtures in `src/DataFixtures/AppFixtures.php`
 
+## Login to dev environment with fixtures loaded
+
+These users are available when fixtures are loaded. Same username/password:
+
+* ctadmin - Sysadmin / Developer
+* coordinator - Study Coordinator
+* mediaprep - Media Prep Team (specimen collection kit management)
+* samplecollection - Sample Collection Team
+* testingtech - Viral Testing Team / Results
+* analysistech - Viral Analysis Team
+* kiosk - Kiosk UI
+
+## Development Environment - Monitoring Sent Email
+
+Use [Mailhog](https://github.com/mailhog/MailHog) as a Docker image to see email sent by the application:
+
+    $ docker run --rm -p8025:8025 -p1025:1025 mailhog/mailhog
+
+Add environment var `MAILER_DSN` to file .env.local:
+
+    # .env.local
+    MAILER_DSN=smtp://127.0.0.1:1025
+
+Perform actions that would normally send an application email.
+
+View mail in Mailhog: <http://0.0.0.0:8025>
+
 ### Frontend Frameworks
 
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
 * [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
-* [Font Awesome 4.7.0](https://fontawesome.com/v4.7.0/) for extra icons
+* [Font Awesome 5.13](https://fontawesome.com/icons?d=gallery&m=free) for extra icons

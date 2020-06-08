@@ -2,11 +2,13 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "loostro/cryptomute": "^1.0",
         "phpoffice/phpspreadsheet": "^1.12",
         "sensio/framework-extra-bundle": "^5.1",
+        "simshaun/recurr": "^4.0",
         "stof/doctrine-extensions-bundle": "^1.4",
         "stowers-lims/zpl": "dev-master",
         "symfony/asset": "4.4.*",
@@ -30,7 +32,8 @@
         "symfony/validator": "4.4.*",
         "symfony/web-link": "4.4.*",
         "symfony/webpack-encore-bundle": "^1.7",
-        "symfony/yaml": "4.4.*"
+        "symfony/yaml": "4.4.*",
+        "zenstruck/schedule-bundle": "^1.0"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3",
@@ -42,7 +45,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.1.3"
+            "php": "7.2"
         },
         "preferred-install": {
             "*": "dist"

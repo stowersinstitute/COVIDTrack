@@ -1,0 +1,26 @@
+{% extends 'kiosk/tube-input.html.twig' %}
+
+{% block body_content %}
+    <div class="box">
+        {% include 'kiosk/review-tabel.html.twig' with {tubeData: tubeData} %}
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6 text-right">
+            <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-default">
+                <i class="fa fa-fw fa-chevron-left"></i> Go Back
+            </a>
+        </div>
+        <div class="col-xs-6">
+            {{ form(finishButtonForm) }}
+        </div>
+    </div>
+
+    <div class="row col-xs-12 text-center" style="margin-top:2em;">
+        {{ _self.renderCancelButton() }}
+    </div>
+{% endblock %}
+
+{% block scan_help %}
+    {# Overridden to not display #}
+{% endblock %}

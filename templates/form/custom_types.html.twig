@@ -1,3 +1,5 @@
+{% use "bootstrap_3_layout.html.twig" %}
+
 {% block radio_button_group_row %}
     <div class="form-group">
         {{- form_label(form) -}}
@@ -8,7 +10,7 @@
                         <i class="fa fa-fw fa-check"></i>{{ title }}</a>
                 {% endfor %}
             </div>
-            {{- form_widget(form) -}}
+            {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
         </div>
     </div>
 
@@ -30,5 +32,8 @@
 {% endblock %}
 
 
-
+{% block form_start %}
+    {% set attr = attr|merge({autocomplete: 'off'}) %}
+    {{- parent() -}}
+{% endblock form_start %}
 

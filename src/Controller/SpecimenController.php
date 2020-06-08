@@ -24,6 +24,8 @@ class SpecimenController extends AbstractController
      */
     public function list()
     {
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_VIEW');
+
         $specimens = $this->getDoctrine()
             ->getRepository(Specimen::class)
             ->findAll();
@@ -36,11 +38,12 @@ class SpecimenController extends AbstractController
     /**
      * View a single Specimen.
      *
-     * TODO: CVDLS-30 Replace requirements below with real accession ID prefix
-     * @Route("/{accessionId<CID\d+>}", methods={"GET", "POST"})
+     * @Route("/{accessionId<C[A-Z]{8}>}", methods={"GET", "POST"})
      */
     public function view(string $accessionId)
     {
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_VIEW');
+
         $specimen = $this->findSpecimen($accessionId);
 
         $auditLogs = $this->getDoctrine()
@@ -60,6 +63,8 @@ class SpecimenController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
+
         $form = $this->createForm(SpecimenForm::class);
         $form->handleRequest($request);
 
@@ -85,11 +90,12 @@ class SpecimenController extends AbstractController
     /**
      * Edit a single Specimen.
      *
-     * TODO: CVDLS-30 Replace requirements below with real accession ID prefix
-     * @Route("/{accessionId<CID\d+>}/edit", methods={"GET", "POST"})
+     * @Route("/{accessionId<C[A-Z]{8}>}}/edit", methods={"GET", "POST"})
      */
     public function edit(string $accessionId, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
+
         $specimen = $this->findSpecimen($accessionId);
 
         $form = $this->createForm(SpecimenForm::class, $specimen);

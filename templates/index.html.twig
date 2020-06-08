@@ -1,7 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block page_title %}COVIDTrack{% endblock %}
-
 {% block body %}
-    This is the home page
+
+    {% if is_granted('ROLE_PARTICIPANT_GROUP_VIEW') %}
+        <div class="row">
+            <div class="col-lg-3 col-xs-6">
+                <!-- small box -->
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>{{ numActiveGroups }}</h3>
+
+                        <p>Participant Groups</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-users"></i>
+                    </div>
+                    {% if is_granted('ROLE_PARTICIPANT_GROUP_VIEW') %}
+                        <a href="{{ path('app_participant_group_list') }}" class="small-box-footer">
+                            View Groups <i class="fa fa-arrow-circle-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if is_granted('ROLE_TUBE_CHECK_IN') %}
+        <h2>Tubes</h2>
+
+        <div class="row">
+            <div class="col-lg-3 col-xs-6">
+                <!-- small box -->
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>{{ numTubesReturned }}</h3>
+
+                        <p>Check-in Queue</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-clipboard-check"></i>
+                    </div>
+                    <a href="{{ path('checkin_queue') }}" class="small-box-footer">
+                        View <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if is_granted('ROLE_RESULTS_VIEW') %}
+        <h2>Specimens</h2>
+
+        <div class="row">
+            <div class="col-lg-3 col-xs-6">
+                <!-- small box -->
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3>{{ numSpecimensInProcess }}</h3>
+
+                        <p>In Process</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-th"></i>
+                    </div>
+                    {# todo: link to results upload #}
+                    {% if is_granted('ROLE_RESULTS_EDIT') %}
+                        <a href="{{ path('qpcr_excel_import') }}" class="small-box-footer">
+                            Import Results <i class="fa fa-upload"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

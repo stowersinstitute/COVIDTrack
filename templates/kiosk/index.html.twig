@@ -11,160 +11,35 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-
-{#            <table class="table large" style="font-size: 2.5em;">#}
-{#                <thead class="thead-dark">#}
-{#                <tr>#}
-{#                    <th>Group ID</th>#}
-{#                    <th>Tube ID</th>#}
-{#                </tr>#}
-{#                </thead>#}
-
-{#                <tr>#}
-{#                    <td><span id="groupId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>#}
-{#                    <td><span id="specimenId"><i class="fa fa-spinner fa-spin"></i> Looking for barcode...</span></td>#}
-{#                </tr>#}
-{#            </table>#}
-            {{
-                form(form, {
-                    'attr': {
-                        'autocomplete': 'off',
-                    }
-                })
-            }}
-
-
-        <input type="text" id="raw-scanner" name="raw-scanner" style="opacity: 0.1; width:10px;"/>
+            {{ form_start(form) }}
+            {{ form_row(form.participantGroup, {'label': false, 'placeholder': 'Select Group here or Scan Group barcode using kiosk scanner'}) }}
+            {{ form_end(form) }}
         </div>
     </div>
+
+    {% block scan_help %}
+    {% include 'kiosk/scan-help.html.twig' with {
+        scanTipHtml: 'Scan Group barcode<br>below the screen'
+    }%}
+    {% endblock %}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
 
     <script>
-        function drawLine(canvas, begin, end, color) {
-            canvas.beginPath();
-            canvas.moveTo(begin.x, begin.y);
-            canvas.lineTo(end.x, end.y);
-            canvas.lineWidth = 4;
-            canvas.strokeStyle = color;
-            canvas.stroke();
-        }
-
-        (function() {
-            var waitingForGroupId = true;
-            var waitingForSpecimenId = true;
-
-            var groupId = null;
-            var specimenId = null;
-
-            function sawGroupId(sawGroupId) {
-                if (!waitingForGroupId) return;
-
-                groupId = sawGroupId;
-                document.getElementById('groupId').innerHTML = '<i class="fa fa-check text-green"></i> ' + sawGroupId;
-                notifySuccessfulScan();
-                waitingForGroupId = false;
-
-                checkForSubmit();
+        // What to do when scanner input
+        $(document).on( "scannerinput", function(e, inputString) {
+            if ($("option:contains(" + inputString + ")", "[data-scanner-input]").length === 0) {
+                console.log('Not an option');
+                return;
             }
 
-            function sawSpecimenId(sawSpecimenId) {
-                if (!waitingForSpecimenId) return;
+            let selection = "";
+            selection = $("option:contains(" + inputString + ")", "[data-scanner-input]").val();
 
-                specimenId = sawSpecimenId;
-                document.getElementById('specimenId').innerHTML = '<i class="fa fa-check text-green"></i> ' + sawSpecimenId;
-                notifySuccessfulScan();
-                waitingForSpecimenId = false;
-
-                checkForSubmit();
-            }
-
-            function checkForSubmit() {
-                if (!waitingForSpecimenId && !waitingForGroupId) {
-                    location.href = "{{ path('kiosk_index') }}" + "specimen-dropoff/" + groupId + "/" + specimenId
-                }
-            }
-
-            function notifySuccessfulScan() {
-                console.log("🔔 BEEP 🔔");
-                document.getElementById("audioScanSuccess").muted = false;
-                document.getElementById("audioScanSuccess").play();
-            }
-
-            // --------------------------- QR code processing stuff
-            var video = document.createElement("video");
-            var canvasElement = document.getElementById("canvas");
-            var canvas = canvasElement.getContext("2d");
-            var loadingMessage = document.getElementById("loadingMessage");
-            var outputContainer = document.getElementById("output");
-            var outputMessage = document.getElementById("outputMessage");
-            var outputData = document.getElementById("outputData");
-
-            var useFrontCamera = false;
-
-            // Use facingMode: environment to attemt to get the front camera on phones
-            navigator.mediaDevices
-                .getUserMedia({
-                    video: {
-                        facingMode: useFrontCamera ? "user" : "environment",
-                        width: 950,
-                        height: 950
-                    }
-                })
-                .then(function(stream) {
-                        video.srcObject = stream;
-                        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-                        video.play();
-                        requestAnimationFrame(tick);
-                    }
-                );
-
-            function tick() {
-                loadingMessage.innerText = "⌛ Loading video...";
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    loadingMessage.hidden = true;
-                    canvasElement.hidden = false;
-                    outputContainer.hidden = false;
-
-                    canvasElement.height = video.videoHeight;
-                    canvasElement.width = video.videoWidth;
-                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    var code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert",
-                    });
-                    if (code) {
-                        drawLine(canvas, code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-                        drawLine(canvas, code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-                        drawLine(canvas, code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-                        drawLine(canvas, code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
-                        outputMessage.hidden = true;
-                        outputData.parentElement.hidden = false;
-                        outputData.innerText = code.data;
-
-                        var specimenPrefix = 'CID';
-                        if (code.data.indexOf(specimenPrefix) === 0) {
-                            // todo: only necessary if we have a hidden specimen prefix
-                            //sawSpecimenId(code.data.substring(specimenPrefix.length));
-                            sawSpecimenId(code.data);
-                        }
-                        if (code.data.indexOf("GID:") === 0) {
-                            sawGroupId(code.data.substring(4));
-                        }
-                    } else {
-                        outputMessage.hidden = false;
-                        outputData.parentElement.hidden = true;
-                    }
-                }
-                requestAnimationFrame(tick);
-            }
-
-        })();
-    </script>
-
-    <script>
-
+            $("[data-scanner-input]").val(selection);
+            $("[data-scanner-input]").parents('form').submit();
+        });
     </script>
 {% endblock %}

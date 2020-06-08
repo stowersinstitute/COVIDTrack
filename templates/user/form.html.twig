@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+    {% if user.id %} Edit User {{ user.username }} {% else %} New User {% endif %}
+{% endblock %}
+
+{% block body %}
+    <div class="alert alert-warning" role="alert">
+        <b>Warning:</b> Changing a user's permissions will log them out!
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Account</h3>
+                </div>
+                <div class="box-body">
+                    {% if not user.ldapUser %}
+                        <strong>Password:</strong> <a href="{{ path("user_change_password", { username: user.username }) }}" class="btn btn-xs btn-default" role="button"><i class="fa fa-lock"></i> Change Password</a><br><br>
+                    {% endif %}
+                    <strong>Last Login:</strong> {{ user.hasLoggedIn ? user.lastLoggedInAt|date('Y-m-d g:ia') : '-- Never --' }}
+                </div>
+            </div>
+
+            {% include 'audit-history.html.twig' with {auditLogs: auditLogs} %}
+        </div>
+    </div>
+{% endblock %}

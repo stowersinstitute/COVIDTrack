@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
  * A cell within an ExcelImportWorksheet
  *
  * @ORM\Entity
+ * @ORM\Table(name="excel_import_cells")
  */
 class ExcelImportCell
 {
@@ -30,14 +31,14 @@ class ExcelImportCell
     /**
      * @var int 1-based row number (matches the row displayed in Excel)
      *
-     * @ORM\Column(name="rowIndex", type="integer", nullable=false)
+     * @ORM\Column(name="row_index", type="integer", nullable=false)
      */
     protected $rowIndex;
 
     /**
      * @var string Column label from Excel, eg. "A"
      *
-     * @ORM\Column(name="colIndex", type="string", length=255, nullable=false)
+     * @ORM\Column(name="col_index", type="string", length=255, nullable=false)
      */
     protected $colIndex;
 
@@ -57,7 +58,7 @@ class ExcelImportCell
      * @var string
      * @see setValueFromExcelCell
      *
-     * @ORM\Column(name="valueType", type="string", length=255, nullable=true)
+     * @ORM\Column(name="value_type", type="string", length=255, nullable=true)
      */
     protected $valueType;
 
@@ -65,7 +66,7 @@ class ExcelImportCell
      * @var ExcelImportWorksheet Worksheet this cell belongs to
      *
      * @ORM\ManyToOne(targetEntity="ExcelImportWorksheet", inversedBy="cells")
-     * @ORM\JoinColumn(name="worksheetId", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="worksheet_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected $worksheet;
 
@@ -84,7 +85,7 @@ class ExcelImportCell
     {
         // Typical value is just the string displayed in Excel
         $internalDataType = self::VALUE_TYPE_SCALAR;
-        $storeValue = $cell->getFormattedValue();
+        $storeValue = trim($cell->getFormattedValue());
 
         // Resolve formulas
         // todo: not actually sure what happens when a formula resolves to a date...

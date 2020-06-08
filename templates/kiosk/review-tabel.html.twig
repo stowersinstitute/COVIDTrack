@@ -1,0 +1,18 @@
+<table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Tube Label ID</th>
+        <th>Type</th>
+        <th>Collection Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for data in tubeData %}
+        <tr>
+            <td>{{ data.tube.accessionId }}</td>
+            <td>{{ data.tubeType }}</td>
+            <td>{{ data.collectedAt is empty ? "" : data.collectedAt|date("F j @ g:ia") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

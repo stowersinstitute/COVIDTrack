@@ -3,7 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="google" content="notranslate">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <title>{% block title %}COVIDTrack{% endblock %}</title>
+        <link rel="manifest" href="/manifest.json">
+        <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -21,38 +24,27 @@
                 <!-- mini logo for sidebar mini 50x50 pixels -->
                 <span class="logo-mini"><b>C</b>Trk</span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><b>COVID</b>Track</span>
+                <span class="logo-lg">
+                    <img src="{{ asset('images/logo-white.svg') }}">
+                    <b>COVID</b>Track</span>
             </a>
             <!-- Header Navbar: style can be found in header.less -->
             <nav class="navbar navbar-static-top">
-                <!-- Sidebar toggle button-->
-                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-                    <span class="sr-only">Toggle navigation</span>
-                </a>
-                <!-- Navbar Right Menu -->
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-                        <li class="dropdown user user-menu">
-                            {% if app.user %}
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">
-                                        {{ app.user.username }}
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ path("app_logout") }}">Sign Out</a>
-                                    </div>
-                                </div>
-                            {% else %}
-                                <a href="{{ path('app_login') }}">Log In</a>
-                            {% endif %}
-                        </li>
-                        <!-- Control Sidebar Toggle Button -->
-                        <li>
-                            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user"></i> {{ app.user.username }} <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                {# todo: change password, etc. for local users #}
+                                {#
+                                <li><a href="#">Profile</a></li>
+                                <li role="separator" class="divider"></li>
+                                #}
+                                <li><a class="dropdown-item" href="{{ path("app_logout") }}">Sign Out</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </div>
-
             </nav>
         </header>
 
@@ -74,6 +66,19 @@
                 {% block body %}{% endblock %}
             </section>
         </div>
+
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> {{ app_current_version }}
+            </div>
+            &nbsp;
+            {# <strong>&copy; <a href="http://stowers.org" target="_blank">Stowers Institute</a></strong> #}
+        </footer>
     </div>
+
+    <script>
+        // Activate tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+    </script>
     </body>
 </html>

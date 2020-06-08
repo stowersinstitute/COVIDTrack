@@ -2,17 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\ExcelImportWorkbook;
-use App\Entity\AuditLog;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\ExcelImport\ParticipantGroupImporter;
-use App\Form\GenericExcelImportType;
-use App\Form\ParticipantGroupForm;
+use App\Entity\StudyCoordinatorNotification;
+use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -23,75 +17,74 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * CLIA Testing Commendations by Participant Group
+     * List notifications previously sent to the Study Coordinator that
+     * recommend Participant Groups with a positive test should undergo
+     * further testing.
+     *
+     * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
+     */
+    public function coordinatorNotifications()
+    {
+        // One or more of these
+        $this->denyAccessUnlessGranted([
+            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(StudyCoordinatorNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'logs' => $logs,
+            'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * CLIA Testing Recommendations by Participant Group
      *
      * @Route(path="/group/results", methods={"GET"}, name="app_report_group_results")
      */
-    public function groupResults()
+    public function groupResults(GroupTestingRecommendationReport $groupTestRecReport)
     {
+        $this->denyAccessUnlessGranted('ROLE_REPORTS_GROUP_VIEW');
+
         $specimenRepo = $this->getDoctrine()->getRepository(Specimen::class);
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
         /**
-         * Collect results for each group. Internal format ends up like this:
+         * Roll-up testing recommendation for each Participant Group.
+         * Internal format ends up like this:
          *
          * [
          *     'Alligators' => [
-         *         '2020-05-03 4:00pm' => 'Recommended',
-         *         '2020-05-04 4:00pm' => 'No',
-         *         '2020-05-05 4:00pm' => 'Awaiting Results',
+         *         '2020-05-03' => 'Recommended',
+         *         '2020-05-04' => 'No',
+         *         '2020-05-05' => 'Awaiting Results',
          *     ]
          * ]
          */
         $reportData = [];
 
         // X axis
-        /** @var \DateTime[] $collectionDates */
-        $collectionDates = $specimenRepo->findAvailableGroupResultDates();
-        // Y axis
-        // TODO: Only Groups with results Specimens?
-        $groupsWithResults = $groupRepo->findActiveAlphabetical();
+        /** @var \DateTime[] $resultDates */
+        $resultDates = $specimenRepo->findAvailableGroupResultDates();
 
-        foreach ($groupsWithResults as $group) {
+        // Y axis
+        $groups = $groupRepo->findActiveAlphabetical();
+        foreach ($groups as $group) {
             /**
-             * Keys: Collection Date string like "2020-05-05 4:00pm". Printed in report.
+             * Keys: Results Date string like "2020-05-05". Printed in report.
              * Values: Recommendation text string
              */
             $byDate = [];
 
-            foreach ($collectionDates as $collectionDate) {
-                // Collect all Specimens for this group and period
-                $results = $specimenRepo->findByGroupForCollectionPeriod($group, $collectionDate);
+            foreach ($resultDates as $resultDate) {
+                $result = $groupTestRecReport->resultForGroup($group, $resultDate);
 
-                // Calculate count for each Specimen CLIA testing recommendation value
-                $initial = [
-                    Specimen::CLIA_REC_RECOMMENDED => 0,
-                    Specimen::CLIA_REC_PENDING => 0,
-                    Specimen::CLIA_REC_NO => 0,
-                ];
-                $count = array_reduce($results, function (array $carry, Specimen $s) {
-                    $carry[$s->getCliaTestingRecommendation()]++;
-                    return $carry;
-                }, $initial);
-
-                // If any specimen recommended for testing, whole group must be notified for CLIA testing
-                if ($count[Specimen::CLIA_REC_RECOMMENDED] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_RECOMMENDED);
-                }
-                // If awaiting at least one result, group results still pending
-                else if ($count[Specimen::CLIA_REC_PENDING] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_PENDING);
-                }
-                // If all report negative, CLIA testing not necessary
-                else if ($count[Specimen::CLIA_REC_NO] > 0) {
-                    $text = Specimen::lookupCliaTestingRecommendationText(Specimen::CLIA_REC_NO);
-                }
-                // Group not tested during this period
-                else {
-                    $text = '-';
-                }
-
-                $byDate[$collectionDate->format('Y-m-d g:ia')] = $text;
+                $byDate[$resultDate->format('Y-m-d')] = $result;
             }
 
             $reportData[$group->getTitle()] = $byDate;
@@ -102,23 +95,10 @@ class ReportController extends AbstractController
             ->getRepository(ParticipantGroup::class)
             ->findAll();
 
-        return $this->render('reports/group-results.html.twig', [
+        return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,
-            'collectionDates' => $collectionDates,
+            'resultDates' => $resultDates,
             'reportData' => $reportData,
         ]);
-    }
-
-    private function mustFindGroup($id): ParticipantGroup
-    {
-        $s = $this->getDoctrine()
-            ->getRepository(ParticipantGroup::class)
-            ->findOneByAnyId($id);
-
-        if (!$s) {
-            throw new \InvalidArgumentException('Cannot find Participant Group');
-        }
-
-        return $s;
     }
 }

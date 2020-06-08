@@ -32,6 +32,11 @@ services:
             - db_data:/var/lib/mysql
         ports:
             - 3306:3306
+    mail:
+        image: mailhog/mailhog
+        ports:
+            - 1025:1025
+            - 8025:8025
 
 volumes:
     db_data:

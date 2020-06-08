@@ -1,11 +1,13 @@
 {% block body %}
+    {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th>&nbsp;</th>
+            {% if userCanEditSpecimens %}<th>&nbsp;</th>{% endif %}
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
+            <th>RNA Well Plate</th>
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
         </tr>
@@ -13,14 +15,21 @@
     <tbody>
     {% for specimen in specimens %}
         <tr>
+            {% if userCanEditSpecimens %}
             <td>
                 <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}">Edit</a>
             </td>
+            {% endif %}
             <td>
                 <a href="{{ path('app_specimen_view', {accessionId: specimen.accessionId}) }}">{{ specimen.accessionId }}</a>
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
+            <td>
+                {% for barcode in specimen.rnaWellPlateBarcodes %}
+                <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                {% endfor %}
+            </td>
             <td>{{ specimen.cliaTestingRecommendedText }}</td>
             <td>{{ specimen.statusText }}</td>
         </tr>

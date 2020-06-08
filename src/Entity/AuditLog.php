@@ -26,10 +26,13 @@ class AuditLog extends LogEntry
      *
      * @return array
      */
-    public function getFieldChanges(): array
+    public function getFieldChanges(): ?array
     {
         // By default use the raw property names and values
         $changes = $this->getData();
+
+        // There may be no changed fields, for example when soft deleting
+        if (!$changes) return [];
 
         // Try invoking static method on logged entity to convert to human-readable
         $class = $this->getObjectClass();

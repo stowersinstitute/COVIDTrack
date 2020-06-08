@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
+use App\Traits\SoftDeleteableEntity;
+use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
@@ -15,6 +16,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * to the group instead of the participant to maintain some anonymity.
  *
  * @ORM\Entity(repositoryClass="App\Entity\SpecimenRepository")
+ * @ORM\Table(name="specimens")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class Specimen
@@ -22,11 +24,11 @@ class Specimen
     use TimestampableEntity, SoftDeleteableEntity;
 
     const STATUS_CREATED = "CREATED";
-    const STATUS_PENDING = "PENDING";
+    const STATUS_RETURNED = "RETURNED";
+    const STATUS_ACCEPTED = "ACCEPTED";
+    const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_IN_PROCESS = "IN_PROCESS";
-    const STATUS_RESULTS = "RESULTS";
-    const STATUS_COMPLETE = "COMPLETE";
-    const STATUS_DROPPED_OFF = "DROPPEDOFF";
+    const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_BUCCAL = "BUCCAL";
@@ -34,13 +36,13 @@ class Specimen
     const TYPE_SALIVA = "SALIVA";
 
     const CLIA_REC_PENDING = "PENDING";
-    const CLIA_REC_RECOMMENDED = "RECOMMENDED";
+    const CLIA_REC_YES = "YES";
     const CLIA_REC_NO = "NO";
 
     /**
      * @var int
      * @ORM\Id()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -49,7 +51,7 @@ class Specimen
      * Unique public ID for referencing this specimen.
      *
      * @var string
-     * @ORM\Column(name="accessionId", type="string", unique=true)
+     * @ORM\Column(name="accession_id", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $accessionId;
@@ -68,21 +70,25 @@ class Specimen
      *
      * @var ParticipantGroup
      * @ORM\ManyToOne(targetEntity="App\Entity\ParticipantGroup", inversedBy="specimens")
-     * @ORM\JoinColumn(name="participantGroupId", referencedColumnName="id")
+     * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id")
      */
     private $participantGroup;
 
     /**
-     * @var WellPlate
-     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="specimens")
+     * Wells where this Specimen is contained.
+     *
+     * @var SpecimenWell[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"position" = "ASC"})
      */
-    private $wellPlate;
+    private $wells;
 
     /**
-     * Time when collected or received.
+     * Date and Time when this Specimen was extracted (collected) from the Participant.
+     * For example, when they spit in the tube or did a blood draw.
      *
      * @var \DateTime
-     * @ORM\Column(name="collectedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="collected_at", type="datetime", nullable=true)
      * @Gedmo\Versioned
      */
     private $collectedAt;
@@ -92,14 +98,14 @@ class Specimen
      * should undergo CLIA-based testing.
      *
      * @var string
-     * @ORM\Column(name="cliaTestingRecommendation", type="string")
+     * @ORM\Column(name="clia_testing_recommendation", type="string")
      * @Gedmo\Versioned
      */
     private $cliaTestingRecommendation;
 
     /**
      * @var string
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="status", type="string")
      * @Gedmo\Versioned
      */
     private $status;
@@ -121,9 +127,26 @@ class Specimen
         $this->status = self::STATUS_CREATED;
         $this->results = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
+    /**
+     * Create a new Specimen
+     *
+     * @return Specimen
+     */
+    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen): self
+    {
+        $accessionId = $gen->generate();
+
+        return new static($accessionId, $group);
+    }
+
+    /**
+     * Create a Specimen from contents in the given Tube.
+     *
+     * @return Specimen
+     */
     public static function createFromTube(Tube $tube, SpecimenAccessionIdGenerator $gen): self
     {
         // Use Tube's Participant Group
@@ -132,11 +155,8 @@ class Specimen
             throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
         }
 
-        // Specimen Accession ID
-        $accessionId = $gen->generate();
-
         // New Specimen
-        $s = new static($accessionId, $group);
+        $s = static::createNew($group, $gen);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
@@ -197,7 +217,7 @@ class Specimen
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'type' => 'Type',
-            'collectedAt' => 'Collected At',
+            'collectedAt' => 'Collection Time',
             'cliaTestingRecommendation' => 'CLIA Testing Recommended?',
             'status' => 'Status',
             'createdAt' => 'Created At',
@@ -240,7 +260,7 @@ class Specimen
         return $return;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -333,11 +353,11 @@ class Specimen
     {
         return [
             'Created' => self::STATUS_CREATED,
-            'Pending' => self::STATUS_PENDING,
-            'Dropped Off' => self::STATUS_DROPPED_OFF,
+            'Returned' => self::STATUS_RETURNED,
+            'Accepted' => self::STATUS_ACCEPTED,
+            'Rejected' => self::STATUS_REJECTED,
             'In Process' => self::STATUS_IN_PROCESS,
-            'Results' => self::STATUS_RESULTS,
-            'Complete' => self::STATUS_COMPLETE,
+            'Results Available' => self::STATUS_RESULTS,
         ];
     }
 
@@ -363,6 +383,7 @@ class Specimen
 
     public function getCliaTestingRecommendedText(): string
     {
+        // NOTE: See $this->recalculateCliaTestingRecommendation() for $this->cliaTestingRecommendation
         return self::lookupCliaTestingRecommendationText($this->cliaTestingRecommendation);
     }
 
@@ -374,21 +395,77 @@ class Specimen
     {
         $map = [
             self::CLIA_REC_PENDING => 'Awaiting Results',
-            self::CLIA_REC_RECOMMENDED => 'Yes',
-            self::CLIA_REC_NO => 'No',
+            self::CLIA_REC_YES => 'Recommend Diagnostic Testing',
+            self::CLIA_REC_NO => 'No Recommendation',
         ];
 
         return $map[$rec] ?? '';
     }
 
-    public function getWellPlate(): ?WellPlate
+    /**
+     * @return SpecimenWell[]
+     */
+    public function getWells(): array
     {
-        return $this->wellPlate;
+        return $this->wells->getValues();
     }
 
-    public function setWellPlate(?WellPlate $wellPlate): void
+    /**
+     * Add this Specimen to given Well Plate at given position.
+     *
+     * If Specimen is already on this Well Plate, it will be updated to being
+     * at the given position.
+     */
+    public function addWellPlate(WellPlate $plate, int $position = null): void
     {
-        $this->wellPlate = $wellPlate;
+        $existingWell = $this->getWellOnPlate($plate);
+        if ($existingWell) {
+            // Update position on existing Well Plate
+            $existingWell->setPosition($position);
+        } else {
+            // Add new
+            $this->wells->add(new SpecimenWell($plate, $this, $position));
+        }
+    }
+
+    /**
+     * Whether Specimen is on the given Well Plate.
+     */
+    public function isOnWellPlate(WellPlate $plate): bool
+    {
+        return (bool) $this->getWellOnPlate($plate);
+    }
+
+    /**
+     * Get SpecimenWell if this Specimen already on given WellPlate.
+     */
+    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    {
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return $well;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all Well Plates where this Specimen is contained.
+     *
+     * @return WellPlate[]
+     */
+    public function getWellPlates(): array
+    {
+        $plates = [];
+        foreach ($this->wells as $well) {
+            $plate = $well->getWellPlate();
+            if ($plate) {
+                $plates[] = $plate;
+            }
+        }
+
+        return $plates;
     }
 
     public function getCollectedAt(): ?\DateTimeInterface
@@ -399,6 +476,22 @@ class Specimen
     public function setCollectedAt(?\DateTimeInterface $collectedAt): void
     {
         $this->collectedAt = $collectedAt ? clone $collectedAt : null;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRnaWellPlateBarcodes(): array
+    {
+        $barcodes = [];
+        foreach ($this->wells as $well) {
+            $code = $well->getWellPlateBarcode();
+            if ($code) {
+                $barcodes[] = $code;
+            }
+        }
+
+        return $barcodes;
     }
 
     private function ensureValidType(?string $type): void
@@ -432,6 +525,8 @@ class Specimen
         $this->results->add($result);
 
         $this->recalculateCliaTestingRecommendation();
+
+        $this->setStatus(self::STATUS_RESULTS);
     }
 
     /**
@@ -495,20 +590,21 @@ class Specimen
         // Current recommendation
         $rec = $this->cliaTestingRecommendation;
 
-        // Latest qPCR result
+        // Latest result
         $qpcr = $this->getMostRecentQPCRResult();
 
-        // When qPCR result available
+        // When result available
         if ($qpcr) {
-            // Get the qPCR conclusion
+            // Get the conclusion
             $result = $qpcr->getConclusion();
 
-            // qPCR conclusion ==> CLIA Recommendation
+            // conclusion ==> CLIA Recommendation
             $map = [
-                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_RECOMMENDED,
-                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
-                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
+                SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
+                SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
+                SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_NO,
             ];
 
             // Use mapped recommendation value, else keep existing rec

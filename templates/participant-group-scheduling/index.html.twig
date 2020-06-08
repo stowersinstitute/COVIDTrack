@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+{% set userCanViewGroupName = is_granted('ROLE_PARTICIPANT_GROUP_VIEW') %}
+
+{% block page_title %}Group Drop-off Schedule{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-success">
+                <div class="box-body">
+                    <div class="pull-left">
+                        <dl>
+                            <dt>Next drop off at</dt>
+                            <dd>
+                                {% if nextDropOffWindowStartsAt %}
+                                    {{ nextDropOffWindowStartsAt|date("l m/d/Y g:i A") }}
+                                {% else %}
+                                    -- None Scheduled --
+                                {% endif %}
+
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <div class="pull-left" style="margin-left: 20px;">
+                        <dl>
+                            <dt>Participant Totals</dt>
+                            <dd>
+                                <span class="badge bg-blue"><i class="fa fa-user"></i> {{ nextWindowParticipantTotals.numParticipants }}</span> Participant(s)
+                                <span class="badge bg-aqua"><i class="fa fa-users"></i> {{ nextWindowParticipantTotals.numGroups }}</span> Group(s)
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    {% if schedule is empty %}
+                        No drop-off schedule is defined.
+                    {% else %}
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                            <tr>
+                                {# Time of day column #}
+                                <td style="width: 100px;">&nbsp;</td>
+                                {% for dayDate in schedule.getDropOffDaysAsDates() %}
+                                    <th>{{ dayDate|date('l') }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for dailyWindow in schedule.getDailyWindowsAsDates() %}
+                                    <tr>
+                                        <td class="text-right"><strong>{{ dailyWindow.startsAt|date('H:i') }}-{{ dailyWindow.endsAt|date('H:i') }}</strong></td>
+                                        {% for dayDate in schedule.getDropOffDaysAsDates() %}
+                                            <td>
+                                                {% set window = schedule.getWindowByWeekDayAndStartTime(dayDate, dailyWindow.startsAt) %}
+                                                {% if window %}
+                                                    {% for group in window.getParticipantGroups() %}
+                                                        <i class="fa fa-users" title="{% if userCanViewGroupName %}{{ group.title }}{% endif %}" data-toggle="tooltip"></i>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    &nbsp;
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+
+                            <tfoot>
+                            <tr>
+                                <td class="text-right"><strong>TOTALS</strong></td>
+                                {% for dayDate in schedule.getDropOffDaysAsDates() %}
+                                    <td>
+                                        {% set dailyParticipantTotals = schedule.getParticipantTotalsOn(dayDate) %}
+                                        <span class="badge bg-blue"><i class="fa fa-user"></i> {{ dailyParticipantTotals.numParticipants }}</span> Participant(s)
+                                        <span class="badge bg-aqua"><i class="fa fa-users"></i> {{ dailyParticipantTotals.numGroups }}</span> Group(s)
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            </tfoot>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

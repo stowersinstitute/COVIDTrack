@@ -2,11 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\AuditLog;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultQPCR;
-use App\Form\SpecimenForm;
+use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\SpecimenResultQPCRForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,19 +23,30 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * @Route(path="/", methods={"GET"}, name="app_results_qpcr_list")
      */
-    public function list()
+    public function list(Request $request)
     {
-        $results = $this->getDoctrine()
-            ->getRepository(SpecimenResultQPCR::class)
-            ->findAll();
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
+
+        $formFilterData = [];
+        $repo = $this->getDoctrine()->getRepository(SpecimenResultQPCR::class);
+
+        $filterForm = $this->createForm(SpecimenResultQPCRFilterForm::class);
+        $filterForm->handleRequest($request);
+
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            $formFilterData = $filterForm->getData();
+        }
+
+        $results = $repo->filterByFormData($formFilterData);
 
         return $this->render('results/qpcr/list.html.twig', [
             'results' => $results,
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 
     /**
-     * Create a single new qPCR Result
+     * Create a single new Result
      *
      * Optional query string params:
      *
@@ -47,6 +56,8 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function new(Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $result = null;
 
         // Query string params may indicate desired Specimen
@@ -82,7 +93,7 @@ class SpecimenResultQPCRController extends AbstractController
     }
 
     /**
-     * Edit a single qPCR Result.
+     * Edit a single Result.
      *
      * Optional query string params:
      *
@@ -92,6 +103,8 @@ class SpecimenResultQPCRController extends AbstractController
      */
     public function edit(string $id, Request $request) : Response
     {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+
         $result = $this->findResult($id);
 
         $form = $this->createForm(SpecimenResultQPCRForm::class, $result);
@@ -126,7 +139,7 @@ class SpecimenResultQPCRController extends AbstractController
             ->find($id);
 
         if (!$q) {
-            throw new \InvalidArgumentException('Cannot find qPCR Result');
+            throw new \InvalidArgumentException('Cannot find Result');
         }
 
         return $q;
