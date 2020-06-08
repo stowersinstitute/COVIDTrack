@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\tests\Entity;
+namespace App\Tests\Entity;
 
 
 use App\Entity\DropOffSchedule;
