@@ -120,14 +120,6 @@ class Specimen
      */
     private $results;
 
-    /**
-     * @return SpecimenResultQPCR[]
-     */
-    public function getResultsForDataMigration(): array
-    {
-        return $this->results->getValues();
-    }
-
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;

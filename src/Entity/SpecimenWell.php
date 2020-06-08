@@ -128,11 +128,6 @@ class SpecimenWell
         return $this->position;
     }
 
-    public function setMigratedQPCRResult(SpecimenResultQPCR $result)
-    {
-        $this->resultQPCR = $result;
-    }
-
     /**
      * @internal Do not call directly. Instead call new SpecimenResultQPCR($specimen);
      */
