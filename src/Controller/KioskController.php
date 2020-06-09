@@ -152,7 +152,7 @@ class KioskController extends AbstractController
             /** @var Tube $tube */
             $tube = $this->getDoctrine()
                 ->getRepository(Tube::class)
-                ->findOneByAnyId($formData['accessionId']);
+                ->findOneByAccessionId($formData['accessionId']);
             if (!$tube) {
                 // TODO: Need a user-friendly error
                 throw new \InvalidArgumentException('Tube ID does not exist');

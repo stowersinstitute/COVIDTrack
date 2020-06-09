@@ -11,19 +11,8 @@ use Doctrine\ORM\EntityRepository;
  */
 class TubeRepository extends EntityRepository
 {
-    /**
-     * @param int|string $id Tube.id or Tube.accessionId
-     */
-    public function findOneByAnyId($id): ?Tube
+    public function findOneByAccessionId(string $id): ?Tube
     {
-        if (is_int($id)) {
-            // Using findOneBy() instead of find()
-            // so Exception not thrown when not found.
-            return $this->findOneBy([
-                'id' => $id,
-            ]);
-        }
-
         return $this->findOneBy([
             'accessionId' => $id,
         ]);
