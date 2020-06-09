@@ -56,13 +56,13 @@ class SpecimenWell
 
     public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
     {
+        $this->position = $position;
+
         $this->wellPlate = $plate;
-        $plate->addWell($this, $position);
+        $plate->addWell($this);
 
         $this->specimen = $specimen;
         $specimen->addWell($this);
-
-        $this->position = $position;
     }
 
     /**

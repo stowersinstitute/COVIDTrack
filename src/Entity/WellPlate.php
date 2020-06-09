@@ -81,7 +81,7 @@ class WellPlate
     /**
      * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
      */
-    public function addWell(SpecimenWell $well, int $atPosition = null): void
+    public function addWell(SpecimenWell $well): void
     {
         // Same Well can't be added twice
         if ($this->hasWell($well)) {
@@ -89,6 +89,7 @@ class WellPlate
         }
 
         // Prevent adding Wells at currently occupied positions
+        $atPosition = $well->getPosition();
         if ($atPosition && $this->hasWellAtPosition($atPosition)) {
             $wellAtPosition = $this->getWellAtPosition($atPosition);
             $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
