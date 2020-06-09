@@ -19,11 +19,24 @@ final class Version20200608210507 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE specimen_results DROP FOREIGN KEY FK_A4130362BF112A8');
-        $this->addSql('DROP INDEX IDX_A4130362BF112A8 ON specimen_results');
-        $this->addSql('ALTER TABLE specimen_results CHANGE specimen_id specimen_well_id INT DEFAULT NULL');
+        // Add Results.well
+        $this->addSql('ALTER TABLE specimen_results ADD specimen_well_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE specimen_results ADD CONSTRAINT FK_A413036263188691 FOREIGN KEY (specimen_well_id) REFERENCES specimen_wells (id)');
         $this->addSql('CREATE INDEX IDX_A413036263188691 ON specimen_results (specimen_well_id)');
+
+        // Update newly created Results.well to be that of Results.specimen.well
+        $updateQuery = "
+            UPDATE specimen_results r
+            INNER JOIN specimens s ON r.specimen_id=s.id
+            INNER JOIN specimen_wells w ON s.id=w.specimen_id
+            SET r.specimen_well_id = w.id
+        ";
+        $this->addSql($updateQuery);
+
+        // Remove Results.specimen relationship
+        $this->addSql('ALTER TABLE specimen_results DROP FOREIGN KEY FK_A4130362BF112A8');
+        $this->addSql('DROP INDEX IDX_A4130362BF112A8 ON specimen_results');
+        $this->addSql('ALTER TABLE specimen_results DROP specimen_id');
     }
 
     public function down(Schema $schema) : void
@@ -33,7 +46,8 @@ final class Version20200608210507 extends AbstractMigration
 
         $this->addSql('ALTER TABLE specimen_results DROP FOREIGN KEY FK_A413036263188691');
         $this->addSql('DROP INDEX IDX_A413036263188691 ON specimen_results');
-        $this->addSql('ALTER TABLE specimen_results CHANGE specimen_well_id specimen_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE specimen_results DROP specimen_well_id');
+        $this->addSql('ALTER TABLE specimen_results ADD specimen_id INT DEFAULT NULL');
         $this->addSql('ALTER TABLE specimen_results ADD CONSTRAINT FK_A4130362BF112A8 FOREIGN KEY (specimen_id) REFERENCES specimens (id) ON DELETE CASCADE');
         $this->addSql('CREATE INDEX IDX_A4130362BF112A8 ON specimen_results (specimen_id)');
     }
