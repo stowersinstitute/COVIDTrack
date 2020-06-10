@@ -64,6 +64,26 @@ class SpecimenTest extends TestCase
         $this->assertSame($conclusion2, $specimen->getQPCRResults()[1]->getConclusion());
     }
 
+    public function testSameQPCRResultCanOnlyExistOnceOnSpecimen()
+    {
+        $specimen = Specimen::buildExample('C100');
+        $this->assertCount(0, $specimen->getQPCRResults());
+
+        $plate = WellPlate::buildExample('ABC');
+        $well = new SpecimenWell($plate, $specimen, 10);
+
+        $result = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        // Specimen and Result now related
+        $this->assertCount(1, $specimen->getQPCRResults());
+
+        // Adding multiple more times shouldn't change anything
+        $specimen->addQPCRResult($result);
+        $specimen->addQPCRResult($result);
+
+        $this->assertCount(1, $specimen->getQPCRResults());
+    }
+
     public function testSameWellCanOnlyExistOnceOnSpecimen()
     {
         $specimen = Specimen::buildExample('C100');
@@ -136,6 +156,7 @@ class SpecimenTest extends TestCase
         $r3 = new SpecimenResultQPCR($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
 
+        $this->assertCount(3, $specimen->getQPCRResults());
         $this->assertSame($r2, $specimen->getMostRecentQPCRResult());
     }
 

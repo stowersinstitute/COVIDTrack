@@ -84,6 +84,15 @@ class Specimen
     private $wells;
 
     /**
+     * qPCR Results associated with this Specimen.
+     *
+     * @var SpecimenResultQPCR[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $resultsQPCR;
+
+    /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
      * For example, when they spit in the tube or did a blood draw.
      *
@@ -117,6 +126,7 @@ class Specimen
 
         $this->status = self::STATUS_CREATED;
         $this->wells = new ArrayCollection();
+        $this->resultsQPCR = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -557,6 +567,22 @@ class Specimen
     }
 
     /**
+     * Add new qPCR Result for this Specimen.
+     *
+     * @internal Should only call from SpecimenResultQPCR::__construct()
+     */
+    public function addQPCRResult(SpecimenResultQPCR $result): void
+    {
+        foreach ($this->resultsQPCR as $existingResult) {
+            if ($result === $existingResult) {
+                return;
+            }
+        }
+
+        $this->resultsQPCR->add($result);
+    }
+
+    /**
      * Get qPCR Results for this Specimen.
      *
      * @param int $limit Max number of results to return
@@ -564,13 +590,7 @@ class Specimen
      */
     public function getQPCRResults(int $limit = null): array
     {
-        $results = [];
-        foreach ($this->wells as $well) {
-            $result = $well->getResultQPCR();
-            if ($result) {
-                $results[] = $result;
-            }
-        }
+        $results = $this->resultsQPCR->getValues();
 
         // Sort most recent createdAt first
         uasort($results, function (SpecimenResultQPCR $a, SpecimenResultQPCR $b) {

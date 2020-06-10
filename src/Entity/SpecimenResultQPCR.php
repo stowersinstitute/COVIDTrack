@@ -36,6 +36,15 @@ class SpecimenResultQPCR extends SpecimenResult
     private $well;
 
     /**
+     * Specimen analyzed.
+     *
+     * @var Specimen
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsQPCR")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
+     */
+    private $specimen;
+
+    /**
      * Conclusion about presence of virus SARS-CoV-2 in specimen.
      *
      * @var string
@@ -49,6 +58,12 @@ class SpecimenResultQPCR extends SpecimenResult
     public function __construct(SpecimenWell $well, string $conclusion)
     {
         parent::__construct();
+
+        if (!$well->getSpecimen()) {
+            throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
+        }
+        $this->specimen = $well->getSpecimen();
+        $this->specimen->addQPCRResult($this);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
         $this->well = $well;
@@ -64,7 +79,7 @@ class SpecimenResultQPCR extends SpecimenResult
 
     public function getSpecimen(): Specimen
     {
-        return $this->well->getSpecimen();
+        return $this->specimen;
     }
 
     public function getWellPlate(): WellPlate
