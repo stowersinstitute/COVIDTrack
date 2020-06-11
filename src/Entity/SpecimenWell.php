@@ -162,13 +162,13 @@ class SpecimenWell
     }
 
     /**
-     * Given a numeric position, get its alphanumeric equivalent. Supports
-     * a 96-well plate.
+     * Given a numeric position (beginning at 1), get its alphanumeric equivalent.
+     * Supports a 96-well plate.
      *
      *   1  2  3  4  5
      * A
      * B
-     * C             * (C5)
+     * C             * ( Given 15, Output C5)
      */
     public static function positionAlphanumericFromInt(int $positionInt): string
     {

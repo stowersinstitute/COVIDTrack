@@ -212,6 +212,7 @@ class TecanImporter extends BaseExcelImporter
             $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
             // Add Specimen to Well Plate at Position from upload
+            // Positions from Excel begin at 1
             $alphanumericPosition = SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
             $well = new SpecimenWell($wellPlate, $specimen, $alphanumericPosition);
             $this->em->persist($well);
