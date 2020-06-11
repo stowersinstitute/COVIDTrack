@@ -28,4 +28,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) ldap \
     && docker-php-ext-install pdo pdo_pgsql pgsql pdo_mysql
 
+RUN mkdir -p /app/var && chown www-data:www-data /app/var
+
 WORKDIR /app
