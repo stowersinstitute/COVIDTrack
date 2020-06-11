@@ -2,13 +2,12 @@
 
 namespace App\Entity;
 
-use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
 
 /**
- * Well Plate with one Specimen per Well
+ * 96-Well Plate with one Specimen per Well.
  *
  * @ORM\Entity(repositoryClass="App\Repository\WellPlateRepository")
  * @ORM\Table(name="well_plates")
@@ -38,7 +37,6 @@ class WellPlate
      *
      * @var SpecimenWell[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="wellPlate", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC"})
      */
     private $wells;
 
@@ -89,7 +87,7 @@ class WellPlate
         }
 
         // Prevent adding Wells at currently occupied positions
-        $atPosition = $well->getPosition();
+        $atPosition = $well->getPositionAlphanumeric();
         if ($atPosition && $this->hasWellAtPosition($atPosition)) {
             $wellAtPosition = $this->getWellAtPosition($atPosition);
             $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
@@ -113,15 +111,15 @@ class WellPlate
         return false;
     }
 
-    public function hasWellAtPosition(int $atPosition): bool
+    public function hasWellAtPosition(string $atPosition): bool
     {
         return (bool) $this->getWellAtPosition($atPosition);
     }
 
-    public function getWellAtPosition(int $atPosition): ?SpecimenWell
+    public function getWellAtPosition(string $atPosition): ?SpecimenWell
     {
         foreach ($this->wells as $well) {
-            if ($well->getPosition() === $atPosition) {
+            if ($well->getPositionAlphanumeric() === $atPosition) {
                 return $well;
             }
         }
@@ -130,11 +128,21 @@ class WellPlate
     }
 
     /**
+     * Return all Wells on this WellPlate, ordered by position.
+     *
      * @return SpecimenWell[]
      */
     public function getWells(): array
     {
-        return $this->wells->getValues();
+        $wells = $this->wells->getValues();
+
+        // Sort by alphanumeric position
+        usort($wells, function(SpecimenWell $a, SpecimenWell $b) {
+            // NOTE: Uses "natural" sort
+            return strnatcmp($a->getPositionAlphanumeric(), $b->getPositionAlphanumeric());
+        });
+
+        return $wells;
     }
 
     /**

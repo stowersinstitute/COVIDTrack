@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -11,8 +12,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class QPCRResultsForm extends AbstractType
 {
@@ -45,10 +48,19 @@ class QPCRResultsForm extends AbstractType
                         ->orderBy('p.barcode', 'ASC');
                 },
             ])
-            ->add('position', IntegerType::class, [
+            ->add('position', TextType::class, [
                 'label' => 'RNA Well Position',
                 'required' => false,
                 'disabled' => $isEditing,
+                'attr' => [
+                    'placeholder' => 'For example A4, G8, H12, etc',
+                ],
+                'constraints' => [
+                    new Regex([
+                        'pattern' => SpecimenWell::alphanumericPositionRegex,
+                        'message' => 'Only supports positions between A1 and H12',
+                    ]),
+                ],
             ])
             ->add('conclusion', ChoiceType::class, [
                 'choices' => SpecimenResultQPCR::getFormConclusions(),

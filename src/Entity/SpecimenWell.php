@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Util\EntityUtils;
 use Doctrine\ORM\Mapping as ORM;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 /**
  * Holds metadata about the relationship of a Specimen housed on a Well Plate
@@ -13,6 +14,14 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenWell
 {
+    /**
+     * Regex to validate alphanumericPosition between A1 and H12
+     */
+    public const alphanumericPositionRegex = '/^([A-H])([2-9]|1[0-2]?)$/';
+
+    public const minIntegerPosition = 1;
+    public const maxIntegerPosition = 96;
+
     /**
      * @var int
      * @ORM\Id()
@@ -51,12 +60,22 @@ class SpecimenWell
      *
      * @var int
      * @ORM\Column(name="position", type="smallint", options={"unsigned":true}, nullable=true)
+     * @deprecated Removing in favor of `private $position_alphanumeric`
      */
     private $position;
 
-    public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
+    /**
+     * Well position in alphanumeric format such as A1, B4, H12, etc.
+     *
+     * @var string
+     * @ORM\Column(name="position_alphanumeric", type="string", length=255, nullable=true)
+     */
+    private $positionAlphanumeric;
+
+    public function __construct(WellPlate $plate, Specimen $specimen, string $position = null)
     {
-        $this->position = $position;
+        self::mustBeValidAlphanumericPosition($position);
+        $this->positionAlphanumeric = $position;
 
         $this->wellPlate = $plate;
         $plate->addWell($this);
@@ -69,7 +88,7 @@ class SpecimenWell
      * Will generate a fake WellPlate if not given.
      * $position is optional.
      */
-    public static function buildExample(Specimen $specimen, WellPlate $plate = null, int $position = null): self
+    public static function buildExample(Specimen $specimen, WellPlate $plate = null, string $position = null): self
     {
         $plate = null !== $plate ? $plate : WellPlate::buildExample('PLATE001');
 
@@ -96,7 +115,7 @@ class SpecimenWell
             return false;
         }
 
-        if ($this->position != $specimenWell->getPosition()) {
+        if ($this->positionAlphanumeric !== $specimenWell->getPositionAlphanumeric()) {
             return false;
         }
 
@@ -118,6 +137,9 @@ class SpecimenWell
         return $this->specimen;
     }
 
+    /**
+     * @deprecated Replace with setPositionAlphanumeric()
+     */
     public function setPosition(int $position): void
     {
         if ($position <= 0) {
@@ -131,9 +153,82 @@ class SpecimenWell
         $this->position = $position;
     }
 
+    /**
+     * @deprecated Replace with getPositionAlphanumeric()
+     */
     public function getPosition(): ?int
     {
         return $this->position;
+    }
+
+    /**
+     * Given a numeric position, get its alphanumeric equivalent. Supports
+     * a 96-well plate.
+     *
+     *   1  2  3  4  5
+     * A
+     * B
+     * C             * (C5)
+     */
+    public static function positionAlphanumericFromInt(int $positionInt): string
+    {
+        if ($positionInt < static::minIntegerPosition) {
+            throw new \InvalidArgumentException('Position must be => ' . static::minIntegerPosition);
+        }
+        if ($positionInt > static::maxIntegerPosition) {
+            throw new \InvalidArgumentException('Position must be <= ' . static::maxIntegerPosition);
+        }
+
+        $numRows = 8; // A-H
+
+        $row = $positionInt % $numRows;
+        if ($row === 0) {
+            $row = $numRows;
+        }
+        $column = ceil($positionInt / $numRows);
+        if ($column === 0) {
+            $column = 1;
+        }
+
+        $position = Coordinate::stringFromColumnIndex($row) . $column;
+
+        static::mustBeValidAlphanumericPosition($position);
+
+        return $position;
+    }
+
+    public function setPositionAlphanumeric(string $position): void
+    {
+        self::mustBeValidAlphanumericPosition($position);
+
+        if ($this->wellPlate->hasWellAtPosition($position)) {
+            throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
+        }
+
+        $this->positionAlphanumeric = $position;
+    }
+
+    /**
+     * @throws \InvalidArgumentException When given invalid position
+     */
+    public static function mustBeValidAlphanumericPosition(?string $position): void
+    {
+        // Empty is OK
+        if (null === $position || '' === $position) {
+            return;
+        }
+
+        // A-H; 1-12
+        preg_match(static::alphanumericPositionRegex, $position, $matches);
+
+        if (count($matches) !== 3) {
+            throw new \InvalidArgumentException('Invalid position');
+        }
+    }
+
+    public function getPositionAlphanumeric(): ?string
+    {
+        return $this->positionAlphanumeric;
     }
 
     /**
@@ -144,8 +239,9 @@ class SpecimenWell
         $barcode = $this->getWellPlateBarcode();
         $output = $barcode;
 
-        if ($this->position !== null) {
-            $output .= ' / ' . $this->position;
+        $position = $this->getPositionAlphanumeric();
+        if ($position !== null) {
+            $output .= ' / ' . $position;
         }
 
         return $output;

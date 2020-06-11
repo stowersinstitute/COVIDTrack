@@ -184,7 +184,7 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
         return $plate;
     }
 
-    private function getNextPositionForPlate(WellPlate $plate): int
+    private function getNextPositionForPlate(WellPlate $plate): string
     {
         $barcode = $plate->getBarcode();
 
@@ -195,6 +195,6 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
         // Get next position
         $this->platePositions[$barcode]++;
 
-        return $this->platePositions[$barcode];
+        return SpecimenWell::positionAlphanumericFromInt($this->platePositions[$barcode]);
     }
 }

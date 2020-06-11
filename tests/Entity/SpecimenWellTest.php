@@ -28,7 +28,7 @@ class SpecimenWellTest extends TestCase
         $this->assertNull($well->getResultQPCR());
 
         // No position
-        $this->assertNull($well->getPosition());
+        $this->assertNull($well->getPositionAlphanumeric());
     }
 
     public function testCreateSpecimenWellWithPosition()
@@ -39,7 +39,7 @@ class SpecimenWellTest extends TestCase
         $specimenAccessionId = 'SPEC888';
         $specimen = Specimen::buildExample($specimenAccessionId);
 
-        $position = 55;
+        $position = 'G2';
         $well = new SpecimenWell($plate, $specimen, $position);
 
         $this->assertSame($plate, $well->getWellPlate());
@@ -51,7 +51,7 @@ class SpecimenWellTest extends TestCase
         $this->assertNull($well->getResultQPCR());
 
         // Has position
-        $this->assertSame($position, $well->getPosition());
+        $this->assertSame($position, $well->getPositionAlphanumeric());
     }
 
     public function testPlatePreventsWellsAtSamePosition()
@@ -62,12 +62,12 @@ class SpecimenWellTest extends TestCase
         $specimen2 = Specimen::buildExample('SPEC2');
 
         // Add Specimen to a specific position
-        $position = 10;
+        $position = 'B2';
         $well1 = new SpecimenWell($plate, $specimen1, $position);
 
         // Add Specimen to duplicate position should throw Exception
         $this->expectException(\InvalidArgumentException::class);
-        new SpecimenWell($plate, $specimen2, $position);
+        new SpecimenWell($plate, $specimen2, $well1->getPositionAlphanumeric());
     }
 
     public function testPlateAllowsMultipleSameSpecimenWithoutPosition()
@@ -95,14 +95,14 @@ class SpecimenWellTest extends TestCase
         // Add Specimen but without a position
         $well1 = new SpecimenWell($plate, $specimen);
         $well2 = new SpecimenWell($plate, $specimen);
-        $well3 = new SpecimenWell($plate, $specimen, 30);
+        $well3 = new SpecimenWell($plate, $specimen, 'G2');
 
         // OK to position in an open well
-        $well1->setPosition(10);
+        $well1->setPositionAlphanumeric('A1');
 
         // But assigning to occupied well not allowed
         $this->expectException(\InvalidArgumentException::class);
-        $well2->setPosition(10);
+        $well2->setPositionAlphanumeric($well1->getPositionAlphanumeric());
     }
 
     public function testGetWellPlatePositionDisplayString()
@@ -118,7 +118,45 @@ class SpecimenWellTest extends TestCase
         $this->assertSame($plateBarcode, $well->getWellPlatePositionDisplayString());
 
         // Now add position and verify display string includes it
-        $well->setPosition(56);
-        $this->assertSame('BC101 / 56', $well->getWellPlatePositionDisplayString());
+        $well->setPositionAlphanumeric('C1');
+        $this->assertSame('BC101 / C1', $well->getWellPlatePositionDisplayString());
+    }
+
+    /**
+     * @dataProvider provideGetAlphanumericPositionFromInteger
+     */
+    public function testGetAlphanumericPositionFromInteger(int $integer, string $expected)
+    {
+        $actual = SpecimenWell::positionAlphanumericFromInt($integer);
+
+        $this->assertSame($expected, $actual);
+    }
+    public function provideGetAlphanumericPositionFromInteger()
+    {
+        return [
+            'Row 1, Column 1' => [1, 'A1'],
+            'Row 8, Column 1' => [8, 'H1'],
+            'Row 1, Column 2' => [9, 'A2'],
+            'Row 2, Column 2' => [10, 'B2'],
+            'Row 1, Column 12' => [89, 'A12'],
+            'Row 8, Column 12' => [96, 'H12'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideGetAlphanumericPositionFromIntegerInvalidArguments
+     */
+    public function testGetAlphanumericPositionFromIntegerInvalidArguments(int $integer)
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        SpecimenWell::positionAlphanumericFromInt($integer);
+    }
+    public function provideGetAlphanumericPositionFromIntegerInvalidArguments()
+    {
+        return [
+            'Negative' => [-2],
+            'Below lower bound' => [0],
+            'Above upper bound' => [97],
+        ];
     }
 }

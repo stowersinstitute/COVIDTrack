@@ -353,7 +353,7 @@ class Tube
         return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function addToWellPlate(WellPlate $plate, int $position = null): void
+    public function addToWellPlate(WellPlate $plate, string $position = null): void
     {
         $well = new SpecimenWell($plate, $this->specimen, $position);
         $this->specimen->addWell($well);

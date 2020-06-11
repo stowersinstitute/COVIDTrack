@@ -37,20 +37,20 @@ class SpecimenTest extends TestCase
 
         // Add first result on Plate ABC
         $plateABC = WellPlate::buildExample('ABC');
-        $position1 = 10;
+        $position1 = 'B2';
         $well1 = new SpecimenWell($plateABC, $specimen, $position1);
         $conclusion1 = SpecimenResultQPCR::CONCLUSION_NEGATIVE;
         $result1 = new SpecimenResultQPCR($well1, $conclusion1);
 
         // For now only in 1 Well on 1 Plate
         $this->assertCount(1, $specimen->getWells());
-        $this->assertSame($position1, $specimen->getWells()[0]->getPosition());
+        $this->assertSame($position1, $specimen->getWells()[0]->getPositionAlphanumeric());
         $this->assertCount(1, $specimen->getWellPlates());
         $this->assertCount(1, $specimen->getQPCRResults());
         $this->assertSame($conclusion1, $specimen->getQPCRResults(1)[0]->getConclusion());
 
         // Add second result on Plate ABC
-        $position2 = 20;
+        $position2 = 'C4';
         $well2 = new SpecimenWell($plateABC, $specimen, $position2);
         $conclusion2 = SpecimenResultQPCR::CONCLUSION_POSITIVE;
         $result2 = new SpecimenResultQPCR($well2, $conclusion2);
@@ -58,7 +58,7 @@ class SpecimenTest extends TestCase
         // On 1 Plate and 2 Wells
         $this->assertTrue(EntityUtils::isSameEntity($well2, $specimen->getWells()[1]));
         $this->assertCount(2, $specimen->getWells());
-        $this->assertSame($position2, $specimen->getWells()[1]->getPosition());
+        $this->assertSame($position2, $specimen->getWells()[1]->getPositionAlphanumeric());
         $this->assertCount(1, $specimen->getWellPlates());
         $this->assertCount(2, $specimen->getQPCRResults());
         $this->assertSame($conclusion2, $specimen->getQPCRResults()[1]->getConclusion());
@@ -70,7 +70,7 @@ class SpecimenTest extends TestCase
         $this->assertCount(0, $specimen->getQPCRResults());
 
         $plate = WellPlate::buildExample('ABC');
-        $well = new SpecimenWell($plate, $specimen, 10);
+        $well = new SpecimenWell($plate, $specimen, 'B2');
 
         $result = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
@@ -90,7 +90,7 @@ class SpecimenTest extends TestCase
         $this->assertCount(0, $specimen->getWells());
 
         $plate = WellPlate::buildExample('ABC');
-        $well = new SpecimenWell($plate, $specimen, 10);
+        $well = new SpecimenWell($plate, $specimen, 'B2');
 
         // Specimen and Well now related
         $this->assertCount(1, $specimen->getWells());
@@ -108,14 +108,14 @@ class SpecimenTest extends TestCase
 
         // Wells on test plate
         $plate1 = WellPlate::buildExample('ABC');
-        $well1 = new SpecimenWell($plate1, $specimen, 12);
-        $well2 = new SpecimenWell($plate1, $specimen, 24);
-        $well3 = new SpecimenWell($plate1, $specimen, 36);
+        $well1 = new SpecimenWell($plate1, $specimen, 'B2');
+        $well2 = new SpecimenWell($plate1, $specimen, 'C4');
+        $well3 = new SpecimenWell($plate1, $specimen, 'D6');
 
         // Wells on a second plate
         $plate2 = WellPlate::buildExample('SOMEOTHER');
-        $well4 = new SpecimenWell($plate2, $specimen, 48);
-        $well5 = new SpecimenWell($plate2, $specimen, 59);
+        $well4 = new SpecimenWell($plate2, $specimen, 'E8');
+        $well5 = new SpecimenWell($plate2, $specimen, 'F9');
 
         // Specimen and Wells are related
         $this->assertCount(5, $specimen->getWells());
@@ -125,12 +125,12 @@ class SpecimenTest extends TestCase
         $this->assertCount(2, $specimen->getWellsOnPlate($plate2));
 
         // Wells on Plate 1
-        $this->assertSame($well3, $specimen->getWellAtPosition($plate1, 36));
-        $this->assertSame($well2, $specimen->getWellAtPosition($plate1, 24));
-        $this->assertSame($well1, $specimen->getWellAtPosition($plate1, 12));
+        $this->assertSame($well3, $specimen->getWellAtPosition($plate1, $well3->getPositionAlphanumeric()));
+        $this->assertSame($well2, $specimen->getWellAtPosition($plate1, $well2->getPositionAlphanumeric()));
+        $this->assertSame($well1, $specimen->getWellAtPosition($plate1, $well1->getPositionAlphanumeric()));
 
         // Test when no Well exists at given Position
-        $this->assertNull($specimen->getWellAtPosition($plate1, 88));
+        $this->assertNull($specimen->getWellAtPosition($plate1, 'G1'));
     }
 
     public function testGetQPCRResultsAfterAddingResults()

@@ -480,11 +480,11 @@ class Specimen
     /**
      * Get Well where Specimen stored on given WellPlate at given position.
      */
-    public function getWellAtPosition(WellPlate $plate, int $position): ?SpecimenWell
+    public function getWellAtPosition(WellPlate $plate, string $position): ?SpecimenWell
     {
         $wells = $this->getWellsOnPlate($plate);
         foreach ($wells as $well) {
-            if ($well->getPosition() === $position) {
+            if ($well->getPositionAlphanumeric() === $position) {
                 return $well;
             }
         }
