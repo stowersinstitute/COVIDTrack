@@ -4,15 +4,21 @@ namespace App\DataFixtures;
 
 use App\Entity\AppUser;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * For permissions information see security.yaml
  */
-class AppUserFixtures extends Fixture
+class AppUserFixtures extends Fixture implements FixtureGroupInterface
 {
     private $passwordEncoder;
+
+    public static function getGroups(): array
+    {
+        return ['users'];
+    }
 
     public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -57,9 +63,14 @@ class AppUserFixtures extends Fixture
      *
      * If null, $password is set to $username
      */
-    protected function buildUser($em, $username, $roles = [], $password = null)
+    protected function buildUser(ObjectManager $em, $username, $roles = [], $password = null)
     {
         if ($password === null) $password = $username;
+
+        // This is to support appending to production data
+        $exists = $em->getRepository(AppUser::class)
+            ->findOneBy(['username' => $username]);
+        if ($exists) return;
 
         $user = new AppUser($username);
         $user->setEmail(sprintf('%s@example.com', $username));
