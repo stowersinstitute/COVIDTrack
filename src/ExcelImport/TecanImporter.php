@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
+use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
@@ -211,7 +212,8 @@ class TecanImporter extends BaseExcelImporter
             $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
             // Add Specimen to Well Plate at Position from upload
-            $specimen->addWellPlate($wellPlate, $rawWellPosition);
+            $well = new SpecimenWell($wellPlate, $specimen, $rawWellPosition);
+            $this->em->persist($well);
 
             // Store in output
             $output[$resultAction][] = [
@@ -297,7 +299,7 @@ class TecanImporter extends BaseExcelImporter
             return $this->seenTubes[$rawTubeAccessionId];
         }
 
-        $tube = $this->tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
+        $tube = $this->tubeRepo->findOneByAccessionId($rawTubeAccessionId);
         if (!$tube) {
             return null;
         }

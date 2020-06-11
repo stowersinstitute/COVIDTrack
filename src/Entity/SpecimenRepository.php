@@ -39,7 +39,8 @@ class SpecimenRepository extends EntityRepository
     {
         $asName = 'resultDate';
         $results = $this->createResultsQB('s')
-            ->join('s.results', 'r')
+            ->join('s.wells', 'w')
+            ->join('w.resultQPCR', 'r')
             // Requires database value has exact same time,
             // we may want to round dates to regular intervals
             ->select('DISTINCT(r.createdAt) as '.$asName)
@@ -100,7 +101,8 @@ class SpecimenRepository extends EntityRepository
         $end = $range['end'];
 
         return $this->createQueryBuilder('s')
-            ->join('s.results', 'r')
+            ->join('s.wells', 'w')
+            ->join('w.resultQPCR', 'r')
             ->where('s.participantGroup = :group')
             ->setParameter('group', $group)
 

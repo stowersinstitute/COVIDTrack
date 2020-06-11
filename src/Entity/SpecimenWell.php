@@ -24,7 +24,7 @@ class SpecimenWell
     /**
      * Well Plate where this well is located.
      * @var WellPlate
-     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="wells")
+     * @ORM\ManyToOne(targetEntity="App\Entity\WellPlate", inversedBy="wells", fetch="EAGER")
      * @ORM\JoinColumn(name="well_plate_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
     private $wellPlate;
@@ -33,10 +33,18 @@ class SpecimenWell
      * Specimen held in this well.
      *
      * @var Specimen
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="wells")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="wells", fetch="EAGER")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", nullable=false, onDelete="cascade")
      */
     private $specimen;
+
+    /**
+     * Result of qPCR testing Specimen contained in this well.
+     *
+     * @var SpecimenResultQPCR|null
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="well")
+     */
+    private $resultQPCR;
 
     /**
      * Well number, 1 thru 96
@@ -48,9 +56,24 @@ class SpecimenWell
 
     public function __construct(WellPlate $plate, Specimen $specimen, int $position = null)
     {
-        $this->wellPlate = $plate;
-        $this->specimen = $specimen;
         $this->position = $position;
+
+        $this->wellPlate = $plate;
+        $plate->addWell($this);
+
+        $this->specimen = $specimen;
+        $specimen->addWell($this);
+    }
+
+    /**
+     * Will generate a fake WellPlate if not given.
+     * $position is optional.
+     */
+    public static function buildExample(Specimen $specimen, WellPlate $plate = null, int $position = null): self
+    {
+        $plate = null !== $plate ? $plate : WellPlate::buildExample('PLATE001');
+
+        return new static($plate, $specimen, $position);
     }
 
     public function getId(): ?int
@@ -73,7 +96,11 @@ class SpecimenWell
             return false;
         }
 
-        return true;
+        if ($this->position != $specimenWell->getPosition()) {
+            return false;
+        }
+
+        return $specimenWell === $this;
     }
 
     public function getWellPlate(): ?WellPlate
@@ -97,11 +124,51 @@ class SpecimenWell
             throw new \InvalidArgumentException('Position must be greater than 0');
         }
 
+        if ($this->wellPlate->hasWellAtPosition($position)) {
+            throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
+        }
+
         $this->position = $position;
     }
 
     public function getPosition(): ?int
     {
         return $this->position;
+    }
+
+    /**
+     * Display condensed string with Well Plate Barcode and Well Position, if available.
+     */
+    public function getWellPlatePositionDisplayString(): string
+    {
+        $barcode = $this->getWellPlateBarcode();
+        $output = $barcode;
+
+        if ($this->position !== null) {
+            $output .= ' / ' . $this->position;
+        }
+
+        return $output;
+    }
+
+    /**
+     * @internal Do not call directly. Instead call new SpecimenResultQPCR($specimen);
+     */
+    public function setQPCRResult(?SpecimenResultQPCR $result)
+    {
+        if ($result && $this->resultQPCR) {
+            throw new \InvalidArgumentException('Cannot assign new qPCR result when one already exists');
+        }
+
+        $this->resultQPCR = $result;
+
+        if ($this->getSpecimen()) {
+            $this->getSpecimen()->updateStatusWhenResultsSet();
+        }
+    }
+
+    public function getResultQPCR(): ?SpecimenResultQPCR
+    {
+        return $this->resultQPCR;
     }
 }

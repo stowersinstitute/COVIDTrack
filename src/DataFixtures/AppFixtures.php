@@ -5,6 +5,8 @@ namespace App\DataFixtures;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
+use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -16,6 +18,20 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
      * @var int[]
      */
     private $specimenIdsWithResults = [];
+
+    /**
+     * Tracks which Well Plates have been created in this fixture class.
+     *
+     * @var WellPlate[] Keys are WellPlate.barcode, Values are WellPlate entities
+     */
+    private $createdPlatesByBarcode = [];
+
+    /**
+     * Tracks which Well Positions have been issued for each fixture Plate.
+     *
+     * @var array Keys are WellPlate.barcode, Values are last issued Well Position
+     */
+    private $platePositions = [];
 
     public function getDependencies()
     {
@@ -52,21 +68,22 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
 
             for ($day=1; $day<=$daysWorthResults; $day++) {
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
-                    $s = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
+                    $specimen = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
 
                     // Might not have enough fixture Tubes to keep going
-                    if (!$s) continue;
+                    if (!$specimen) continue;
 
                     // Set a random conclusion, if we have one
                     $conclusion = $possibleResults[array_rand($possibleResults)];
                     if ($conclusion) {
-                        $r1 = new SpecimenResultQPCR($s);
-                        $r1->setCreatedAt(new \DateTimeImmutable(sprintf('-%d days', $day)));
-                        $r1->setConclusion($conclusion);
+                        $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
-                        $s->setStatus(Specimen::STATUS_RESULTS);
+                        $well = $this->makeSpecimenWellForResultsOn($em, $specimen, $resultDate);
 
-                        $em->persist($r1);
+                        $result = new SpecimenResultQPCR($well, $conclusion);
+                        $result->setCreatedAt($resultDate);
+
+                        $em->persist($result);
                     }
                 }
             }
@@ -137,5 +154,47 @@ class AppFixtures extends Fixture implements DependentFixtureInterface
         $this->specimenIdsWithResults[] = $found->getId();
 
         return $found;
+    }
+
+    private function makeSpecimenWellForResultsOn(ObjectManager $em, Specimen $specimen, \DateTimeImmutable $resultDate): SpecimenWell
+    {
+        $plate = $this->findOrCreatePlateForResultsOnDate($em, $resultDate);
+        $position = $this->getNextPositionForPlate($plate);
+
+        $well = new SpecimenWell($plate, $specimen, $position);
+
+        $em->persist($well);
+
+        return $well;
+    }
+
+    private function findOrCreatePlateForResultsOnDate(ObjectManager $em, \DateTimeImmutable $resultDate): WellPlate
+    {
+        $barcode = $resultDate->format('MdY');
+
+        if (isset($this->createdPlatesByBarcode[$barcode])) {
+            return $this->createdPlatesByBarcode[$barcode];
+        }
+
+        $plate = new WellPlate($barcode);
+        $em->persist($plate);
+
+        $this->createdPlatesByBarcode[$barcode] = $plate;
+
+        return $plate;
+    }
+
+    private function getNextPositionForPlate(WellPlate $plate): int
+    {
+        $barcode = $plate->getBarcode();
+
+        if (!isset($this->platePositions[$barcode])) {
+            $this->platePositions[$barcode] = 0;
+        }
+
+        // Get next position
+        $this->platePositions[$barcode]++;
+
+        return $this->platePositions[$barcode];
     }
 }

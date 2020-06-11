@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
@@ -47,6 +48,11 @@ class WellPlate
         $this->setBarcode($barcode);
     }
 
+    public static function buildExample(string $barcode = 'ABC100'): self
+    {
+        return new static($barcode);
+    }
+
     public function __toString()
     {
         return $this->barcode;
@@ -57,7 +63,7 @@ class WellPlate
         return $this->id;
     }
 
-    public function getBarcode(): ?string
+    public function getBarcode(): string
     {
         return $this->barcode;
     }
@@ -70,6 +76,57 @@ class WellPlate
         }
 
         $this->barcode = $barcode;
+    }
+
+    /**
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
+     */
+    public function addWell(SpecimenWell $well): void
+    {
+        // Same Well can't be added twice
+        if ($this->hasWell($well)) {
+            throw new \InvalidArgumentException('Cannot add same SpecimenWell to WellPlate multiple times');
+        }
+
+        // Prevent adding Wells at currently occupied positions
+        $atPosition = $well->getPosition();
+        if ($atPosition && $this->hasWellAtPosition($atPosition)) {
+            $wellAtPosition = $this->getWellAtPosition($atPosition);
+            $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
+            throw new \InvalidArgumentException(sprintf('Cannot add a new Well at Position %s. Well with Specimen "%s" already exists at that Position.', $atPosition, $specimenId));
+        }
+
+        $this->wells->add($well);
+    }
+
+    /**
+     * Whether given Well is already associated with this Well Plate
+     */
+    public function hasWell(SpecimenWell $well): bool
+    {
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasWellAtPosition(int $atPosition): bool
+    {
+        return (bool) $this->getWellAtPosition($atPosition);
+    }
+
+    public function getWellAtPosition(int $atPosition): ?SpecimenWell
+    {
+        foreach ($this->wells as $well) {
+            if ($well->getPosition() === $atPosition) {
+                return $well;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -88,9 +145,10 @@ class WellPlate
         $specimens = [];
 
         foreach ($this->wells as $well) {
-            $specimens[] = $well->getSpecimen();
+            $s = $well->getSpecimen();
+            $specimens[$s->getAccessionId()] = $s;
         }
 
-        return $specimens;
+        return array_values($specimens);
     }
 }

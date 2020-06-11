@@ -30,7 +30,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
             ->where('r.createdAt >= :since')
             ->setParameter('since', $datetime)
 
-            ->join('r.specimen', 's')
+            ->join('r.well', 'w')
+            ->join('w.specimen', 's')
             ->join('s.participantGroup', 'g')
             ->andWhere('g.isControl = false')
 
@@ -45,10 +46,12 @@ class SpecimenResultQPCRRepository extends EntityRepository
 
     /**
      * @see SpecimenResultQPCRFilterForm
+     * @return SpecimenResultQPCR[]
      */
-    public function filterByFormData($data)
+    public function filterByFormData($data): array
     {
-        $qb = $this->createDefaultQueryBuilder();
+        $qb = $this->createDefaultQueryBuilder('r');
+        $qb->join('r.well', 'w')->addSelect('w');
 
         if (isset($data['conclusion'])) {
             $qb->andWhere('r.conclusion = :f_conclusion');
@@ -64,11 +67,11 @@ class SpecimenResultQPCRRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    protected function createDefaultQueryBuilder()
+    protected function createDefaultQueryBuilder($alias = 'r')
     {
-        return $this->createQueryBuilder('r')
-            ->orderBy('r.createdAt', 'DESC')
-            ->addOrderBy('r.id', 'ASC')
+        return $this->createQueryBuilder($alias)
+            ->orderBy($alias.'.createdAt', 'DESC')
+            ->addOrderBy($alias.'.id', 'ASC')
         ;
     }
 }

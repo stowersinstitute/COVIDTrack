@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\tests\AccessionId;
+namespace App\Tests\AccessionId;
 
 
 use App\AccessionId\SpecimenAccessionIdGenerator;

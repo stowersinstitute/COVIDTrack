@@ -72,7 +72,7 @@ class TubeCheckinController extends AbstractController
         /** @var Tube $tube */
         $tube = $this->getDoctrine()
             ->getRepository(Tube::class)
-            ->findOneByAnyId($tubeId);
+            ->findOneByAccessionId($tubeId);
         if (!$tube) {
             $msg = 'Cannot find Tube by ID';
             return $this->createJsonErrorResponse($msg);

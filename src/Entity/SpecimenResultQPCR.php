@@ -12,9 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenResultQPCR extends SpecimenResult
 {
-    // When result is not yet available.
-    const CONCLUSION_PENDING = "PENDING";
-
     // When result did not find evidence of viral DNA in Specimen.
     const CONCLUSION_NEGATIVE = "NEGATIVE";
 
@@ -30,6 +27,24 @@ class SpecimenResultQPCR extends SpecimenResult
     const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
 
     /**
+     * Well analyzed to derive this result
+     *
+     * @var SpecimenWell
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultQPCR", fetch="EAGER")
+     * @ORM\JoinColumn(name="specimen_well_id", referencedColumnName="id")
+     */
+    private $well;
+
+    /**
+     * Specimen analyzed.
+     *
+     * @var Specimen
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsQPCR")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
+     */
+    private $specimen;
+
+    /**
      * Conclusion about presence of virus SARS-CoV-2 in specimen.
      *
      * @var string
@@ -37,11 +52,44 @@ class SpecimenResultQPCR extends SpecimenResult
      */
     private $conclusion;
 
-    public function __construct(Specimen $specimen)
+    /**
+     * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
+     */
+    public function __construct(SpecimenWell $well, string $conclusion)
     {
-        $this->conclusion = self::CONCLUSION_PENDING;
+        parent::__construct();
 
-        parent::__construct($specimen);
+        if (!$well->getSpecimen()) {
+            throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
+        }
+        $this->specimen = $well->getSpecimen();
+        $this->specimen->addQPCRResult($this);
+
+        // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
+        $this->well = $well;
+        $well->setQPCRResult($this);
+
+        $this->setConclusion($conclusion);
+    }
+
+    public function getWell(): SpecimenWell
+    {
+        return $this->well;
+    }
+
+    public function getSpecimen(): Specimen
+    {
+        return $this->specimen;
+    }
+
+    public function getWellPlate(): WellPlate
+    {
+        return $this->well->getWellPlate();
+    }
+
+    public function getWellPosition(): int
+    {
+        return $this->well->getPosition();
     }
 
     public function getConclusion(): string
@@ -52,9 +100,8 @@ class SpecimenResultQPCR extends SpecimenResult
     public function setConclusion(string $conclusion): void
     {
         if (!self::isValidConclusion($conclusion)) {
-            throw new \InvalidArgumentException('Tried setting invalid Conclusion');
+            throw new \InvalidArgumentException('Cannot set invalid qPCR Result Conclusion');
         }
-
         $this->conclusion = $conclusion;
 
         // Specimen recommendation depends on conclusion
@@ -79,7 +126,6 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
-            'Pending' => self::CONCLUSION_PENDING,
             'Negative' => self::CONCLUSION_NEGATIVE,
             'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,
