@@ -262,8 +262,8 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             // Build list of positions to display in error message
             $wellPositions = [];
             foreach ($specimen->getWellsOnPlate($wellPlate) as $well) {
-                if ($well->getPosition()) {
-                    $wellPositions[] = $well->getPosition();
+                if ($well->getPositionAlphanumeric()) {
+                    $wellPositions[] = $well->getPositionAlphanumeric();
                 }
             }
             $prnCurrentPositions = implode(', ', $wellPositions);

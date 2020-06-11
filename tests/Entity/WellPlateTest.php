@@ -26,10 +26,10 @@ class WellPlateTest extends TestCase
     {
         $plate = WellPlate::buildExample('BC12345');
         $specimen = Specimen::buildExample('C100');
-        $well = new SpecimenWell($plate, $specimen, 10);
+        $well = new SpecimenWell($plate, $specimen, 'B2');
 
         // Well Plate and Well now related
-        $this->assertSame($well, $plate->getWellAtPosition(10));
+        $this->assertSame($well, $plate->getWellAtPosition($well->getPositionAlphanumeric()));
 
         // Adding multiple more times throws Exception
         $this->expectException(\InvalidArgumentException::class);
@@ -43,9 +43,9 @@ class WellPlateTest extends TestCase
         // This specimen will be added in multiple wells on plate
         $specimen = Specimen::buildExample('C101');
 
-        $well1 = new SpecimenWell($plate, $specimen, 1);
-        $well2 = new SpecimenWell($plate, $specimen, 2);
-        $well3 = new SpecimenWell($plate, $specimen, 3);
+        $well1 = new SpecimenWell($plate, $specimen, 'A1');
+        $well2 = new SpecimenWell($plate, $specimen, 'A2');
+        $well3 = new SpecimenWell($plate, $specimen, 'A3');
 
         // Verify Well count is correct
         $this->assertCount(3, $plate->getWells());
@@ -55,5 +55,26 @@ class WellPlateTest extends TestCase
 
         // But the same Specimen only returned once
         $this->assertCount(1, $plate->getSpecimens());
+    }
+
+    public function testGetWellsOrderedByWellPosition()
+    {
+        $plate = WellPlate::buildExample('BC12345');
+        $specimen = Specimen::buildExample('C101');
+
+        $well2 = new SpecimenWell($plate, $specimen, 'A11');
+        $well1 = new SpecimenWell($plate, $specimen, 'A9');
+        $well0 = new SpecimenWell($plate, $specimen, 'A1');
+        $well4 = new SpecimenWell($plate, $specimen, 'G8');
+        $well3 = new SpecimenWell($plate, $specimen, 'C12');
+
+        $wells = $plate->getWells();
+        $this->assertCount(5, $wells);
+
+        $this->assertSame($wells[0]->getPositionAlphanumeric(), $well0->getPositionAlphanumeric());
+        $this->assertSame($wells[1]->getPositionAlphanumeric(), $well1->getPositionAlphanumeric());
+        $this->assertSame($wells[2]->getPositionAlphanumeric(), $well2->getPositionAlphanumeric());
+        $this->assertSame($wells[3]->getPositionAlphanumeric(), $well3->getPositionAlphanumeric());
+        $this->assertSame($wells[4]->getPositionAlphanumeric(), $well4->getPositionAlphanumeric());
     }
 }

@@ -212,7 +212,9 @@ class TecanImporter extends BaseExcelImporter
             $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
             // Add Specimen to Well Plate at Position from upload
-            $well = new SpecimenWell($wellPlate, $specimen, $rawWellPosition);
+            // Positions from Excel begin at 1
+            $alphanumericPosition = SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
+            $well = new SpecimenWell($wellPlate, $specimen, $alphanumericPosition);
             $this->em->persist($well);
 
             // Store in output
@@ -234,7 +236,10 @@ class TecanImporter extends BaseExcelImporter
     }
 
     /**
-     * Returns true if $raw is valid
+     * Tecan upload provides Position in integer format as 1 thru 96.
+     * Verify this position is valid.
+     *
+     * Returns true if $rawWellPosition is valid.
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
@@ -247,6 +252,28 @@ class TecanImporter extends BaseExcelImporter
                 $this->columnMap['wellPosition']
             );
             return false;
+        }
+
+        $invalidPositionMsg = sprintf('Position must be between %d and %d', SpecimenWell::minIntegerPosition, SpecimenWell::maxIntegerPosition);
+        if (
+            $rawWellPosition < SpecimenWell::minIntegerPosition
+            || $rawWellPosition > SpecimenWell::maxIntegerPosition
+        ) {
+            $this->messages[] = ImportMessage::newError(
+                $invalidPositionMsg,
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
+        }
+
+        try {
+            SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
+        } catch (\Exception $e) {
+            $this->messages[] = ImportMessage::newError(
+                $invalidPositionMsg,
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
         }
 
         return true;
