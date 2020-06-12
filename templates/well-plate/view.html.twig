@@ -31,6 +31,8 @@
                 <dl class="dl-horizontal">
                     <dt>Barcode</dt><dd>{{ wellPlate.barcode }}</dd>
                     <dt>Storage Location</dt><dd>{{ wellPlate.storageLocation }}</dd>
+                    <dt>Last Modified</dt><dd>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</dd>
+                    <dt>Created At</dt><dd>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</dd>
                 </dl>
             </div>
         </div>
