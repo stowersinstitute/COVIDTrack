@@ -25,15 +25,24 @@ class EmailBuilder
     private $replyToAddress;
 
     /**
+     * Whether emails are being built in a test environment, which will add
+     * text to the Subject and Body that indicate this is a test.
+     *
+     * @var bool
+     */
+    private $sendTestEmails;
+
+    /**
      * See environment vars CT_DEFAULT_FROM_ADDRESS and CT_DEFAULT_REPLY_TO_ADDRESS
      * to set arguments.
      *
      * @param string $replyToAddress
      */
-    public function __construct(string $fromAddress, string $replyToAddress)
+    public function __construct(string $fromAddress, string $replyToAddress, bool $sendTestEmails = false)
     {
         $this->fromAddress = $fromAddress;
         $this->replyToAddress = $replyToAddress;
+        $this->sendTestEmails = $sendTestEmails;
     }
 
     /**
@@ -44,6 +53,11 @@ class EmailBuilder
     public function createHtml(array $toAddresses, string $subject, string $html): Email
     {
         $email = $this->createBase($toAddresses, $subject);
+
+        if ($this->sendTestEmails) {
+            $html = "<p>This is a test email</p>\n" . $html;
+        }
+
         $email->html($html);
 
         return $email;
@@ -57,6 +71,11 @@ class EmailBuilder
     public function createText(array $toAddresses, string $subject, string $text): Email
     {
         $email = $this->createBase($toAddresses, $subject);
+
+        if ($this->sendTestEmails) {
+            $text = "This is a test email\n\n" . $text;
+        }
+
         $email->text($text);
 
         return $email;
@@ -75,8 +94,16 @@ class EmailBuilder
         $email->replyTo($this->replyToAddress);
         $email->to(...$toAddresses); // to(...[addr1, addr2]) ==> to(addr1, addr2)
 
-        // All emails sent with a prefix
-        $email->subject('[COVIDTrack] ' . $subject);
+        // Subject parts are space-delimited
+        // "[TEST] [COVIDTrack] These groups require testing"
+        $subjectParts = [];
+        if ($this->sendTestEmails) {
+            $subjectParts[] = '[TEST]';
+        }
+        $subjectParts[] = '[COVIDTrack]';
+        $subjectParts[] = $subject;
+
+        $email->subject(implode(' ', $subjectParts));
 
         return $email;
     }

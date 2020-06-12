@@ -50,6 +50,7 @@ services:
         arguments:
             $fromAddress: '%env(CT_DEFAULT_FROM_ADDRESS)%'
             $replyToAddress: '%env(CT_DEFAULT_REPLY_TO_ADDRESS)%'
+            $sendTestEmails: '%env(CT_SEND_TEST_EMAILS)%'
 
     App\Security\LoginFormAuthenticator:
         arguments:
