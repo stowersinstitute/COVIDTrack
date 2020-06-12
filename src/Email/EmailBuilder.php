@@ -35,11 +35,13 @@ class EmailBuilder
     /**
      * See environment vars CT_DEFAULT_FROM_ADDRESS and CT_DEFAULT_REPLY_TO_ADDRESS
      * to set arguments.
+     *
+     * @param string $replyToAddress Uses $fromAddress when not given
      */
-    public function __construct(string $fromAddress, string $replyToAddress, bool $sendTestEmails = true)
+    public function __construct(string $fromAddress, string $replyToAddress = '', bool $sendTestEmails = true)
     {
         $this->fromAddress = $fromAddress;
-        $this->replyToAddress = $replyToAddress;
+        $this->replyToAddress = $replyToAddress ?: $fromAddress;
         $this->sendTestEmails = $sendTestEmails;
     }
 
