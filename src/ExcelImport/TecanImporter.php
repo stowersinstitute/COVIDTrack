@@ -234,7 +234,7 @@ class TecanImporter extends BaseExcelImporter
             $output[$resultAction][] = [
                 'tubeAccessionId' => $rawTubeId,
                 'rnaWellPlateId' => $rawWellPlateId,
-                'rnaWellPosition' => $rawWellPosition,
+                'rnaWellPosition' => sprintf("%s (%d)", $well->getPositionAlphanumeric(), $rawWellPosition),
             ];
         }
 
