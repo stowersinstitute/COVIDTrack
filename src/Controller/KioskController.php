@@ -201,7 +201,7 @@ class KioskController extends AbstractController
         if (!$tube || !$tube->willAllowDropOff()) {
             return new JsonResponse([
                 'isError' => true,
-                'message' => "This Tube is unavailable for drop-off. Please contact staff for assistance.",
+                'message' => "This tube is unavailable for drop-off. Please contact staff for assistance.",
             ]);
         }
 
