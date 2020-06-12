@@ -35,19 +35,12 @@ class EmailBuilder
     /**
      * See environment vars CT_DEFAULT_FROM_ADDRESS and CT_DEFAULT_REPLY_TO_ADDRESS
      * to set arguments.
-     *
-     * @param string $sendTestEmails Uses strings to support environment variables, which are passed as strings
      */
-    public function __construct(string $fromAddress, string $replyToAddress, string $sendTestEmails = 'false')
+    public function __construct(string $fromAddress, string $replyToAddress, bool $sendTestEmails = true)
     {
         $this->fromAddress = $fromAddress;
         $this->replyToAddress = $replyToAddress;
-
-        $validSendTestEmailArgs = ['true', 'false'];
-        if (!in_array($sendTestEmails, $validSendTestEmailArgs, true)) {
-            throw new \InvalidArgumentException('Invalid sendTestEmails argument. Valid values: ' . implode(' or ', $validSendTestEmailArgs));
-        }
-        $this->sendTestEmails = ($sendTestEmails === 'true') ? true : false;
+        $this->sendTestEmails = $sendTestEmails;
     }
 
     /**
