@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\WellPlate;
 use App\Form\WellPlateForm;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -56,12 +58,11 @@ class WellPlateController extends AbstractController
      *
      * @Route("/edit/{barcode}", methods={"GET","POST"}, name="well_plate_edit")
      */
-    public function edit(Request $request, string $barcode)
+    public function edit(Request $request, string $barcode, EntityManagerInterface $em)
     {
         $this->mustHaveEditPermissions();
 
-        $plate = $this->getDoctrine()
-            ->getRepository(WellPlate::class)
+        $plate = $em->getRepository(WellPlate::class)
             ->findOneByBarcode($barcode);
         if (!$plate) {
             throw new NotFoundHttpException('Cannot find Well Plate by barcode');
@@ -71,7 +72,6 @@ class WellPlateController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->flush();
 
             return $this->redirectToRoute('well_plate_view', [
