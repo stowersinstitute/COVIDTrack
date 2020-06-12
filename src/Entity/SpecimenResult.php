@@ -75,7 +75,7 @@ abstract class SpecimenResult
      *
      * For example:
      *
-     *     return $this->getWell()->getPosition();
+     *     return $this->getWell()->getPositionAlphanumeric();
      */
     abstract public function getWellPosition(): string;
 
