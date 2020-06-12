@@ -6,6 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
+use App\Entity\Specimen;
 use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
@@ -211,17 +212,29 @@ class TecanImporter extends BaseExcelImporter
             // Whether created or updated
             $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
-            // Add Specimen to Well Plate at Position from upload
+            // Get SpecimenWell where this Specimen is stored on the Well Plate
+            $well = $this->findOrCreateWell($wellPlate, $specimen);
+
+            // Set position on this Well Plate
             // Positions from Excel begin at 1
-            $alphanumericPosition = SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
-            $well = new SpecimenWell($wellPlate, $specimen, $alphanumericPosition);
+            try {
+                $alphanumericPosition = SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
+                $well->setPositionAlphanumeric($alphanumericPosition);
+            } catch (\Exception $e) {
+                $this->messages[] = ImportMessage::newError(
+                    $e->getMessage(),
+                    $rowNumber,
+                    $this->columnMap['wellPosition']
+                );
+            }
+
             $this->em->persist($well);
 
             // Store in output
             $output[$resultAction][] = [
                 'tubeAccessionId' => $rawTubeId,
                 'rnaWellPlateId' => $rawWellPlateId,
-                'rnaWellPosition' => $rawWellPosition,
+                'rnaWellPosition' => sprintf("%s (%d)", $well->getPositionAlphanumeric(), $rawWellPosition),
             ];
         }
 
@@ -371,5 +384,27 @@ class TecanImporter extends BaseExcelImporter
         if (self::TUBE_ID_HEADER !== $found) {
             throw new \RuntimeException(sprintf('Cannot find column %s. Expected to find at cell %s%d', self::TUBE_ID_HEADER, $column, $row));
         }
+    }
+
+    private function findOrCreateWell(WellPlate $wellPlate, Specimen $specimen): SpecimenWell
+    {
+        $well = null;
+
+        if ($specimen->isOnWellPlate($wellPlate)) {
+            // Specimen is already on this plate
+            // Find if there's a well without a position
+            foreach($specimen->getWellsOnPlate($wellPlate) as $existingWell) {
+                if (!$existingWell->getPositionAlphanumeric()) {
+                    $well = $existingWell;
+                    break;
+                }
+            }
+        }
+
+        if (!$well) {
+            $well = new SpecimenWell($wellPlate, $specimen);
+        }
+
+        return $well;
     }
 }
