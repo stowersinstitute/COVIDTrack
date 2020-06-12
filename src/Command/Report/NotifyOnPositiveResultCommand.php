@@ -7,6 +7,7 @@ use App\Entity\AppUser;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\StudyCoordinatorNotification;
+use App\Util\DateUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -68,8 +70,10 @@ class NotifyOnPositiveResultCommand extends Command
     {
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
-            ->addOption('testing', null, InputOption::VALUE_NONE, 'Use to ignore the last time the notification was sent to Study Coordinator, and ignore if Groups have already been recommended today. Useful for triggering a test email.')
-            ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save a record of this notification being sent. Useful when testing.')
+            ->addOption('do-not-send', null, InputOption::VALUE_NONE, 'Do not send real email when run')
+            ->addOption('all-positive-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published today')
+            ->addOption('all-positive-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published from the beginning of time')
+            ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save a record of this notification being sent')
         ;
     }
 
@@ -137,22 +141,15 @@ class NotifyOnPositiveResultCommand extends Command
 
         $email = $this->emailBuilder->createHtml($recipients, $subject, $html);
 
-        // Debug output email
-        $this->outputDebug('------');
-        $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
-        $replyToOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getReplyTo());
-        $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
-        $this->outputDebug('From: ' . implode(', ', $fromOutput));
-        $this->outputDebug('Reply-To: ' . implode(', ', $replyToOutput));
-        $this->outputDebug('To: ' . implode(', ', $toOutput));
-        $this->outputDebug('Subject: ' . $email->getSubject());
-        $this->outputDebug('------');
-        $this->outputDebug($email->getHtmlBody());
+        $this->outputDebugEmail($email);
 
-        $this->mailer->send($email);
+        // Send the email
+        if (!$input->getOption('do-not-send')) {
+            $this->mailer->send($email);
+        }
 
         // Log
-        $save = (!$input->getOption('skip-saving') && !$input->getOption('testing'));
+        $save = (!$input->getOption('skip-saving'));
         if ($save) {
             $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
             $this->em->persist($notif);
@@ -219,9 +216,13 @@ class NotifyOnPositiveResultCommand extends Command
         $lastNotificationSent = $this->em
             ->getRepository(StudyCoordinatorNotification::class)
             ->getMostRecentSentAt();
-        if (!$lastNotificationSent || $this->input->getOption('testing')) {
-            // Study Coordinator has never been notified.
-            // Assume since earliest possible time.
+        if ($this->input->getOption('all-positive-groups-today')) {
+            // CLI options want us to email about all groups with positive result today
+            // Assume since midnight today
+            $lastNotificationSent = DateUtils::dayFloor(new \DateTime());
+        } else if ($this->input->getOption('all-positive-groups-ever') || !$lastNotificationSent) {
+            // Study Coordinator never notified
+            // Search for since earliest possible date
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
         }
 
@@ -253,15 +254,14 @@ class NotifyOnPositiveResultCommand extends Command
             }
         }
 
-        // Only contact about Groups not yet notified today
-        if (!$this->input->getOption('testing')) {
+        // Remove Groups already notified today
+        if (!$this->input->getOption('all-positive-groups-today') && !$this->input->getOption('all-positive-groups-ever')) {
             $now = new \DateTime();
             /** @var StudyCoordinatorNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em
                 ->getRepository(StudyCoordinatorNotification::class)
                 ->getGroupsNotifiedOnDate($now);
 
-            // Remove Groups notified today
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
                 $id = $groupPreviouslyNotified->getId();
                 unset($groups[$id]);
@@ -274,5 +274,21 @@ class NotifyOnPositiveResultCommand extends Command
         $output['timestamps'] = array_values($resultsTimestamps);
 
         return $output;
+    }
+
+    private function outputDebugEmail(Email $email)
+    {
+        // Email stores From, Reply-To, To as arrays, convert to comma delimited
+        $fromOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getFrom());
+        $replyToOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getReplyTo());
+        $toOutput = array_map(function(Address $A) { return $A->toString(); }, $email->getTo());
+
+        $this->outputDebug('------');
+        $this->outputDebug('From: ' . implode(', ', $fromOutput));
+        $this->outputDebug('Reply-To: ' . implode(', ', $replyToOutput));
+        $this->outputDebug('To: ' . implode(', ', $toOutput));
+        $this->outputDebug('Subject: ' . $email->getSubject());
+        $this->outputDebug('------');
+        $this->outputDebug($email->getHtmlBody());
     }
 }
