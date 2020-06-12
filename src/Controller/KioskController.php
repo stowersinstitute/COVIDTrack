@@ -196,7 +196,7 @@ class KioskController extends AbstractController
 
         $accessionId = $request->get('accessionId');
 
-        $tube = $em->getRepository(Tube::class)->findOneByAnyId($accessionId);
+        $tube = $em->getRepository(Tube::class)->findOneByAccessionId($accessionId);
 
         if (!$tube || !$tube->willAllowDropOff()) {
             return new JsonResponse([
