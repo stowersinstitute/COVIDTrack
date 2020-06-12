@@ -5,6 +5,7 @@
         <tr>
             {% if userCanEditPlates %}<th>&nbsp;</th>{% endif %}
             <th>Barcode</th>
+            <th>Storage Location</th>
             <th>Created</th>
             <th>Last Modified</th>
         </tr>
@@ -20,6 +21,7 @@
             <td>
                 <a href="{{ path('well_plate_view', {barcode: wellPlate.barcode}) }}">{{ wellPlate.barcode }}</a>
             </td>
+            <td>{{ wellPlate.storageLocation }}</td>
             <td>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>

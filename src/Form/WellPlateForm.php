@@ -19,6 +19,9 @@ class WellPlateForm extends AbstractType
                 'label' => 'Barcode',
                 'required' => true,
             ])
+            ->add('storageLocation', TextType::class, [
+                'label' => 'Storage Location',
+            ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
             ])
