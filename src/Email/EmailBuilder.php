@@ -30,7 +30,7 @@ class EmailBuilder
      *
      * @var bool
      */
-    private $sendTestEmails;
+    private $indicateIsTestingEmail;
 
     /**
      * See environment vars CT_DEFAULT_FROM_ADDRESS and CT_DEFAULT_REPLY_TO_ADDRESS
@@ -38,11 +38,11 @@ class EmailBuilder
      *
      * @param string $replyToAddress Uses $fromAddress when not given
      */
-    public function __construct(string $fromAddress, string $replyToAddress = '', bool $sendTestEmails = true)
+    public function __construct(string $fromAddress, string $replyToAddress = '', bool $indicateIsTestingEmail = true)
     {
         $this->fromAddress = $fromAddress;
         $this->replyToAddress = $replyToAddress ?: $fromAddress;
-        $this->sendTestEmails = $sendTestEmails;
+        $this->indicateIsTestingEmail = $indicateIsTestingEmail;
     }
 
     /**
@@ -54,7 +54,7 @@ class EmailBuilder
     {
         $email = $this->createBase($toAddresses, $subject);
 
-        if ($this->sendTestEmails) {
+        if ($this->indicateIsTestingEmail) {
             $html = "<p>This is a test email</p>\n" . $html;
         }
 
@@ -72,7 +72,7 @@ class EmailBuilder
     {
         $email = $this->createBase($toAddresses, $subject);
 
-        if ($this->sendTestEmails) {
+        if ($this->indicateIsTestingEmail) {
             $text = "This is a test email\n\n" . $text;
         }
 
@@ -97,7 +97,7 @@ class EmailBuilder
         // Subject parts are space-delimited
         // "[TEST] [COVIDTrack] These groups require testing"
         $subjectParts = [];
-        if ($this->sendTestEmails) {
+        if ($this->indicateIsTestingEmail) {
             $subjectParts[] = '[TEST]';
         }
         $subjectParts[] = '[COVIDTrack]';
