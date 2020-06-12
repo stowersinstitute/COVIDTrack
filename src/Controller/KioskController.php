@@ -185,6 +185,32 @@ class KioskController extends AbstractController
     }
 
     /**
+     * Checks if the given tube is available for checkin
+     *
+     * @Route(path="/tube-available-check", methods={"POST"}, name="kiosk_tube_available_check")
+     */
+    public function tubeAvailableCheck(Request $request, EntityManagerInterface $em)
+    {
+        $this->mustHavePermissions();
+        $this->mustFindKiosk($request);
+
+        $accessionId = $request->get('accessionId');
+
+        $tube = $em->getRepository(Tube::class)->findOneByAnyId($accessionId);
+
+        if (!$tube || !$tube->willAllowDropOff()) {
+            return new JsonResponse([
+                'isError' => true,
+                'message' => "This Tube is unavailable for drop-off. Please contact staff for assistance.",
+            ]);
+        }
+
+        return new JsonResponse([
+            'result' => true,
+        ]);
+    }
+
+    /**
      * View previously added Tubes to verify before completion.
      * POST back to this route to complete Kiosk interaction.
      *
