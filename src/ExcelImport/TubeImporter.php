@@ -1,12 +1,15 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 
+/**
+ * Import list of Tube Accession IDs found on vendor Tubes received with
+ * labels already on the Tube. Makes COVIDTrack aware of Tube Accession IDs
+ * created outside the system.
+ */
 class TubeImporter extends BaseExcelImporter
 {
     public function __construct(ExcelImportWorksheet $worksheet)
@@ -24,6 +27,8 @@ class TubeImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return Tube[] Imported Tubes. Do not yet have Tube.id because EntityManager not flushed.
      */
     public function process($commit = false)
     {
@@ -32,6 +37,7 @@ class TubeImporter extends BaseExcelImporter
         $this->output = [];
 
         // Created and updated can be figured out from the Excel file
+        $tubes = [];
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -49,7 +55,11 @@ class TubeImporter extends BaseExcelImporter
 
             $this->output[] = $tube;
             if ($commit) $this->em->persist($tube);
+
+            $tubes[] = $tube;
         }
+
+        return $tubes;
     }
 
     /**
