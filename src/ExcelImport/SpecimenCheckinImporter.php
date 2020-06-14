@@ -133,7 +133,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
 
         $this->output = $output;
 
-        return $this->output;
+        return array_values($importedTubes);
     }
 
     /**
