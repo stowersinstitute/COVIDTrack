@@ -9,10 +9,33 @@ use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
 use App\Repository\WellPlateRepository;
 use Doctrine\ORM\EntityManager;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class BaseExcelImporterTestCase extends TestCase
+class BaseExcelImporterTestCase extends KernelTestCase
 {
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $em;
+
+    protected function setUp()
+    {
+        $kernel = self::bootKernel();
+
+        $this->em = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        // doing this is recommended to avoid memory leaks
+        $this->em->close();
+        $this->em = null;
+    }
+
     /**
      * @return \PHPUnit\Framework\MockObject\MockObject|EntityManager
      */
