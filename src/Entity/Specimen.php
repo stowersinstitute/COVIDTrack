@@ -79,7 +79,6 @@ class Specimen
      *
      * @var SpecimenWell[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC"})
      */
     private $wells;
 
