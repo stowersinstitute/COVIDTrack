@@ -28,6 +28,7 @@ $cliOpts = getopt(
 
         // Aliases for common scenarios
         'for-local-development',
+        'for-test-suite',
 
         'help',
     ]
@@ -54,6 +55,7 @@ Available Options
     --web-assets-prod                       When compiling web assets configure them for production use
     
     --for-local-development                 Alias to perform first-time setup for local development
+    --for-test-suite                        Alias to perform setup to execute test suite
     
 Examples
 ------------------------------
@@ -65,6 +67,10 @@ First-time project setup (Docker):
 First-time project setup (Symfony Server):
 
     bin/setup.php --for-local-development
+
+Setup to run test suite. Note that other CLI options are not honored:
+
+    bin/setup.php --for-test-suite
     
 After updating from source control:
 
@@ -107,6 +113,23 @@ if (isset($cliOpts['for-local-development'])) {
     $cliOpts['local-env-from'] = '.env.sqlite.dist';
     $stages['create-database'] = true;
     $stages['fixtures'] = true;
+}
+
+if (isset($cliOpts['for-test-suite'])) {
+    $I_SAY_ITS_NOT_PROD = true;
+
+    // Ensure has latest code dependencies
+    $stages['composer-install'] = true;
+    // Ensure has web assets installed, in case tests run any UI tests
+    $cliOpts['web-assets-prod'] = true;
+    $stages['web-assets'] = true;
+
+    // Explicitly disable some stages that do not apply
+    $stages['create-local-env'] = false;// All test config within config/packages/test/*.yaml
+    $stages['drop-database'] = false;   // Handled in run-tests.sh
+    $stages['create-database'] = false; // Handled in run-tests.sh
+    $stages['sync-database'] = false;   // Handled in run-tests.sh
+    $stages['fixtures'] = false; // Test code loads its own fixtures per-test
 }
 
 if (isset($cliOpts['post-update'])) {
