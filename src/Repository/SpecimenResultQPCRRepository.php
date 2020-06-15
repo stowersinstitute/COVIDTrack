@@ -30,6 +30,7 @@ class SpecimenResultQPCRRepository extends EntityRepository
             ->where('r.createdAt >= :since')
             ->setParameter('since', $datetime)
 
+            // Do not include results from "control" groups
             ->join('r.well', 'w')
             ->join('w.specimen', 's')
             ->join('s.participantGroup', 'g')
