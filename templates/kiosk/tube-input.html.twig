@@ -32,29 +32,33 @@
                 <p></p>
             </div>
 
-            <div id="tubeDetails" class="collapse">
+            <div id="tubeDetailSelection" class="collapse">
                 {{ form_row(form.tubeType) }}
-                <div class="row">
-                    <div class="col-xs-6">
-                        {{ form_row(form.collectedAtDate) }}
+
+                <div id="tubeTimeSelection" class="collapse">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            {{ form_row(form.collectedAtDate) }}
+                        </div>
+                        <div class="col-xs-6">
+                            {{ form_row(form.collectedAtTime) }}
+                        </div>
                     </div>
-                    <div class="col-xs-6">
-                        {{ form_row(form.collectedAtTime) }}
+
+                    <div class="row">
+                        <div class="col-xs-6 text-right">
+                            {{ form_row(form.save) }}
+                        </div>
+                        <div class="col-xs-6">
+                            {{ form_row(form.review) }}
+                        </div>
+                    </div>
+
+                    <div class="row col-xs-12 text-center">
+                        {{ _self.renderCancelButton() }}
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-xs-6 text-right">
-                        {{ form_row(form.save) }}
-                    </div>
-                    <div class="col-xs-6">
-                        {{ form_row(form.review) }}
-                    </div>
-                </div>
-
-                <div class="row col-xs-12 text-center">
-                    {{ _self.renderCancelButton() }}
-                </div>
             </div>
 
             <div class="row" id="buttons-before-tube-entered">
@@ -135,7 +139,7 @@
 
                     if($(e.target).val() !== "") {
                         setTubeInputStatus('LOADING');
-                        showTubeDetails(false);
+                        showTubeDetailSelection(false);
 
                         $.ajax('{{ path('kiosk_tube_available_check') }}', {
                             method: 'POST',
@@ -151,9 +155,18 @@
                     } else {
                         // Collapse form details
                         setTubeInputStatus();
-                        showTubeDetails(false);
+                        showTubeDetailSelection(false);
                     }
                 }, 500);
+            });
+
+            $("#kiosk_add_tube_form_tubeType").on('input', function(e) {
+                console.log(e);
+                if($(e.target).val() !== "") {
+                    showTubeTimeSelection(true);
+                } else {
+                    showTubeTimeSelection(false);
+                }
             });
 
             /**
@@ -163,11 +176,11 @@
             function onAvailableCheckResponse(data) {
                 if (data.isError) {
                     setTubeInputStatus('ERROR', data.message);
-                    showTubeDetails(false);
+                    showTubeDetailSelection(false);
                     return;
                 }
 
-                showTubeDetails(true);
+                showTubeDetailSelection(true);
                 setTubeInputStatus('SUCCESS');
             }
 
@@ -198,17 +211,28 @@
             }
 
             /**
-             * Shows (and hides) the tube details fields and handles display of the scanning hint and buttons
+             * Shows (and hides) the tube detail section (Tube Type and Time UI) handles display of the scanning hint
+             */
+            function showTubeDetailSelection(show = true) {
+                if (show) {
+                    $("#tubeDetailSelection").collapse('show');
+                    $("#scanTip").hide();
+                } else {
+                    $("#tubeDetailSelection").collapse('hide');
+                    $("#scanTip").show();
+                }
+            }
+
+            /**
+             * Shows (and hides) the tube day and time fields and pre-complete buttons
              * @param show
              */
-            function showTubeDetails(show = true) {
+            function showTubeTimeSelection(show = true) {
                 if (show) {
-                    $("#tubeDetails").collapse('show');
-                    $("#scanTip").hide();
+                    $("#tubeTimeSelection").collapse('show');
                     $("#buttons-before-tube-entered").hide();
                 } else {
-                    $("#tubeDetails").collapse('hide');
-                    $("#scanTip").show();
+                    $("#tubeTimeSelection").collapse('hide');
                     $("#buttons-before-tube-entered").show();
                 }
             }
