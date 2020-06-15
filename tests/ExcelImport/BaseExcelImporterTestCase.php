@@ -16,7 +16,7 @@ class BaseExcelImporterTestCase extends KernelTestCase
     /**
      * @var \Doctrine\ORM\EntityManager
      */
-    private $em;
+    protected $em;
 
     protected function setUp()
     {
@@ -25,6 +25,20 @@ class BaseExcelImporterTestCase extends KernelTestCase
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
+    }
+
+    /**
+     * Persist/Flush multiple entities.
+     *
+     * Usage:
+     *     $this->persistAndFlush($one, $two, $three);
+     */
+    protected function persistAndFlush(...$entities)
+    {
+        foreach ($entities as $entity) {
+            $this->em->persist($entity);
+        }
+        $this->em->flush();
     }
 
     protected function tearDown()

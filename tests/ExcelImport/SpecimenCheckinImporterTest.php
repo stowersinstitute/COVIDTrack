@@ -12,8 +12,7 @@ class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
     public function testProcess()
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin.xlsx');
-        $em = $this->buildMockEntityManager();
-        $importer = new SpecimenCheckinImporter($em, $workbook->getFirstWorksheet());
+        $importer = new SpecimenCheckinImporter($this->em, $workbook->getFirstWorksheet());
 
         $checkedInTubes = $importer->process(true);
 

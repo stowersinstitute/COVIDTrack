@@ -12,8 +12,7 @@ class SpecimenResultQPCRImporterTest extends BaseExcelImporterTestCase
     {
         $this->markTestSkipped('Not ready for results testing yet');
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin.xlsx');
-        $em = $this->buildMockEntityManager();
-        $importer = new SpecimenResultQPCRImporter($em, $workbook->getFirstWorksheet());
+        $importer = new SpecimenResultQPCRImporter($this->em, $workbook->getFirstWorksheet());
 
         $tubes = $importer->process(true);
 
