@@ -55,7 +55,7 @@ security:
             - ROLE_SPECIMEN_DROP_OFF
             - ROLE_TUBE_CHECK_IN
             - ROLE_REPORTS_GROUP_VIEW
-            - ROLE_WELL_PLATE_VIEW
+            - ROLE_WELL_PLATE_EDIT
         ROLE_KIOSK_UI:
             - ROLE_SPECIMEN_DROP_OFF
         ROLE_PARTICIPANT_GROUP_EDIT:
@@ -64,5 +64,7 @@ security:
             - ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW
         ROLE_RESULTS_EDIT:
             - ROLE_RESULTS_VIEW
+        ROLE_WELL_PLATE_EDIT:
+            - ROLE_WELL_PLATE_VIEW
         ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING:
             ~
