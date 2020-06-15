@@ -18,10 +18,19 @@
 
             {{ form_start(form) }}
             {{ form_errors(form) }}
-            {{ form_row(form.accessionId, {
-                'label': false,
-                'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
-            }) }}
+                <div class="row" id="tube-input-group">
+                    <div class="col-xs-12">
+                        {{ form_row(form.accessionId, {
+                            'label': false,
+                            'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
+                        }) }}
+                    </div>
+                    <div id="tube-check-status" class="input-lg"></div>
+                </div>
+            <div class="callout callout-danger hidden" id="tube-error-callout">
+                <h4>Tube Barcode Error</h4>
+                <p></p>
+            </div>
 
             <div id="tubeDetails" class="collapse">
                 {{ form_row(form.tubeType) }}
@@ -70,6 +79,12 @@
         scanTipHtml: 'Scan Tube barcode<br>below the screen'
     } %}
     {% endblock %}
+
+
+    <style type="text/css">
+        #tube-input-group { position: relative; }
+        #tube-check-status { position: absolute; right: 1rem; }
+    </style>
 {% endblock %}
 
 {% block modal %}
@@ -102,27 +117,101 @@
     <script>
         // What to do when scanner input
         $(document).on( "scannerinput", function(e, inputString) {
-            if (!$("[data-scanner-input]").focused) {
-                $("[data-scanner-input]").val(inputString).trigger('input');
-            }
+            // We don't want the scanner typing in the input field.
+            $("[data-scanner-input]").blur();
+            $("[data-scanner-input]").val(inputString).trigger('input');
         });
 
         $(document).ready(function(){
             // React when inputting Tube Label ID
-            $("input").on('input', function(e) {
-                console.log(e);
-                if($(e.target).val() !== "") {
-                    // Expand to show form details
+            var _timeoutHandler = 0;
+
+            $("#kiosk_add_tube_form_accessionId").on('input', function(e) {
+                // Timeout handler will make sure the user is done typing before checking the tube id.
+                if (_timeoutHandler) {
+                    clearTimeout(_timeoutHandler);
+                }
+                _timeoutHandler = setTimeout(function () {
+
+                    if($(e.target).val() !== "") {
+                        setTubeInputStatus('LOADING');
+                        showTubeDetails(false);
+
+                        $.ajax('{{ path('kiosk_tube_available_check') }}', {
+                            method: 'POST',
+                            data: { accessionId: $(e.target).val() },
+
+                            success: onAvailableCheckResponse,
+
+                            // Unexpected errors like 500 server or network down
+                            error: function(xhr, textStatus, error) {
+                                console.log("error in response: " + textStatus + " " + error);
+                            }
+                        });
+                    } else {
+                        // Collapse form details
+                        setTubeInputStatus();
+                        showTubeDetails(false);
+                    }
+                }, 500);
+            });
+
+            /**
+             * What to do when we get a tube check response from the server
+             * @param data AJAX Response Data
+             */
+            function onAvailableCheckResponse(data) {
+                if (data.isError) {
+                    setTubeInputStatus('ERROR', data.message);
+                    showTubeDetails(false);
+                    return;
+                }
+
+                showTubeDetails(true);
+                setTubeInputStatus('SUCCESS');
+            }
+
+            /**
+             * Sets the icon in the tube input field and any error message in the callout below the input field
+             * @param status Options: LOADING, ERROR, or SUCCESS
+             * @param message Error message to show in the callout
+             */
+            function setTubeInputStatus(status = '', message = '') {
+                var statusWrapper = $("#tube-check-status");
+
+                statusWrapper.empty();
+                $("#tube-error-callout").toggleClass('hidden', true);
+
+                switch (status) {
+                    case 'LOADING':
+                        statusWrapper.append('<i class="fa fa-fw fa-virus fa-spin"></i>');
+                        break;
+                    case 'ERROR':
+                        statusWrapper.append('<i class="fa fa-fw fa-times text-red"></i>');
+                        $("#tube-error-callout").toggleClass('hidden', false);
+                        $("#tube-error-callout p").html(message);
+                        break;
+                    case 'SUCCESS':
+                        statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
+                        break;
+                }
+            }
+
+            /**
+             * Shows (and hides) the tube details fields and handles display of the scanning hint and buttons
+             * @param show
+             */
+            function showTubeDetails(show = true) {
+                if (show) {
                     $("#tubeDetails").collapse('show');
                     $("#scanTip").hide();
                     $("#buttons-before-tube-entered").hide();
                 } else {
-                    // Collapse form details
                     $("#tubeDetails").collapse('hide');
                     $("#scanTip").show();
                     $("#buttons-before-tube-entered").show();
                 }
-            });
+            }
 
             // Confirming Cancel does POST to do real cancel
             $('#confirm-cancel-dropoff').on('click', function(e) {
