@@ -43,7 +43,7 @@ class GenericTextLabelBuilder extends AbstractLabelBuilder
         $fontSize = 32;
         $zpl->setFont($font, $fontSize);
 
-        $zpl->drawText(0, 18, $this->text, 'N', ZplBuilder::JUSTIFY_AUTO, 64, $fontSize);
+        $zpl->drawText(20, 18, $this->text, 'N', ZplBuilder::JUSTIFY_AUTO, 64, $fontSize);
 
         return $zpl->toZpl();
     }

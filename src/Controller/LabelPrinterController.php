@@ -238,7 +238,7 @@ class LabelPrinterController extends AbstractController
             ->add('labelType', ChoiceType::class, [
                 'label' => 'Label Type',
                 'choices' => [
-                    'Generic Text: Yellow 1" x 2.5"' => GenericTextLabelBuilder::class,
+                    'Generic Text: Yellow 2.5" x 1"' => GenericTextLabelBuilder::class,
                 ],
                 'placeholder' => '- Select -',
                 'required' => true,
