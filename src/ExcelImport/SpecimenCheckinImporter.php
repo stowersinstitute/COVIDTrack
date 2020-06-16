@@ -64,6 +64,8 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      * Applies the data in the excel file to existing entities
      *
      * Modified entities are returned
+     *
+     * @return Tube[]
      */
     public function process($commit = false)
     {
