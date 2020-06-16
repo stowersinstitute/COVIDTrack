@@ -3,6 +3,10 @@ framework:
     session:
         storage_id: session.storage.mock_file
 
-liip_test_fixtures:
-    cache_db:
-        sqlite: liip_test_fixtures.services_database_backup.sqlite
+# liip/test-fixtures-bundle says this can be used, but noticed very inconsistent
+# database state when fixtures or tests were modified. Running the same tests
+# back-to-back without changes would yield different results.
+# Leaving this commented for potential use in the future.
+#liip_test_fixtures:
+#    cache_db:
+#        sqlite: liip_test_fixtures.services_database_backup.sqlite

@@ -5,12 +5,16 @@ namespace App\Tests\ExcelImport;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\SpecimenCheckinImporter;
-use App\ExcelImport\SpecimenResultQPCRImporter;
+use App\Tests\ExcelImport\DataFixtures\TubeCheckinFixtures;
 
-class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
+class TubeCheckinImporterTest extends BaseExcelImporterTestCase
 {
     public function testProcess()
     {
+        $this->loadFixtures([
+            TubeCheckinFixtures::class,
+        ]);
+
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin.xlsx');
         $importer = new SpecimenCheckinImporter($this->em, $workbook->getFirstWorksheet());
 
@@ -24,13 +28,13 @@ class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
         $this->assertCount(7, $checkedInTubes);
 
         $ensureHasTubeIds = [
-            'TEST0001',
-            'TEST0002',
-            'TEST0003',
-            'TEST0004',
-            'TEST0005',
-            'TEST0006',
-            'TEST0007',
+            'TestCheckin0001',
+            'TestCheckin0002',
+//            'TestCheckin0003',
+            'TestCheckin0004',
+            'TestCheckin0005',
+//            'TestCheckin0006',
+            'TestCheckin0007',
         ];
         $processedTubeIds = array_map(function(Tube $T) {
             return $T->getAccessionId();
@@ -39,7 +43,7 @@ class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
             return !in_array($mustHaveTubeId, $processedTubeIds);
         });
 
-        // Test Tubes all have Specimens
+        // TODO: assert Tubes all have Specimens
 
         $this->assertSame([], $missingTubeIds, 'Processed Tubes missing these Tube IDs');
     }
