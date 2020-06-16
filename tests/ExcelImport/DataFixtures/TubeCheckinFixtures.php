@@ -68,9 +68,6 @@ class TubeCheckinFixtures extends Fixture implements DependentFixtureInterface
         }
 
         $em->flush();
-
-//        $allTubes = $em->getRepository(Tube::class)->findAll();
-//        var_dump(count($allTubes));
     }
 
     public function getData(): array

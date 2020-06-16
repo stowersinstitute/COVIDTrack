@@ -5,8 +5,6 @@ namespace App\Tests\ExcelImport;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\TubeImporter;
-use App\Tests\ExcelImport\DataFixtures\TubeTestFixtures;
-use Liip\TestFixturesBundle\Test\FixturesTrait;
 
 /**
  * Tests users can import pre-labeled tubes using Excel.
@@ -60,8 +58,8 @@ class TubeImporterTest extends BaseExcelImporterTestCase
         // Order not important
         $expectedTubeIds = [
             'TESTImport0001',
-//            'TESTImport0002', //Should not be included because existed before import
-//            'TESTImport0003', //Should not be included because existed before import
+//            'TESTImport0002', //Should not be included because added before import
+//            'TESTImport0003', //Should not be included because added before import
             'TESTImport0004',
             'TESTImport0005',
             'TESTImport0006',
