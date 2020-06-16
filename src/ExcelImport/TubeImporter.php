@@ -12,6 +12,11 @@ use App\Entity\Tube;
  */
 class TubeImporter extends BaseExcelImporter
 {
+    /**
+     * @var Tube[] Keys are Tube.accessionId found in import file, Values are Tube entity created
+     */
+    private $seenTubeAccessionIds = [];
+
     public function __construct(ExcelImportWorksheet $worksheet)
     {
         parent::__construct($worksheet);
@@ -54,6 +59,8 @@ class TubeImporter extends BaseExcelImporter
             $tube = new Tube($rawAccessionId);
 
             $this->output[] = $tube;
+            $this->seenTubeAccessionIds[$rawAccessionId] = $tube;
+
             if ($commit) $this->em->persist($tube);
 
             $tubes[] = $tube;
@@ -89,12 +96,22 @@ class TubeImporter extends BaseExcelImporter
             return false;
         }
 
-        // Cannot already exist
+        // Cannot already exist in database
         $repo = $this->em->getRepository(Tube::class);
         $exists = $repo->findOneBy(['accessionId' => $raw]);
         if ($exists) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('There is already a tube with accession ID "%s"', $raw),
+                $rowNumber,
+                $this->columnMap['accessionId']
+            );
+            return false;
+        }
+
+        // Cannot already have been imported (duplicate in this import file)
+        if (isset($this->seenTubeAccessionIds[$raw])) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Accession ID "%s" occurs multiple times in this Excel file', $raw),
                 $rowNumber,
                 $this->columnMap['accessionId']
             );

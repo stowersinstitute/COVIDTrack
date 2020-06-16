@@ -42,41 +42,25 @@ class TubeImporterTest extends BaseExcelImporterTestCase
         $this->mustContainAllTubeAccessionIds($expectedTubeIds, $tubes);
     }
 
-    public function testProcessErrorImportingDuplicateTubeAccessionId()
+    public function testErrorConditions()
     {
-        // Persist/Flush a known Tube Accession ID from tube-importer.xlsx
-        $first = new Tube('TESTImport0002');
-        $second = new Tube('TESTImport0003');
-        $this->persistAndFlush($first, $second);
-
-        // Do import as normal
-        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-importer.xlsx');
+        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-importer-with-errors.xlsx');
         $importer = new TubeImporter($workbook->getFirstWorksheet());
         $importer->setEntityManager($this->em);
 
         // This list should match what's in tube-importer.xlsx
-        // Order not important
         $expectedTubeIds = [
-            'TESTImport0001',
-//            'TESTImport0002', //Should not be included because added before import
-//            'TESTImport0003', //Should not be included because added before import
-            'TESTImport0004',
-            'TESTImport0005',
-            'TESTImport0006',
-            'TESTImport0007',
-            'TESTImport0008',
-            'TESTImport0009',
-            'TESTImport0010',
+            'TESTImport0001', // The only valid Tube ID in the import
         ];
 
         $tubes = $importer->process(true);
 
         $this->assertCount(count($expectedTubeIds), $tubes);
-        $this->assertTrue($importer->hasErrors());
         $this->assertSame(count($expectedTubeIds), $importer->getNumImportedItems());
-
-        // Verify processed list has expected Tube Accession IDs
         $this->mustContainAllTubeAccessionIds($expectedTubeIds, $tubes);
+
+        $this->assertTrue($importer->hasErrors());
+        $this->assertCount(3, $importer->getErrors());
     }
 
     /**
