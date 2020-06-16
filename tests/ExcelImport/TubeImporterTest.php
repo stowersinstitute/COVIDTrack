@@ -35,7 +35,7 @@ class TubeImporterTest extends BaseExcelImporterTestCase
         $tubes = $importer->process(true);
 
         $this->assertCount(count($expectedTubeIds), $tubes);
-        $this->assertFalse($importer->hasErrors());
+        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
         $this->assertSame(count($expectedTubeIds), $importer->getNumImportedItems());
 
         // Verify processed list has expected Tube Accession IDs

@@ -20,7 +20,7 @@ class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
 
         $checkedInTubes = $importer->process(true);
 
-        $this->assertFalse($importer->hasErrors(), 'Import has errors when not expected to have any');
+        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
         $this->assertCount(5, $importer->getOutput()['accepted']);
         $this->assertCount(2, $importer->getOutput()['rejected']);
 
