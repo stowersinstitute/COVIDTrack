@@ -118,7 +118,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             // Create Well Plate if given
             if (strlen($rawWellPlateBarcode) > 0) {
                 $plate = $this->findWellPlateOrMakeNew($rawWellPlateBarcode);
-                $tube->addWellPlate($plate);
+                $tube->addToWellPlate($plate);
             }
 
             // Kit Type
@@ -269,7 +269,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         /** @var Tube $tube */
         $tube = $this->em
             ->getRepository(Tube::class)
-            ->findOneWithSpecimenLoaded($accessionId);
+            ->findOneByAccessionId($accessionId);
         if (!$tube) {
             return null;
         }

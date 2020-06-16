@@ -1,18 +1,27 @@
 {% block body %}
+{% set userCanEditPlates = is_granted('ROLE_WELL_PLATE_EDIT') %}
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
+            {% if userCanEditPlates %}<th>&nbsp;</th>{% endif %}
             <th>Barcode</th>
-            <th>Created</th>
+            <th>Storage Location</th>
+            <th>Created At</th>
             <th>Last Modified</th>
         </tr>
     </thead>
     <tbody>
     {% for wellPlate in wellPlates %}
         <tr>
+            {% if userCanEditPlates %}
+            <td>
+                <a href="{{ path('well_plate_edit', {barcode: wellPlate.barcode}) }}">Edit</a>
+            </td>
+            {% endif %}
             <td>
                 <a href="{{ path('well_plate_view', {barcode: wellPlate.barcode}) }}">{{ wellPlate.barcode }}</a>
             </td>
+            <td>{{ wellPlate.storageLocation }}</td>
             <td>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>

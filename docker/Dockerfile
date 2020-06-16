@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
         libgmp-dev \
         nodejs \
         yarn \
+        mariadb-client\
     && docker-php-ext-install -j$(nproc) iconv \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install -j$(nproc) gmp \
@@ -26,5 +27,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) sockets \
     && docker-php-ext-install -j$(nproc) ldap \
     && docker-php-ext-install pdo pdo_pgsql pgsql pdo_mysql
+
+RUN mkdir -p /app/var && chown www-data:www-data /app/var
 
 WORKDIR /app

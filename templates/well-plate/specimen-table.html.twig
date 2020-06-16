@@ -1,3 +1,4 @@
+{% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
@@ -9,9 +10,13 @@
     {% for well in wells %}
         <tr>
             <td>
-                <a href="{{ path('app_specimen_view', {accessionId: well.specimen.accessionId}) }}">{{ well.specimen.accessionId }}</a>
+                {% if userCanViewSpecimens %}
+                    <a href="{{ path('app_specimen_view', {accessionId: well.specimen.accessionId}) }}">{{ well.specimen.accessionId }}</a>
+                {% else %}
+                    {{ well.specimen.accessionId }}
+                {% endif %}
             </td>
-            <td>{{ well.position }}</td>
+            <td>{{ well.positionAlphanumeric }}</td>
         </tr>
     {% endfor %}
     </tbody>

@@ -79,9 +79,17 @@ class Specimen
      *
      * @var SpecimenWell[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC"})
      */
     private $wells;
+
+    /**
+     * qPCR Results associated with this Specimen.
+     *
+     * @var SpecimenResultQPCR[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $resultsQPCR;
 
     /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
@@ -110,22 +118,14 @@ class Specimen
      */
     private $status;
 
-    /**
-     * Results of analyzing a Specimen.
-     *
-     * @var SpecimenResult[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
-     * @ORM\OrderBy({"createdAt" = "DESC"})
-     */
-    private $results;
-
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
 
         $this->status = self::STATUS_CREATED;
-        $this->results = new ArrayCollection();
+        $this->wells = new ArrayCollection();
+        $this->resultsQPCR = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -347,6 +347,43 @@ class Specimen
     }
 
     /**
+     * Update current status after results have been added.
+     * Should not change status if already in a final status
+     * such as deleted.
+     *
+     * @return string Current status after latest update
+     */
+    public function updateStatusWhenResultsSet(): string
+    {
+        if ($this->isDeleted()) {
+            // Do not change
+            return $this->status;
+        }
+
+        if (self::STATUS_REJECTED === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
+        if (self::STATUS_RESULTS === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
+        $updateIfInStatus = [
+            self::STATUS_CREATED,
+            self::STATUS_RETURNED,
+            self::STATUS_ACCEPTED,
+        ];
+        if (in_array($this->status, $updateIfInStatus)) {
+            $newStatus = self::STATUS_RESULTS;
+            $this->setStatus($newStatus);
+        }
+
+        return $this->getStatus();
+    }
+
+    /**
      * @return string[]
      */
     public static function getFormStatuses(): array
@@ -403,21 +440,26 @@ class Specimen
     }
 
     /**
-     * Add this Specimen to given Well Plate at given position.
-     *
-     * If Specimen is already on this Well Plate, it will be updated to being
-     * at the given position.
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
      */
-    public function addWellPlate(WellPlate $plate, int $position = null): void
+    public function addWell(SpecimenWell $well): void
     {
-        $existingWell = $this->getWellOnPlate($plate);
-        if ($existingWell) {
-            // Update position on existing Well Plate
-            $existingWell->setPosition($position);
-        } else {
-            // Add new
-            $this->wells->add(new SpecimenWell($plate, $this, $position));
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                // Abort adding
+                return;
+            }
         }
+
+        $this->wells->add($well);
+    }
+
+    /**
+     * @return SpecimenWell[]
+     */
+    public function getWells(): array
+    {
+        return $this->wells->getValues();
     }
 
     /**
@@ -425,21 +467,45 @@ class Specimen
      */
     public function isOnWellPlate(WellPlate $plate): bool
     {
-        return (bool) $this->getWellOnPlate($plate);
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Get SpecimenWell if this Specimen already on given WellPlate.
+     * Get Well where Specimen stored on given WellPlate at given position.
      */
-    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    public function getWellAtPosition(WellPlate $plate, string $position): ?SpecimenWell
     {
-        foreach ($this->wells as $well) {
-            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+        $wells = $this->getWellsOnPlate($plate);
+        foreach ($wells as $well) {
+            if ($well->getPositionAlphanumeric() === $position) {
                 return $well;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Get Wells where Specimen is stored on given WellPlate.
+     *
+     * @return SpecimenWell[]
+     */
+    public function getWellsOnPlate(WellPlate $plate): array
+    {
+        $found = [];
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                $found[] = $well;
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -453,11 +519,12 @@ class Specimen
         foreach ($this->wells as $well) {
             $plate = $well->getWellPlate();
             if ($plate) {
-                $plates[] = $plate;
+                // Indexed to make unique array
+                $plates[$plate->getBarcode()] = $plate;
             }
         }
 
-        return $plates;
+        return array_values($plates);
     }
 
     public function getCollectedAt(): ?\DateTimeInterface
@@ -499,26 +566,19 @@ class Specimen
     }
 
     /**
-     * List of all Results collected on this Specimen.
+     * Add new qPCR Result for this Specimen.
      *
-     * @return SpecimenResult[]
+     * @internal Should only call from SpecimenResultQPCR::__construct()
      */
-    public function getResults(): array
+    public function addQPCRResult(SpecimenResultQPCR $result): void
     {
-        return $this->results->getValues();
-    }
+        foreach ($this->resultsQPCR as $existingResult) {
+            if ($result === $existingResult) {
+                return;
+            }
+        }
 
-    /**
-     * @internal Call new SpecimenResults($specimen) to associate
-     */
-    public function addResult(SpecimenResult $result): void
-    {
-        // TODO: Add de-duplicating logic
-        $this->results->add($result);
-
-        $this->recalculateCliaTestingRecommendation();
-
-        $this->setStatus(self::STATUS_RESULTS);
+        $this->resultsQPCR->add($result);
     }
 
     /**
@@ -529,13 +589,10 @@ class Specimen
      */
     public function getQPCRResults(int $limit = null): array
     {
-        $results = $this->results
-            ->filter(function(SpecimenResult $r) {
-                return ($r instanceof SpecimenResultQPCR);
-            })->getValues();
+        $results = $this->resultsQPCR->getValues();
 
         // Sort most recent createdAt first
-        uasort($results, function (SpecimenResult $a, SpecimenResult $b) {
+        uasort($results, function (SpecimenResultQPCR $a, SpecimenResultQPCR $b) {
             return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
         });
 
@@ -548,28 +605,6 @@ class Specimen
         $results = $this->getQPCRResults(1);
 
         return array_shift($results);
-    }
-
-    /**
-     * @return SpecimenResultDDPCR[]
-     */
-    public function getDDPCRResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultDDPCR);
-        })->getValues();
-    }
-
-    /**
-     * @return SpecimenResultSequencing[]
-     */
-    public function getSequencingResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultSequencing);
-        })->getValues();
     }
 
     /**
@@ -592,7 +627,6 @@ class Specimen
 
             // conclusion ==> CLIA Recommendation
             $map = [
-                SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,

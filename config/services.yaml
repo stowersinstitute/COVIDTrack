@@ -23,6 +23,11 @@ parameters:
     env(CT_USER_SUPPORT_EMAIL): ''
     env(CT_USER_SUPPORT_HTML): ''
 
+    # Allow Symfony router to generate correct URLs in Command classes
+    router.request_context.host: '%env(APP_HOST)%'
+    router.request_context.base_url: '%env(APP_BASE_URL)%'
+    asset.request_context.base_path: '%router.request_context.base_url%'
+
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -40,6 +45,12 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    App\Email\EmailBuilder:
+        arguments:
+            $fromAddress: '%env(CT_DEFAULT_FROM_ADDRESS)%'
+            $replyToAddress: '%env(CT_DEFAULT_REPLY_TO_ADDRESS)%'
+            $indicateIsTestingEmail: '%env(bool:CT_SEND_TEST_EMAILS)%'
 
     App\Security\LoginFormAuthenticator:
         arguments:

@@ -28,18 +28,28 @@ class AppUserFixtures extends Fixture
         $this->buildUser($manager, 'ctadmin', ['ROLE_ADMIN']);
 
         // Study Coordinator (with explicit notification role)
-        $this->buildUser($manager, 'coordinator', ['ROLE_STUDY_COORDINATOR', 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING']);
+        $this->buildUser($manager, 'coordinator', [
+            'ROLE_PARTICIPANT_GROUP_EDIT',
+            'ROLE_PRINT_GROUP_LABELS',
+            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+        ]);
 
         // Specimen Collection Team
-        $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN']);
+        $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN', 'ROLE_WELL_PLATE_EDIT']);
 
         // Kiosk
         $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);
 
-        // Sequencing technicians
-        $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_EDIT']);
+        // Viral Testing Team
+        $this->buildUser($manager, 'testingtech', ['ROLE_RESULTS_EDIT', 'ROLE_WELL_PLATE_VIEW']);
 
-        $manager->flush();;
+        // Viral Analysis Team
+        $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_VIEW', 'ROLE_WELL_PLATE_VIEW']);
+
+        // Media Prep
+        $this->buildUser($manager, 'mediaprep', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW']);
+
+        $manager->flush();
     }
 
     /**
