@@ -13,8 +13,6 @@ use Liip\TestFixturesBundle\Test\FixturesTrait;
  */
 class TubeImporterTest extends BaseExcelImporterTestCase
 {
-    use FixturesTrait;
-
     public function testProcess()
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-importer.xlsx');

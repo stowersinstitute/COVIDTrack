@@ -9,10 +9,13 @@ use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
 use App\Repository\WellPlateRepository;
 use Doctrine\ORM\EntityManager;
+use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class BaseExcelImporterTestCase extends KernelTestCase
 {
+    use FixturesTrait;
+
     /**
      * @var \Doctrine\ORM\EntityManager
      */
@@ -20,9 +23,7 @@ class BaseExcelImporterTestCase extends KernelTestCase
 
     protected function setUp()
     {
-        $kernel = self::bootKernel();
-
-        $this->em = $kernel->getContainer()
+        $this->em = $this->getContainer()
             ->get('doctrine')
             ->getManager();
     }
