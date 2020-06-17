@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorksheet;
@@ -12,6 +10,13 @@ class ParticipantGroupImporter extends BaseExcelImporter
 {
     /** @var ParticipantGroupAccessionIdGenerator  */
     private $idGenerator;
+
+    /**
+     * Groups processed by this Importer
+     *
+     * @var ParticipantGroup[]
+     */
+    private $processedGroups = [];
 
     public function __construct(ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
@@ -67,7 +72,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->processedGroups;
+        }
 
         $groupRepo = $this->em->getRepository(ParticipantGroup::class);
 
@@ -78,7 +85,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
         ];
 
         // Created and updated can be figured out from the Excel file
-        $processedGroups = [];
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -129,7 +135,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
 
-            $processedGroups[] = $group;
+            $this->processedGroups[] = $group;
         }
 
         // Deactivated is everything not in the excel file
@@ -141,12 +147,12 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
             $group->setIsActive(false);
 
-            $processedGroups[] = $group;
+            $this->processedGroups[] = $group;
         }
 
         $this->output = $result;
 
-        return $processedGroups;
+        return $this->processedGroups;
     }
 
     /**

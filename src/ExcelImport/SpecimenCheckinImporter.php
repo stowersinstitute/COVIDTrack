@@ -19,6 +19,12 @@ class SpecimenCheckinImporter extends BaseExcelImporter
     const STATUS_REJECTED = 'REJECTED';
 
     /**
+     * Tubes imported by this importer.
+     * @var Tube[]
+     */
+    private $importedTubes = [];
+
+    /**
      * Local cache for record lookup
      * @var array Keys Tube.accessionId; Values Tube
      */
@@ -69,16 +75,14 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->importedTubes;
+        }
 
         $output = [
             'accepted' => [],
             'rejected' => [],
         ];
-
-        // Track Tubes imported during this import.
-        // Used for duplicate import checking.
-        $importedTubes = [];
 
         for ($rowNumber=$this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
@@ -93,7 +97,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
+            $rowOk = $this->validateTube($rawTubeId, $rowNumber) && $rowOk;
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
             $rowOk = $this->validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber) && $rowOk;
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
@@ -126,7 +130,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
             // Kit Type
             $tube->setKitType($rawKitType);
 
-            $importedTubes[$tube->getAccessionId()] = $tube;
+            $this->importedTubes[$tube->getAccessionId()] = $tube;
         }
 
         if (!$commit) {
@@ -135,7 +139,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
 
         $this->output = $output;
 
-        return array_values($importedTubes);
+        $this->importedTubes = array_values($this->importedTubes);
+
+        return $this->importedTubes;
     }
 
     /**
@@ -143,10 +149,9 @@ class SpecimenCheckinImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      *
-     * @param Tube[]  $seenTubes Tubes already imported during this import
      * @return bool
      */
-    private function validateTube(string $rawTubeId, $rowNumber, array $seenTubes): bool
+    private function validateTube(string $rawTubeId, $rowNumber): bool
     {
         if (!$rawTubeId) {
             $this->messages[] = ImportMessage::newError(
@@ -169,7 +174,7 @@ class SpecimenCheckinImporter extends BaseExcelImporter
         }
 
         // Don't re-process same tube again
-        if (isset($seenTubes[$tube->getAccessionId()])) {
+        if (isset($this->importedTubes[$tube->getAccessionId()])) {
             $this->messages[] = ImportMessage::newError(
                 'Tube ID occurs more than once in uploaded workbook',
                 $rowNumber,

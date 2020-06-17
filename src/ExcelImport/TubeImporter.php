@@ -17,6 +17,12 @@ class TubeImporter extends BaseExcelImporter
      */
     private $seenTubeAccessionIds = [];
 
+    /**
+     * Tubes imported by this importer.
+     * @var Tube[]
+     */
+    private $importedTubes = [];
+
     public function __construct(ExcelImportWorksheet $worksheet)
     {
         parent::__construct($worksheet);
@@ -37,12 +43,13 @@ class TubeImporter extends BaseExcelImporter
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->importedTubes;
+        }
 
         $this->output = [];
 
         // Created and updated can be figured out from the Excel file
-        $tubes = [];
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -63,10 +70,10 @@ class TubeImporter extends BaseExcelImporter
 
             if ($commit) $this->em->persist($tube);
 
-            $tubes[] = $tube;
+            $this->importedTubes[] = $tube;
         }
 
-        return $tubes;
+        return $this->importedTubes;
     }
 
     /**
