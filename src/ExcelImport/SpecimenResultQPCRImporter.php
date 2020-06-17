@@ -7,7 +7,7 @@ use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 
 class SpecimenResultQPCRImporter extends BaseExcelImporter
 {
@@ -35,7 +35,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private $seenPlates = [];
 
-    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
         $this->specimenRepo = $em->getRepository(Specimen::class);
