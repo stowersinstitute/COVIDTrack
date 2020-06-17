@@ -7,7 +7,8 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates Participant Groups for testing Excel Imports
+ * Creates Participant Groups for testing Excel Imports of other downstream
+ * data that depends on Participant Groups.
  */
 class ParticipantGroupFixtures extends Fixture
 {
