@@ -62,6 +62,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return ParticipantGroup[]
      */
     public function process($commit = false)
     {
@@ -76,6 +78,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
         ];
 
         // Created and updated can be figured out from the Excel file
+        $processedGroups = [];
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -125,6 +128,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
+
+            $processedGroups[] = $group;
         }
 
         // Deactivated is everything not in the excel file
@@ -135,9 +140,13 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $result['deactivated'][] = $group;
 
             $group->setIsActive(false);
+
+            $processedGroups[] = $group;
         }
 
         $this->output = $result;
+
+        return $processedGroups;
     }
 
     /**

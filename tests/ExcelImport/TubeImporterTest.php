@@ -7,7 +7,7 @@ use App\Entity\Tube;
 use App\ExcelImport\TubeImporter;
 
 /**
- * Tests users can import pre-labeled tubes using Excel.
+ * Tests importing pre-labeled tubes using Excel.
  */
 class TubeImporterTest extends BaseExcelImporterTestCase
 {

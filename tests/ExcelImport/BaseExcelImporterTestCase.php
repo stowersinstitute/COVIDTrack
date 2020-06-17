@@ -2,6 +2,8 @@
 
 namespace App\Tests\ExcelImport;
 
+use App\Entity\ParticipantGroup;
+use App\Entity\ParticipantGroupRepository;
 use App\Entity\Specimen;
 use App\Entity\SpecimenRepository;
 use App\Entity\Tube;
@@ -62,6 +64,7 @@ abstract class BaseExcelImporterTestCase extends KernelTestCase
         $mockEM = $builder->getMock();
 
         $repositories = [
+            [ParticipantGroup::class, $this->buildParticipantGroupRepo()],
             [Tube::class, $this->buildTubeRepo()],
             [Specimen::class, $this->buildSpecimenRepo()],
             [WellPlate::class, $this->buildWellPlateRepo()],
@@ -72,6 +75,17 @@ abstract class BaseExcelImporterTestCase extends KernelTestCase
             ->willReturnMap($repositories);
 
         return $mockEM;
+    }
+
+    /**
+     * @return \PHPUnit\Framework\MockObject\MockObject|ParticipantGroupRepository
+     */
+    protected function buildParticipantGroupRepo()
+    {
+        $builder = $this->getMockBuilder(ParticipantGroupRepository::class)
+            ->disableOriginalConstructor();
+
+        return $builder->getMock();
     }
 
     /**
