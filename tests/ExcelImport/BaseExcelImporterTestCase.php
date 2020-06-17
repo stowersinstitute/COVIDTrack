@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManager;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class BaseExcelImporterTestCase extends KernelTestCase
+abstract class BaseExcelImporterTestCase extends KernelTestCase
 {
     use FixturesTrait;
 
