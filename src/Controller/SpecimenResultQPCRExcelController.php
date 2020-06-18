@@ -64,7 +64,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
             $importingWorkbook->getFirstWorksheet()
         );
 
-        $output = $importer->process();
+        $importer->process();
+        $output = $importer->getOutput();
 
         return $this->render('results/qpcr/excel-import-preview.html.twig', [
             'importId' => $importId,
