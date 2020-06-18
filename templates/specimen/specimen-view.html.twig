@@ -26,8 +26,8 @@
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
                     <dt>RNA Well Plate</dt><dd>
-                        {% for barcode in specimen.rnaWellPlateBarcodes %}
-                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                        {% for well in specimen.wells %}
+                        <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a><br>
                         {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>

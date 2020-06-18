@@ -33,6 +33,14 @@ class WellPlate
     private $barcode;
 
     /**
+     * Where this Well Plate is physically stored.
+     *
+     * @var null|string
+     * @ORM\Column(name="storage_location", type="string", length=255, nullable=true)
+     */
+    private $storageLocation;
+
+    /**
      * Wells that contain Specimens.
      *
      * @var SpecimenWell[]|ArrayCollection
@@ -74,6 +82,16 @@ class WellPlate
         }
 
         $this->barcode = $barcode;
+    }
+
+    public function getStorageLocation(): ?string
+    {
+        return $this->storageLocation;
+    }
+
+    public function setStorageLocation(?string $storageLocation): void
+    {
+        $this->storageLocation = $storageLocation;
     }
 
     /**

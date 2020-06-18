@@ -429,6 +429,14 @@ class Tube
     }
 
     /**
+     * Whether this Tube is in the correct state to be dropped off at a kiosk
+     */
+    public function willAllowDropOff()
+    {
+        return in_array($this->status, [self::STATUS_PRINTED, self::STATUS_CREATED]);
+    }
+
+    /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
      */

@@ -79,6 +79,7 @@ class UserType extends AbstractType
         $this->addRoleField($builder, 'ROLE_RESULTS_EDIT', 'Results: Upload and Edit');
         $this->addRoleField($builder, 'ROLE_RESULTS_VIEW', 'Results: View');
 
+        $this->addRoleField($builder, 'ROLE_WELL_PLATE_EDIT', 'Well Plates: Edit');
         $this->addRoleField($builder, 'ROLE_WELL_PLATE_VIEW', 'Well Plates: View');
 
         $this->addRoleField($builder, 'ROLE_PRINT_TUBE_LABELS', 'Print: Tube Labels');

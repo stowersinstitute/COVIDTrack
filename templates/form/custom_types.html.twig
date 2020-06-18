@@ -19,6 +19,7 @@
             var sel = $(this).data('title');
             var tog = $(this).data('toggle');
             $('#'+tog).prop('value', sel);
+            $('#'+tog).trigger('input');
 
             $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('not-active');
             $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('not-active').addClass('active');

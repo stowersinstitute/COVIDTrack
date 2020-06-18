@@ -56,15 +56,6 @@ class SpecimenWell
     private $resultQPCR;
 
     /**
-     * Well number, 1 thru 96
-     *
-     * @var int
-     * @ORM\Column(name="position", type="smallint", options={"unsigned":true}, nullable=true)
-     * @deprecated Removing in favor of `private $position_alphanumeric`
-     */
-    private $position;
-
-    /**
      * Well position in alphanumeric format such as A1, B4, H12, etc.
      *
      * @var string
@@ -135,30 +126,6 @@ class SpecimenWell
     public function getSpecimen(): ?Specimen
     {
         return $this->specimen;
-    }
-
-    /**
-     * @deprecated Replace with setPositionAlphanumeric()
-     */
-    public function setPosition(int $position): void
-    {
-        if ($position <= 0) {
-            throw new \InvalidArgumentException('Position must be greater than 0');
-        }
-
-        if ($this->wellPlate->hasWellAtPosition($position)) {
-            throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
-        }
-
-        $this->position = $position;
-    }
-
-    /**
-     * @deprecated Replace with getPositionAlphanumeric()
-     */
-    public function getPosition(): ?int
-    {
-        return $this->position;
     }
 
     /**

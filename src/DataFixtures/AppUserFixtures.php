@@ -35,7 +35,7 @@ class AppUserFixtures extends Fixture
         ]);
 
         // Specimen Collection Team
-        $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN']);
+        $this->buildUser($manager, 'samplecollection', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_TUBE_CHECK_IN', 'ROLE_WELL_PLATE_EDIT']);
 
         // Kiosk
         $this->buildUser($manager, 'kiosk', ['ROLE_KIOSK_UI']);
