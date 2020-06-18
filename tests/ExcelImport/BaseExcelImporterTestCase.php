@@ -10,49 +10,11 @@ use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
 use App\Repository\WellPlateRepository;
+use App\Tests\BaseDatabaseTestCase;
 use Doctrine\ORM\EntityManager;
-use Liip\TestFixturesBundle\Test\FixturesTrait;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-abstract class BaseExcelImporterTestCase extends KernelTestCase
+abstract class BaseExcelImporterTestCase extends BaseDatabaseTestCase
 {
-    use FixturesTrait;
-
-    /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    protected $em;
-
-    protected function setUp()
-    {
-        $this->em = $this->getContainer()
-            ->get('doctrine')
-            ->getManager();
-    }
-
-    /**
-     * Persist/Flush multiple entities.
-     *
-     * Usage:
-     *     $this->persistAndFlush($one, $two, $three);
-     */
-    protected function persistAndFlush(...$entities)
-    {
-        foreach ($entities as $entity) {
-            $this->em->persist($entity);
-        }
-        $this->em->flush();
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        // doing this is recommended to avoid memory leaks
-        $this->em->close();
-        $this->em = null;
-    }
-
     /**
      * @return \PHPUnit\Framework\MockObject\MockObject|EntityManager
      */
