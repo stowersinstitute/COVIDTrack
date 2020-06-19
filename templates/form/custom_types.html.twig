@@ -34,11 +34,19 @@
 
 {% block text_lookup_row %}
     <div class="form-group">
+        {# Field Label #}
         {{- form_label(form) -}}
+
+        {# Input group #}
         {%- set input_group_attr = input_group_attr|merge({class: (input_group_attr.class ~ ' input-group')|trim}) -%}
         <div {% with { attr: input_group_attr } %}{{ block('attributes') }}{% endwith %}>
+            {# Icon Holder #}
             <span id="lookup-status" class="input-group-addon"></span>
+
+            {# The actual Text Input field #}
             {{- form_widget(form) -}}
+
+            {# The Lookup Button #}
             {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
             <span class="input-group-btn">
                 <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
