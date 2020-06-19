@@ -176,7 +176,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
     {
         return [
             [
-                'accessionId' => 'NotifResults0001',
+                'accessionId' => 'NotifTube0001',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Orange',
@@ -184,7 +184,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
             ],
             [
-                'accessionId' => 'NotifResults0002',
+                'accessionId' => 'NotifTube0002',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Red',
@@ -192,7 +192,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
             ],
             [
-                'accessionId' => 'NotifResults0003',
+                'accessionId' => 'NotifTube0003',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Yellow',
@@ -200,7 +200,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE,
             ],
             [
-                'accessionId' => 'NotifResults0004',
+                'accessionId' => 'NotifTube0004',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Purple',
@@ -208,7 +208,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE,
             ],
             [
-                'accessionId' => 'NotifResults0005',
+                'accessionId' => 'NotifTube0005',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Gray',
@@ -216,7 +216,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
 //                'resultConclusion' => null, Does not yet have a result
             ],
             [
-                'accessionId' => 'NotifResults0006',
+                'accessionId' => 'NotifTube0006',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Control',
