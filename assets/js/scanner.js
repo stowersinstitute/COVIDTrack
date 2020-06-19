@@ -2,7 +2,7 @@
     var _timeoutHandler = 0,
         _inputString = '',
         _onKeypress = function(e) {
-            console.log({key: e.key});
+            // console.log({key: e.key});
             if (_timeoutHandler) {
                 clearTimeout(_timeoutHandler);
             }
@@ -10,7 +10,7 @@
             if(e.key !== "Enter") {
                 _inputString += e.key;
             } else {
-                console.log(_inputString);
+                // console.log(_inputString);
                 $(e.target).trigger('scannerinput', _inputString);
                 _inputString = '';
             }
