@@ -66,9 +66,6 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
     private function buildMockMailer()
     {
         $mock = $this->createMock(MailerInterface::class);
-//        $mock
-//            ->expects($this->once())
-//            ->method('send');
 
         return $mock;
     }
