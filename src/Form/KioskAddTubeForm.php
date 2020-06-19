@@ -4,9 +4,9 @@ namespace App\Form;
 
 use App\Entity\Tube;
 use App\Form\Type\RadioButtonGroupType;
+use App\Form\Type\TextLookupType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -30,9 +30,10 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $builder
-            ->add('accessionId', TextType::class, [
+            ->add('accessionId', TextLookupType::class, [
                 'label' => 'Tube Label ID',
-                'attr' => [ 'data-scanner-input' => null ]
+                'attr' => [ 'data-scanner-input' => null ],
+                'button_text' => 'Lookup',
             ])
             ->add('tubeType', RadioButtonGroupType::class, [
                 'choices' => [

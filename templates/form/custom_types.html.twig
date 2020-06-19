@@ -32,6 +32,25 @@
     </style>
 {% endblock %}
 
+{% block text_lookup_row %}
+    <div class="form-group">
+        {{- form_label(form) -}}
+        {%- set input_group_attr = input_group_attr|merge({class: (input_group_attr.class ~ ' input-group')|trim}) -%}
+        <div {% with { attr: input_group_attr } %}{{ block('attributes') }}{% endwith %}>
+            <span id="lookup-status" class="input-group-addon"></span>
+            {{- form_widget(form) -}}
+            {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
+            <span class="input-group-btn">
+                <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
+                    {% if button_icon_class %}
+                        <i class="{{ button_icon_class }}"></i>
+                    {% endif %}
+                    {{ button_text }}
+                </button>
+            </span>
+        </div>
+    </div>
+{% endblock %}
 
 {% block form_start %}
     {% set attr = attr|merge({autocomplete: 'off'}) %}

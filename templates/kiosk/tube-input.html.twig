@@ -22,10 +22,11 @@
                     <div class="col-xs-12">
                         {{ form_row(form.accessionId, {
                             'label': false,
-                            'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
+                            'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
+                            'input_group_attr': {'class': 'input-group-lg'},
+                            'button_icon_class': 'fa fa-fw fa-search'
                         }) }}
                     </div>
-                    <div id="tube-check-status" class="input-lg"></div>
                 </div>
             <div class="callout callout-danger hidden" id="tube-error-callout">
                 <h4>Tube Barcode Error</h4>
@@ -124,44 +125,44 @@
             // We don't want the scanner typing in the input field.
             $("[data-scanner-input]").blur();
             $("[data-scanner-input]").val(inputString).trigger('input');
+            $("#kiosk_add_tube_form_accessionId_button").trigger('click');
         });
 
         $(document).ready(function(){
-            // React when inputting Tube Label ID
-            var _timeoutHandler = 0;
+            setTubeInputStatus();
 
-            $("#kiosk_add_tube_form_accessionId").on('input', function(e) {
-                // Timeout handler will make sure the user is done typing before checking the tube id.
-                if (_timeoutHandler) {
-                    clearTimeout(_timeoutHandler);
+            // Reset the detail sections when the input is changed
+            $("#kiosk_add_tube_form_accessionId").on('input', function() {
+                setTubeInputStatus();
+                showTubeDetailSelection(false);
+            });
+
+            $("#kiosk_add_tube_form_accessionId_button").click(function(){
+                var val = $('#kiosk_add_tube_form_accessionId').val();
+
+                if(val !== "") {
+                    setTubeInputStatus('LOADING');
+                    showTubeDetailSelection(false);
+
+                    $.ajax('{{ path('kiosk_tube_available_check') }}', {
+                        method: 'POST',
+                        data: { accessionId: val },
+
+                        success: onAvailableCheckResponse,
+
+                        // Unexpected errors like 500 server or network down
+                        error: function(xhr, textStatus, error) {
+                            console.log("error in response: " + textStatus + " " + error);
+                        }
+                    });
+                } else {
+                    // Collapse form details
+                    setTubeInputStatus();
+                    showTubeDetailSelection(false);
                 }
-                _timeoutHandler = setTimeout(function () {
-
-                    if($(e.target).val() !== "") {
-                        setTubeInputStatus('LOADING');
-                        showTubeDetailSelection(false);
-
-                        $.ajax('{{ path('kiosk_tube_available_check') }}', {
-                            method: 'POST',
-                            data: { accessionId: $(e.target).val() },
-
-                            success: onAvailableCheckResponse,
-
-                            // Unexpected errors like 500 server or network down
-                            error: function(xhr, textStatus, error) {
-                                console.log("error in response: " + textStatus + " " + error);
-                            }
-                        });
-                    } else {
-                        // Collapse form details
-                        setTubeInputStatus();
-                        showTubeDetailSelection(false);
-                    }
-                }, 500);
             });
 
             $("#kiosk_add_tube_form_tubeType").on('input', function(e) {
-                console.log(e);
                 if($(e.target).val() !== "") {
                     showTubeTimeSelection(true);
                 } else {
@@ -190,7 +191,7 @@
              * @param message Error message to show in the callout
              */
             function setTubeInputStatus(status = '', message = '') {
-                var statusWrapper = $("#tube-check-status");
+                var statusWrapper = $("#lookup-status");
 
                 statusWrapper.empty();
                 $("#tube-error-callout").toggleClass('hidden', true);
@@ -206,6 +207,9 @@
                         break;
                     case 'SUCCESS':
                         statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
+                        break;
+                    default:
+                        statusWrapper.append('<i class="fa fa-fw fa-question text-gray"></i>');
                         break;
                 }
             }
