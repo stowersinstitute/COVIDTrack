@@ -7,6 +7,7 @@ use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
+use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -17,6 +18,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             AppParticipantGroupsFixtures::class,
+            AppWellPlateFixtures::class,
             AppKioskFixtures::class,
         ];
     }
@@ -103,6 +105,10 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
 
             $kitTypeNumber = ($i % 3) + 1;
             $T->setKitType('Example Type ' . $kitTypeNumber);
+
+            // Tubes accepted at check-in will be added to a Well Plate
+            $wellPlate = $this->findFixtureWellPlate();
+            $T->addToWellPlate($wellPlate);
 
             $em->persist($T);
         }
@@ -191,5 +197,12 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
         }
 
         $em->flush();
+    }
+
+    private function findFixtureWellPlate(): WellPlate
+    {
+        $referenceName = 'wellPlate.FIXPLATE' . rand(1, 5);
+
+        return $this->getReference($referenceName);
     }
 }
