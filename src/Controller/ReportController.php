@@ -6,7 +6,11 @@ use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\StudyCoordinatorNotification;
 use App\Report\GroupTestingRecommendationReport;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -39,6 +43,55 @@ class ReportController extends AbstractController
         return $this->render('reports/coordinator-notifications/index.html.twig', [
             'logs' => $logs,
             'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * Run logic that would send the Study Coordinator a notification if new
+     * results need to be reported.
+     *
+     * Meant to be called from the UI via AJAX.
+     *
+     * @Route(path="/coordinator/notifications/check", methods={"POST"}, name="report_coordinator_notifications_check")
+     */
+    public function checkCoordinatorNotifications(KernelInterface $kernel)
+    {
+        // One or more of these
+        try {
+            $this->denyAccessUnlessGranted([
+                // Users who receive the notification can check it for themselves
+                'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
+                // Users who can edit results
+                'ROLE_RESULTS_EDIT',
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput([
+            'command' => 'app:report:notify-on-positive-result',
+        ]);
+
+        // Output is not used
+        $output = new NullOutput();
+        $exitCode = $application->run($input, $output);
+
+        $success = true;
+        $message = 'If new results were available, the Study Coordinator has been notified';
+        if ($exitCode !== 0) {
+            $success = false;
+            $message = 'Error occurred when checking for new results';
+        }
+        return $this->json([
+            'success' => $success,
+            'message' => $message,
         ]);
     }
 
