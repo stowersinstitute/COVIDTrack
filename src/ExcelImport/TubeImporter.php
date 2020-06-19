@@ -13,11 +13,6 @@ use App\Entity\Tube;
 class TubeImporter extends BaseExcelImporter
 {
     /**
-     * @var Tube[] Keys are Tube.accessionId found in import file, Values are Tube entity created
-     */
-    private $seenTubeAccessionIds = [];
-
-    /**
      * Tubes imported by this importer.
      * @var Tube[]
      */
@@ -66,12 +61,13 @@ class TubeImporter extends BaseExcelImporter
             $tube = new Tube($rawAccessionId);
 
             $this->output[] = $tube;
-            $this->seenTubeAccessionIds[$rawAccessionId] = $tube;
 
             if ($commit) $this->em->persist($tube);
 
-            $this->importedTubes[] = $tube;
+            $this->importedTubes[$rawAccessionId] = $tube;
         }
+
+        $this->importedTubes = array_values($this->importedTubes);
 
         return $this->importedTubes;
     }
@@ -116,7 +112,7 @@ class TubeImporter extends BaseExcelImporter
         }
 
         // Cannot already have been imported (duplicate in this import file)
-        if (isset($this->seenTubeAccessionIds[$raw])) {
+        if (isset($this->importedTubes[$raw])) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('Accession ID "%s" occurs multiple times in this Excel file', $raw),
                 $rowNumber,
