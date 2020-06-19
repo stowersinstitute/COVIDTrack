@@ -6,9 +6,10 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\ExcelImport\TecanImporter;
+use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\TecanImportFixtures;
 
-class TecanImporterTest extends BaseExcelImporterTestCase
+class TecanImporterTest extends BaseDatabaseTestCase
 {
     private const PROCESSED_PLATE_BARCODE = 'TecanPlate1';
 

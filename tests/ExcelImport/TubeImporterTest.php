@@ -5,11 +5,12 @@ namespace App\Tests\ExcelImport;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\TubeImporter;
+use App\Tests\BaseDatabaseTestCase;
 
 /**
  * Tests importing pre-labeled tubes using Excel.
  */
-class TubeImporterTest extends BaseExcelImporterTestCase
+class TubeImporterTest extends BaseDatabaseTestCase
 {
     public function testProcess()
     {

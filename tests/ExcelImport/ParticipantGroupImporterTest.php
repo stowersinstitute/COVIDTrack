@@ -6,12 +6,13 @@ use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ParticipantGroup;
 use App\ExcelImport\ParticipantGroupImporter;
+use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\ParticipantGroupImportUpdatingFixtures;
 
 /**
  * Tests importing Participant Groups using Excel.
  */
-class ParticipantGroupImporterTest extends BaseExcelImporterTestCase
+class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 {
     public function testProcessNewGroups()
     {
@@ -106,7 +107,7 @@ class ParticipantGroupImporterTest extends BaseExcelImporterTestCase
     private function buildMockParticipantGroupIdGen()
     {
         $builder = $this->getMockBuilder(ParticipantGroupAccessionIdGenerator::class)
-            ->setConstructorArgs([$this->buildMockEntityManager()]);
+            ->disableOriginalConstructor();
 
         $mock = $builder->getMock();
         $mock

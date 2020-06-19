@@ -4,11 +4,11 @@ namespace App\Tests\ExcelImport;
 
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\Tube;
 use App\ExcelImport\SpecimenResultQPCRImporter;
+use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\SpecimenResultQPCRImporterFixtures;
 
-class SpecimenResultQPCRImporterTest extends BaseExcelImporterTestCase
+class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
 {
     public function testProcess()
     {

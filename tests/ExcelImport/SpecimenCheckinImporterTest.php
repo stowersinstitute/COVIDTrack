@@ -5,9 +5,10 @@ namespace App\Tests\ExcelImport;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\SpecimenCheckinImporter;
+use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\TubeCheckinFixtures;
 
-class SpecimenCheckinImporterTest extends BaseExcelImporterTestCase
+class SpecimenCheckinImporterTest extends BaseDatabaseTestCase
 {
     public function testProcess()
     {
