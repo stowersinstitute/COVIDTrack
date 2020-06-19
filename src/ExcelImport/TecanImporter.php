@@ -256,7 +256,7 @@ class TecanImporter extends BaseExcelImporter
             $this->getEntityManager()->clear();
         }
 
-         return $this->processedTubes;
+        return $this->processedTubes;
     }
 
     /**
