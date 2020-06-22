@@ -29,9 +29,12 @@ class ReportController extends AbstractController
      */
     public function coordinatorNotifications()
     {
-        // One or more of these
+        // User must have one or more of these
         $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
             'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
+            // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
         ]);
 
@@ -56,8 +59,8 @@ class ReportController extends AbstractController
      */
     public function checkCoordinatorNotifications(KernelInterface $kernel)
     {
-        // One or more of these
         try {
+            // User must have one or more of these
             $this->denyAccessUnlessGranted([
                 // Users who receive the notification can check it for themselves
                 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
