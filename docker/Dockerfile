@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
         libldap-dev \
         libgmp-dev \
         nodejs \
+        openssh-client \
         yarn \
         mariadb-client\
     && docker-php-ext-install -j$(nproc) iconv \
