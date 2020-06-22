@@ -447,6 +447,15 @@ class Tube
         return $this->status === self::STATUS_RETURNED;
     }
 
+    /**
+     * Whether this Tube is in the correct state to be run through the Tecan
+     * import operation.
+     */
+    public function willAllowTecanImport(): bool
+    {
+        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
+    }
+
     public function getCheckInDecision(): ?string
     {
         return $this->checkInDecision;
