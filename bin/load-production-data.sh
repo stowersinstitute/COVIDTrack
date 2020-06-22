@@ -70,7 +70,7 @@ else
 fi
 
 # Assign password to variable mysql client recognizes
-export MYSQL_PWD=$DATABASE_PASSWORD
+export MYSQL_PWD=$DATABASE_PASS
 
 echo "Dropping database..."
 echo "drop database if exists ${DATABASE_NAME}" | mysql -h "$DATABASE_HOST" -u "$DATABASE_USER"
