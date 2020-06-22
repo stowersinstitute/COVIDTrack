@@ -75,11 +75,13 @@ class ReportController extends AbstractController
             ], 403);
         }
 
+        // Execute Symfony Command programmatically
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
+        $commandName = 'app:report:notify-on-positive-result';
         $input = new ArrayInput([
-            'command' => 'app:report:notify-on-positive-result',
+            'command' => $commandName,
         ]);
 
         // Output is not used
@@ -92,6 +94,7 @@ class ReportController extends AbstractController
             $success = false;
             $message = 'Error occurred when checking for new results';
         }
+
         return $this->json([
             'success' => $success,
             'message' => $message,
