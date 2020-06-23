@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Specimen;
 use App\Entity\Tube;
 use Doctrine\ORM\EntityRepository;
 
