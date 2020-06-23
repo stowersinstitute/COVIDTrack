@@ -6,7 +6,7 @@
 {% block importPreviewHeader %}{% endblock %}
 
 {% block beforeTopConfirmButton %}
-    {% include 'checkin/excel-import-summary-widgets.html.twig' %}
+    {% include 'checkin/saliva/excel-import-summary-widgets.html.twig' %}
 {% endblock %}
 
 {% block importPreviewSection %}
@@ -18,7 +18,7 @@
                         <h3 class="box-title">Rejected <span class="badge bg-red">{{ rejected|length }}</span></h3>
                     </div>
                     <div class="box-body">
-                        {% include 'checkin/excel-import-table.html.twig' with { checkins: rejected } %}
+                        {% include 'checkin/saliva/excel-import-table.html.twig' with { checkins: rejected } %}
                     </div>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                         <h3 class="box-title">Accepted <span class="badge bg-green">{{ accepted|length }}</span></h3>
                     </div>
                     <div class="box-body">
-                        {% include 'checkin/excel-import-table.html.twig' with { checkins: accepted } %}
+                        {% include 'checkin/saliva/excel-import-table.html.twig' with { checkins: accepted } %}
                     </div>
                 </div>
             </div>

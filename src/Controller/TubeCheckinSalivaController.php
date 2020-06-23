@@ -14,12 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Actions for the Tube check-in process. These tubes have been returned by
+ * Actions for the Saliva Tube check-in process. These tubes have been returned by
  * Participants and allow Technicians to acknowledge receipt.
  *
- * @Route(path="/checkin")
+ * @Route(path="/checkin/saliva")
  */
-class TubeCheckinController extends AbstractController
+class TubeCheckinSalivaController extends AbstractController
 {
     /**
      * List Specimens that have been returned, ready for check-in
@@ -108,7 +108,7 @@ class TubeCheckinController extends AbstractController
     }
 
     /**
-     * @Route(path="/import/start", name="checkin_import_start")
+     * @Route(path="/import/start", name="checkin_saliva_import_start")
      */
     public function importStart(Request $request, ExcelImporter $excelImporter)
     {
@@ -127,19 +127,19 @@ class TubeCheckinController extends AbstractController
             $em->persist($workbook);
             $em->flush();
 
-            return $this->redirectToRoute('checkin_import_preview', [
+            return $this->redirectToRoute('checkin_saliva_import_preview', [
                 'importId' => $workbook->getId(),
             ]);
         }
 
         return $this->render('excel-import/base-excel-import-start.html.twig', [
-            'itemLabel' => 'Accepted/Rejected',
+            'itemLabel' => 'Saliva Tubes',
             'importForm' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/import/preview/{importId<\d+>}", name="checkin_import_preview")
+     * @Route("/import/preview/{importId<\d+>}", name="checkin_saliva_import_preview")
      */
     public function importPreview(int $importId, ExcelImporter $excelImporter)
     {
@@ -155,19 +155,19 @@ class TubeCheckinController extends AbstractController
 
         $output = $importer->process();
 
-        return $this->render('checkin/excel-import-preview.html.twig', [
+        return $this->render('checkin/saliva/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
             'rejected' => $output['rejected'] ?? [],
             'accepted' => $output['accepted'] ?? [],
-            'importPreviewTemplate' => 'checkin/excel-import-table.html.twig',
-            'importCommitRoute' => 'checkin_import_commit',
+            'importPreviewTemplate' => 'checkin/saliva/excel-import-table.html.twig',
+            'importCommitRoute' => 'checkin_saliva_import_commit',
             'importCommitText' => 'Save Check-ins',
         ]);
     }
 
     /**
-     * @Route("/import/commit/{importId<\d+>}", methods={"POST"}, name="checkin_import_commit")
+     * @Route("/import/commit/{importId<\d+>}", methods={"POST"}, name="checkin_saliva_import_commit")
      */
     public function importCommit(int $importId, ExcelImporter $excelImporter)
     {
@@ -189,7 +189,7 @@ class TubeCheckinController extends AbstractController
 
         $em->flush();
 
-        return $this->render('checkin/excel-import-result.html.twig', [
+        return $this->render('checkin/saliva/excel-import-result.html.twig', [
             'importer' => $importer,
             'rejected' => $output['rejected'] ?? [],
             'accepted' => $output['accepted'] ?? [],
