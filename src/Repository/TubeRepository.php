@@ -10,10 +10,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class TubeRepository extends EntityRepository
 {
-    public function findOneByAccessionId(string $accessionId): ?Tube
+    public function findOneByAccessionId(string $id): ?Tube
     {
         return $this->findOneBy([
-            'accessionId' => $accessionId,
+            'accessionId' => $id,
         ]);
     }
 
