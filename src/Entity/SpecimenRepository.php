@@ -114,13 +114,21 @@ class SpecimenRepository extends EntityRepository
             ->execute();
     }
 
-    public function getInProcessCount() : int
+    public function getPendingResultsCount() : int
     {
         return $this->createQueryBuilder('s')
             ->select('count(s.id)')
-            ->where('s.status = :inProcessStatus')
-            ->setParameter('inProcessStatus', Specimen::STATUS_IN_PROCESS)
-            ->getQuery()->getSingleScalarResult();
+            ->join('s.participantGroup', 'participantGroup')
+
+            // Correct status
+            ->where('s.status = :status')
+            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+
+            // Not in a control group
+            ->andWhere('participantGroup.isControl = false')
+
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**

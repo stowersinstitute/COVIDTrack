@@ -30,7 +30,7 @@ class DefaultController extends AbstractController
 
             'numTubesReturned' => $tubeRepo->getReturnedCount(),
 
-            'numSpecimensInProcess' => $specimenRepo->getInProcessCount(),
+            'numSpecimensPendingResults' => $specimenRepo->getPendingResultsCount(),
         ]);
     }
 }
