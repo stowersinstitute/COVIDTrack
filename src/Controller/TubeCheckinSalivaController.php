@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\ExcelImporter;
-use App\ExcelImport\SpecimenCheckinImporter;
+use App\ExcelImport\TubeCheckinSalivaImporter;
 use App\Form\GenericExcelImportType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -46,7 +46,7 @@ class TubeCheckinSalivaController extends AbstractController
         }, []);
         ksort($typeCounts);
 
-        return $this->render('checkin/list.html.twig', [
+        return $this->render('checkin/queue.html.twig', [
             'tubes' => $tubes,
             'typeCounts' => $typeCounts,
             'typeCountsTotal' => array_sum($typeCounts),
@@ -80,8 +80,8 @@ class TubeCheckinSalivaController extends AbstractController
 
         // Decision
         $validDecisions = [
-            SpecimenCheckinImporter::STATUS_ACCEPTED,
-            SpecimenCheckinImporter::STATUS_REJECTED,
+            TubeCheckinSalivaImporter::STATUS_ACCEPTED,
+            TubeCheckinSalivaImporter::STATUS_REJECTED,
         ];
         $decision = $request->request->get('decision');
         if (!in_array($decision, $validDecisions)) {
@@ -89,10 +89,10 @@ class TubeCheckinSalivaController extends AbstractController
             return $this->createJsonErrorResponse($msg);
         }
         switch ($decision) {
-            case SpecimenCheckinImporter::STATUS_ACCEPTED:
+            case TubeCheckinSalivaImporter::STATUS_ACCEPTED:
                 $tube->markAccepted($this->getUser()->getUsername());
                 break;
-            case SpecimenCheckinImporter::STATUS_REJECTED:
+            case TubeCheckinSalivaImporter::STATUS_REJECTED:
                 $tube->markRejected($this->getUser()->getUsername());
                 break;
         }
@@ -148,7 +148,7 @@ class TubeCheckinSalivaController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenCheckinImporter(
+        $importer = new TubeCheckinSalivaImporter(
             $this->getDoctrine()->getManager(),
             $importingWorkbook->getFirstWorksheet()
         );
@@ -178,7 +178,7 @@ class TubeCheckinSalivaController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenCheckinImporter(
+        $importer = new TubeCheckinSalivaImporter(
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
