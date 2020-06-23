@@ -43,7 +43,7 @@ class SpecimenResultQPCRExcelController extends AbstractController
             ]);
         }
 
-        return $this->render('excel-import/base-excel-import-start.twig', [
+        return $this->render('excel-import/base-excel-import-start.html.twig', [
             'itemLabel' => 'Results',
             'importForm' => $form->createView(),
         ]);
