@@ -3,6 +3,8 @@
     <tr>
         <th>Specimen ID</th>
         <th>Conclusion</th>
+        <th>RNA Well Plate Barcode</th>
+        <th>RNA Well Position</th>
     </tr>
     </thead>
 
@@ -11,6 +13,8 @@
         <tr>
             <td>{{ result.specimenAccessionId }}</td>
             <td>{{ result.conclusion }}</td>
+            <td>{{ result.wellPlateBarcode }}</td>
+            <td>{{ result.wellPosition }}</td>
         </tr>
     {% endfor %}
     </tbody>

@@ -353,9 +353,10 @@ class Tube
         return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function addWellPlate(WellPlate $plate, int $position = null): void
+    public function addToWellPlate(WellPlate $plate, string $position = null): void
     {
-        $this->specimen->addWellPlate($plate, $position);
+        $well = new SpecimenWell($plate, $this->specimen, $position);
+        $this->specimen->addWell($well);
     }
 
     public function getKitType(): ?string
@@ -425,6 +426,14 @@ class Tube
         // Create Specimen
         $this->specimen = Specimen::createFromTube($this, $gen);
         $this->specimen->setStatus(Specimen::STATUS_RETURNED);
+    }
+
+    /**
+     * Whether this Tube is in the correct state to be dropped off at a kiosk
+     */
+    public function willAllowDropOff()
+    {
+        return in_array($this->status, [self::STATUS_PRINTED, self::STATUS_CREATED]);
     }
 
     /**

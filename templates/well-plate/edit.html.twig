@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Result {% else %} Edit Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}{% endif %}
+    {% if new %} New Well Plate {% else %} Edit Well Plate {{ wellPlate.barcode }} {% endif %}
 {% endblock %}
 
 {% block body %}

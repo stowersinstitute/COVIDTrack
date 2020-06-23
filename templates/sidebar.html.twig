@@ -62,11 +62,13 @@ Renders a top-level navigation node in the tree navigation.
             _self.treenode('Participant Groups', 'fa-users', [
                 {
                     text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'],
                     iconClass: 'fa-calendar',
                     route: 'participant_group_scheduling_index'
                 },
                 {
                     text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_participant_group_list'
                 },
@@ -82,7 +84,7 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'group_excel_import',
                     mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'])
         }}
         {{
             _self.treenode('Tubes', 'fa-vial', [

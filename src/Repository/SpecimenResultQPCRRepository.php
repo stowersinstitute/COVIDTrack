@@ -14,7 +14,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
 {
     /**
      * Find Results whose conclusion recommends for testing,
-     * and result was created after a certain time.
+     * and result was created after a certain time. This excludes
+     * results from control group specimen.
      *
      * @return SpecimenResultQPCR[]
      */
@@ -29,6 +30,12 @@ class SpecimenResultQPCRRepository extends EntityRepository
             ->where('r.createdAt >= :since')
             ->setParameter('since', $datetime)
 
+            // Do not include results from "control" groups
+            ->join('r.well', 'w')
+            ->join('w.specimen', 's')
+            ->join('s.participantGroup', 'g')
+            ->andWhere('g.isControl = false')
+
             ->andWhere('r.conclusion IN (:conclusions)')
             ->setParameter('conclusions', $conclusionRecommendingTesting)
 
@@ -40,10 +47,12 @@ class SpecimenResultQPCRRepository extends EntityRepository
 
     /**
      * @see SpecimenResultQPCRFilterForm
+     * @return SpecimenResultQPCR[]
      */
-    public function filterByFormData($data)
+    public function filterByFormData($data): array
     {
-        $qb = $this->createDefaultQueryBuilder();
+        $qb = $this->createDefaultQueryBuilder('r');
+        $qb->join('r.well', 'w')->addSelect('w');
 
         if (isset($data['conclusion'])) {
             $qb->andWhere('r.conclusion = :f_conclusion');
@@ -59,11 +68,11 @@ class SpecimenResultQPCRRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    protected function createDefaultQueryBuilder()
+    protected function createDefaultQueryBuilder($alias = 'r')
     {
-        return $this->createQueryBuilder('r')
-            ->orderBy('r.createdAt', 'DESC')
-            ->addOrderBy('r.id', 'ASC')
+        return $this->createQueryBuilder($alias)
+            ->orderBy($alias.'.createdAt', 'DESC')
+            ->addOrderBy($alias.'.id', 'ASC')
         ;
     }
 }

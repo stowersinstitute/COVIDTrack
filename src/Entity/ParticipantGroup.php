@@ -86,8 +86,17 @@ class ParticipantGroup
      * @var boolean If true, the system expects specimens for this group
      *
      * @ORM\Column(name="is_active", type="boolean", nullable=true)
+     * @Gedmo\Versioned
      */
     private $isActive;
+
+    /**
+     * @var boolean If true, group will be considered a control group and not generate notifications or impact scheduling.
+     *
+     * @ORM\Column(name="is_control", type="boolean", nullable=false, options={"default":0})
+     * @Gedmo\Versioned
+     */
+    private $isControl;
 
     public function __construct(string $accessionId, int $participantCount)
     {
@@ -96,6 +105,7 @@ class ParticipantGroup
         $this->specimens = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->isActive = true;
+        $this->isControl = false;
 
         $this->dropOffWindows = new ArrayCollection();
     }
@@ -147,6 +157,8 @@ class ParticipantGroup
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
+            'isActive' => 'Is Active?',
+            'isControl' => 'Is Control Group?',
         ];
 
         /**
@@ -154,6 +166,12 @@ class ParticipantGroup
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
+            'isActive' => function($isControl) {
+                return $isControl ? 'Yes' : 'No';
+            },
+            'isControl' => function($isControl) {
+                return $isControl ? 'Yes' : 'No';
+            },
         ];
 
         $return = [];
@@ -315,5 +333,15 @@ class ParticipantGroup
     public function setExternalId(?string $externalId): void
     {
         $this->externalId = $externalId;
+    }
+
+    public function isControl(): bool
+    {
+        return $this->isControl;
+    }
+
+    public function setIsControl(bool $isControl): void
+    {
+        $this->isControl = $isControl;
     }
 }

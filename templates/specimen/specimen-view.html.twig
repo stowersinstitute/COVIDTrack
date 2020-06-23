@@ -26,8 +26,8 @@
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
                     <dt>RNA Well Plate</dt><dd>
-                        {% for barcode in specimen.rnaWellPlateBarcodes %}
-                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                        {% for well in specimen.wells %}
+                        <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a><br>
                         {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
@@ -63,7 +63,9 @@
                     <tr>
                         {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
                         <th>Conclusion</th>
-                        <th>Created At</th>
+                        <th>RNA Well Plate Barcode</th>
+                        <th>RNA Well Position</th>
+                        <th>Reported At</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -75,7 +77,9 @@
                             </td>
                             {% endif %}
                             <td>{{ result.conclusionText }}</td>
-                            <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
+                            <td>{{ result.wellPlateBarcode }}</td>
+                            <td>{{ result.wellPosition }}</td>
+                            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -84,74 +88,6 @@
         </div>
     </div>
 </div>
-
-{% if specimen.DDPCRResults|length > 0 %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-success">
-            <div class="box-header with-border">
-                <h3 class="box-title">ddPCR</h3>
-            </div>
-            <div class="box-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-{#                        <th>&nbsp;</th>#}
-                        <th>Failure?</th>
-                        <th>Created At</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for result in specimen.ddpcrResults %}
-                        <tr>
-{#                            <td>#}
-{#                                <a href="{{ path('app_ddpcr_edit', {id: result.id}) }}">Edit</a>#}
-{#                            </td>#}
-                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
-                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-{% if specimen.sequencingResults|length > 0 %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-success">
-            <div class="box-header with-border">
-                <h3 class="box-title">Sequencing</h3>
-            </div>
-            <div class="box-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-{#                        <th>&nbsp;</th>#}
-                        <th>Failure?</th>
-                        <th>Created At</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for result in specimen.sequencingResults %}
-                        <tr>
-{#                            <td>#}
-{#                                <a href="{{ path('app_sequencing_edit', {id: result.id}) }}">Edit</a>#}
-{#                            </td>#}
-                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
-                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {% endif %}{# End if userCanViewResults #}
 

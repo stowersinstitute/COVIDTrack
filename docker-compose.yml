@@ -8,8 +8,8 @@ services:
         environment:
             SFAPP_NOT_PRODUCTION: "true"
         volumes:
-            - ./:/app
-#            - var:/app/var
+            - ./:/app:cached
+            - var:/app/var
         depends_on:
             - db
     nginx:
@@ -32,7 +32,12 @@ services:
             - db_data:/var/lib/mysql
         ports:
             - 3306:3306
+    mail:
+        image: mailhog/mailhog
+        ports:
+            - 1025:1025
+            - 8025:8025
 
 volumes:
     db_data:
-#    var:
+    var:

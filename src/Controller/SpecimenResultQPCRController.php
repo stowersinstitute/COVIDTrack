@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use App\Form\SpecimenResultQPCRFilterForm;
-use App\Form\SpecimenResultQPCRForm;
+use App\Form\QPCRResultsForm;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,26 +56,35 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * @Route(path="/new", methods={"GET", "POST"}, name="app_results_qpcr_new")
      */
-    public function new(Request $request) : Response
+    public function new(Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
-        $result = null;
+        $data = [
+            'specimen' => null,
+        ];
 
         // Query string params may indicate desired Specimen
         if ($request->query->has('accessionId')) {
             $specimen = $this->mustFindSpecimen($request->query->get('accessionId'));
-            $result = new SpecimenResultQPCR($specimen);
+            $data['specimen'] = $specimen;
         }
 
-        $form = $this->createForm(SpecimenResultQPCRForm::class, $result);
+        $form = $this->createForm(QPCRResultsForm::class, $data);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var SpecimenResultQPCR $result */
-            $result = $form->getData();
+            $data = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
+            $specimen = $data['specimen'];
+            $wellPlate = $data['wellPlate'];
+            $position = $data['position'];
+            $well = new SpecimenWell($wellPlate, $specimen, $position);
+
+            $conclusion = $data['conclusion'];
+
+            $result = new SpecimenResultQPCR($well, $conclusion);
+
             $em->persist($result);
             $em->flush();
 
@@ -101,17 +112,28 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_qpcr_edit")
      */
-    public function edit(string $id, Request $request) : Response
+    public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = $this->findResult($id);
+        $data = [
+            'specimen' => $result->getSpecimen(),
+            'wellPlate' => $result->getWellPlate(),
+            'position' => $result->getWellPosition(),
+            'conclusion' => $result->getConclusion(),
+        ];
 
-        $form = $this->createForm(SpecimenResultQPCRForm::class, $result);
+        $form = $this->createForm(QPCRResultsForm::class, $data, [
+            'edit' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $data = $form->getData();
+
+            $result->setConclusion($data['conclusion']);
+
             $em->flush();
 
             // When given Specimen accessionId query string param,
