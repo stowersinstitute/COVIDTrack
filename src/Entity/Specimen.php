@@ -559,7 +559,6 @@ class Specimen
     {
         $valid = [
             self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
-            self::STATUS_REJECTED, // Rare case where rejected Specimen still sent on
             self::STATUS_RESULTS,  // Can add more than 1 result
         ];
 
