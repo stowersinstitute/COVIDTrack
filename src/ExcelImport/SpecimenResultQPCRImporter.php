@@ -156,9 +156,20 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         }
 
         // Ensure Specimen can be found
-        if (!$this->findSpecimen($rawSpecimenId)) {
+        $specimen = $this->findSpecimen($rawSpecimenId);
+        if (!$specimen) {
             $this->messages[] = ImportMessage::newError(
                 'Specimen not found by Specimen ID',
+                $rowNumber,
+                $this->columnMap['specimenId']
+            );
+            return false;
+        }
+
+        // Ensure in correct workflow status
+        if (!$specimen->willAllowAddingResults()) {
+            $this->messages[] = ImportMessage::newError(
+                'Specimen not in correct status to allow importing results',
                 $rowNumber,
                 $this->columnMap['specimenId']
             );
