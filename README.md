@@ -110,7 +110,7 @@ Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony P
 
 Run test suite from command-line:
 
-    ./vendor/bin/simple-phpunit
+    $ ./bin/run-tests.sh
 
 ## Data Fixtures
 
