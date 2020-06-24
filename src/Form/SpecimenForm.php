@@ -5,6 +5,7 @@ namespace App\Form;
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -34,6 +35,11 @@ class SpecimenForm extends AbstractType
                 'class' => ParticipantGroup::class,
                 'required' => true,
                 'placeholder' => '',
+                // Sort by Accession ID
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('g')
+                        ->orderBy('g.title', 'ASC');
+                },
             ])
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
