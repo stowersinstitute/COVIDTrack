@@ -181,6 +181,16 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             return false;
         }
 
+        // Tube Type must either be blank or previously marked as "Blood"
+        if ($tube->getTubeType() && $tube->getTubeType() !== Tube::TYPE_BLOOD) {
+            $this->messages[] = ImportMessage::newError(
+                'Tube ID not marked to store Blood',
+                $rowNumber,
+                $this->columnMap['tubeId']
+            );
+            return false;
+        }
+
         // Don't re-process same tube again
         if (isset($seenTubes[$tube->getAccessionId()])) {
             $this->messages[] = ImportMessage::newError(
