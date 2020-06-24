@@ -70,6 +70,36 @@ class SpecimenWellTest extends TestCase
         new SpecimenWell($plate, $specimen2, $well1->getPositionAlphanumeric());
     }
 
+    /**
+     * @dataProvider providePlateAllowsAnyWellPositionFormat
+     */
+    public function testPlateAllowsAnyWellPositionFormat(string $position)
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen1 = Specimen::buildExample('SPEC1');
+        $specimen2 = Specimen::buildExample('SPEC2');
+
+        // Add Specimen to a specific position
+        $well = new SpecimenWell($plate, $specimen1, $position);
+
+        $this->assertSame($position, $well->getPositionAlphanumeric());
+
+        // Add Specimen to duplicate position should throw Exception
+        $this->expectException(\InvalidArgumentException::class);
+        new SpecimenWell($plate, $specimen2, $well->getPositionAlphanumeric());
+    }
+
+    public function providePlateAllowsAnyWellPositionFormat()
+    {
+        return [
+            'With leading zeros' => ['B06'],
+            'Random alphanumeric' => ['Gb4RzPq2'],
+            'With symbols' => ['@hJkLp512'],
+            'With spaces' => ['HJkL p51 2'],
+        ];
+    }
+
     public function testPlateAllowsMultipleSameSpecimenWithoutPosition()
     {
         $plate = WellPlate::buildExample('BC102');

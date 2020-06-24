@@ -55,12 +55,6 @@ class QPCRResultsForm extends AbstractType
                 'attr' => [
                     'placeholder' => 'For example A4, G8, H12, etc',
                 ],
-                'constraints' => [
-                    new Regex([
-                        'pattern' => SpecimenWell::alphanumericPositionRegex,
-                        'message' => 'Only supports positions between A1 and H12',
-                    ]),
-                ],
             ])
             ->add('conclusion', ChoiceType::class, [
                 'choices' => SpecimenResultQPCR::getFormConclusions(),
