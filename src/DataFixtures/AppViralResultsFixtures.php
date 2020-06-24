@@ -37,7 +37,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
     {
         return [
             AppParticipantGroupsFixtures::class,
-            AppTubeFixtures::class,
+            AppSalivaTubeFixtures::class,
         ];
     }
 

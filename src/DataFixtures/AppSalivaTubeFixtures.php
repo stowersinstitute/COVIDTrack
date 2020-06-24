@@ -11,7 +11,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppTubeFixtures extends Fixture implements DependentFixtureInterface
+class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
