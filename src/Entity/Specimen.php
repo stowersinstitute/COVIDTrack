@@ -31,7 +31,6 @@ class Specimen
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
-    const TYPE_BUCCAL = "BUCCAL";
     const TYPE_NASAL = "NASAL";
     const TYPE_SALIVA = "SALIVA";
 
@@ -291,7 +290,6 @@ class Specimen
     {
         return [
             'Blood' => self::TYPE_BLOOD,
-            'Buccal' => self::TYPE_BUCCAL,
             'Nasal' => self::TYPE_NASAL,
             'Saliva' => self::TYPE_SALIVA,
         ];
