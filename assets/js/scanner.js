@@ -9,8 +9,8 @@
 
             if(e.key !== "Enter") {
                 _inputString += e.key;
-            } else {
-                // console.log(_inputString);
+            } else if (_inputString.length > 0) {
+                console.log("Scanner input detected:", _inputString);
                 $(e.target).trigger('scannerinput', _inputString);
                 _inputString = '';
             }

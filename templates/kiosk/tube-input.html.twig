@@ -1,5 +1,5 @@
 {% macro renderCancelButton() %}
-    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancelDropOff">
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancelDropOff">
         <i class="fa fa-fw fa-trash"></i>
         Cancel Drop Off
     </button>
@@ -10,24 +10,43 @@
 {% block page_title %}COVIDTrack Kiosk{% endblock %}
 
 {% block body %}
+    <div class="row margin-bottom">
+        <div class="col-xs-7">
+            <h3 class="no-margin" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+                {{ kioskSession.participantGroup.title }} Group
+            </h3>
+        </div>
+        <div class="col-xs-5">
+            {% block header_buttons %}
+            <div class="pull-right" id="buttons-before-tube-entered">
+                <div class="btn-group btn-group-xs">
+                    {{ _self.renderCancelButton() }}
+                    {% if kioskSession.tubeData|length > 0 %}
+                    <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-success">
+                        Review <i class="fa fa-fw fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
-            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ kioskSession.participantGroup.title }} Group</strong></h3>
-
             {% block body_content %}
 
             {{ form_start(form) }}
             {{ form_errors(form) }}
-                <div class="row" id="tube-input-group">
-                    <div class="col-xs-12">
-                        {{ form_row(form.accessionId, {
-                            'label': false,
-                            'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
-                            'input_group_attr': {'class': 'input-group-lg'},
-                            'button_icon_class': 'fa fa-fw fa-search'
-                        }) }}
-                    </div>
+            <div class="row" id="tube-input-group">
+                <div class="col-xs-12">
+                    {{ form_row(form.accessionId, {
+                        'label': false,
+                        'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
+                        'input_group_attr': {'class': 'input-group-lg'},
+                        'button_icon_class': 'fa fa-fw fa-search'
+                    }) }}
                 </div>
+            </div>
             <div class="callout callout-danger hidden" id="tube-error-callout">
                 <h4>Tube Barcode Error</h4>
                 <p></p>
@@ -62,20 +81,10 @@
 
             </div>
 
-            <div class="row" id="buttons-before-tube-entered">
-                <div class="col-xs-6 text-right">
-                    {{ _self.renderCancelButton() }}
-                </div>
-                <div class="col-xs-6">
-                    <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-sm btn-success">
-                        Continue <i class="fa fa-fw fa-chevron-right"></i>
-                    </a>
-                </div>
-            </div>
 
             {{ form_end(form) }}
 
-            {% endblock %}
+        {% endblock %}
         </div>
     </div>
 
