@@ -42,9 +42,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
         $this->columnMap = [
             'tubeId' => 'A',
             'acceptedStatus' => 'B',
-            'rnaWellPlateBarcode' => 'C',
-            'kitType' => 'D',
-            'username' => 'E',
+            'wellPlateBarcode' => 'C',
+            'wellIdentifier' => 'D',
+            'wellPosition' => 'E',
+            'kitType' => 'F',
+            'username' => 'G',
         ];
     }
 
@@ -85,19 +87,29 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
 
-            $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
-            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
-            $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
-            $rawWellPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['rnaWellPlateBarcode']);
-            $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
-            $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
-
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
+
+            $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
             $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
+
+            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
+            $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
-            $rowOk = $this->validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber) && $rowOk;
+
+            $wellPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPlateBarcode']);
+            $rowOk = $this->validateWellPlateBarcode($wellPlateBarcode, $rowNumber) && $rowOk;
+
+            $wellIdentifier = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellIdentifier']);
+            $rowOk = $this->validateWellIdentifier($wellIdentifier, $rowNumber) && $rowOk;
+
+            $wellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
+            $rowOk = $this->validateWellPosition($wellPosition, $rowNumber) && $rowOk;
+
+            $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
+
+            $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
             $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
@@ -119,8 +131,8 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             }
 
             // Create Well Plate if given
-            if (strlen($rawWellPlateBarcode) > 0) {
-                $plate = $this->findWellPlateOrMakeNew($rawWellPlateBarcode);
+            if (strlen($wellPlateBarcode) > 0) {
+                $plate = $this->findWellPlateOrMakeNew($wellPlateBarcode);
                 $tube->addToWellPlate($plate);
             }
 
@@ -219,7 +231,56 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      */
     private function validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber): bool
     {
-        // No validation rules
+        // Well Plate Barcode cannot be blank
+        if (!$rawWellPlateBarcode) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Well Plate Barcode cannot be blank'),
+                $rowNumber,
+                $this->columnMap['wellPlateBarcode']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validateWellIdentifier($rawWellIdentifier, $rowNumber): bool
+    {
+        // Cannot be blank
+        if (!$rawWellIdentifier) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Well Identifier cannot be blank'),
+                $rowNumber,
+                $this->columnMap['wellIdentifier']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is valid
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    private function validateWellPosition($rawWellPosition, $rowNumber): bool
+    {
+        // Well Position cannot be blank
+        if (!$rawWellPosition) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Well Position cannot be blank'),
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
+            return false;
+        }
+
         return true;
     }
 

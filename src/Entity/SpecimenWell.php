@@ -51,6 +51,15 @@ class SpecimenWell
     private $resultQPCR;
 
     /**
+     * Any identifier that identifies this well. For example, a Biobank Tube ID.
+     * Uniqueness is not enforced on this field.
+     *
+     * @var null|string
+     * @ORM\Column(name="well_identifier", type="string", length=255, nullable=true)
+     */
+    private $wellIdentifier;
+
+    /**
      * Well position in alphanumeric format such as A1, B4, H12, etc.
      *
      * @var string
@@ -120,6 +129,16 @@ class SpecimenWell
     public function getSpecimen(): ?Specimen
     {
         return $this->specimen;
+    }
+
+    public function getWellIdentifier(): ?string
+    {
+        return $this->wellIdentifier;
+    }
+
+    public function setWellIdentifier(?string $wellIdentifier): void
+    {
+        $this->wellIdentifier = $wellIdentifier;
     }
 
     /**

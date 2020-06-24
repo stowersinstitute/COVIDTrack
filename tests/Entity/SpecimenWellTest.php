@@ -27,6 +27,9 @@ class SpecimenWellTest extends TestCase
         // No result
         $this->assertNull($well->getResultQPCR());
 
+        // No well identifier
+        $this->assertNull($well->getWellIdentifier());
+
         // No position
         $this->assertNull($well->getPositionAlphanumeric());
     }
@@ -49,6 +52,9 @@ class SpecimenWellTest extends TestCase
 
         // No result
         $this->assertNull($well->getResultQPCR());
+
+        // No well identifier
+        $this->assertNull($well->getWellIdentifier());
 
         // Has position
         $this->assertSame($position, $well->getPositionAlphanumeric());
