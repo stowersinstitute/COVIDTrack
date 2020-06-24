@@ -15,7 +15,8 @@ class TextLookupType extends AbstractType
             'input_group_attr' => [],
             'button_text' => 'Lookup',
             'button_attr' => [],
-            'button_icon_class' => '',
+            'left_button_icon_class' => '',
+            'right_button_icon_class' => '',
         ]);
     }
 
@@ -24,7 +25,8 @@ class TextLookupType extends AbstractType
         $view->vars['input_group_attr'] = $options['input_group_attr'];
         $view->vars['button_text'] = $options['button_text'];
         $view->vars['button_attr'] = $options['button_attr'];
-        $view->vars['button_icon_class'] = $options['button_icon_class'];
+        $view->vars['left_button_icon_class'] = $options['left_button_icon_class'];
+        $view->vars['right_button_icon_class'] = $options['right_button_icon_class'];
     }
 
     public function getParent()

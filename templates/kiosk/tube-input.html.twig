@@ -43,7 +43,9 @@
                         'label': false,
                         'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
                         'input_group_attr': {'class': 'input-group-lg'},
-                        'button_icon_class': 'fa fa-fw fa-search'
+                        'button_text': 'Continue',
+                        'button_attr': {'class': 'btn-success btn-lg'},
+                        'right_button_icon_class': 'fa fa-fw fa-chevron-right'
                     }) }}
                 </div>
             </div>
@@ -230,9 +232,11 @@
                 if (show) {
                     $("#tubeDetailSelection").collapse('show');
                     $("#scanTip").hide();
+                    $("#kiosk_add_tube_form_accessionId_button").hide();
                 } else {
                     $("#tubeDetailSelection").collapse('hide');
                     $("#scanTip").show();
+                    $("#kiosk_add_tube_form_accessionId_button").show();
                 }
             }
 

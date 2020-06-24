@@ -45,18 +45,21 @@
 
             {# The actual Text Input field #}
             {{- form_widget(form) -}}
-
-            {# The Lookup Button #}
-            {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
-            <span class="input-group-btn">
-                <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
-                    {% if button_icon_class %}
-                        <i class="{{ button_icon_class }}"></i>
-                    {% endif %}
-                    {{ button_text }}
-                </button>
-            </span>
         </div>
+
+    </div>
+    <div class="row text-center">
+        {# The Lookup Button #}
+        {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
+        <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
+            {% if left_button_icon_class %}
+                <i class="{{ left_button_icon_class }}"></i>
+            {% endif %}
+            {{ button_text }}
+            {% if right_button_icon_class %}
+                <i class="{{ right_button_icon_class }}"></i>
+            {% endif %}
+        </button>
     </div>
 {% endblock %}
 
