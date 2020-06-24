@@ -17,7 +17,11 @@ class KioskAddTubeForm extends AbstractType
         $days = [];
         foreach (range(3, 0) as $daysAgo) {
             $date = new \DateTime(sprintf('-%d days', $daysAgo));
-            $days[$date->format('M d')] = $date->format('Y-m-d');
+            $prnDate = $date->format('M d');
+            if ($daysAgo === 0) {
+                $prnDate .= " (Today)";
+            }
+            $days[$prnDate] = $date->format('Y-m-d');
         }
 
         $times = [];

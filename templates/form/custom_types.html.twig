@@ -48,7 +48,7 @@
         </div>
 
     </div>
-    <div class="row text-center">
+    <div class="row text-center margin">
         {# The Lookup Button #}
         {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
         <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
