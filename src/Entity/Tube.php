@@ -442,12 +442,7 @@ class Tube
      */
     public function willAllowCheckinDecision(): bool
     {
-        // Has a check-in decision, but not yet further along
-        // Accepted
-        if ($this->status === self::STATUS_ACCEPTED) {
-            return true;
-        }
-        // Rejected
+        // Allow Rejected tubes to be switched to Accepted
         if ($this->status === self::STATUS_REJECTED) {
             return true;
         }
