@@ -158,3 +158,7 @@ View mail in Mailhog: <http://0.0.0.0:8025>
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
 * [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
 * [Font Awesome 5.13](https://fontawesome.com/icons?d=gallery&m=free) for extra icons
+
+### User Documentation
+
+[User Documentation](https://confluence.stowers.org/x/GQB8CQ) for using software from user's perspective is available.
