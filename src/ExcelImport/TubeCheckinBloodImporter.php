@@ -39,8 +39,9 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
 
         parent::__construct($worksheet);
 
+        // Array keys are available in HTML views to look up imported data
         $this->columnMap = [
-            'tubeId' => 'A',
+            'tubeAccessionId' => 'A',
             'acceptedStatus' => 'B',
             'wellPlateBarcode' => 'C',
             'wellIdentifier' => 'D',
@@ -74,6 +75,8 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
     {
         if ($this->output !== null) return $this->output;
 
+        // Array values are the raw values from each row
+        // See $this->columnMap for available keys
         $output = [
             'accepted' => [],
             'rejected' => [],
@@ -90,26 +93,28 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
 
-            $rawTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['tubeId']);
+            $rawValues = $this->buildColumnMapValues($rowNumber);
+
+            $rawTubeId = $rawValues['tubeAccessionId'];
             $rowOk = $this->validateTube($rawTubeId, $rowNumber, $importedTubes) && $rowOk;
 
-            $rawAcceptedStatus = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptedStatus']);
+            $rawAcceptedStatus = $rawValues['acceptedStatus'];
             $rawAcceptedStatus = strtoupper($rawAcceptedStatus);
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
 
-            $wellPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPlateBarcode']);
+            $wellPlateBarcode = $rawValues['wellPlateBarcode'];
             $rowOk = $this->validateWellPlateBarcode($wellPlateBarcode, $rowNumber) && $rowOk;
 
-            $wellIdentifier = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellIdentifier']);
+            $wellIdentifier = $rawValues['wellIdentifier'];
             $rowOk = $this->validateWellIdentifier($wellIdentifier, $rowNumber) && $rowOk;
 
-            $wellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
+            $wellPosition = $rawValues['wellPosition'];
             $rowOk = $this->validateWellPosition($wellPosition, $rowNumber) && $rowOk;
 
-            $rawKitType = $this->worksheet->getCellValue($rowNumber, $this->columnMap['kitType']);
+            $rawKitType = $rawValues['kitType'];
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
 
-            $rawUsername = $this->worksheet->getCellValue($rowNumber, $this->columnMap['username']);
+            $rawUsername = $rawValues['username'];
             $rowOk = $this->validateUsername($rawUsername, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
@@ -122,11 +127,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             switch ($rawAcceptedStatus) {
                 case self::STATUS_ACCEPTED:
                     $tube->markAccepted($rawUsername);
-                    $output['accepted'][] = $tube;
+                    $output['accepted'][$rowNumber] = $rawValues;
                     break;
                 case self::STATUS_REJECTED:
                     $tube->markRejected($rawUsername);
-                    $output['rejected'][] = $tube;
+                    $output['rejected'][$rowNumber] = $rawValues;
                     break;
             }
 
@@ -165,7 +170,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 'Tube ID cannot be blank',
                 $rowNumber,
-                $this->columnMap['tubeId']
+                $this->columnMap['tubeAccessionId']
             );
             return false;
         }
@@ -176,7 +181,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 'Tube not found by Tube ID',
                 $rowNumber,
-                $this->columnMap['tubeId']
+                $this->columnMap['tubeAccessionId']
             );
             return false;
         }
@@ -186,7 +191,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 'Tube ID not marked to store Blood',
                 $rowNumber,
-                $this->columnMap['tubeId']
+                $this->columnMap['tubeAccessionId']
             );
             return false;
         }
@@ -196,7 +201,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 'Tube ID occurs more than once in uploaded workbook',
                 $rowNumber,
-                $this->columnMap['tubeId']
+                $this->columnMap['tubeAccessionId']
             );
             return false;
         }
@@ -206,7 +211,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 sprintf('Tube cannot be checked-in because it is in the wrong status: %s', $tube->getStatusText()),
                 $rowNumber,
-                $this->columnMap['tubeId']
+                $this->columnMap['tubeAccessionId']
             );
             return false;
         }
@@ -370,5 +375,19 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
         }
 
         return $plate;
+    }
+
+    /**
+     * Get cell values for each cell in given row.
+     * Returned array has same keys as $this->columnMap.
+     */
+    private function buildColumnMapValues(int $rowNumber): array
+    {
+        $map = [];
+        foreach ($this->columnMap as $columnId => $letter) {
+            $map[$columnId] = $this->worksheet->getCellValue($rowNumber, $letter);
+        }
+
+        return $map;
     }
 }
