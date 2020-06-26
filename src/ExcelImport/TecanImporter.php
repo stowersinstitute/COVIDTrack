@@ -77,30 +77,12 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
+    /**
+     * OVERRIDDEN to validate Workbook meets import expectations
+     */
     public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
     {
-        $filepath = $file->getRealPath();
-        $spreadsheet = static::createSpreadsheetFromPath($filepath);
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-        $importWorkbook->setFileMimeType($file->getMimeType());
-        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
-        $importWorkbook->setUploadedBy($uploadedByUser);
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
+        $importWorkbook = parent::createExcelImportWorkbookFromUpload($file, $uploadedByUser);
 
         self::mustMeetFileFormatExpectations($importWorkbook->getFirstWorksheet());
 

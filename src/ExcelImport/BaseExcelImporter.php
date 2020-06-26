@@ -4,10 +4,14 @@
 namespace App\ExcelImport;
 
 
+use App\Entity\AppUser;
+use App\Entity\ExcelImportCell;
+use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use Doctrine\ORM\EntityManager;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Parent class for managing Excel imports
@@ -64,6 +68,41 @@ abstract class BaseExcelImporter
     public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
     {
         return IOFactory::load($filepath);
+    }
+
+    /**
+     * Given UploadedFile, parse it into an ExcelImportWorkbook.
+     *
+     * @param UploadedFile $file
+     * @param AppUser|null $uploadedByUser
+     * @return ExcelImportWorkbook
+     */
+    public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
+    {
+        $filepath = $file->getRealPath();
+        $spreadsheet = static::createSpreadsheetFromPath($filepath);
+
+        $importWorkbook = new ExcelImportWorkbook();
+        $importWorkbook->setFilename($file->getClientOriginalName());
+        $importWorkbook->setFileMimeType($file->getMimeType());
+        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
+        $importWorkbook->setUploadedBy($uploadedByUser);
+
+        foreach ($spreadsheet->getAllSheets() as $sheet) {
+            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
+
+            foreach ($sheet->getRowIterator() as $row) {
+                foreach ($row->getCellIterator() as $cell) {
+                    $importCell = new ExcelImportCell($importWorksheet);
+                    $importCell->setRowIndex($row->getRowIndex());
+                    $importCell->setColIndex($cell->getColumn());
+
+                    $importCell->setValueFromExcelCell($cell);
+                }
+            }
+        }
+
+        return $importWorkbook;
     }
 
     /**
