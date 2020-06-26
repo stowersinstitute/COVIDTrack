@@ -28,7 +28,6 @@ $cliOpts = getopt(
 
         // Aliases for common scenarios
         'for-local-development',
-        'for-test-suite',
 
         'help',
     ]
@@ -55,7 +54,6 @@ Available Options
     --web-assets-prod                       When compiling web assets configure them for production use
     
     --for-local-development                 Alias to perform first-time setup for local development
-    --for-test-suite                        Alias to perform setup to execute test suite
     
 Examples
 ------------------------------
@@ -64,13 +62,13 @@ First-time project setup (Docker):
 
     docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --rebuild-database
     
-First-time project setup (Symfony Server):
+First-time project setup using SQLite and Symfony Server:
+
+    bin/setup.php --for-local-development --fixtures
+
+Setup to run test suite:
 
     bin/setup.php --for-local-development
-
-Setup to run test suite. Note that other CLI options are not honored:
-
-    bin/setup.php --for-test-suite
     
 After updating from source control:
 
@@ -113,27 +111,6 @@ if (isset($cliOpts['for-local-development'])) {
     $cliOpts['local-env-from'] = '.env.sqlite.dist';
     $stages['create-database'] = true;
     $stages['sync-database'] = true;
-}
-
-if (isset($cliOpts['for-test-suite'])) {
-    $I_SAY_ITS_NOT_PROD = true;
-
-    // Assume dev database is MySQL, even though it's never used.
-    // Required so Symfony can clear cache
-    $stages['create-local-env'] = true;
-    $cliOpts['local-env-from'] = '.env.sqlite.dist';
-
-    // Ensure has latest code dependencies
-    $stages['composer-install'] = true;
-    // Ensure has web assets installed, in case tests run any UI tests
-    $cliOpts['web-assets-prod'] = true;
-    $stages['web-assets'] = true;
-
-    // Explicitly disable some stages that do not apply
-    $stages['drop-database'] = false;   // Handled in run-tests.sh
-    $stages['create-database'] = false; // Handled in run-tests.sh
-    $stages['sync-database'] = false;   // Handled in run-tests.sh
-    $stages['fixtures'] = false; // Test code loads its own fixtures per-test
 }
 
 if (isset($cliOpts['post-update'])) {
