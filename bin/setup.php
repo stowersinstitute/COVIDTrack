@@ -112,6 +112,7 @@ if (isset($cliOpts['for-local-development'])) {
     $stages['create-local-env'] = true;
     $cliOpts['local-env-from'] = '.env.sqlite.dist';
     $stages['create-database'] = true;
+    $stages['sync-database'] = true;
 }
 
 if (isset($cliOpts['for-test-suite'])) {
