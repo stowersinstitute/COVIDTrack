@@ -5,7 +5,12 @@ namespace App\ExcelImport;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
+use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManager;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
  * Check-in Blood Specimens using Excel import
@@ -49,6 +54,69 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             'kitType' => 'F',
             'username' => 'G',
         ];
+    }
+
+    /**
+     * Find and replace Tube Accession IDs with Specimen Accession IDs
+     * in the given file.
+     *
+     * @return Spreadsheet Returns the entire Excel workbook with Tube IDs replaced
+     */
+    public static function convertTubesToSpecimens(string $excelFilePath, TubeRepository $tubeRepo): Spreadsheet
+    {
+        // Read file in as Excel workbook, get first worksheet
+        $workbook = IOFactory::load($excelFilePath);
+        $worksheet = $workbook->getActiveSheet();
+
+        // Parse Tube Accession IDs from spreadsheet
+        $columnLetter = 'A';
+        $rawTubeAccessionIds = self::getColumnValues($worksheet, $columnLetter);
+        foreach ($rawTubeAccessionIds as $rowNumber => $rawTubeAccessionId) {
+            $tube = $tubeRepo->findOneByAccessionId($rawTubeAccessionId);
+
+            if (!$tube || !$tube->getSpecimen()) {
+                throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
+            }
+
+            $specimenAccessionId = $tube->getSpecimen()->getAccessionId();
+            $coordinate = $columnLetter . $rowNumber;
+            $cell = $worksheet->getCell($coordinate);
+            if ($cell) {
+                $cell->setValue($specimenAccessionId);
+            }
+        }
+
+        return $workbook;
+    }
+
+    /**
+     * Get all cell values for a specific column letter.
+     *
+     * @param Worksheet $worksheet
+     * @param string    $columnLetter Example: "A"
+     * @param int       $startAtRow   Default 2 assumes Row 1 is header text
+     * @return array<int, string> Keys are int $rowNumber, Values are string $cellValue
+     */
+    public static function getColumnValues(Worksheet $worksheet, string $columnLetter, int $startAtRow = 2): array
+    {
+        $max = $worksheet->getHighestRow($columnLetter);
+
+        $values = [];
+        for ($rowNumber = $startAtRow; $rowNumber <= $max; $rowNumber++) {
+            $columnIdx = Coordinate::columnIndexFromString($columnLetter);
+
+            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
+            if (!$cell) {
+                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', $columnLetter, $rowNumber));
+            }
+
+            $rawValue = trim($cell->getValue());
+            if (null !== $rawValue) {
+                $values[$rowNumber] = $rawValue;
+            }
+        }
+
+        return $values;
     }
 
     /**
