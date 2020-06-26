@@ -117,24 +117,7 @@ class TecanImporter extends BaseExcelImporter
         $spreadsheet = static::createSpreadsheetFromPath($filepath);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $max = $worksheet->getHighestRow(self::TUBE_ID_COLUMN);
-
-        $tubeAccessionIds = [];
-        for ($rowNumber = static::STARTING_ROW; $rowNumber <= $max; $rowNumber++) {
-            $columnIdx = Coordinate::columnIndexFromString(static::TUBE_ID_COLUMN);
-
-            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
-            if (!$cell) {
-                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::TUBE_ID_COLUMN, $rowNumber));
-            }
-
-            $rawTubeId = trim($cell->getValue());
-            if ($rawTubeId) {
-                $tubeAccessionIds[] = $rawTubeId;
-            }
-        }
-
-        return $tubeAccessionIds;
+        return static::getColumnValues($worksheet, static::TUBE_ID_COLUMN, static::STARTING_ROW);
     }
 
     /**
