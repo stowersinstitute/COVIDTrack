@@ -26,21 +26,27 @@ class AppSystemConfigurationEntryFixtures extends Fixture
         return [
             [
                 'referenceId' => SpecimenAccessionIdGenerator::BASE_KEY_CONFIG_ID,
-                'value' => $this->makeRandomString(),
+                'value' => $this->makeRandomHexString(),
             ],
             [
                 'referenceId' => SpecimenAccessionIdGenerator::IV_CONFIG_ID,
-                'value' => $this->makeRandomString(),
+                'value' => $this->makeRandomHexString(),
             ],
             [
                 'referenceId' => SpecimenAccessionIdGenerator::PASSWORD_CONFIG_ID,
-                'value' => $this->makeRandomString(),
+                'value' => $this->makeRandomHexString(),
             ],
         ];
     }
 
-    private function makeRandomString(): string
+    private function makeRandomHexString(int $length = 32): string
     {
-        return 'ABCDEFG' . rand(1, 9999);
+        $string = '';
+        for ($i=0; $i<$length; $i++) {
+            $code = rand(65, 70); // A-F
+            $string .= chr($code);
+        }
+
+        return $string;
     }
 }
