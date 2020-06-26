@@ -60,6 +60,18 @@ abstract class BaseExcelImporter
     }
 
     /**
+     * Get filename of Excel document being imported.
+     */
+    public function getFilename(): string
+    {
+        if (!$this->worksheet) {
+            return 'last imported spreadsheet';
+        }
+
+        return $this->worksheet->getWorkbook()->getFilename();
+    }
+
+    /**
      * Convenience method to help skip empty rows in Excel since these are usually
      * leftovers from copying and pasting into an existing template and should not
      * be considered validation errors
