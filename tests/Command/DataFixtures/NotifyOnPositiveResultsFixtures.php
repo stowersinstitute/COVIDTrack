@@ -50,19 +50,19 @@ class NotifyOnPositiveResultsFixtures extends Fixture
             [
                 'username' => 'mary',
                 'displayName' => 'Mary Smith',
-                'email' => 'mary@domain.com',
+                'email' => 'mary@example.com',
                 'notify' => true,
             ],
             [
                 'username' => 'admin',
                 'displayName' => 'Admin User',
-                'email' => 'admin@domain.com',
+                'email' => 'admin@example.com',
                 'notify' => true,
             ],
             [
                 'username' => 'james',
                 'displayName' => 'James Doe',
-                'email' => 'james@domain.com',
+                'email' => 'james@example.com',
                 'notify' => false,
             ],
         ];
