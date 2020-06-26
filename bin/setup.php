@@ -118,6 +118,11 @@ if (isset($cliOpts['for-local-development'])) {
 if (isset($cliOpts['for-test-suite'])) {
     $I_SAY_ITS_NOT_PROD = true;
 
+    // Assume dev database is SQLite, even though it's never explicitly used.
+    // This step required so running `composer install` can run cache:clear for post-install-cmd
+    $stages['create-local-env'] = true;
+    $cliOpts['local-env-from'] = '.env.sqlite.dist';
+
     // Ensure has latest code dependencies
     $stages['composer-install'] = true;
     // Ensure has web assets installed, in case tests run any UI tests
@@ -125,7 +130,6 @@ if (isset($cliOpts['for-test-suite'])) {
     $stages['web-assets'] = true;
 
     // Explicitly disable some stages that do not apply
-    $stages['create-local-env'] = false;// All test config within config/packages/test/*.yaml
     $stages['drop-database'] = false;   // Handled in run-tests.sh
     $stages['create-database'] = false; // Handled in run-tests.sh
     $stages['sync-database'] = false;   // Handled in run-tests.sh
