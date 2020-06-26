@@ -16,6 +16,7 @@ class AppTubeFixtures extends Fixture implements DependentFixtureInterface
     public function getDependencies()
     {
         return [
+            AppSystemConfigurationEntryFixtures::class,
             AppParticipantGroupsFixtures::class,
             AppKioskFixtures::class,
         ];
