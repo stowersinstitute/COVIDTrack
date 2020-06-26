@@ -1,0 +1,11 @@
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # Auto-register all Application fixtures for "dev" environment.
+    # Allows "doctrine:fixtures:load" to load application fixtures in "dev" environment
+    # and prevents these fixtures from being loaded in "test" environment
+    App\DataFixtures\:
+        resource: '../../../src/DataFixtures/*'

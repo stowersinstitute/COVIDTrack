@@ -7,7 +7,7 @@ use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 
 class SpecimenResultQPCRImporter extends BaseExcelImporter
 {
@@ -35,7 +35,14 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private $seenPlates = [];
 
-    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
+    /**
+     * Each result entity processed during this import.
+     *
+     * @var SpecimenResultQPCR[]
+     */
+    private $processedResults = [];
+
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
         $this->specimenRepo = $em->getRepository(Specimen::class);
@@ -72,10 +79,14 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return SpecimenResultQPCR[] Results processed during this import
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->processedResults;
+        }
 
         $output = [
             'created' => [],
@@ -120,6 +131,8 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             // Store in output
             $output[$resultAction][] = $qpcr;
+
+            $this->processedResults[] = $qpcr;
         }
 
         $this->output = $output;
@@ -129,7 +142,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $this->getEntityManager()->clear();
         }
 
-        return $this->output;
+        return $this->processedResults;
     }
 
     /**
@@ -180,7 +193,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         // Ensure Specimen can be found
         if (!$this->findSpecimen($rawSpecimenId)) {
             $this->messages[] = ImportMessage::newError(
-                'Specimen not found by Specimen ID',
+                sprintf('Cannot find Specimen by Specimen ID "%s"', $rawSpecimenId),
                 $rowNumber,
                 $this->columnMap['specimenId']
             );
@@ -231,12 +244,12 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validatePlateAndPosition(string $rawPlateBarcode, $rawPosition, string $specimenId, int $rowNumber): bool
+    private function validatePlateAndPosition(string $rawPlateBarcode, $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Cannot find RNA Well Plate "%s"', $rawPlateBarcode),
+                sprintf('Cannot find Well Plate by barcode "%s"', $rawPlateBarcode),
                 $rowNumber,
                 $this->columnMap['plateBarcode']
             );
@@ -244,10 +257,14 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         }
 
         // Specimen must already be in a Well on this Well Plate
-        $specimen = $this->findSpecimen($specimenId); // Specimen ID already validated
+        $specimen = $this->findSpecimen($rawSpecimenId);
+        if (!$specimen) {
+            // Error message already added via validateSpecimenId
+            return false;
+        }
         if (!$specimen->isOnWellPlate($wellPlate)) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" not currently on RNA Well Plate "%s"', $specimenId, $rawPlateBarcode),
+                sprintf('Specimen "%s" not currently on Well Plate "%s"', $rawSpecimenId, $rawPlateBarcode),
                 $rowNumber,
                 $this->columnMap['plateBarcode']
             );
@@ -272,7 +289,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             }
 
             $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" currently in Well(s) %s. Results cannot be saved for Well "%s"', $specimenId, $prnCurrentPositions, $rawPosition),
+                sprintf('Specimen "%s" currently in Well(s) %s. Results cannot be saved for Well "%s"', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
                 $rowNumber,
                 $this->columnMap['position']
             );

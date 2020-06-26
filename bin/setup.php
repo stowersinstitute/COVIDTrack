@@ -62,7 +62,11 @@ First-time project setup (Docker):
 
     docker-compose exec app /app/bin/setup.php --local-env-from=.env.docker --rebuild-database
     
-First-time project setup (Symfony Server):
+First-time project setup using SQLite and Symfony Server:
+
+    bin/setup.php --for-local-development --fixtures
+
+Setup to run test suite:
 
     bin/setup.php --for-local-development
     
@@ -106,7 +110,7 @@ if (isset($cliOpts['for-local-development'])) {
     $stages['create-local-env'] = true;
     $cliOpts['local-env-from'] = '.env.sqlite.dist';
     $stages['create-database'] = true;
-    $stages['fixtures'] = true;
+    $stages['sync-database'] = true;
 }
 
 if (isset($cliOpts['post-update'])) {

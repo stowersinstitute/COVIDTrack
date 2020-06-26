@@ -1,14 +1,23 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 
+/**
+ * Import list of Tube Accession IDs found on vendor Tubes received with
+ * labels already on the Tube. Makes COVIDTrack aware of Tube Accession IDs
+ * created outside the system.
+ */
 class TubeImporter extends BaseExcelImporter
 {
+    /**
+     * Tubes imported by this importer.
+     * @var Tube[]
+     */
+    private $importedTubes = [];
+
     public function __construct(ExcelImportWorksheet $worksheet)
     {
         parent::__construct($worksheet);
@@ -24,10 +33,14 @@ class TubeImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return Tube[] Imported Tubes. Do not yet have Tube.id because EntityManager not flushed.
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->importedTubes;
+        }
 
         $this->output = [];
 
@@ -48,8 +61,15 @@ class TubeImporter extends BaseExcelImporter
             $tube = new Tube($rawAccessionId);
 
             $this->output[] = $tube;
+
             if ($commit) $this->em->persist($tube);
+
+            $this->importedTubes[$rawAccessionId] = $tube;
         }
+
+        $this->importedTubes = array_values($this->importedTubes);
+
+        return $this->importedTubes;
     }
 
     /**
@@ -79,12 +99,22 @@ class TubeImporter extends BaseExcelImporter
             return false;
         }
 
-        // Cannot already exist
+        // Cannot already exist in database
         $repo = $this->em->getRepository(Tube::class);
         $exists = $repo->findOneBy(['accessionId' => $raw]);
         if ($exists) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('There is already a tube with accession ID "%s"', $raw),
+                $rowNumber,
+                $this->columnMap['accessionId']
+            );
+            return false;
+        }
+
+        // Cannot already have been imported (duplicate in this import file)
+        if (isset($this->importedTubes[$raw])) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Accession ID "%s" occurs multiple times in this Excel file', $raw),
                 $rowNumber,
                 $this->columnMap['accessionId']
             );

@@ -11,7 +11,7 @@ use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -38,13 +38,18 @@ class TecanImporter extends BaseExcelImporter
     private $tubeRepo;
 
     /**
+     * @var Tube[]
+     */
+    private $processedTubes = [];
+
+    /**
      * Cache of found Tubes used instead of query caching
      *
      * @var array Keys Tube.accessionId; Values Tube entity
      */
     private $seenTubes = [];
 
-    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
         $this->tubeRepo = $em->getRepository(Tube::class);
@@ -166,10 +171,14 @@ class TecanImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return Tube[]
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->processedTubes;
+        }
 
         $output = [
             'created' => [],
@@ -236,6 +245,8 @@ class TecanImporter extends BaseExcelImporter
                 'rnaWellPlateId' => $rawWellPlateId,
                 'rnaWellPosition' => sprintf("%s (%d)", $well->getPositionAlphanumeric(), $rawWellPosition),
             ];
+
+            $this->processedTubes[] = $tube;
         }
 
         $this->output = $output;
@@ -245,7 +256,7 @@ class TecanImporter extends BaseExcelImporter
             $this->getEntityManager()->clear();
         }
 
-        return $this->output;
+        return $this->processedTubes;
     }
 
     /**
