@@ -1,16 +1,16 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
 use Doctrine\ORM\EntityManager;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
@@ -103,6 +103,36 @@ abstract class BaseExcelImporter
         }
 
         return $importWorkbook;
+    }
+
+    /**
+     * Get all cell values for a specific column letter.
+     *
+     * @param Worksheet $worksheet
+     * @param string    $columnLetter Example: "A"
+     * @param int       $startAtRow   Default 2 assumes Row 1 is header text
+     * @return array<int, string> Keys are int $rowNumber, Values are string $cellValue
+     */
+    public static function getColumnValues(Worksheet $worksheet, string $columnLetter, int $startAtRow = 2): array
+    {
+        $max = $worksheet->getHighestRow($columnLetter);
+
+        $values = [];
+        for ($rowNumber = $startAtRow; $rowNumber <= $max; $rowNumber++) {
+            $columnIdx = Coordinate::columnIndexFromString($columnLetter);
+
+            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
+            if (!$cell) {
+                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', $columnLetter, $rowNumber));
+            }
+
+            $rawValue = trim($cell->getValue());
+            if (null !== $rawValue) {
+                $values[$rowNumber] = $rawValue;
+            }
+        }
+
+        return $values;
     }
 
     /**
