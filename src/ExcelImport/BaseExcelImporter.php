@@ -6,6 +6,8 @@ namespace App\ExcelImport;
 
 use App\Entity\ExcelImportWorksheet;
 use Doctrine\ORM\EntityManager;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * Parent class for managing Excel imports
@@ -57,6 +59,11 @@ abstract class BaseExcelImporter
     public function __construct(ExcelImportWorksheet $worksheet)
     {
         $this->worksheet = $worksheet;
+    }
+
+    public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
+    {
+        return IOFactory::load($filepath);
     }
 
     /**

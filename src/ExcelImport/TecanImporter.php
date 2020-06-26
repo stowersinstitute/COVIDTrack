@@ -77,11 +77,6 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
-    {
-        return IOFactory::load($filepath);
-    }
-
     public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
     {
         $filepath = $file->getRealPath();
