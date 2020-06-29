@@ -108,9 +108,15 @@ Instead of using Docker, develop with tools installed directly on the host machi
 
 Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
 
-Run test suite from command-line:
+Run test suite from command-line of a local development environment:
 
-    $ ./bin/run-tests.sh
+    $ bin/run-tests.sh
+
+To run on a CI server, create a fresh local development environment then run:
+
+    $ git clone ...
+    $ bin/setup.php --for-local-development
+    $ bin/run-tests.sh
 
 ## Data Fixtures
 
