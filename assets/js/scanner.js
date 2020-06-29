@@ -2,13 +2,17 @@
     var _timeoutHandler = 0,
         _inputString = '',
         _onKeypress = function(e) {
-            //console.log({key: e.key});
+            // console.log({key: e.key});
             if (_timeoutHandler) {
                 clearTimeout(_timeoutHandler);
             }
 
             if(e.key !== "Enter") {
                 _inputString += e.key;
+            } else if (_inputString.length > 0) {
+                console.log("Scanner input detected:", _inputString);
+                $(e.target).trigger('scannerinput', _inputString);
+                _inputString = '';
             }
 
             // Since the scanner acts like a keyboard we are checking for quickly entered key presses in a short period of time.
@@ -18,10 +22,6 @@
                     _inputString = '';
                     return;
                 }
-                console.log(_inputString);
-                $(e.target).trigger('scannerinput', _inputString);
-                _inputString = '';
-
             }, 50); //iPad seems to like 50ms.
         };
     $(document).on({

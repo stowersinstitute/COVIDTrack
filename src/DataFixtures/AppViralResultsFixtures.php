@@ -78,10 +78,14 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     if ($conclusion) {
                         $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
-                        $well = $this->makeSpecimenWellForResultsOn($em, $specimen, $resultDate);
+                        $well = $this->getSpecimenWellForFirstResult($specimen);
 
+                        // Add Result to Well
                         $result = new SpecimenResultQPCR($well, $conclusion);
                         $result->setCreatedAt($resultDate);
+
+                        // Set Position normally coming from reporting result
+                        $well->setPositionAlphanumeric($this->getNextPositionForPlate($well->getWellPlate()));
 
                         $em->persist($result);
                     }
@@ -121,6 +125,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         /** @var Specimen[] $specimens */
         $qb = $em->getRepository(Specimen::class)
             ->createQueryBuilder('s')
+            ->join('s.wells', 'wells')
 
             // Group
             ->andWhere('s.participantGroup = :group')
@@ -129,6 +134,9 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             // Has been accepted by a Check-in Technician
             ->andWhere('s.status = :status')
             ->setParameter('status', Specimen::STATUS_ACCEPTED)
+
+            // Is on a Well Plate
+            ->andWhere('wells.wellPlate IS NOT NULL')
 
             // Doesn't have a CLIA testing rec yet
             ->andWhere('s.cliaTestingRecommendation = :recommendation')
@@ -156,32 +164,19 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         return $found;
     }
 
-    private function makeSpecimenWellForResultsOn(ObjectManager $em, Specimen $specimen, \DateTimeImmutable $resultDate): SpecimenWell
+    private function getSpecimenWellForFirstResult(Specimen $specimen): SpecimenWell
     {
-        $plate = $this->findOrCreatePlateForResultsOnDate($em, $resultDate);
-        $position = $this->getNextPositionForPlate($plate);
-
-        $well = new SpecimenWell($plate, $specimen, $position);
-
-        $em->persist($well);
-
-        return $well;
-    }
-
-    private function findOrCreatePlateForResultsOnDate(ObjectManager $em, \DateTimeImmutable $resultDate): WellPlate
-    {
-        $barcode = $resultDate->format('MdY');
-
-        if (isset($this->createdPlatesByBarcode[$barcode])) {
-            return $this->createdPlatesByBarcode[$barcode];
+        $wells = $specimen->getWells();
+        if (count($wells) < 1) {
+            throw new \RuntimeException(sprintf('Specimen %s is not yet on a Well Plate', $specimen->getAccessionId()));
         }
 
-        $plate = new WellPlate($barcode);
-        $em->persist($plate);
+        $well = array_shift($wells);
+        if ($well->getResultQPCR()) {
+            throw new \RuntimeException(sprintf('Specimen %s in Well %s on Well Plate %s already has results', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
+        }
 
-        $this->createdPlatesByBarcode[$barcode] = $plate;
-
-        return $plate;
+        return $well;
     }
 
     private function getNextPositionForPlate(WellPlate $plate): string

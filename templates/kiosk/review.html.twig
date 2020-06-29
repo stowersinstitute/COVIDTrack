@@ -1,5 +1,7 @@
 {% extends 'kiosk/tube-input.html.twig' %}
 
+{% block header_buttons %}{% endblock %}
+
 {% block body_content %}
     <div class="box">
         {% include 'kiosk/review-tabel.html.twig' with {tubeData: tubeData} %}

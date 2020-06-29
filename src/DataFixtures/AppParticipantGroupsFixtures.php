@@ -25,6 +25,10 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             $g = new ParticipantGroup($raw['accessionId'], $raw['participantCount']);
             $g->setTitle($raw['title']);
 
+            if (isset($raw['isControl'])) {
+                $g->setIsControl($raw['isControl']);
+            }
+
             // group.Red
             $referenceId = 'group.' . $g->getTitle();
             $this->addReference($referenceId, $g);
@@ -52,6 +56,7 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             [ 'title' => 'Blue',        'participantCount' => 11,   'accessionId' => 'GRP-9LT5SY' ],
             [ 'title' => 'Indigo',      'participantCount' => 13,   'accessionId' => 'GRP-WCKXJT' ],
             [ 'title' => 'Violet',      'participantCount' => 15,   'accessionId' => 'GRP-CRYGX9' ],
+            [ 'title' => 'CONTROL',     'participantCount' => 0,    'accessionId' => 'GRP-CTRLLL', 'isControl' => true, ],
         ];
     }
 }

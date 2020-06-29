@@ -132,14 +132,14 @@ class AppUser implements UserInterface
      * The input to this method will be a map of properties and their raw values
      *
      *     [
-     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => AuditLogUtils::getHumanReadableString($value)
      *     ]
      *
