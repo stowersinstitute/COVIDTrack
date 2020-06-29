@@ -138,10 +138,10 @@ abstract class BaseExcelImporter
     /**
      * Get filename of Excel document being imported.
      */
-    public function getFilename(): string
+    public function getFilename(): ?string
     {
         if (!$this->worksheet) {
-            return 'last imported spreadsheet';
+            return null;
         }
 
         return $this->worksheet->getWorkbook()->getFilename();
