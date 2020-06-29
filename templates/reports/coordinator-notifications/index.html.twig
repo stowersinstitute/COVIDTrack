@@ -3,6 +3,16 @@
 {% block page_title %}Study Coordinator Notifications (Limit {{ limit }} most recent){% endblock %}
 
 {% block body %}
+<div class="row margin-bottom">
+    <div class="col-md-12">
+        <div class="pull-right">
+            {% include 'reports/coordinator-notifications/check-new-results-button.html.twig' with {
+                refreshOnComplete: true
+            } %}
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-xs-12">
         <div class="box">

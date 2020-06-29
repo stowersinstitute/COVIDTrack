@@ -27,27 +27,10 @@ class ExcelImporter
 
     public function createWorkbookFromUpload(UploadedFile $file) : ExcelImportWorkbook
     {
-        $spreadsheet = IOFactory::load($file->getRealPath());
-
-        $importWorkbook = new ExcelImportWorkbook();
+        $importWorkbook = ExcelImportWorkbook::createFromFilePath($file->getRealPath());
         $importWorkbook->setFilename($file->getClientOriginalName());
-        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
 
         if ($this->security) $importWorkbook->setUploadedBy($this->security->getUser());
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
 
         return $importWorkbook;
     }

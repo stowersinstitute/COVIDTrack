@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Controller;
-
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
@@ -11,11 +9,15 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
+ * Actions for site-wide views.
+ *
  * @Route(path="/")
  */
 class DefaultController extends AbstractController
 {
     /**
+     * Renders COVIDTrack home screen.
+     *
      * @Route(path="/", methods={"GET"})
      */
     public function index()
@@ -27,10 +29,8 @@ class DefaultController extends AbstractController
 
         return $this->render('index.html.twig', [
             'numActiveGroups' => $groupRepo->getActiveCount(),
-
             'numTubesReturned' => $tubeRepo->getReturnedCount(),
-
-            'numSpecimensInProcess' => $specimenRepo->getInProcessCount(),
+            'numSpecimensPendingResults' => $specimenRepo->getPendingResultsCount(),
         ]);
     }
 }

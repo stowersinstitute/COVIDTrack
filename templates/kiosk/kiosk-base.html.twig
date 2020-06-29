@@ -68,6 +68,9 @@
                 <div class="modal-body">
                     <i class="fa fa-spin fa-spinner"></i> Reconnecting...
                 </div>
+                <div class="modal-footer">
+                    <a href="#" class="btn btn-lg btn-default" onclick="window.location.reload();"><i class="fa fa-fw fa-redo"></i> Reload</a>
+                </div>
             </div>
         </div>
     </div>
@@ -104,9 +107,14 @@
 
         $.ajax('{{ path('kiosk_heartbeat') }}', {
             method: 'POST',
-            data: hbData,
+            data: hbData
+        })
+            .done(function(data, status, xhr) {
+                if(xhr.getResponseHeader('content-type').startsWith('text/html')) {
+                    console.log('Heartbeat response was HTML, reloading the page.');
+                    window.location.reload();
+                }
 
-            success: function(data) {
                 // A successful response should clear the maintenance modal
                 hideMaintenanceModal();
 
@@ -121,16 +129,13 @@
                 if (data.appVersion && data.appVersion != hbData.appVersion) {
                     if (hbData.state === 'WAITING_DROPOFF_START') location.reload(true);
                 }
-            },
-
-            // Unexpected errors like 500 server or network down
-            error: function(xhr, textStatus, error) {
+            })
+            .fail(function(xhr, textStatus, error) {
                 console.log("error in response: " + textStatus + " " + error);
 
                 // Prevent kiosk interaction until successful heartbeat (see success())
                 showMaintenanceModal();
-            }
-        });
+            });
     }
 
     CT_PAGE_LOADED_AT = new Date();

@@ -1,0 +1,9 @@
+Position,TubeID,ScanError,SRCRack,SRCPos,SRCTubeID,Volume,Error,SRCRackID,GridPos,SiteOnGrid,TipNumber,DetectVol,Time
+,,,,,,,,TecanPlate1,,,,,
+1,,,,,TestTecan0001,,,,,,,,
+2,,,,,TestTecan0002,,,,,,,,
+3,,,,,TestTecan0003,,,,,,,,
+,,,,,,,,,,,,,
+4,,,,,TestTecan0004,,,,,,,,
+5,,,,,TestTecan0005,,,,,,,,
+6,,,,,TestTecan0006,,,,,,,,

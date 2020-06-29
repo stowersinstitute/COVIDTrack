@@ -185,14 +185,14 @@ class Tube
      * and values like this:
      *
      *     [
-     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -449,6 +449,15 @@ class Tube
 
         // Status before Accepted/Rejected
         return $this->status === self::STATUS_RETURNED;
+    }
+
+    /**
+     * Whether this Tube is in the correct state to be run through the Tecan
+     * import operation.
+     */
+    public function willAllowTecanImport(): bool
+    {
+        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
     }
 
     public function getCheckInDecision(): ?string

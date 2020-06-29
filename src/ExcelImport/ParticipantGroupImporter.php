@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\ExcelImport;
-
 
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorksheet;
@@ -12,6 +10,13 @@ class ParticipantGroupImporter extends BaseExcelImporter
 {
     /** @var ParticipantGroupAccessionIdGenerator  */
     private $idGenerator;
+
+    /**
+     * Groups processed by this Importer
+     *
+     * @var ParticipantGroup[]
+     */
+    private $processedGroups = [];
 
     public function __construct(ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
@@ -62,10 +67,14 @@ class ParticipantGroupImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return ParticipantGroup[]
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->processedGroups;
+        }
 
         $groupRepo = $this->em->getRepository(ParticipantGroup::class);
 
@@ -125,6 +134,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
+
+            $this->processedGroups[] = $group;
         }
 
         // Deactivated is everything not in the excel file
@@ -135,9 +146,13 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $result['deactivated'][] = $group;
 
             $group->setIsActive(false);
+
+            $this->processedGroups[] = $group;
         }
 
         $this->output = $result;
+
+        return $this->processedGroups;
     }
 
     /**

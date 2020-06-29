@@ -1,5 +1,5 @@
 {% macro renderCancelButton() %}
-    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancelDropOff">
+    <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#cancelDropOff">
         <i class="fa fa-fw fa-trash"></i>
         Cancel Drop Off
     </button>
@@ -10,30 +10,53 @@
 {% block page_title %}COVIDTrack Kiosk{% endblock %}
 
 {% block body %}
+    <div class="row margin-bottom">
+        <div class="col-xs-6">
+            <h3 class="no-margin" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+                {{ kioskSession.participantGroup.title }} Group
+            </h3>
+        </div>
+        <div class="col-xs-6">
+            {% block header_buttons %}
+            <div class="pull-right" id="buttons-before-tube-entered">
+                {{ _self.renderCancelButton() }}
+                {% if kioskSession.tubeData|length > 0 %}
+                <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-success btn-xs">
+                    Review <i class="fa fa-fw fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endblock %}
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
-            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ kioskSession.participantGroup.title }} Group</strong></h3>
-
             {% block body_content %}
 
             {{ form_start(form) }}
             {{ form_errors(form) }}
-                <div class="row" id="tube-input-group">
-                    <div class="col-xs-12">
-                        {{ form_row(form.accessionId, {
-                            'label': false,
-                            'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
-                        }) }}
-                    </div>
-                    <div id="tube-check-status" class="input-lg"></div>
+            <div class="row" id="tube-input-group">
+                <div class="col-xs-12">
+                    {{ form_row(form.accessionId, {
+                        'label': false,
+                        'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
+                        'input_group_attr': {'class': 'input-group-lg'},
+                        'button_text': 'Continue',
+                        'button_attr': {'class': 'btn-success btn-lg'},
+                        'right_button_icon_class': 'fa fa-fw fa-chevron-right'
+                    }) }}
                 </div>
+            </div>
             <div class="callout callout-danger hidden" id="tube-error-callout">
                 <h4>Tube Barcode Error</h4>
                 <p></p>
             </div>
 
             <div id="tubeDetailSelection" class="collapse">
-                {{ form_row(form.tubeType) }}
+                {{ form_row(form.tubeType, {
+                    'label': 'What type of tube are you returning?',
+                    'label_attr': {'style': 'font-size: 1.25em;'}
+                }) }}
 
                 <div id="tubeTimeSelection" class="collapse">
                     <div class="row">
@@ -61,20 +84,10 @@
 
             </div>
 
-            <div class="row" id="buttons-before-tube-entered">
-                <div class="col-xs-6 text-right">
-                    {{ _self.renderCancelButton() }}
-                </div>
-                <div class="col-xs-6">
-                    <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-sm btn-success">
-                        Continue <i class="fa fa-fw fa-chevron-right"></i>
-                    </a>
-                </div>
-            </div>
 
             {{ form_end(form) }}
 
-            {% endblock %}
+        {% endblock %}
         </div>
     </div>
 
@@ -124,44 +137,44 @@
             // We don't want the scanner typing in the input field.
             $("[data-scanner-input]").blur();
             $("[data-scanner-input]").val(inputString).trigger('input');
+            $("#kiosk_add_tube_form_accessionId_button").trigger('click');
         });
 
         $(document).ready(function(){
-            // React when inputting Tube Label ID
-            var _timeoutHandler = 0;
+            setTubeInputStatus();
 
-            $("#kiosk_add_tube_form_accessionId").on('input', function(e) {
-                // Timeout handler will make sure the user is done typing before checking the tube id.
-                if (_timeoutHandler) {
-                    clearTimeout(_timeoutHandler);
+            // Reset the detail sections when the input is changed
+            $("#kiosk_add_tube_form_accessionId").on('input', function() {
+                setTubeInputStatus();
+                showTubeDetailSelection(false);
+            });
+
+            $("#kiosk_add_tube_form_accessionId_button").click(function(){
+                var val = $('#kiosk_add_tube_form_accessionId').val();
+
+                if(val !== "") {
+                    setTubeInputStatus('LOADING');
+                    showTubeDetailSelection(false);
+
+                    $.ajax('{{ path('kiosk_tube_available_check') }}', {
+                        method: 'POST',
+                        data: { accessionId: val },
+
+                        success: onAvailableCheckResponse,
+
+                        // Unexpected errors like 500 server or network down
+                        error: function(xhr, textStatus, error) {
+                            console.log("error in response: " + textStatus + " " + error);
+                        }
+                    });
+                } else {
+                    // Collapse form details
+                    setTubeInputStatus();
+                    showTubeDetailSelection(false);
                 }
-                _timeoutHandler = setTimeout(function () {
-
-                    if($(e.target).val() !== "") {
-                        setTubeInputStatus('LOADING');
-                        showTubeDetailSelection(false);
-
-                        $.ajax('{{ path('kiosk_tube_available_check') }}', {
-                            method: 'POST',
-                            data: { accessionId: $(e.target).val() },
-
-                            success: onAvailableCheckResponse,
-
-                            // Unexpected errors like 500 server or network down
-                            error: function(xhr, textStatus, error) {
-                                console.log("error in response: " + textStatus + " " + error);
-                            }
-                        });
-                    } else {
-                        // Collapse form details
-                        setTubeInputStatus();
-                        showTubeDetailSelection(false);
-                    }
-                }, 500);
             });
 
             $("#kiosk_add_tube_form_tubeType").on('input', function(e) {
-                console.log(e);
                 if($(e.target).val() !== "") {
                     showTubeTimeSelection(true);
                 } else {
@@ -190,7 +203,7 @@
              * @param message Error message to show in the callout
              */
             function setTubeInputStatus(status = '', message = '') {
-                var statusWrapper = $("#tube-check-status");
+                var statusWrapper = $("#lookup-status");
 
                 statusWrapper.empty();
                 $("#tube-error-callout").toggleClass('hidden', true);
@@ -207,6 +220,9 @@
                     case 'SUCCESS':
                         statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
                         break;
+                    default:
+                        statusWrapper.append('<i class="fa fa-fw fa-question text-gray"></i>');
+                        break;
                 }
             }
 
@@ -217,9 +233,11 @@
                 if (show) {
                     $("#tubeDetailSelection").collapse('show');
                     $("#scanTip").hide();
+                    $("#kiosk_add_tube_form_accessionId_button").hide();
                 } else {
                     $("#tubeDetailSelection").collapse('hide');
                     $("#scanTip").show();
+                    $("#kiosk_add_tube_form_accessionId_button").show();
                 }
             }
 
@@ -230,10 +248,8 @@
             function showTubeTimeSelection(show = true) {
                 if (show) {
                     $("#tubeTimeSelection").collapse('show');
-                    $("#buttons-before-tube-entered").hide();
                 } else {
                     $("#tubeTimeSelection").collapse('hide');
-                    $("#buttons-before-tube-entered").show();
                 }
             }
 
