@@ -255,7 +255,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validatePlateAndPosition(string $rawPlateBarcode, $rawPosition, string $rawSpecimenId, int $rowNumber): bool
+    private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
