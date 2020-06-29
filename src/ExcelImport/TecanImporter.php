@@ -340,6 +340,16 @@ class TecanImporter extends BaseExcelImporter
             return false;
         }
 
+        // Ensure Tube in correct status
+        if (!$tube->willAllowTecanImport()) {
+            $this->messages[] = ImportMessage::newError(
+                'Tube not in correct status to allow importing',
+                $rowNumber,
+                $this->columnMap['tubeAccessionId']
+            );
+            return false;
+        }
+
         return true;
     }
 

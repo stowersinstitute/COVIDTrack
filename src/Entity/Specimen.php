@@ -27,7 +27,6 @@ class Specimen
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
-    const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
@@ -197,14 +196,14 @@ class Specimen
      * and values like this:
      *
      *     [
-     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -393,7 +392,6 @@ class Specimen
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
-            'In Process' => self::STATUS_IN_PROCESS,
             'Results Available' => self::STATUS_RESULTS,
         ];
     }
@@ -551,6 +549,20 @@ class Specimen
         }
 
         return $barcodes;
+    }
+
+    /**
+     * Whether this Specimen is in the correct state to accept published
+     * results.
+     */
+    public function willAllowAddingResults(): bool
+    {
+        $valid = [
+            self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
+            self::STATUS_RESULTS,  // Can add more than 1 result
+        ];
+
+        return in_array($this->status, $valid);
     }
 
     private function ensureValidType(?string $type): void
