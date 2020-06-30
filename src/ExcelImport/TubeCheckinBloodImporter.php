@@ -186,7 +186,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
         $tube = $this->findTube($rawTubeId);
         if (!$tube) {
             $this->messages[] = ImportMessage::newError(
-                'Tube not found by Tube ID',
+                sprintf('Tube not found by Tube ID "%s"', $rawTubeId),
                 $rowNumber,
                 $this->columnMap['tubeAccessionId']
             );
