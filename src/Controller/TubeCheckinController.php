@@ -153,7 +153,8 @@ class TubeCheckinController extends AbstractController
             $importingWorkbook->getFirstWorksheet()
         );
 
-        $output = $importer->process();
+        $importer->process();
+        $output = $importer->getOutput();
 
         return $this->render('checkin/excel-import-preview.html.twig', [
             'importId' => $importId,
@@ -182,7 +183,8 @@ class TubeCheckinController extends AbstractController
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
-        $output = $importer->process(true);
+        $importer->process(true);
+        $output = $importer->getOutput();
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);

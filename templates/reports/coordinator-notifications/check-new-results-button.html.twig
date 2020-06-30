@@ -1,0 +1,41 @@
+{% if refreshOnComplete is not defined %}
+    {% set refreshOnComplete = false %}
+{% endif %}
+<a id="check-new-results" href="#" class="btn btn-primary"><i class="fa fa-fw fa-sync-alt"></i> {{ buttonText | default('Check For New Results') }}</a>
+
+<script>
+    $("#check-new-results").click(function(e) {
+        e.preventDefault();
+
+        $btn = $(this);
+        $btn.addClass('disabled');
+
+        const url = "{{ path('report_coordinator_notifications_check') }}";
+        $.post(url)
+            .fail(function(responseObj) {
+                // Error happened, show it
+                const responseJSON = responseObj.responseJSON;
+                if (responseJSON) {
+                    // Error message available in response
+                    var errorMsg = responseJSON.message;
+                } else {
+                    // 500 error where JSON is not returned
+                    var errorMsg = 'A server error prevented checking for new results';
+                    console.log(responseObj);
+                }
+
+                if (errorMsg) {
+                    alert(errorMsg);
+                    return;
+                }
+                alert('Error when checking for new results');
+            })
+            .done(function(response) {
+                alert(response.message);
+                $btn.removeClass('disabled');
+                {% if refreshOnComplete %}
+                location.reload();
+                {% endif %}
+            });
+    });
+</script>

@@ -1,4 +1,5 @@
 .idea
+tests/ExcelImport/workbooks/~*.xlsx
 
 ###> symfony/framework-bundle ###
 /.env.local

@@ -19,6 +19,7 @@
             var sel = $(this).data('title');
             var tog = $(this).data('toggle');
             $('#'+tog).prop('value', sel);
+            $('#'+tog).trigger('input');
 
             $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('not-active');
             $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('not-active').addClass('active');
@@ -31,6 +32,36 @@
     </style>
 {% endblock %}
 
+{% block text_lookup_row %}
+    <div class="form-group">
+        {# Field Label #}
+        {{- form_label(form) -}}
+
+        {# Input group #}
+        {%- set input_group_attr = input_group_attr|merge({class: (input_group_attr.class ~ ' input-group')|trim}) -%}
+        <div {% with { attr: input_group_attr } %}{{ block('attributes') }}{% endwith %}>
+            {# Icon Holder #}
+            <span id="lookup-status" class="input-group-addon"></span>
+
+            {# The actual Text Input field #}
+            {{- form_widget(form) -}}
+        </div>
+
+    </div>
+    <div class="row text-center margin">
+        {# The Lookup Button #}
+        {%- set button_attr = button_attr|merge({class: (button_attr.class|default('btn-primary') ~ ' btn')|trim}) -%}
+        <button type="button" id="{{ id }}_button" {% with { attr: button_attr } %}{{ block('attributes') }}{% endwith %}>
+            {% if left_button_icon_class %}
+                <i class="{{ left_button_icon_class }}"></i>
+            {% endif %}
+            {{ button_text }}
+            {% if right_button_icon_class %}
+                <i class="{{ right_button_icon_class }}"></i>
+            {% endif %}
+        </button>
+    </div>
+{% endblock %}
 
 {% block form_start %}
     {% set attr = attr|merge({autocomplete: 'off'}) %}

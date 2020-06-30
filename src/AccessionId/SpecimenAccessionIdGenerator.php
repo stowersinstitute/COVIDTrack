@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\AccessionId;
 
 use App\Configuration\AppConfiguration;
@@ -37,25 +36,12 @@ class SpecimenAccessionIdGenerator
     public function __construct(AppConfiguration $appConfig)
     {
         $this->appConfig = $appConfig;
-
-        $this->loadEncryptionParameters($appConfig);
-
-        // Configure encrypter
-        $this->encrypter = new Cryptomute(
-            'aes-128-cbc', // changes to this may require changes to how IV is generated
-            $this->baseKey,
-            7
-        );
-
-        $this->encrypter->setValueRange(
-            // 10 digits
-            '0000000000',
-            '4294967295'
-        );
     }
 
     public function generate()
     {
+        $this->init();
+
         $counterRefId = 'FpeSpecimenAccessionIdGenerator.counter';
         // Changes must be written to the database immediately to minimize contention with other requests
         $this->appConfig->setAutoFlush(true);
@@ -75,8 +61,29 @@ class SpecimenAccessionIdGenerator
         return sprintf('C%s', $encrypted);
     }
 
+    protected function init(): void
+    {
+        $this->loadEncryptionParameters($this->appConfig);
+
+        // Configure encrypter
+        $this->encrypter = new Cryptomute(
+            'aes-128-cbc', // changes to this may require changes to how IV is generated
+            $this->baseKey,
+            7
+        );
+
+        $this->encrypter->setValueRange(
+        // 10 digits
+            '0000000000',
+            '4294967295'
+        );
+    }
+
     protected function loadEncryptionParameters(AppConfiguration $appConfig)
     {
+        // Return early if already initialized
+        if ($this->baseKey && $this->password && $this->iv) return;
+
         $randomValueSettings = [
             self::BASE_KEY_CONFIG_ID,
             self::PASSWORD_CONFIG_ID,
