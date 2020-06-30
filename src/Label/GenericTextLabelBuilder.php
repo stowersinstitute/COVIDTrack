@@ -32,18 +32,20 @@ class GenericTextLabelBuilder extends AbstractLabelBuilder
         $font = 'Font 0';
         $fontSize = 10;
 
-        // Write rectangle label text
-
         // All positioning code is below here
 
         $zpl = $this->getZplBuilder();
 
-        $zpl->setHome(2, 2);
+        $zpl->setHome(0, 0);
+        $fontSize = 28;
 
-        $fontSize = 32;
+        if (strlen($this->text) < 10) {
+            $fontSize = 42;
+        }
+
         $zpl->setFont($font, $fontSize);
 
-        $zpl->drawText(20, 18, $this->text, 'N', ZplBuilder::JUSTIFY_AUTO, 64, $fontSize);
+        $zpl->drawCell(64, 25, $this->text, false, false,'C');
 
         return $zpl->toZpl();
     }

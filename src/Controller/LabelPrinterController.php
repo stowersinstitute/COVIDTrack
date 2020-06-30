@@ -225,7 +225,7 @@ class LabelPrinterController extends AbstractController
      */
     public function genericPrint(Request $request, ZplPrinting $zpl)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted(['ROLE_ADMIN', 'ROLE_PRINT_TUBE_LABELS']);
 
         $form = $this->createFormBuilder()
             ->add('printer', EntityType::class, [
@@ -245,6 +245,7 @@ class LabelPrinterController extends AbstractController
             ])
             ->add('text', TextType::class, [
                 'label' => 'Text',
+                'help' => 'Roughly 20 characters max',
                 'required' => true,
             ])
             ->add('copies', IntegerType::class, [
