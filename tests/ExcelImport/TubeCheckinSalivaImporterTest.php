@@ -6,17 +6,17 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
 use App\ExcelImport\TubeCheckinSalivaImporter;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\ExcelImport\DataFixtures\TubeCheckinFixtures;
+use App\Tests\ExcelImport\DataFixtures\TubeCheckinSalivaFixtures;
 
 class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
 {
     public function testProcess()
     {
         $this->loadFixtures([
-            TubeCheckinFixtures::class,
+            TubeCheckinSalivaFixtures::class,
         ]);
 
-        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin.xlsx');
+        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin-saliva.xlsx');
         $importer = new TubeCheckinSalivaImporter($this->em, $workbook->getFirstWorksheet());
 
         $checkedInTubes = $importer->process(true);

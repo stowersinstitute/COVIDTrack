@@ -10,9 +10,9 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing Tube Check-in using Excel
+ * Creates data for testing Check-in of Saliva Tubes using Excel
  */
-class TubeCheckinFixtures extends Fixture implements DependentFixtureInterface
+class TubeCheckinSalivaFixtures extends Fixture implements DependentFixtureInterface
 {
     /**
      * @var SpecimenAccessionIdGenerator
