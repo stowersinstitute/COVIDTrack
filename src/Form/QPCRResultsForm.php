@@ -49,7 +49,7 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('position', TextType::class, [
-                'label' => 'RNA Well Position',
+                'label' => 'Well Position',
                 'required' => false,
                 'disabled' => $isEditing,
                 'attr' => [
