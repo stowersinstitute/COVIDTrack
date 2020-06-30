@@ -37,7 +37,7 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('wellPlate', EntityType::class, [
-                'label' => 'RNA Well Plate Barcode',
+                'label' => 'Well Plate Barcode',
                 'class' => WellPlate::class,
                 'placeholder' => '- Select -',
                 'required' => true,
