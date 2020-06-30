@@ -267,6 +267,7 @@ class LabelPrinterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
+            // Technical Debt: CVDLS-112
             $builderClass = $data['labelType'];
 
             $labelBuilder = new $builderClass($printer);
@@ -278,8 +279,8 @@ class LabelPrinterController extends AbstractController
 
             if($result->getPrinterType() === 'image') {
                 /** @var ZplImage $data */
-                $data = $result->getData();
-                $image = file_get_contents($data->serverPath);
+                $resultData = $result->getData();
+                $image = file_get_contents($resultData->serverPath);
                 $b64Image = base64_encode($image);
             } else if ($result->getPrinterType() === 'text') {
                 $zplText = $result->getData();

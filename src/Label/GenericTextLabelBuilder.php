@@ -11,7 +11,7 @@ use Zpl\ZplBuilder;
 class GenericTextLabelBuilder extends AbstractLabelBuilder
 {
     /**
-     * @var ParticipantGroup
+     * @var string
      */
     protected $text;
 
@@ -53,8 +53,7 @@ class GenericTextLabelBuilder extends AbstractLabelBuilder
     public static function testLabelZpl(LabelPrinter $printer): string
     {
         $builder = new self($printer);
-        $group = new ParticipantGroup('Generic Text', 5);
-        $builder->setGroup($group);
+        $builder->setText('COVIDTrack');
 
         return $builder->build();
     }
