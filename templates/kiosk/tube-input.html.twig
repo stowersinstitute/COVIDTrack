@@ -58,32 +58,34 @@
                     'label_attr': {'style': 'font-size: 1.25em;'}
                 }) }}
 
-                <div id="tubeTimeSelection" class="collapse">
-                    <div class="row">
-                        <div class="col-xs-6">
-                            {{ form_row(form.collectedAtDate) }}
-                        </div>
-                        <div class="col-xs-6">
-                            {{ form_row(form.collectedAtTime) }}
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-xs-6 text-right">
-                            {{ form_row(form.save) }}
-                        </div>
-                        <div class="col-xs-6">
-                            {{ form_row(form.review) }}
-                        </div>
-                    </div>
+            </div>
 
-                    <div class="row col-xs-12 text-center">
-                        {{ _self.renderCancelButton() }}
+            <div id="tubeTimeSelection" class="collapse">
+                <div class="row">
+                    <div class="col-xs-6">
+                        {{ form_row(form.collectedAtDate) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.collectedAtTime) }}
                     </div>
                 </div>
 
             </div>
 
+            <div id="tubeContinueButtons" class="collapse">
+                <div class="row">
+                    <div class="col-xs-6 text-right">
+                        {{ form_row(form.save) }}
+                    </div>
+                    <div class="col-xs-6">
+                        {{ form_row(form.review) }}
+                    </div>
+                </div>
+                <div class="row col-xs-12 text-center">
+                    {{ _self.renderCancelButton() }}
+                </div>
+            </div>
 
             {{ form_end(form) }}
 
@@ -182,6 +184,14 @@
                 }
             });
 
+            $("#kiosk_add_tube_form_collectedAtDate, #kiosk_add_tube_form_collectedAtTime").on('input', function(e) {
+                if ($("#kiosk_add_tube_form_collectedAtDate").val() && $("#kiosk_add_tube_form_collectedAtTime").val()) {
+                    showTubeContinueButtons(true);
+                } else {
+                    showTubeContinueButtons(false);
+                }
+            });
+
             /**
              * What to do when we get a tube check response from the server
              * @param data AJAX Response Data
@@ -235,6 +245,7 @@
                     $("#scanTip").hide();
                     $("#kiosk_add_tube_form_accessionId_button").hide();
                 } else {
+                    $("#kiosk_add_tube_form_tubeType").val('').trigger('input');
                     $("#tubeDetailSelection").collapse('hide');
                     $("#scanTip").show();
                     $("#kiosk_add_tube_form_accessionId_button").show();
@@ -249,7 +260,17 @@
                 if (show) {
                     $("#tubeTimeSelection").collapse('show');
                 } else {
+                    $("#kiosk_add_tube_form_collectedAtDate").val('').trigger('input');
+                    $("#kiosk_add_tube_form_collectedAtTime").val('').trigger('input');
                     $("#tubeTimeSelection").collapse('hide');
+                }
+            }
+
+            function showTubeContinueButtons(show = true) {
+                if (show) {
+                    $("#tubeContinueButtons").collapse('show');
+                } else {
+                    $("#tubeContinueButtons").collapse('hide');
                 }
             }
 

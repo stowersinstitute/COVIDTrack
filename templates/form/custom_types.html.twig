@@ -23,7 +23,14 @@
 
             $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('not-active');
             $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('not-active').addClass('active');
-        })
+        });
+
+        // Handle field value getting cleared
+        $('#{{ id }}').bind('input', function(e) {
+            if($(e.target).val() === '') {
+                $('a[data-toggle="{{ id }}"]').removeClass('active').addClass('not-active');
+            }
+        });
     </script>
 
     <style>
