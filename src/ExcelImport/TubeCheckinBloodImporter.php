@@ -109,13 +109,13 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             $rowOk = $this->validateAcceptOrReject($rawAcceptedStatus, $rowNumber) && $rowOk;
 
             $wellPlateBarcode = $rawValues['wellPlateBarcode'];
-            $rowOk = $this->validateWellPlateBarcode($wellPlateBarcode, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellPlateBarcode($wellPlateBarcode, $rawAcceptedStatus, $rowNumber) && $rowOk;
 
             $wellIdentifier = $rawValues['wellIdentifier'];
-            $rowOk = $this->validateWellIdentifier($wellIdentifier, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellIdentifier($wellIdentifier, $rawAcceptedStatus, $rowNumber) && $rowOk;
 
             $wellPosition = $rawValues['wellPosition'];
-            $rowOk = $this->validateWellPosition($wellPosition, $rowNumber) && $rowOk;
+            $rowOk = $this->validateWellPosition($wellPosition, $rawAcceptedStatus, $rowNumber) && $rowOk;
 
             $rawKitType = $rawValues['kitType'];
             $rowOk = $this->validateKitType($rawKitType, $rowNumber) && $rowOk;
@@ -251,10 +251,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateWellPlateBarcode($rawWellPlateBarcode, $rowNumber): bool
+    private function validateWellPlateBarcode($rawWellPlateBarcode, string $acceptedStatus, $rowNumber): bool
     {
-        // Well Plate Barcode cannot be blank
-        if (!$rawWellPlateBarcode) {
+        // Well Plate Barcode can only be blank for Rejected tubes, because
+        // rejected tubes will never be stored on a Well Plate
+        if ($acceptedStatus !== self::STATUS_REJECTED && !$rawWellPlateBarcode) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('Well Plate Barcode cannot be blank'),
                 $rowNumber,
@@ -271,10 +272,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateWellIdentifier($rawWellIdentifier, $rowNumber): bool
+    private function validateWellIdentifier($rawWellIdentifier, string $acceptedStatus, $rowNumber): bool
     {
-        // Cannot be blank
-        if (!$rawWellIdentifier) {
+        // Can only be blank for Rejected tubes, because
+        // rejected tubes will never be stored on a Well Plate
+        if ($acceptedStatus !== self::STATUS_REJECTED && !$rawWellIdentifier) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('Well Identifier cannot be blank'),
                 $rowNumber,
@@ -291,10 +293,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateWellPosition($rawWellPosition, $rowNumber): bool
+    private function validateWellPosition($rawWellPosition, string $acceptedStatus, $rowNumber): bool
     {
-        // Well Position cannot be blank
-        if (!$rawWellPosition) {
+        // Can only be blank for Rejected tubes, because
+        // rejected tubes will never be stored on a Well Plate
+        if ($acceptedStatus !== self::STATUS_REJECTED && !$rawWellPosition) {
             $this->messages[] = ImportMessage::newError(
                 sprintf('Well Position cannot be blank'),
                 $rowNumber,
