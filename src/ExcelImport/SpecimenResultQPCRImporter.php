@@ -255,7 +255,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validatePlateAndPosition(string $rawPlateBarcode, $rawPosition, string $rawSpecimenId, int $rowNumber): bool
+    private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
@@ -300,7 +300,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             }
 
             $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" currently in Well(s) %s. Results cannot be saved for Well "%s"', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
+                sprintf('Specimen "%s" currently in Well %s. Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
                 $rowNumber,
                 $this->columnMap['position']
             );

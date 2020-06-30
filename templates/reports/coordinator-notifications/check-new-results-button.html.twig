@@ -1,7 +1,7 @@
 {% if refreshOnComplete is not defined %}
     {% set refreshOnComplete = false %}
 {% endif %}
-<a id="check-new-results" href="#" class="btn btn-primary"><i class="fa fa-fw fa-sync-alt"></i> Check For New Results</a>
+<a id="check-new-results" href="#" class="btn btn-primary"><i class="fa fa-fw fa-sync-alt"></i> {{ buttonText | default('Check For New Results') }}</a>
 
 <script>
     $("#check-new-results").click(function(e) {
