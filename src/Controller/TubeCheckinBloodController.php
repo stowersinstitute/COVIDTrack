@@ -5,11 +5,9 @@ namespace App\Controller;
 use App\Entity\ExcelImportWorkbook;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\TubeCheckinBloodImporter;
-use App\ExcelImport\TubeCheckinSalivaImporter;
 use App\Form\GenericExcelImportType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -93,7 +91,7 @@ class TubeCheckinBloodController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new TubeCheckinSalivaImporter(
+        $importer = new TubeCheckinBloodImporter(
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
