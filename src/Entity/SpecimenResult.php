@@ -21,6 +21,7 @@ use App\Traits\TimestampableEntity;
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
  *     "qpcr" = "SpecimenResultQPCR",
+ *     "antibody" = "SpecimenResultAntibody",
  * })
  */
 abstract class SpecimenResult

@@ -1,0 +1,45 @@
+{% block body %}
+{% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
+{% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
+{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+            <th>Specimen</th>
+            <th>Conclusion</th>
+            <th>Well Plate Barcode</th>
+            <th>Well Position</th>
+            <th>Reported At</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for result in results %}
+        <tr>
+            {% if userCanEditResults %}
+            <td>
+                <a href="{{ path('app_results_antibody_edit', {id: result.id}) }}">Edit</a>
+            </td>
+            {% endif %}
+            <td>
+                {% if userCanViewSpecimens %}
+                    <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>
+                {% else %}
+                    {{ result.specimen.accessionId }}
+                {% endif %}
+            </td>
+            <td>{{ result.conclusionText }}</td>
+            <td>
+                {% if userCanViewWellPlates %}
+                    <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>
+                {% else %}
+                    {{ result.wellPlateBarcode }}
+                {% endif %}
+            </td>
+            <td>{{ result.wellPosition }}</td>
+            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

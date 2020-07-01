@@ -51,6 +51,14 @@ class SpecimenWell
     private $resultQPCR;
 
     /**
+     * Result of Antibody testing Specimen contained in this well.
+     *
+     * @var SpecimenResultAntibody|null
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="well")
+     */
+    private $resultAntibody;
+
+    /**
      * Any identifier that identifies this well. For example, a Biobank Tube ID.
      * Uniqueness is not enforced on this field.
      *
@@ -227,5 +235,26 @@ class SpecimenWell
     public function getResultQPCR(): ?SpecimenResultQPCR
     {
         return $this->resultQPCR;
+    }
+
+    /**
+     * @internal Do not call directly. Instead call new SpecimenResultAntibody($specimen);
+     */
+    public function setAntibodyResult(?SpecimenResultAntibody $result)
+    {
+        if ($result && $this->resultAntibody) {
+            throw new \InvalidArgumentException('Cannot assign new Antibody result when one already exists');
+        }
+
+        $this->resultAntibody = $result;
+
+        if ($this->getSpecimen()) {
+            $this->getSpecimen()->updateStatusWhenResultsSet();
+        }
+    }
+
+    public function getResultAntibody(): ?SpecimenResultAntibody
+    {
+        return $this->resultAntibody;
     }
 }

@@ -5,32 +5,31 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Result of performing qPCR analysis on Specimen.
+ * Result of analyzing presence of antibodies in Specimen.
  *
- * @ORM\Entity(repositoryClass="App\Repository\SpecimenResultQPCRRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\SpecimenResultAntibodyRepository")
  * NOTE: (a)ORM\Table defined on parent class
  */
-class SpecimenResultQPCR extends SpecimenResult
+class SpecimenResultAntibody extends SpecimenResult
 {
-    // When result did not find evidence of viral DNA in Specimen.
-    const CONCLUSION_NEGATIVE = "NEGATIVE";
+    // When result did not find evidence of antibodies in Specimen
+    const CONCLUSION_NEGATIVE_TEXT = "NEGATIVE";
+    const CONCLUSION_NEGATIVE_INT = 0;
 
-    // When result indicates Participant should obtain CLIA-based COVID test.
-    // Testing confidence is high, strongly leans towards viral RNA being present.
-    const CONCLUSION_POSITIVE = "POSITIVE";
+    const CONCLUSION_PARTIAL_TEXT = "PARTIAL";
+    const CONCLUSION_PARTIAL_INT = 1;
 
-    // When result indicates Participant should obtain CLIA-based COVID test.
-    // Testing confidence is low, but leans towards viral RNA being present.
-    const CONCLUSION_RECOMMENDED = "RECOMMENDED";
+    const CONCLUSION_WEAK_TEXT = "WEAK";
+    const CONCLUSION_WEAK_INT = 2;
 
-    // When result could not be determined positive or negative.
-    const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
+    const CONCLUSION_STRONG_TEXT = "STRONG";
+    const CONCLUSION_STRONG_INT = 3;
 
     /**
      * Well analyzed to derive this result
      *
      * @var SpecimenWell
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultQPCR", fetch="EAGER")
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultAntibody", fetch="EAGER")
      * @ORM\JoinColumn(name="specimen_well_id", referencedColumnName="id")
      */
     private $well;
@@ -39,7 +38,7 @@ class SpecimenResultQPCR extends SpecimenResult
      * Specimen analyzed.
      *
      * @var Specimen
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsQPCR")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsAntibody")
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
      */
     private $specimen;
@@ -53,21 +52,21 @@ class SpecimenResultQPCR extends SpecimenResult
     private $conclusion;
 
     /**
-     * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
+     * @param string       $conclusion SpecimenResultAntibody::CONCLUSION_* constant
      */
     public function __construct(SpecimenWell $well, string $conclusion)
     {
         parent::__construct();
 
         if (!$well->getSpecimen()) {
-            throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
+            throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultAntibody');
         }
         $this->specimen = $well->getSpecimen();
-        $this->specimen->addQPCRResult($this);
+        $this->specimen->addAntibodyResult($this);
 
-        // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
+        // Setup relationship between SpecimenWell <==> SpecimenResultsAntibody
         $this->well = $well;
-        $well->setQPCRResult($this);
+        $well->setAntibodyResult($this);
 
         $this->setConclusion($conclusion);
     }
@@ -100,12 +99,9 @@ class SpecimenResultQPCR extends SpecimenResult
     public function setConclusion(string $conclusion): void
     {
         if (!self::isValidConclusion($conclusion)) {
-            throw new \InvalidArgumentException('Cannot set invalid qPCR Result Conclusion');
+            throw new \InvalidArgumentException('Cannot set invalid Result Conclusion');
         }
         $this->conclusion = $conclusion;
-
-        // Specimen recommendation depends on conclusion
-        $this->getSpecimen()->recalculateCliaTestingRecommendation();
     }
 
     public static function isValidConclusion(string $conclusion): bool
@@ -126,10 +122,10 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
-            'Negative' => self::CONCLUSION_NEGATIVE,
-            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
-            'Recommended' => self::CONCLUSION_RECOMMENDED,
-            'Positive' => self::CONCLUSION_POSITIVE,
+            'Negative' => self::CONCLUSION_NEGATIVE_TEXT,
+            'Partial' => self::CONCLUSION_PARTIAL_TEXT,
+            'Weak' => self::CONCLUSION_WEAK_TEXT,
+            'Strong' => self::CONCLUSION_STRONG_TEXT,
         ];
     }
 }
