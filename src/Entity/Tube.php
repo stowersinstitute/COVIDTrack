@@ -353,10 +353,16 @@ class Tube
         return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function addToWellPlate(WellPlate $plate, string $position = null): void
+    public function addToWellPlate(WellPlate $plate, string $position = null): SpecimenWell
     {
+        if (!$this->specimen) {
+            throw new \RuntimeException('Tube must be checked in at a Kiosk before adding to a Well Plate');
+        }
+
         $well = new SpecimenWell($plate, $this->specimen, $position);
         $this->specimen->addWell($well);
+
+        return $well;
     }
 
     public function getKitType(): ?string
@@ -442,12 +448,7 @@ class Tube
      */
     public function willAllowCheckinDecision(): bool
     {
-        // Has a check-in decision, but not yet further along
-        // Accepted
-        if ($this->status === self::STATUS_ACCEPTED) {
-            return true;
-        }
-        // Rejected
+        // Allow Rejected tubes to be switched to Accepted
         if ($this->status === self::STATUS_REJECTED) {
             return true;
         }

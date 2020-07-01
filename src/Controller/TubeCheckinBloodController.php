@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\ExcelImportWorkbook;
 use App\ExcelImport\ExcelImporter;
-use App\ExcelImport\SpecimenResultQPCRImporter;
+use App\ExcelImport\TubeCheckinBloodImporter;
 use App\Form\GenericExcelImportType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -12,18 +12,19 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Import SpecimenResultQPCR with Excel
+ * Actions for the Blood Tube check-in process. These tubes have been returned by
+ * Participants and allow Technicians to acknowledge receipt.
  *
- * @Route(path="/results/qpcr/excel-import")
+ * @Route(path="/checkin/blood")
  */
-class SpecimenResultQPCRExcelController extends AbstractController
+class TubeCheckinBloodController extends AbstractController
 {
     /**
-     * @Route("/start", name="qpcr_excel_import")
+     * @Route(path="/import/start", name="checkin_blood_import_start")
      */
-    public function start(Request $request, ExcelImporter $excelImporter)
+    public function importStart(Request $request, ExcelImporter $excelImporter)
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
@@ -38,28 +39,28 @@ class SpecimenResultQPCRExcelController extends AbstractController
             $em->persist($workbook);
             $em->flush();
 
-            return $this->redirectToRoute('qpcr_excel_import_preview', [
+            return $this->redirectToRoute('checkin_blood_import_preview', [
                 'importId' => $workbook->getId(),
             ]);
         }
 
         return $this->render('excel-import/base-excel-import-start.html.twig', [
-            'itemLabel' => 'Results',
+            'itemLabel' => 'Blood Tubes',
             'importForm' => $form->createView(),
         ]);
     }
 
     /**
-     * @Route("/preview/{importId<\d+>}", name="qpcr_excel_import_preview")
+     * @Route("/import/preview/{importId<\d+>}", name="checkin_blood_import_preview")
      */
-    public function preview(int $importId, ExcelImporter $excelImporter)
+    public function importPreview(int $importId, ExcelImporter $excelImporter)
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenResultQPCRImporter(
+        $importer = new TubeCheckinBloodImporter(
             $this->getDoctrine()->getManager(),
             $importingWorkbook->getFirstWorksheet()
         );
@@ -67,44 +68,45 @@ class SpecimenResultQPCRExcelController extends AbstractController
         $importer->process();
         $output = $importer->getOutput();
 
-        return $this->render('results/qpcr/excel-import-preview.html.twig', [
+        return $this->render('checkin/blood/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
-            'createdResults' => $output['created'] ?? [],
-            'updatedResults' => $output['updated'] ?? [],
-            'importPreviewTemplate' => 'results/qpcr/excel-import-table.html.twig',
-            'importCommitRoute' => 'qpcr_excel_import_commit',
-            'importCommitText' => 'Save Results',
+            'rejected' => $output['rejected'] ?? [],
+            'accepted' => $output['accepted'] ?? [],
+            'importPreviewTemplate' => 'checkin/blood/excel-import-table.html.twig',
+            'importCommitRoute' => 'checkin_blood_import_commit',
+            'importCommitText' => 'Save Check-ins',
         ]);
     }
 
     /**
-     * @Route("/commit/{importId<\d+>}", methods={"POST"}, name="qpcr_excel_import_commit")
+     * @Route("/import/commit/{importId<\d+>}", methods={"POST"}, name="checkin_blood_import_commit")
      */
-    public function commit(int $importId, ExcelImporter $excelImporter)
+    public function importCommit(int $importId, ExcelImporter $excelImporter)
     {
-        $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new SpecimenResultQPCRImporter(
+        $importer = new TubeCheckinBloodImporter(
             $em,
             $importingWorkbook->getFirstWorksheet()
         );
         $importer->process(true);
+        $output = $importer->getOutput();
 
         // Clean up workbook from the database
         $em->remove($importingWorkbook);
 
         $em->flush();
 
-        return $this->render('results/qpcr/excel-import-result.html.twig', [
+        return $this->render('checkin/blood/excel-import-result.html.twig', [
             'importer' => $importer,
-            'createdResults' => $output['created'] ?? [],
-            'updatedResults' => $output['updated'] ?? [],
+            'rejected' => $output['rejected'] ?? [],
+            'accepted' => $output['accepted'] ?? [],
         ]);
     }
 

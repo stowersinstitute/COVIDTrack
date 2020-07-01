@@ -115,7 +115,7 @@ class TubeController extends AbstractController
             ]);
         }
 
-        return $this->render('excel-import/base-excel-import-start.twig', [
+        return $this->render('excel-import/base-excel-import-start.html.twig', [
             'itemLabel' => 'Pre-labeled Tubes',
             'importForm' => $form->createView(),
         ]);

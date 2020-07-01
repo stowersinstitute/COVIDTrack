@@ -14,11 +14,6 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  */
 class SpecimenWell
 {
-    /**
-     * Regex to validate alphanumericPosition between A1 and H12
-     */
-    public const alphanumericPositionRegex = '/^([A-H])([2-9]|1[0-2]?)$/';
-
     public const minIntegerPosition = 1;
     public const maxIntegerPosition = 96;
 
@@ -56,6 +51,15 @@ class SpecimenWell
     private $resultQPCR;
 
     /**
+     * Any identifier that identifies this well. For example, a Biobank Tube ID.
+     * Uniqueness is not enforced on this field.
+     *
+     * @var null|string
+     * @ORM\Column(name="well_identifier", type="string", length=255, nullable=true)
+     */
+    private $wellIdentifier;
+
+    /**
      * Well position in alphanumeric format such as A1, B4, H12, etc.
      *
      * @var string
@@ -65,7 +69,6 @@ class SpecimenWell
 
     public function __construct(WellPlate $plate, Specimen $specimen, string $position = null)
     {
-        self::mustBeValidAlphanumericPosition($position);
         $this->positionAlphanumeric = $position;
 
         $this->wellPlate = $plate;
@@ -128,8 +131,20 @@ class SpecimenWell
         return $this->specimen;
     }
 
+    public function getWellIdentifier(): ?string
+    {
+        return $this->wellIdentifier;
+    }
+
+    public function setWellIdentifier(?string $wellIdentifier): void
+    {
+        $this->wellIdentifier = $wellIdentifier;
+    }
+
     /**
-     * Given a numeric position (beginning at 1), get its alphanumeric equivalent.
+     * Given a numeric position (beginning at 1), get its alphanumeric
+     * equivalent such as "B4".
+     *
      * Supports a 96-well plate.
      *
      *   1  2  3  4  5
@@ -157,40 +172,16 @@ class SpecimenWell
             $column = 1;
         }
 
-        $position = Coordinate::stringFromColumnIndex($row) . $column;
-
-        static::mustBeValidAlphanumericPosition($position);
-
-        return $position;
+        return Coordinate::stringFromColumnIndex($row) . $column;
     }
 
     public function setPositionAlphanumeric(string $position): void
     {
-        self::mustBeValidAlphanumericPosition($position);
-
         if ($this->wellPlate->hasWellAtPosition($position)) {
             throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
         }
 
         $this->positionAlphanumeric = $position;
-    }
-
-    /**
-     * @throws \InvalidArgumentException When given invalid position
-     */
-    public static function mustBeValidAlphanumericPosition(?string $position): void
-    {
-        // Empty is OK
-        if (null === $position || '' === $position) {
-            return;
-        }
-
-        // A-H; 1-12
-        preg_match(static::alphanumericPositionRegex, $position, $matches);
-
-        if (count($matches) !== 3) {
-            throw new \InvalidArgumentException('Invalid position');
-        }
     }
 
     public function getPositionAlphanumeric(): ?string
@@ -204,14 +195,23 @@ class SpecimenWell
     public function getWellPlatePositionDisplayString(): string
     {
         $barcode = $this->getWellPlateBarcode();
-        $output = $barcode;
 
+        // Add Barcode
+        $parts = [$barcode];
+
+        // Add Position
         $position = $this->getPositionAlphanumeric();
         if ($position !== null) {
-            $output .= ' / ' . $position;
+            $parts[] = $position;
         }
 
-        return $output;
+        // Add Well Identifier
+        $wellIdentifier = $this->getWellIdentifier();
+        if ($wellIdentifier !== null) {
+            $parts[] = $wellIdentifier;
+        }
+
+        return implode(' / ', $parts);
     }
 
     /**

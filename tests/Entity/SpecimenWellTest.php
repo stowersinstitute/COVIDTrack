@@ -27,6 +27,9 @@ class SpecimenWellTest extends TestCase
         // No result
         $this->assertNull($well->getResultQPCR());
 
+        // No well identifier
+        $this->assertNull($well->getWellIdentifier());
+
         // No position
         $this->assertNull($well->getPositionAlphanumeric());
     }
@@ -50,6 +53,9 @@ class SpecimenWellTest extends TestCase
         // No result
         $this->assertNull($well->getResultQPCR());
 
+        // No well identifier
+        $this->assertNull($well->getWellIdentifier());
+
         // Has position
         $this->assertSame($position, $well->getPositionAlphanumeric());
     }
@@ -68,6 +74,36 @@ class SpecimenWellTest extends TestCase
         // Add Specimen to duplicate position should throw Exception
         $this->expectException(\InvalidArgumentException::class);
         new SpecimenWell($plate, $specimen2, $well1->getPositionAlphanumeric());
+    }
+
+    /**
+     * @dataProvider providePlateAllowsAnyWellPositionFormat
+     */
+    public function testPlateAllowsAnyWellPositionFormat(string $position)
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen1 = Specimen::buildExample('SPEC1');
+        $specimen2 = Specimen::buildExample('SPEC2');
+
+        // Add Specimen to a specific position
+        $well = new SpecimenWell($plate, $specimen1, $position);
+
+        $this->assertSame($position, $well->getPositionAlphanumeric());
+
+        // Add Specimen to duplicate position should throw Exception
+        $this->expectException(\InvalidArgumentException::class);
+        new SpecimenWell($plate, $specimen2, $well->getPositionAlphanumeric());
+    }
+
+    public function providePlateAllowsAnyWellPositionFormat()
+    {
+        return [
+            'With leading zeros' => ['B06'],
+            'Random alphanumeric' => ['Gb4RzPq2'],
+            'With symbols' => ['@hJkLp512'],
+            'With spaces' => ['HJkL p51 2'],
+        ];
     }
 
     public function testPlateAllowsMultipleSameSpecimenWithoutPosition()
@@ -117,9 +153,13 @@ class SpecimenWellTest extends TestCase
         // Verify display string when doesn't have Position
         $this->assertSame($plateBarcode, $well->getWellPlatePositionDisplayString());
 
-        // Now add position and verify display string includes it
+        // Add position and verify display string includes it
         $well->setPositionAlphanumeric('C1');
         $this->assertSame('BC101 / C1', $well->getWellPlatePositionDisplayString());
+
+        // Add position and verify display string includes it
+        $well->setWellIdentifier('TUBEIDHERE');
+        $this->assertSame('BC101 / C1 / TUBEIDHERE', $well->getWellPlatePositionDisplayString());
     }
 
     /**

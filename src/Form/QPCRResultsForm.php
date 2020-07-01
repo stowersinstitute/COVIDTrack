@@ -37,7 +37,7 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('wellPlate', EntityType::class, [
-                'label' => 'RNA Well Plate Barcode',
+                'label' => 'Well Plate Barcode',
                 'class' => WellPlate::class,
                 'placeholder' => '- Select -',
                 'required' => true,
@@ -49,17 +49,11 @@ class QPCRResultsForm extends AbstractType
                 },
             ])
             ->add('position', TextType::class, [
-                'label' => 'RNA Well Position',
+                'label' => 'Well Position',
                 'required' => false,
                 'disabled' => $isEditing,
                 'attr' => [
                     'placeholder' => 'For example A4, G8, H12, etc',
-                ],
-                'constraints' => [
-                    new Regex([
-                        'pattern' => SpecimenWell::alphanumericPositionRegex,
-                        'message' => 'Only supports positions between A1 and H12',
-                    ]),
                 ],
             ])
             ->add('conclusion', ChoiceType::class, [

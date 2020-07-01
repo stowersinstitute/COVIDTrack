@@ -2,13 +2,16 @@
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
+        <th>Well Position</th>
         <th>Specimen</th>
-        <th>Position</th>
+        <th>Type</th>
+        <th>Well ID</th>
     </tr>
     </thead>
     <tbody>
     {% for well in wells %}
         <tr>
+            <td>{{ well.positionAlphanumeric }}</td>
             <td>
                 {% if userCanViewSpecimens %}
                     <a href="{{ path('app_specimen_view', {accessionId: well.specimen.accessionId}) }}">{{ well.specimen.accessionId }}</a>
@@ -16,7 +19,8 @@
                     {{ well.specimen.accessionId }}
                 {% endif %}
             </td>
-            <td>{{ well.positionAlphanumeric }}</td>
+            <td>{{ well.specimen.typeText }}</td>
+            <td>{{ well.wellIdentifier }}</td>
         </tr>
     {% endfor %}
     </tbody>

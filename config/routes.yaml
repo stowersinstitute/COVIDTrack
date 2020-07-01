@@ -1,3 +1,11 @@
 index:
     path: /
     controller: App\Controller\DefaultController::index
+
+# Redirect for old Check-in Saliva Tubes screen
+redirect_saliva_import:
+    path: /checkin/import/start
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: checkin_saliva_import_start
+        permanent: true

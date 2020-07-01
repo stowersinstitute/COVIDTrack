@@ -10,9 +10,9 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing Tube Check-in using Excel
+ * Creates data for testing Check-in of Blood Tubes using Excel
  */
-class TubeCheckinFixtures extends Fixture implements DependentFixtureInterface
+class TubeCheckinBloodFixtures extends Fixture implements DependentFixtureInterface
 {
     /**
      * @var SpecimenAccessionIdGenerator
@@ -74,64 +74,64 @@ class TubeCheckinFixtures extends Fixture implements DependentFixtureInterface
     {
         return [
             [
-                'accessionId' => 'TestCheckin0001',
+                'accessionId' => 'TestBloodCheckin0001',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0002',
+                'accessionId' => 'TestBloodCheckin0002',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0003',
+                'accessionId' => 'TestBloodCheckin0003',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0004',
+                'accessionId' => 'TestBloodCheckin0004',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0005',
+                'accessionId' => 'TestBloodCheckin0005',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0006',
+                'accessionId' => 'TestBloodCheckin0006',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0007',
+                'accessionId' => 'TestBloodCheckin0007',
                 'returnAtKiosk' => true,
-                'tubeType' => Tube::TYPE_SALIVA,
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
-                'accessionId' => 'TestCheckin0008',
+                'accessionId' => 'TestBloodCheckin0008',
                 'returnAtKiosk' => false,
             ],
             [
-                'accessionId' => 'TestCheckin0009',
+                'accessionId' => 'TestBloodCheckin0009',
                 'returnAtKiosk' => false,
             ],
             [
-                'accessionId' => 'TestCheckin0010',
+                'accessionId' => 'TestBloodCheckin0010',
                 'returnAtKiosk' => false,
             ],
         ];

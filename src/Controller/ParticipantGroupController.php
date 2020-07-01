@@ -299,7 +299,7 @@ class ParticipantGroupController extends AbstractController
             ]);
         }
 
-        return $this->render('excel-import/base-excel-import-start.twig', [
+        return $this->render('excel-import/base-excel-import-start.html.twig', [
             'itemLabel' => 'Participant Groups',
             'importForm' => $form->createView(),
         ]);

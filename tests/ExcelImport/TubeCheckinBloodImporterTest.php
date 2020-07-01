@@ -4,20 +4,20 @@ namespace App\Tests\ExcelImport;
 
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\Tube;
-use App\ExcelImport\SpecimenCheckinImporter;
+use App\ExcelImport\TubeCheckinBloodImporter;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\ExcelImport\DataFixtures\TubeCheckinFixtures;
+use App\Tests\ExcelImport\DataFixtures\TubeCheckinBloodFixtures;
 
-class SpecimenCheckinImporterTest extends BaseDatabaseTestCase
+class TubeCheckinBloodImporterTest extends BaseDatabaseTestCase
 {
     public function testProcess()
     {
         $this->loadFixtures([
-            TubeCheckinFixtures::class,
+            TubeCheckinBloodFixtures::class,
         ]);
 
-        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin.xlsx');
-        $importer = new SpecimenCheckinImporter($this->em, $workbook->getFirstWorksheet());
+        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin-blood.xlsx');
+        $importer = new TubeCheckinBloodImporter($this->em, $workbook->getFirstWorksheet());
 
         $checkedInTubes = $importer->process(true);
 
@@ -29,13 +29,13 @@ class SpecimenCheckinImporterTest extends BaseDatabaseTestCase
         $this->assertCount(7, $checkedInTubes);
 
         $ensureHasTubeIds = [
-            'TestCheckin0001',
-            'TestCheckin0002',
-            'TestCheckin0003',
-            'TestCheckin0004',
-            'TestCheckin0005',
-            'TestCheckin0006',
-            'TestCheckin0007',
+            'TestBloodCheckin0001',
+            'TestBloodCheckin0002',
+            'TestBloodCheckin0003',
+            'TestBloodCheckin0004',
+            'TestBloodCheckin0005',
+            'TestBloodCheckin0006',
+            'TestBloodCheckin0007',
         ];
         $processedTubeIds = array_map(function(Tube $T) {
             return $T->getAccessionId();
