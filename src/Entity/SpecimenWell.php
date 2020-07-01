@@ -205,12 +205,6 @@ class SpecimenWell
             $parts[] = $position;
         }
 
-        // Add Well Identifier
-        $wellIdentifier = $this->getWellIdentifier();
-        if ($wellIdentifier !== null) {
-            $parts[] = $wellIdentifier;
-        }
-
         return implode(' / ', $parts);
     }
 

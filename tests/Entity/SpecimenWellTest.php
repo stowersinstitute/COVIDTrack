@@ -156,10 +156,6 @@ class SpecimenWellTest extends TestCase
         // Add position and verify display string includes it
         $well->setPositionAlphanumeric('C1');
         $this->assertSame('BC101 / C1', $well->getWellPlatePositionDisplayString());
-
-        // Add position and verify display string includes it
-        $well->setWellIdentifier('TUBEIDHERE');
-        $this->assertSame('BC101 / C1 / TUBEIDHERE', $well->getWellPlatePositionDisplayString());
     }
 
     /**
