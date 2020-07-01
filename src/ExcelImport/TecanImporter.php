@@ -82,35 +82,12 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
-    {
-        return IOFactory::load($filepath);
-    }
-
+    /**
+     * OVERRIDDEN to validate Workbook meets import expectations
+     */
     public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
     {
-        $filepath = $file->getRealPath();
-        $spreadsheet = static::createSpreadsheetFromPath($filepath);
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-        $importWorkbook->setFileMimeType($file->getMimeType());
-        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
-        $importWorkbook->setUploadedBy($uploadedByUser);
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
+        $importWorkbook = parent::createExcelImportWorkbookFromUpload($file, $uploadedByUser);
 
         self::mustMeetFileFormatExpectations($importWorkbook->getFirstWorksheet());
 
@@ -145,24 +122,7 @@ class TecanImporter extends BaseExcelImporter
         $spreadsheet = static::createSpreadsheetFromPath($filepath);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $max = $worksheet->getHighestRow(self::TUBE_ID_COLUMN);
-
-        $tubeAccessionIds = [];
-        for ($rowNumber = static::STARTING_ROW; $rowNumber <= $max; $rowNumber++) {
-            $columnIdx = Coordinate::columnIndexFromString(static::TUBE_ID_COLUMN);
-
-            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
-            if (!$cell) {
-                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::TUBE_ID_COLUMN, $rowNumber));
-            }
-
-            $rawTubeId = trim($cell->getValue());
-            if ($rawTubeId) {
-                $tubeAccessionIds[] = $rawTubeId;
-            }
-        }
-
-        return $tubeAccessionIds;
+        return static::getColumnValues($worksheet, static::TUBE_ID_COLUMN, static::STARTING_ROW);
     }
 
     /**

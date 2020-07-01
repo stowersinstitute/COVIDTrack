@@ -5,7 +5,10 @@ namespace App\ExcelImport;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
+use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManager;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * Check-in Blood Specimens using Excel import
@@ -55,6 +58,39 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
             'kitType' => 'F',
             'username' => 'G',
         ];
+    }
+
+    /**
+     * Find and replace Tube Accession IDs with Specimen Accession IDs
+     * in the given file.
+     *
+     * @return Spreadsheet Returns the entire Excel workbook with Tube IDs replaced
+     */
+    public static function convertTubesToSpecimens(string $excelFilePath, TubeRepository $tubeRepo): Spreadsheet
+    {
+        // Read file in as Excel workbook, get first worksheet
+        $workbook = IOFactory::load($excelFilePath);
+        $worksheet = $workbook->getActiveSheet();
+
+        // Parse Tube Accession IDs from spreadsheet
+        $columnLetter = 'A';
+        $rawTubeAccessionIds = self::getColumnValues($worksheet, $columnLetter);
+        foreach ($rawTubeAccessionIds as $rowNumber => $rawTubeAccessionId) {
+            $tube = $tubeRepo->findOneByAccessionId($rawTubeAccessionId);
+
+            if (!$tube || !$tube->getSpecimen()) {
+                throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
+            }
+
+            $specimenAccessionId = $tube->getSpecimen()->getAccessionId();
+            $coordinate = $columnLetter . $rowNumber;
+            $cell = $worksheet->getCell($coordinate);
+            if ($cell) {
+                $cell->setValue($specimenAccessionId);
+            }
+        }
+
+        return $workbook;
     }
 
     /**
