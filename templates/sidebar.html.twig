@@ -184,18 +184,26 @@ Renders a top-level navigation node in the tree navigation.
             ], ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
-            _self.treenode('Label Printers', 'fa-print', [
+            _self.treenode('Label Printing', 'fa-print', [
                 {
-                    text: 'List',
+                    text: 'Printers',
                     iconClass: 'fa-list',
-                    route: 'app_labelprinter_list'
+                    route: 'app_labelprinter_list',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                 },
                 {
                     text: 'Print Test Label',
                     iconClass: 'fa-plus',
-                    route: 'app_labelprinter_testprint'
+                    route: 'app_labelprinter_testprint',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                 },
-            ], ['ROLE_ADMIN'])
+                {
+                    text: 'Print Generic Labels',
+                    iconClass: 'fa-tag',
+                    route: 'app_labelprinter_genericprint',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN', 'ROLE_PRINT_TUBE_LABELS'],
+                },
+            ], ['ROLE_ADMIN', 'ROLE_PRINT_TUBE_LABELS'])
         }}
         {{
             _self.treenode('Users', 'fa-users', [
