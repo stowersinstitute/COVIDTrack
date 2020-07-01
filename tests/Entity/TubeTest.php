@@ -6,7 +6,9 @@ use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\SpecimenWell;
 use App\Entity\Tube;
+use App\Entity\WellPlate;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,6 +40,15 @@ class TubeTest extends TestCase
         $this->assertSame($tubeType, $tube->getTubeType());
         $this->assertSame($collectedAt, $tube->getCollectedAt());
         $this->assertInstanceOf(Specimen::class, $tube->getSpecimen());
+    }
+
+    public function testAddingToWellPlateRequiresKioskDropoff()
+    {
+        $plate = WellPlate::buildExample();
+        $tube = new Tube('T123');
+
+        $this->expectException(\RuntimeException::class);
+        $tube->addToWellPlate($plate, 'A05');
     }
 
     /**

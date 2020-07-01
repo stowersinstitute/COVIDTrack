@@ -355,6 +355,10 @@ class Tube
 
     public function addToWellPlate(WellPlate $plate, string $position = null): void
     {
+        if (!$this->specimen) {
+            throw new \RuntimeException('Tube must be checked in at a Kiosk before adding to a Well Plate');
+        }
+
         $well = new SpecimenWell($plate, $this->specimen, $position);
         $this->specimen->addWell($well);
     }
