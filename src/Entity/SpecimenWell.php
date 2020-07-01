@@ -195,14 +195,23 @@ class SpecimenWell
     public function getWellPlatePositionDisplayString(): string
     {
         $barcode = $this->getWellPlateBarcode();
-        $output = $barcode;
 
+        // Add Barcode
+        $parts = [$barcode];
+
+        // Add Position
         $position = $this->getPositionAlphanumeric();
         if ($position !== null) {
-            $output .= ' / ' . $position;
+            $parts[] = $position;
         }
 
-        return $output;
+        // Add Well Identifier
+        $wellIdentifier = $this->getWellIdentifier();
+        if ($wellIdentifier !== null) {
+            $parts[] = $wellIdentifier;
+        }
+
+        return implode(' / ', $parts);
     }
 
     /**
