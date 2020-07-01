@@ -353,7 +353,7 @@ class Tube
         return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function addToWellPlate(WellPlate $plate, string $position = null): void
+    public function addToWellPlate(WellPlate $plate, string $position = null): SpecimenWell
     {
         if (!$this->specimen) {
             throw new \RuntimeException('Tube must be checked in at a Kiosk before adding to a Well Plate');
@@ -361,6 +361,8 @@ class Tube
 
         $well = new SpecimenWell($plate, $this->specimen, $position);
         $this->specimen->addWell($well);
+
+        return $well;
     }
 
     public function getKitType(): ?string

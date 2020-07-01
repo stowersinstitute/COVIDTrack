@@ -51,6 +51,22 @@ class TubeTest extends TestCase
         $tube->addToWellPlate($plate, 'A05');
     }
 
+    public function testAddingToWellPlate()
+    {
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $plate = WellPlate::buildExample();
+        $tube = new Tube('T123');
+        $tube->setSpecimen(Specimen::buildExample('S123'));
+
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_SALIVA, new \DateTimeImmutable());
+
+        $well = $tube->addToWellPlate($plate, 'A05');
+
+        $this->assertInstanceOf(SpecimenWell::class, $well);
+    }
+
     /**
      * @param string $accessionId Accession ID to return when calling ->generate() on the mock
      * @return MockObject|SpecimenAccessionIdGenerator
