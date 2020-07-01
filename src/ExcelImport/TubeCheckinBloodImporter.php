@@ -141,10 +141,15 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
                     break;
             }
 
-            // Create Well Plate if given
-            if (strlen($wellPlateBarcode) > 0) {
+            // Accepted Tubes will track storage details
+            if ($rawAcceptedStatus === self::STATUS_ACCEPTED) {
+                // Well Plate is either created or fetched,
+                // and this Tube/Specimen added at given Well Position
                 $plate = $this->findWellPlateOrMakeNew($wellPlateBarcode);
-                $tube->addToWellPlate($plate);
+                $well = $tube->addToWellPlate($plate, $wellPosition);
+
+                // Well Identifier
+                $well->setWellIdentifier($wellIdentifier);
             }
 
             // Kit Type
