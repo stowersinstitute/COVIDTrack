@@ -127,6 +127,10 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             ->createQueryBuilder('s')
             ->join('s.wells', 'wells')
 
+            // Saliva Specimen
+            ->andWhere('s.type = :type')
+            ->setParameter('type', Specimen::TYPE_SALIVA)
+
             // Group
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
@@ -181,15 +185,19 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
 
     private function getNextPositionForPlate(WellPlate $plate): string
     {
-        $barcode = $plate->getBarcode();
+        do {
+            $barcode = $plate->getBarcode();
 
-        if (!isset($this->platePositions[$barcode])) {
-            $this->platePositions[$barcode] = 0;
-        }
+            if (!isset($this->platePositions[$barcode])) {
+                $this->platePositions[$barcode] = 0;
+            }
 
-        // Get next position
-        $this->platePositions[$barcode]++;
+            // Get next position
+            $this->platePositions[$barcode]++;
 
-        return SpecimenWell::positionAlphanumericFromInt($this->platePositions[$barcode]);
+            $position = SpecimenWell::positionAlphanumericFromInt($this->platePositions[$barcode]);
+        } while (null !== $plate->getWellAtPosition($position));
+
+        return $position;
     }
 }

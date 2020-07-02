@@ -15,7 +15,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 /**
  * Import Tubes used for Blood collection
  */
-class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
+class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
@@ -46,29 +46,11 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $em)
     {
-        $this->distributedTubes($em);
         $this->returnedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
-        // Must flush because Tecan import example has hardcoded IDs.
-        // Below code can't detect existing tubes unless flushed first.
         $em->flush();
-
-        $this->tubesForTecanExample($em);
-    }
-
-    /**
-     * Tubes that have their label printed and distributed.
-     */
-    private function distributedTubes(ObjectManager $em)
-    {
-        // Fixtures require at least 250 distributed tubes for Tecan import example to work.
-        // See $this->tubesForTecanExample()
-        $numToCreate = 250;
-        for ($i=1; $i<= $numToCreate; $i++) {
-            $em->persist(new Tube());
-        }
     }
 
     /**
@@ -162,42 +144,10 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
         $group = $this->getRandomGroup($em);
         $kioskSession->setParticipantGroup($group);
 
-        $sessionTube = new KioskSessionTube($kioskSession, $tube, Tube::TYPE_SALIVA, $collectedAt);
+        $sessionTube = new KioskSessionTube($kioskSession, $tube, Tube::TYPE_BLOOD, $collectedAt);
         $kioskSession->addTubeData($sessionTube);
 
         $kioskSession->finish($this->specimenAccessionIdGen);
-    }
-
-    /**
-     * Ensure fixture Tubes exist that match Tube IDs in example Tecan output
-     * file at src/Resources/RPE1P7.XLS.
-     */
-    private function tubesForTecanExample(ObjectManager $em)
-    {
-        $repo = $em->getRepository(Tube::class);
-
-        // Has Tube Accession IDs between 122 and 217.
-        // This might re-use some of the "distributed" tubes from $this->distributedTubes()
-        foreach(range(122, 217) as $i) {
-            $accessionId = sprintf("T00000%d", $i);
-
-            $T = $repo->findOneBy(['accessionId' => $accessionId]);
-            if (!$T) {
-                // Create with hardcoded Tube Accession ID
-                $T = new Tube($accessionId);
-            }
-
-            // Drop-off
-            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', 1));
-            $this->doKioskDropoff($em, $T, $collectedAt);
-
-            // Accepted
-            $T->markAccepted('fixtures', new \DateTimeImmutable(sprintf('-%d days 10:00am', 1)));
-
-            $em->persist($T);
-        }
-
-        $em->flush();
     }
 
     private function findFixtureWellPlate(): WellPlate
