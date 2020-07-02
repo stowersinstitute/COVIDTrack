@@ -155,12 +155,15 @@ class SpecimenResultAntibody extends SpecimenResult
             SpecimenResultAntibody::CONCLUSION_STRONG_INT => SpecimenResultAntibody::CONCLUSION_STRONG_TEXT,
         ];
 
-        if (!isset($map[$number])) {
+        $conclusion = $map[$number];
+        if ($number !== null && !isset($conclusion)) {
             throw new \InvalidArgumentException('Unknown signal value for setting quantitative Antibody result');
         }
 
         $this->conclusionQuantitative = $number;
 
-        $this->setConclusion($map[$number]);
+        if (isset($conclusion)) {
+            $this->setConclusion($conclusion);
+        }
     }
 }
