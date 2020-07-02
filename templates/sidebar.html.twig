@@ -165,11 +165,23 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_results_qpcr_list'
                 },
                 {
-                    text: 'Import',
+                    text: 'Viral Import',
                     mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-upload',
                     route: 'qpcr_excel_import'
                 },
+                {
+                    text: 'Antibody Results',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_VIEW'],
+                    iconClass: 'fa-list',
+                    route: 'app_results_antibody_list'
+                },
+{#                {#}
+{#                    text: 'Antibody Import',#}
+{#                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],#}
+{#                    iconClass: 'fa-upload',#}
+{#                    route: 'qpcr_excel_import'#}
+{#                },#}
             ], ['ROLE_RESULTS_VIEW', 'ROLE_RESULTS_EDIT'])
         }}
         {{

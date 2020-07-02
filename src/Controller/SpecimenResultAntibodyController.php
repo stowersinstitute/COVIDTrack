@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Specimen;
+use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
+use App\Form\AntibodyResultsForm;
+use App\Form\SpecimenResultAntibodyFilterForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -77,10 +80,10 @@ class SpecimenResultAntibodyController extends AbstractController
             $wellPlate = $data['wellPlate'];
             $position = $data['position'];
             $well = new SpecimenWell($wellPlate, $specimen, $position);
+            $well->setWellIdentifier($data['wellIdentifier']);
 
-            $conclusion = $data['conclusion'];
-
-            $result = new SpecimenResultAntibody($well, $conclusion);
+            $signal = $data['conclusionQuantitative'];
+            $result = new SpecimenResultAntibody($well, $signal);
 
             $em->persist($result);
             $em->flush();
@@ -118,7 +121,8 @@ class SpecimenResultAntibodyController extends AbstractController
             'specimen' => $result->getSpecimen(),
             'wellPlate' => $result->getWellPlate(),
             'position' => $result->getWellPosition(),
-            'conclusion' => $result->getConclusion(),
+            'wellIdentifier' => $result->getWellIdentifier(),
+            'conclusionQuantitative' => $result->getConclusionQuantitative(),
         ];
 
         $form = $this->createForm(AntibodyResultsForm::class, $data, [
@@ -127,9 +131,10 @@ class SpecimenResultAntibodyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $formData = $form->getData();
 
-            $result->setConclusion($data['conclusion']);
+            $result->setConclusionQuantitative($formData['conclusionQuantitative']);
+            $result->setWellIdentifier($formData['wellIdentifier']);
 
             $em->flush();
 

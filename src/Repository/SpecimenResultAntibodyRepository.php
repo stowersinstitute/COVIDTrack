@@ -50,9 +50,8 @@ class SpecimenResultAntibodyRepository extends EntityRepository
      * @see SpecimenResultAntibodyFilterForm
      * @return SpecimenResultAntibody[]
      */
-    public function filterByFormData($data): array
+    public function filterByFormData(array $data): array
     {
-        throw new \RuntimeException('filterByFormData() Not yet supported');
         $qb = $this->createDefaultQueryBuilder('r');
         $qb->join('r.well', 'w')->addSelect('w');
 

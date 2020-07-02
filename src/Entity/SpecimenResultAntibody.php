@@ -60,7 +60,7 @@ class SpecimenResultAntibody extends SpecimenResult
     private $conclusionQuantitative;
 
     /**
-     * @param int $conclusionQuantitative Number representing conclusion
+     * @param int $conclusionQuantitative Number representing conclusion, called "Signal"
      */
     public function __construct(SpecimenWell $well, int $conclusionQuantitative)
     {
@@ -106,6 +106,11 @@ class SpecimenResultAntibody extends SpecimenResult
         return $identifier !== null ? $identifier : '';
     }
 
+    public function setWellIdentifier(?string $identifier): void
+    {
+        $this->getWell()->setWellIdentifier($identifier);
+    }
+
     public function getConclusion(): string
     {
         return $this->conclusion;
@@ -144,15 +149,28 @@ class SpecimenResultAntibody extends SpecimenResult
         ];
     }
 
+    /**
+     * @return int[]
+     */
+    public static function getFormConclusionQuantitative(): array
+    {
+        return [
+            'Negative' => self::CONCLUSION_NEGATIVE_INT,
+            'Partial' => self::CONCLUSION_PARTIAL_INT,
+            'Weak' => self::CONCLUSION_WEAK_INT,
+            'Strong' => self::CONCLUSION_STRONG_INT,
+        ];
+    }
+
     public function setConclusionQuantitative(int $number)
     {
         // TODO: Replace in AppAntibodyResultsFixtures
         // Each quantitative conclusion corresponds to a text conclusion
         $map = [
-            SpecimenResultAntibody::CONCLUSION_NEGATIVE_INT => SpecimenResultAntibody::CONCLUSION_NEGATIVE_TEXT,
-            SpecimenResultAntibody::CONCLUSION_PARTIAL_INT => SpecimenResultAntibody::CONCLUSION_PARTIAL_TEXT,
-            SpecimenResultAntibody::CONCLUSION_WEAK_INT => SpecimenResultAntibody::CONCLUSION_WEAK_TEXT,
-            SpecimenResultAntibody::CONCLUSION_STRONG_INT => SpecimenResultAntibody::CONCLUSION_STRONG_TEXT,
+            self::CONCLUSION_NEGATIVE_INT => self::CONCLUSION_NEGATIVE_TEXT,
+            self::CONCLUSION_PARTIAL_INT => self::CONCLUSION_PARTIAL_TEXT,
+            self::CONCLUSION_WEAK_INT => self::CONCLUSION_WEAK_TEXT,
+            self::CONCLUSION_STRONG_INT => self::CONCLUSION_STRONG_TEXT,
         ];
 
         $conclusion = $map[$number];

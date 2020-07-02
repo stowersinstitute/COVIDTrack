@@ -20,6 +20,7 @@ class SpecimenResultAntibodyFilterForm extends AbstractType
         $builder
             ->setMethod('GET')
             ->add('conclusion', ChoiceType::class, [
+                'label' => 'Conclusion',
                 'choices' => SpecimenResultAntibody::getFormConclusions(),
                 'placeholder' => '- Any -',
                 'required' => false,

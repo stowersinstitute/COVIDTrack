@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 {% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 
-{% block page_title %}Results{% endblock %}
+{% block page_title %}Antibody Results{% endblock %}
 
 {% block body %}
 {% if userCanViewResults %}
