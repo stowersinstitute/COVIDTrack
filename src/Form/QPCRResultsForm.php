@@ -57,6 +57,7 @@ class QPCRResultsForm extends AbstractType
                 ],
             ])
             ->add('conclusion', ChoiceType::class, [
+                'label' => 'Conclusion',
                 'choices' => SpecimenResultQPCR::getFormConclusions(),
                 'placeholder' => '- Select -',
                 'required' => true,
