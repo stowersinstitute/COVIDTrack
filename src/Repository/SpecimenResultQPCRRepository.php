@@ -49,7 +49,7 @@ class SpecimenResultQPCRRepository extends EntityRepository
      * @see SpecimenResultQPCRFilterForm
      * @return SpecimenResultQPCR[]
      */
-    public function filterByFormData($data): array
+    public function filterByFormData(array $data): array
     {
         $qb = $this->createDefaultQueryBuilder('r');
         $qb->join('r.well', 'w')->addSelect('w');
