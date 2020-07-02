@@ -47,12 +47,14 @@
 </div>
 
 {% if userCanViewResults %}
+
+{% if specimen.type == "SALIVA" %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    Results
+                    Viral Results
 
                     {% if userCanEditResults %}
                     <a href="{{ path('app_results_qpcr_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
@@ -90,6 +92,57 @@
         </div>
     </div>
 </div>
+{% endif %}{# End viralResults #}
+
+{% if specimen.type == "BLOOD" %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    Antibody Results
+
+                    {% if userCanEditResults %}
+                    <a href="{{ path('app_results_antibody_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        <th>Conclusion</th>
+                        <th>Signal</th>
+                        <th>Well Plate Barcode</th>
+                        <th>Well Position</th>
+                        <th>Well ID</th>
+                        <th>Reported At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in specimen.antibodyResults %}
+                        <tr>
+                            {% if userCanEditResults %}
+                            <td>
+                                <a href="{{ path('app_results_antibody_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
+                            </td>
+                            {% endif %}
+                            <td>{{ result.conclusionText }}</td>
+                            <td>{{ result.conclusionQuantitative }}</td>
+                            <td>{{ result.wellPlateBarcode }}</td>
+                            <td>{{ result.wellPosition }}</td>
+                            <td>{{ result.wellIdentifier }}</td>
+                            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}{# End viralResults #}
 
 {% endif %}{# End if userCanViewResults #}
 
