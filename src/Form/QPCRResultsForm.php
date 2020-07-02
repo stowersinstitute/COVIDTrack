@@ -33,6 +33,8 @@ class QPCRResultsForm extends AbstractType
                 // Sort by Accession ID
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('s')
+                        ->where('s.type = :type')
+                        ->setParameter('type', Specimen::TYPE_SALIVA)
                         ->orderBy('s.accessionId', 'ASC');
                 },
             ])
