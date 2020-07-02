@@ -166,4 +166,9 @@ class SpecimenResultAntibody extends SpecimenResult
             $this->setConclusion($conclusion);
         }
     }
+
+    public function getConclusionQuantitative(): ?int
+    {
+        return $this->conclusionQuantitative;
+    }
 }
