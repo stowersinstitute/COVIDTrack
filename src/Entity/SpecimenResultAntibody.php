@@ -44,7 +44,7 @@ class SpecimenResultAntibody extends SpecimenResult
     private $specimen;
 
     /**
-     * Conclusion about presence of virus SARS-CoV-2 in specimen.
+     * Conclusion about presence of antibodies against SARS-CoV-2 virus.
      *
      * @var string
      * @ORM\Column(name="conclusion", type="string", length=255)
@@ -52,9 +52,17 @@ class SpecimenResultAntibody extends SpecimenResult
     private $conclusion;
 
     /**
-     * @param string       $conclusion SpecimenResultAntibody::CONCLUSION_* constant
+     * Numerical representation of Conclusion.
+     *
+     * @var string
+     * @ORM\Column(name="conclusion_quantitative", type="integer", nullable=true)
      */
-    public function __construct(SpecimenWell $well, string $conclusion)
+    private $conclusionQuantitative;
+
+    /**
+     * @param int $conclusionQuantitative Number representing conclusion
+     */
+    public function __construct(SpecimenWell $well, int $conclusionQuantitative)
     {
         parent::__construct();
 
@@ -68,7 +76,7 @@ class SpecimenResultAntibody extends SpecimenResult
         $this->well = $well;
         $well->setAntibodyResult($this);
 
-        $this->setConclusion($conclusion);
+        $this->setConclusionQuantitative($conclusionQuantitative);
     }
 
     public function getWell(): SpecimenWell
@@ -127,5 +135,25 @@ class SpecimenResultAntibody extends SpecimenResult
             'Weak' => self::CONCLUSION_WEAK_TEXT,
             'Strong' => self::CONCLUSION_STRONG_TEXT,
         ];
+    }
+
+    public function setConclusionQuantitative(int $number)
+    {
+        // TODO: Replace in AppAntibodyResultsFixtures
+        // Each quantitative conclusion corresponds to a text conclusion
+        $map = [
+            SpecimenResultAntibody::CONCLUSION_NEGATIVE_INT => SpecimenResultAntibody::CONCLUSION_NEGATIVE_TEXT,
+            SpecimenResultAntibody::CONCLUSION_PARTIAL_INT => SpecimenResultAntibody::CONCLUSION_PARTIAL_TEXT,
+            SpecimenResultAntibody::CONCLUSION_WEAK_INT => SpecimenResultAntibody::CONCLUSION_WEAK_TEXT,
+            SpecimenResultAntibody::CONCLUSION_STRONG_INT => SpecimenResultAntibody::CONCLUSION_STRONG_TEXT,
+        ];
+
+        if (!isset($map[$number])) {
+            throw new \InvalidArgumentException('Unknown signal value for setting quantitative Antibody result');
+        }
+
+        $this->conclusionQuantitative = $number;
+
+        $this->setConclusion($map[$number]);
     }
 }
