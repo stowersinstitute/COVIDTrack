@@ -31,7 +31,9 @@
                         {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
+                    {% if specimen.type == "SALIVA" %}
                     <dt>CLIA Testing Recommended?</dt><dd>{{ specimen.cliaTestingRecommendedText }}</dd>
+                    {% endif %}
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
                 </dl>
             </div>
