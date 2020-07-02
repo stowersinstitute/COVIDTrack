@@ -74,14 +74,14 @@ class SpecimenResultQPCRController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $formData = $form->getData();
 
-            $specimen = $data['specimen'];
-            $wellPlate = $data['wellPlate'];
-            $position = $data['position'];
+            $specimen = $formData['specimen'];
+            $wellPlate = $formData['wellPlate'];
+            $position = $formData['position'];
             $well = new SpecimenWell($wellPlate, $specimen, $position);
 
-            $conclusion = $data['conclusion'];
+            $conclusion = $formData['conclusion'];
 
             $result = new SpecimenResultQPCR($well, $conclusion);
 
@@ -130,9 +130,9 @@ class SpecimenResultQPCRController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $formData = $form->getData();
 
-            $result->setConclusion($data['conclusion']);
+            $result->setConclusion($formData['conclusion']);
 
             $em->flush();
 
