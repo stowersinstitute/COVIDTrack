@@ -99,6 +99,13 @@ class SpecimenResultAntibody extends SpecimenResult
         return $this->well->getPositionAlphanumeric() ?: '';
     }
 
+    public function getWellIdentifier(): string
+    {
+        $identifier = $this->well->getWellIdentifier();
+
+        return $identifier !== null ? $identifier : '';
+    }
+
     public function getConclusion(): string
     {
         return $this->conclusion;
