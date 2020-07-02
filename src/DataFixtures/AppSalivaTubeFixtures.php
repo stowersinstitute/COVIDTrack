@@ -202,7 +202,7 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
 
     private function findFixtureWellPlate(): WellPlate
     {
-        $referenceName = 'wellPlate.FIXPLATE' . rand(1, 5);
+        $referenceName = 'wellPlate.VIRALPLATE' . rand(1, 5);
 
         return $this->getReference($referenceName);
     }

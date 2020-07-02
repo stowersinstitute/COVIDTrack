@@ -152,7 +152,7 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
 
     private function findFixtureWellPlate(): WellPlate
     {
-        $referenceName = 'wellPlate.FIXPLATE' . rand(1, 5);
+        $referenceName = 'wellPlate.BLOODPLATE' . rand(1, 5);
 
         return $this->getReference($referenceName);
     }
