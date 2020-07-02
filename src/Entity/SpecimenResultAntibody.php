@@ -54,7 +54,7 @@ class SpecimenResultAntibody extends SpecimenResult
     /**
      * Numerical representation of Conclusion.
      *
-     * @var string
+     * @var null|int
      * @ORM\Column(name="conclusion_quantitative", type="integer", nullable=true)
      */
     private $conclusionQuantitative;
