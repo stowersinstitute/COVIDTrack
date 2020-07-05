@@ -44,6 +44,33 @@ class SpecimenResultQPCRRepository extends EntityRepository
             ->getQuery()
             ->execute();
     }
+    /**
+     * Find Results whose conclusion could not be determined.
+     * This excludes results from control group specimen.
+     *
+     * @return SpecimenResultQPCR[]
+     */
+    public function findTestingResultInconclusiveCreatedAfter(\DateTimeInterface $datetime): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.createdAt >= :since')
+            ->setParameter('since', $datetime)
+
+            // Do not include results from "control" groups
+            ->join('r.well', 'w')
+            ->join('w.specimen', 's')
+            ->join('s.participantGroup', 'g')
+            ->andWhere('g.isControl = false')
+
+            // Only Inconclusive Results
+            ->andWhere('r.conclusion = :conclusion')
+            ->setParameter('conclusion', SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE)
+
+            ->orderBy('r.createdAt')
+
+            ->getQuery()
+            ->execute();
+    }
 
     /**
      * @see SpecimenResultQPCRFilterForm
