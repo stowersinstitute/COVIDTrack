@@ -162,6 +162,35 @@ class SpecimenResultAntibody extends SpecimenResult
         ];
     }
 
+    /**
+     * Check if given value is a valid quantitative conclusion.
+     *
+     * @param mixed $value Explicitly does not use typehint. See code.
+     * @return bool
+     */
+    public static function isValidConclusionQuantitative($value): bool
+    {
+        // NULL is allowed
+        // Explicitly does not use a typehint AND
+        // Explicitly checks NULL to denote between empty and 0
+        if ($value === null) {
+            return true;
+        }
+
+        // Must be integer
+        if (!is_int($value)) {
+            return false;
+        }
+
+        // Cast to int, since value must be integer to be stored
+        $value = (int) $value;
+
+        $approved = range(0, 3);
+
+        return in_array($value, $approved);
+
+    }
+
     public function setConclusionQuantitative(int $number)
     {
         // TODO: Replace in AppAntibodyResultsFixtures
