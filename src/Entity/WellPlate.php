@@ -139,7 +139,7 @@ class WellPlate
         if (null === $atPosition) return null;
 
         foreach ($this->wells as $well) {
-            if (SpecimenWell::isSamePosition($well->getPositionAlphanumeric(), $atPosition)) {
+            if ($well->isAtPosition($atPosition)) {
                 return $well;
             }
         }

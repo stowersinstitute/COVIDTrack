@@ -238,6 +238,37 @@ class SpecimenWellTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider provideIsAtPosition
+     */
+    public function testIsAtPosition($setPosition, $testPosition, $expected)
+    {
+        $plate = WellPlate::buildExample();
+        $specimen = Specimen::buildExample('S100');
+
+        $well = new SpecimenWell($plate, $specimen, $setPosition);
+
+        $actual = $well->isAtPosition($testPosition);
+        $this->assertSame($expected, $actual);
+    }
+
+    public function provideIsAtPosition()
+    {
+        return [
+            // SpecimenWell with a NULL position is not in a specific well in the WellPlate,
+            // so isAtPosition() will always return false
+            'Well not set in a position' => [null, null, false],
+            'Test position null' => ['E3', null, false],
+            'Set position null' => [null, 'E4', false],
+
+            'Identical' => ['ASDF1', 'ASDF1', true],
+            'Test position without leading zero' => ['E05', 'E5', true],
+            'Test position with leading zero' => ['E6', 'E06', true],
+
+            'Mismatch' => ['E5', 'H9', false],
+        ];
+    }
+
     public function testGetWellPlatePositionDisplayString()
     {
         $plateBarcode = 'BC101';

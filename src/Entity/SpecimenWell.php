@@ -128,7 +128,7 @@ class SpecimenWell
             return false;
         }
 
-        if ($this->positionAlphanumeric !== $specimenWell->getPositionAlphanumeric()) {
+        if (false === $this->isAtPosition($specimenWell->getPositionAlphanumeric())) {
             return false;
         }
 
@@ -253,6 +253,18 @@ class SpecimenWell
         }
 
         return false;
+    }
+
+    /**
+     * Check if this well is at given position.
+     */
+    public function isAtPosition(?string $checkPosition): bool
+    {
+        if (!self::isValidPosition($checkPosition)) {
+            throw new \InvalidArgumentException('Invalid well position');
+        }
+
+        return self::isSamePosition($this->getPositionAlphanumeric(), $checkPosition);
     }
 
     public function getPositionAlphanumeric(): ?string
