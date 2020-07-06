@@ -129,15 +129,17 @@ class WellPlate
         return false;
     }
 
-    public function hasWellAtPosition(string $atPosition): bool
+    public function hasWellAtPosition(?string $atPosition): bool
     {
         return (bool) $this->getWellAtPosition($atPosition);
     }
 
-    public function getWellAtPosition(string $atPosition): ?SpecimenWell
+    public function getWellAtPosition(?string $atPosition): ?SpecimenWell
     {
+        if (null === $atPosition) return null;
+
         foreach ($this->wells as $well) {
-            if ($well->getPositionAlphanumeric() === $atPosition) {
+            if (SpecimenWell::isSamePosition($well->getPositionAlphanumeric(), $atPosition)) {
                 return $well;
             }
         }
