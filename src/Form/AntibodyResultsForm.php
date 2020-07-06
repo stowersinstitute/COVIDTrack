@@ -65,11 +65,16 @@ class AntibodyResultsForm extends AbstractType
                     'placeholder' => 'For example its Biobank Tube ID',
                 ],
             ])
+            ->add('conclusion', ChoiceType::class, [
+                'label' => 'Conclusion',
+                'choices' => SpecimenResultAntibody::getFormConclusions(),
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
             ->add('conclusionQuantitative', ChoiceType::class, [
                 'label' => 'Signal',
                 'choices' => SpecimenResultAntibody::getFormConclusionQuantitative(),
                 'placeholder' => '- Select -',
-                'required' => true,
             ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],

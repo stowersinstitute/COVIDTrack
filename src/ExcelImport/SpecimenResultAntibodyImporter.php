@@ -120,7 +120,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
 
             $rawWellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
-            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawWellIdentifier, $rawSpecimenId, $rowNumber) && $rowOk;
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -135,7 +135,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $resultAction = count($specimen->getAntibodyResults(1)) === 1 ? 'updated' : 'created';
 
             // New Result
-            $result = new SpecimenResultAntibody($well, $rawSignal);
+            $result = new SpecimenResultAntibody($well, $rawConclusion, $rawSignal);
 
             $this->getEntityManager()->persist($result);
 
@@ -305,8 +305,39 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
+    private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, ?string $rawWellIdentifier, string $rawSpecimenId, int $rowNumber): bool
     {
+        // Plate Barcode required
+        if ($rawPlateBarcode === null) {
+            $this->messages[] = ImportMessage::newError(
+                'Well Plate Barcode cannot be blank',
+                $rowNumber,
+                $this->columnMap['plateBarcode']
+            );
+            return false;
+        }
+
+        // Well Position required
+        if ($rawPosition === null) {
+            $this->messages[] = ImportMessage::newError(
+                'Well Position cannot be blank',
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
+            return false;
+        }
+
+        // Well Identifier required
+        if ($rawPosition === null) {
+            $this->messages[] = ImportMessage::newError(
+                'Well Identifier cannot be blank',
+                $rowNumber,
+                $this->columnMap['wellIdentifier']
+            );
+            return false;
+        }
+
+        // Must find Well Plate by Barcode
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
             $this->messages[] = ImportMessage::newError(
@@ -352,7 +383,18 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 sprintf('Specimen "%s" currently in Well %s. Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
                 $rowNumber,
-                $this->columnMap['position']
+                $this->columnMap['wellPosition']
+            );
+            return false;
+        }
+
+        // Well Identifier must match
+        $currentWellIdentifier = $well->getWellIdentifier();
+        if ($currentWellIdentifier !== $rawWellIdentifier) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Well %s on Plate %s currently has Well ID "%s". Uploaded value is "%s". These must match.', $rawPosition, $rawPlateBarcode, $currentWellIdentifier, $rawWellIdentifier),
+                $rowNumber,
+                $this->columnMap['wellPosition']
             );
             return false;
         }

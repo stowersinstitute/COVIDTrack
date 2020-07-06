@@ -62,7 +62,7 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
         $groups = $em->getRepository(ParticipantGroup::class)->findAll();
 
         // Reasonable positive/negative rate
-        $possibleResults = $this->buildResultsDistribution();
+        $possibleSignal = $this->buildSignalDistribution();
 
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
@@ -77,14 +77,19 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
                     if (!$specimen) continue;
 
                     // Set a random conclusion, if we have one
-                    $conclusionInt = $possibleResults[array_rand($possibleResults)];
-                    if ($conclusionInt !== null) {
+                    $signal = $possibleSignal[array_rand($possibleSignal)];
+                    if ($signal !== null) {
                         $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
+                        $conclusion = SpecimenResultAntibody::CONCLUSION_NEGATIVE;
+                        if ($signal === SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_INT) {
+                            $conclusion = SpecimenResultAntibody::CONCLUSION_POSITIVE;
+                        }
+
                         // Add Result to Well
-                        $result = new SpecimenResultAntibody($well, $conclusionInt);
+                        $result = new SpecimenResultAntibody($well, $conclusion, $signal);
                         $result->setCreatedAt($resultDate);
 
                         // Set Position normally coming from reporting result
@@ -99,12 +104,12 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
     }
 
     /**
-     * Build array of possible Results across a probability distribution.
+     * Build array of possible Signal Results across a probability distribution.
      * Pull a random element from this array to get a random result.
      *
      * Returns NULL when no result available, such as when Awaiting Results.
      */
-    private function buildResultsDistribution(): array
+    private function buildSignalDistribution(): array
     {
         // Approximate hit rate out of 100
         $strong = 6;
@@ -114,10 +119,10 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
         $awaitingResults = 8;
 
         $possible = array_merge(
-            array_fill(0, $strong, SpecimenResultAntibody::CONCLUSION_STRONG_INT),
-            array_fill(0, $weak, SpecimenResultAntibody::CONCLUSION_WEAK_INT),
-            array_fill(0, $partial, SpecimenResultAntibody::CONCLUSION_PARTIAL_INT),
-            array_fill(0, $negative, SpecimenResultAntibody::CONCLUSION_NEGATIVE_INT),
+            array_fill(0, $strong, SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_INT),
+            array_fill(0, $weak, SpecimenResultAntibody::CONCLUSION_QUANT_WEAK_INT),
+            array_fill(0, $partial, SpecimenResultAntibody::CONCLUSION_QUANT_PARTIAL_INT),
+            array_fill(0, $negative, SpecimenResultAntibody::CONCLUSION_QUANT_NEGATIVE_INT),
             array_fill(0, $awaitingResults, null)
         );
 

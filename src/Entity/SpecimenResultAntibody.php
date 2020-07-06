@@ -12,18 +12,21 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenResultAntibody extends SpecimenResult
 {
+    const CONCLUSION_NEGATIVE = 'NEGATIVE';
+    const CONCLUSION_POSITIVE = 'POSITIVE';
+
     // When result did not find evidence of antibodies in Specimen
-    const CONCLUSION_NEGATIVE_TEXT = "NEGATIVE";
-    const CONCLUSION_NEGATIVE_INT = 0;
+    const CONCLUSION_QUANT_NEGATIVE_TEXT = "NEGATIVE";
+    const CONCLUSION_QUANT_NEGATIVE_INT = 0;
 
-    const CONCLUSION_PARTIAL_TEXT = "PARTIAL";
-    const CONCLUSION_PARTIAL_INT = 1;
+    const CONCLUSION_QUANT_PARTIAL_TEXT = "PARTIAL";
+    const CONCLUSION_QUANT_PARTIAL_INT = 1;
 
-    const CONCLUSION_WEAK_TEXT = "WEAK";
-    const CONCLUSION_WEAK_INT = 2;
+    const CONCLUSION_QUANT_WEAK_TEXT = "WEAK";
+    const CONCLUSION_QUANT_WEAK_INT = 2;
 
-    const CONCLUSION_STRONG_TEXT = "STRONG";
-    const CONCLUSION_STRONG_INT = 3;
+    const CONCLUSION_QUANT_STRONG_TEXT = "STRONG";
+    const CONCLUSION_QUANT_STRONG_INT = 3;
 
     /**
      * Well analyzed to derive this result
@@ -60,9 +63,10 @@ class SpecimenResultAntibody extends SpecimenResult
     private $conclusionQuantitative;
 
     /**
-     * @param int $conclusionQuantitative Number representing conclusion, called "Signal"
+     * @param string $conclusion CONCLUSION_* constant
+     * @param null|int $conclusionQuantitative CONCLUSION_QUANT_*_INT value, called "Signal"
      */
-    public function __construct(SpecimenWell $well, int $conclusionQuantitative)
+    public function __construct(SpecimenWell $well, string $conclusion, ?int $conclusionQuantitative)
     {
         parent::__construct();
 
@@ -76,6 +80,7 @@ class SpecimenResultAntibody extends SpecimenResult
         $this->well = $well;
         $well->setAntibodyResult($this);
 
+        $this->setConclusion($conclusion);
         $this->setConclusionQuantitative($conclusionQuantitative);
     }
 
@@ -142,10 +147,8 @@ class SpecimenResultAntibody extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
-            'Negative' => self::CONCLUSION_NEGATIVE_TEXT,
-            'Partial' => self::CONCLUSION_PARTIAL_TEXT,
-            'Weak' => self::CONCLUSION_WEAK_TEXT,
-            'Strong' => self::CONCLUSION_STRONG_TEXT,
+            'Negative' => self::CONCLUSION_NEGATIVE,
+            'Positive' => self::CONCLUSION_POSITIVE,
         ];
     }
 
@@ -155,10 +158,10 @@ class SpecimenResultAntibody extends SpecimenResult
     public static function getFormConclusionQuantitative(): array
     {
         return [
-            'Negative' => self::CONCLUSION_NEGATIVE_INT,
-            'Partial' => self::CONCLUSION_PARTIAL_INT,
-            'Weak' => self::CONCLUSION_WEAK_INT,
-            'Strong' => self::CONCLUSION_STRONG_INT,
+            'Negative' => self::CONCLUSION_QUANT_NEGATIVE_INT,
+            'Partial' => self::CONCLUSION_QUANT_PARTIAL_INT,
+            'Weak' => self::CONCLUSION_QUANT_WEAK_INT,
+            'Strong' => self::CONCLUSION_QUANT_STRONG_INT,
         ];
     }
 
@@ -188,30 +191,15 @@ class SpecimenResultAntibody extends SpecimenResult
         $approved = range(0, 3);
 
         return in_array($testValue, $approved);
-
     }
 
-    public function setConclusionQuantitative(int $number)
+    public function setConclusionQuantitative(int $signal)
     {
-        // TODO: Replace in AppAntibodyResultsFixtures
-        // Each quantitative conclusion corresponds to a text conclusion
-        $map = [
-            self::CONCLUSION_NEGATIVE_INT => self::CONCLUSION_NEGATIVE_TEXT,
-            self::CONCLUSION_PARTIAL_INT => self::CONCLUSION_PARTIAL_TEXT,
-            self::CONCLUSION_WEAK_INT => self::CONCLUSION_WEAK_TEXT,
-            self::CONCLUSION_STRONG_INT => self::CONCLUSION_STRONG_TEXT,
-        ];
-
-        $conclusion = $map[$number];
-        if ($number !== null && !isset($conclusion)) {
+        if (!self::isValidConclusionQuantitative($signal)) {
             throw new \InvalidArgumentException('Unknown signal value for setting quantitative Antibody result');
         }
 
-        $this->conclusionQuantitative = $number;
-
-        if (isset($conclusion)) {
-            $this->setConclusion($conclusion);
-        }
+        $this->conclusionQuantitative = $signal;
     }
 
     public function getConclusionQuantitative(): ?int

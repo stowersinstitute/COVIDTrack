@@ -3,8 +3,10 @@
     <tr>
         <th>Specimen ID</th>
         <th>Conclusion</th>
+        <th>Signal</th>
         <th>Well Plate Barcode</th>
         <th>Well Position</th>
+        <th>Well ID</th>
     </tr>
     </thead>
 
@@ -13,8 +15,10 @@
         <tr>
             <td>{{ result.specimenAccessionId }}</td>
             <td>{{ result.conclusion }}</td>
+            <td>{{ result.conclusionQuantitative }}</td>
             <td>{{ result.wellPlateBarcode }}</td>
             <td>{{ result.wellPosition }}</td>
+            <td>{{ result.wellIdentifier }}</td>
         </tr>
     {% endfor %}
     </tbody>
