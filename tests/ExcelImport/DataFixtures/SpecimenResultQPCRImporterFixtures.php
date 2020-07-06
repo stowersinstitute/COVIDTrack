@@ -15,7 +15,7 @@ use Doctrine\Common\Persistence\ObjectManager;
  */
 class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFixtureInterface
 {
-    // Must match specimen-results.xlsx
+    // Must match specimen-viral-results.xlsx
     public const PLATE_BARCODE_WITH_RESULTS = 'QPCRResults';
 
     /**
@@ -38,7 +38,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
 
                 $counter++;
 
-                // Must match in specimen-results.xlsx
+                // Must match in specimen-viral-results.xlsx
                 // For example: SpecimenQPCRResults1
                 return sprintf("SpecimenQPCRResults%d", $counter);
             }
@@ -94,7 +94,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
     }
 
     /**
-     * This data must match what's in specimen-results.xlsx
+     * This data must match what's in specimen-viral-results.xlsx
      */
     public function getTubeData(): array
     {
