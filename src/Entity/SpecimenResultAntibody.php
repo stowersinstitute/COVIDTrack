@@ -177,17 +177,17 @@ class SpecimenResultAntibody extends SpecimenResult
             return true;
         }
 
-        // Must be integer
-        if (!is_int($value)) {
+        // Must be integer/string that casts to itself
+        if (!is_int($value) && !is_string($value)) {
             return false;
         }
 
         // Cast to int, since value must be integer to be stored
-        $value = (int) $value;
+        $testValue = (int) $value;
 
         $approved = range(0, 3);
 
-        return in_array($value, $approved);
+        return in_array($testValue, $approved);
 
     }
 
