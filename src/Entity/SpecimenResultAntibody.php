@@ -158,12 +158,12 @@ class SpecimenResultAntibody extends SpecimenResult
      */
     public static function getFormConclusionQuantitative(): array
     {
-        return [
-            'Negative' => self::CONCLUSION_QUANT_NEGATIVE_INT,
-            'Partial' => self::CONCLUSION_QUANT_PARTIAL_INT,
-            'Weak' => self::CONCLUSION_QUANT_WEAK_INT,
-            'Strong' => self::CONCLUSION_QUANT_STRONG_INT,
-        ];
+        $validValues = range(self::CONCLUSION_QUANT_NEGATIVE_INT, self::CONCLUSION_QUANT_STRONG_INT);
+
+        $textLabels = array_map('strval', $validValues);
+        $fieldValues = $validValues;
+
+        return array_combine($textLabels, $fieldValues);
     }
 
     /**
@@ -189,9 +189,9 @@ class SpecimenResultAntibody extends SpecimenResult
         // Cast to int, since value must be integer to be stored
         $testValue = (int) $value;
 
-        $approved = range(0, 3);
+        $valid = range(self::CONCLUSION_QUANT_NEGATIVE_INT, self::CONCLUSION_QUANT_STRONG_INT);
 
-        return in_array($testValue, $approved);
+        return in_array($testValue, $valid);
     }
 
     public function setConclusionQuantitative(int $signal)
