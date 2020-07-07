@@ -56,7 +56,6 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
     {
         // This Well Plate will hold the Specimens
         $resultsWellPlate = new WellPlate(self::PLATE_BARCODE_WITH_RESULTS);
-        $this->setReference('tests.plateWithQPCRResults', $resultsWellPlate);
         $em->persist($resultsWellPlate);
 
         // Simulate printing labels for Tubes

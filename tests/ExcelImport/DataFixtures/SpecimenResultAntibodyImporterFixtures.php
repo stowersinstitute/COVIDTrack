@@ -56,7 +56,6 @@ class SpecimenResultAntibodyImporterFixtures extends Fixture implements Dependen
     {
         // This Well Plate will hold the Specimens
         $resultsWellPlate = new WellPlate(self::PLATE_BARCODE_WITH_RESULTS);
-        $this->setReference('tests.plateWithAntibodyResults', $resultsWellPlate);
         $em->persist($resultsWellPlate);
 
         // Simulate printing labels for Tubes
