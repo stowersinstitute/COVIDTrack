@@ -76,6 +76,9 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
         $columnLetter = 'A';
         $rawTubeAccessionIds = self::getColumnValues($worksheet, $columnLetter);
         foreach ($rawTubeAccessionIds as $rowNumber => $rawTubeAccessionId) {
+            // Skip converting rows without a Tube ID
+            if ((string)$rawTubeAccessionId === '') continue;
+
             $tube = $tubeRepo->findOneByAccessionId($rawTubeAccessionId);
 
             if (!$tube || !$tube->getSpecimen()) {
