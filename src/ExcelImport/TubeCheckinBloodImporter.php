@@ -81,8 +81,13 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
 
             $tube = $tubeRepo->findOneByAccessionId($rawTubeAccessionId);
 
-            if (!$tube || !$tube->getSpecimen()) {
+            if (!$tube) {
                 throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
+            }
+
+            // Must be in correct workflow state
+            if (!$tube->willAllowCheckinDecision()) {
+                throw new \InvalidArgumentException(sprintf('Tube Accession ID "%s" has not been dropped off at a kiosk', $rawTubeAccessionId ));
             }
 
             $specimenAccessionId = $tube->getSpecimen()->getAccessionId();
