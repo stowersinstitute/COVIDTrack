@@ -12,10 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SpecimenResultAntibody extends SpecimenResult
 {
-    const CONCLUSION_NEGATIVE = 'NEGATIVE';
-    const CONCLUSION_INCONCLUSIVE = 'INCONCLUSIVE';
-    const CONCLUSION_POSITIVE = 'POSITIVE';
-
     // When result did not find evidence of antibodies in Specimen
     const CONCLUSION_QUANT_NEGATIVE_TEXT = "NEGATIVE";
     const CONCLUSION_QUANT_NEGATIVE_INT = 0;
@@ -46,14 +42,6 @@ class SpecimenResultAntibody extends SpecimenResult
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
      */
     private $specimen;
-
-    /**
-     * Conclusion about presence of antibodies against SARS-CoV-2 virus.
-     *
-     * @var string
-     * @ORM\Column(name="conclusion", type="string", length=255)
-     */
-    private $conclusion;
 
     /**
      * Numerical representation of Conclusion.
@@ -115,31 +103,6 @@ class SpecimenResultAntibody extends SpecimenResult
     public function setWellIdentifier(?string $identifier): void
     {
         $this->getWell()->setWellIdentifier($identifier);
-    }
-
-    public function getConclusion(): string
-    {
-        return $this->conclusion;
-    }
-
-    public function setConclusion(string $conclusion): void
-    {
-        if (!self::isValidConclusion($conclusion)) {
-            throw new \InvalidArgumentException('Cannot set invalid Result Conclusion');
-        }
-        $this->conclusion = $conclusion;
-    }
-
-    public static function isValidConclusion(string $conclusion): bool
-    {
-        return in_array($conclusion, self::getFormConclusions());
-    }
-
-    public function getConclusionText(): string
-    {
-        $conclusions = array_flip(self::getFormConclusions());
-
-        return $conclusions[$this->conclusion] ?? '';
     }
 
     /**
