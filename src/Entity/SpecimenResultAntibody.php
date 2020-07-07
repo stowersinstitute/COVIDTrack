@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 class SpecimenResultAntibody extends SpecimenResult
 {
     const CONCLUSION_NEGATIVE = 'NEGATIVE';
+    const CONCLUSION_INCONCLUSIVE = 'INCONCLUSIVE';
     const CONCLUSION_POSITIVE = 'POSITIVE';
 
     // When result did not find evidence of antibodies in Specimen
