@@ -188,7 +188,6 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
         return $well;
     }
 
-    // TODO: Move to WellPlate->getNextAvailablePosition()?
     private function getNextPositionForPlate(WellPlate $plate): string
     {
         do {

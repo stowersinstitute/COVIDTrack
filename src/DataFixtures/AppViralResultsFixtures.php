@@ -183,7 +183,6 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         return $well;
     }
 
-    // TODO: Move to WellPlate->getNextAvailablePosition()?
     private function getNextPositionForPlate(WellPlate $plate): string
     {
         do {

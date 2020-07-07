@@ -54,12 +54,39 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             $specimenId = $result->getSpecimenAccessionId();
 
             $expected = $biobankTubeMap[$specimenId];
-            $this->assertSame($expected, $result->getWellIdentifier(), $specimenId . ' has wrong Well Identifier');
+            $this->assertSame($expected, $result->getWellIdentifier(), $specimenId . ' has wrong Well ID');
         }
 
-        // TODO: Ensure Biobank Plate ID
-        // TODO: Ensure Signal
+        // Verify Biobank Barcode
+        $biobankBarcodeMap = [
+            'SpecimenAntibodyResults1' => 'AntibodyResults1',
+            'SpecimenAntibodyResults2' => 'AntibodyResults1',
+            'SpecimenAntibodyResults3' => 'AntibodyResults1',
+            'SpecimenAntibodyResults4' => 'AntibodyResults1',
+            'SpecimenAntibodyResults5' => 'AntibodyResults1',
+            'SpecimenAntibodyResults6' => 'AntibodyResults1',
+        ];
+        foreach ($processedResults as $result) {
+            $specimenId = $result->getSpecimenAccessionId();
 
-        // TODO: Ensure Storage Rack / Storage Well?
+            $expected = $biobankBarcodeMap[$specimenId];
+            $this->assertSame($expected, $result->getWellPlateBarcode(), $specimenId . ' has wrong Biobank Barcode');
+        }
+
+        // Verify Signal
+        $signalMap = [
+            'SpecimenAntibodyResults1' => 0,
+            'SpecimenAntibodyResults2' => 3,
+            'SpecimenAntibodyResults3' => 1,
+            'SpecimenAntibodyResults4' => 0,
+            'SpecimenAntibodyResults5' => 3,
+            'SpecimenAntibodyResults6' => 1,
+        ];
+        foreach ($processedResults as $result) {
+            $specimenId = $result->getSpecimenAccessionId();
+
+            $expected = $signalMap[$specimenId];
+            $this->assertSame($expected, $result->getConclusionQuantitative(), $specimenId . ' has wrong Signal');
+        }
     }
 }
