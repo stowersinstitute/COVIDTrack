@@ -123,6 +123,7 @@ class SpecimenResultAntibodyController extends AbstractController
             'wellPlate' => $result->getWellPlate(),
             'position' => $result->getWellPosition(),
             'wellIdentifier' => $result->getWellIdentifier(),
+            'conclusion' => $result->getConclusion(),
             'conclusionQuantitative' => $result->getConclusionQuantitative(),
         ];
 
