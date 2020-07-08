@@ -84,7 +84,7 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
                         $conclusion = SpecimenResultAntibody::CONCLUSION_NEGATIVE;
-                        if ($signal === SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_INT) {
+                        if ($signal === SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_NUMBER) {
                             $conclusion = SpecimenResultAntibody::CONCLUSION_POSITIVE;
                         }
 
@@ -119,10 +119,10 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
         $awaitingResults = 8;
 
         $possible = array_merge(
-            array_fill(0, $strong, SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_INT),
-            array_fill(0, $weak, SpecimenResultAntibody::CONCLUSION_QUANT_WEAK_INT),
-            array_fill(0, $partial, SpecimenResultAntibody::CONCLUSION_QUANT_PARTIAL_INT),
-            array_fill(0, $negative, SpecimenResultAntibody::CONCLUSION_QUANT_NEGATIVE_INT),
+            array_fill(0, $strong, SpecimenResultAntibody::CONCLUSION_QUANT_STRONG_NUMBER),
+            array_fill(0, $weak, SpecimenResultAntibody::CONCLUSION_QUANT_WEAK_NUMBER),
+            array_fill(0, $partial, SpecimenResultAntibody::CONCLUSION_QUANT_PARTIAL_NUMBER),
+            array_fill(0, $negative, SpecimenResultAntibody::CONCLUSION_QUANT_NEGATIVE_NUMBER),
             array_fill(0, $awaitingResults, null)
         );
 

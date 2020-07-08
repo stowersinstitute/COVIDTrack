@@ -75,12 +75,12 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
 
         // Verify Signal
         $signalMap = [
-            'SpecimenAntibodyResults1' => 0,
-            'SpecimenAntibodyResults2' => 3,
-            'SpecimenAntibodyResults3' => 1,
-            'SpecimenAntibodyResults4' => 0,
-            'SpecimenAntibodyResults5' => 3,
-            'SpecimenAntibodyResults6' => 1,
+            'SpecimenAntibodyResults1' => '0',
+            'SpecimenAntibodyResults2' => '3',
+            'SpecimenAntibodyResults3' => '1',
+            'SpecimenAntibodyResults4' => '0',
+            'SpecimenAntibodyResults5' => '3',
+            'SpecimenAntibodyResults6' => '1',
         ];
         foreach ($processedResults as $result) {
             $specimenId = $result->getSpecimenAccessionId();

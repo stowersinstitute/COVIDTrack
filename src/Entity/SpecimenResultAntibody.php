@@ -14,16 +14,16 @@ class SpecimenResultAntibody extends SpecimenResult
 {
     // When result did not find evidence of antibodies in Specimen
     const CONCLUSION_QUANT_NEGATIVE_TEXT = "NEGATIVE";
-    const CONCLUSION_QUANT_NEGATIVE_INT = 0;
+    const CONCLUSION_QUANT_NEGATIVE_NUMBER = "0";
 
     const CONCLUSION_QUANT_PARTIAL_TEXT = "PARTIAL";
-    const CONCLUSION_QUANT_PARTIAL_INT = 1;
+    const CONCLUSION_QUANT_PARTIAL_NUMBER = "1";
 
     const CONCLUSION_QUANT_WEAK_TEXT = "WEAK";
-    const CONCLUSION_QUANT_WEAK_INT = 2;
+    const CONCLUSION_QUANT_WEAK_NUMBER = "2";
 
     const CONCLUSION_QUANT_STRONG_TEXT = "STRONG";
-    const CONCLUSION_QUANT_STRONG_INT = 3;
+    const CONCLUSION_QUANT_STRONG_NUMBER = "3";
 
     /**
      * Well analyzed to derive this result
@@ -46,16 +46,16 @@ class SpecimenResultAntibody extends SpecimenResult
     /**
      * Numerical representation of Conclusion.
      *
-     * @var null|int
-     * @ORM\Column(name="conclusion_quantitative", type="integer", nullable=true)
+     * @var null|string
+     * @ORM\Column(name="conclusion_quantitative", type="string", length=255, nullable=true)
      */
     private $conclusionQuantitative;
 
     /**
      * @param string $conclusion CONCLUSION_* constant
-     * @param null|int $conclusionQuantitative CONCLUSION_QUANT_*_INT value, called "Signal"
+     * @param null|string $conclusionQuantitative CONCLUSION_QUANT_*_NUMBER value, called "Signal"
      */
-    public function __construct(SpecimenWell $well, string $conclusion, ?int $conclusionQuantitative)
+    public function __construct(SpecimenWell $well, string $conclusion, ?string $conclusionQuantitative)
     {
         parent::__construct();
 
@@ -118,16 +118,14 @@ class SpecimenResultAntibody extends SpecimenResult
     }
 
     /**
-     * @return int[]
+     * @return string[]
      */
     public static function getFormConclusionQuantitative(): array
     {
-        $validValues = range(self::CONCLUSION_QUANT_NEGATIVE_INT, self::CONCLUSION_QUANT_STRONG_INT);
+        $validValues = range(self::CONCLUSION_QUANT_NEGATIVE_NUMBER, self::CONCLUSION_QUANT_STRONG_NUMBER);
+        $validValues = array_map('strval', $validValues);
 
-        $textLabels = array_map('strval', $validValues);
-        $fieldValues = $validValues;
-
-        return array_combine($textLabels, $fieldValues);
+        return array_combine($validValues, $validValues);
     }
 
     /**
@@ -150,15 +148,15 @@ class SpecimenResultAntibody extends SpecimenResult
             return false;
         }
 
-        // Cast to int, since value must be integer to be stored
-        $testValue = (int) $value;
+        // Cast to string, since value must be string to be stored
+        $testValue = (string) $value;
 
-        $valid = range(self::CONCLUSION_QUANT_NEGATIVE_INT, self::CONCLUSION_QUANT_STRONG_INT);
+        $valid = range(self::CONCLUSION_QUANT_NEGATIVE_NUMBER, self::CONCLUSION_QUANT_STRONG_NUMBER);
 
         return in_array($testValue, $valid);
     }
 
-    public function setConclusionQuantitative(int $signal)
+    public function setConclusionQuantitative(string $signal)
     {
         if (!self::isValidConclusionQuantitative($signal)) {
             throw new \InvalidArgumentException('Unknown signal value for setting quantitative Antibody result');
@@ -167,7 +165,7 @@ class SpecimenResultAntibody extends SpecimenResult
         $this->conclusionQuantitative = $signal;
     }
 
-    public function getConclusionQuantitative(): ?int
+    public function getConclusionQuantitative(): ?string
     {
         return $this->conclusionQuantitative;
     }
