@@ -23,8 +23,9 @@ class SpecimenResultQPCR extends SpecimenResult
     // Testing confidence is low, but leans towards viral RNA being present.
     const CONCLUSION_RECOMMENDED = "RECOMMENDED";
 
-    // When result could not be determined positive or negative.
-    const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
+    // When result is not negative, but not certainly positive.
+    // May be because of a dirty sample, or questionable analysis, or similar.
+    const CONCLUSION_NON_NEGATIVE = "NON-NEGATIVE";
 
     /**
      * Well analyzed to derive this result
@@ -127,7 +128,7 @@ class SpecimenResultQPCR extends SpecimenResult
     {
         return [
             'Negative' => self::CONCLUSION_NEGATIVE,
-            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
+            'Non-Negative' => self::CONCLUSION_NON_NEGATIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,
             'Positive' => self::CONCLUSION_POSITIVE,
         ];

@@ -197,7 +197,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Yellow',
                 'wellPlatePosition' => 'A3',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE,
+                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
             ],
             [
                 'accessionId' => 'NotifTube0004',
@@ -205,7 +205,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => 'Purple',
                 'wellPlatePosition' => 'A4',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE,
+                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
             ],
             [
                 'accessionId' => 'NotifTube0005',
