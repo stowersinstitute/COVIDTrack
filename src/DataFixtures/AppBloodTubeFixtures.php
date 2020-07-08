@@ -79,7 +79,7 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $numToCreate = 25;
+        $numToCreate = 75;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
             $T = new Tube();
