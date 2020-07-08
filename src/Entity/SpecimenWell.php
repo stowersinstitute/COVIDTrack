@@ -240,12 +240,13 @@ class SpecimenWell
         }
 
         // Support "G05" === "G5"
+        $pattern = '/^[A-G]0[1-9]$/';
         $position1Normalized = $position1;
-        if (preg_match('/^([A-G])(0)([1-9])$/', $position1)) {
+        if (preg_match($pattern, $position1)) {
             $position1Normalized = str_replace('0', '', $position1);
         }
         $position2Normalized = $position2;
-        if (preg_match('/^([A-G])(0)([1-9])$/', $position2)) {
+        if (preg_match($pattern, $position2)) {
             $position2Normalized = str_replace('0', '', $position2);
         }
         if ($position1Normalized === $position2Normalized) {
