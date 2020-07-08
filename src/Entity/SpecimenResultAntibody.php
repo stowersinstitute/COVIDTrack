@@ -47,7 +47,7 @@ class SpecimenResultAntibody extends SpecimenResult
      * Numerical representation of Conclusion.
      *
      * @var null|string
-     * @ORM\Column(name="signal", type="string", length=255, nullable=true)
+     * @ORM\Column(name="signal_value", type="string", length=255, nullable=true)
      */
     private $signal;
 
