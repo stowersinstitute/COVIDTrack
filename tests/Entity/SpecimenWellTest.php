@@ -97,6 +97,7 @@ class SpecimenWellTest extends TestCase
         return [
             'Without Padded Zero' => ['F2'],
             'With Padded Zero'    => ['F02'],
+            'First Tens'          => ['F10'],
             'Max Row Number'      => ['F12'],
         ];
     }
@@ -266,6 +267,7 @@ class SpecimenWellTest extends TestCase
             'Test position with leading zero' => ['E6', 'E06', true],
 
             'Mismatch' => ['E5', 'H9', false],
+            'Mismatch with trailing zero' => ['F10', 'F1', false],
         ];
     }
 
