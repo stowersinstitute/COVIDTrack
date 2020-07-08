@@ -6,6 +6,7 @@ use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
+use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -17,6 +18,13 @@ use Doctrine\Common\Persistence\ObjectManager;
  */
 class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
 {
+    /**
+     * Tracks which Well Positions have been issued for each fixture Plate.
+     *
+     * @var array Keys are WellPlate.barcode, Values are last issued Well Position
+     */
+    private $platePositions = [];
+
     public function getDependencies()
     {
         return [
@@ -92,9 +100,14 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
             $kitTypeNumber = ($i % 3) + 1;
             $T->setKitType('Example Type ' . $kitTypeNumber);
 
-            // Tubes accepted at check-in will be added to a Well Plate
+            // Blood Tubes accepted at check-in will be added to a Well Plate and Well
             $wellPlate = $this->findFixtureWellPlate();
-            $T->addToWellPlate($wellPlate);
+            $position = $this->getNextPositionForPlate($wellPlate);
+            $well = $T->addToWellPlate($wellPlate, $position);
+
+            // Blood Tubes accepted will also have set their Well ID (Biobank Tube ID)
+            $wellID = $this->generateNextWellIdentifier();
+            $well->setWellIdentifier($wellID);
 
             $em->persist($T);
         }
@@ -155,5 +168,33 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
         $referenceName = 'wellPlate.ANTIBODYPLATE' . rand(1, 5);
 
         return $this->getReference($referenceName);
+    }
+
+    private function generateNextWellIdentifier(): string
+    {
+        if (empty($count)) {
+            static $count = 0;
+        }
+        $count++;
+
+        return 'WELLID' . $count;
+    }
+
+    private function getNextPositionForPlate(WellPlate $plate): string
+    {
+        do {
+            $barcode = $plate->getBarcode();
+
+            if (!isset($this->platePositions[$barcode])) {
+                $this->platePositions[$barcode] = 0;
+            }
+
+            // Get next position
+            $this->platePositions[$barcode]++;
+
+            $position = SpecimenWell::positionAlphanumericFromInt($this->platePositions[$barcode]);
+        } while (null !== $plate->getWellAtPosition($position));
+
+        return $position;
     }
 }

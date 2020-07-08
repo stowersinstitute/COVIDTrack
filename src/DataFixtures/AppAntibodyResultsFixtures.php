@@ -29,13 +29,6 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
      */
     private $createdPlatesByBarcode = [];
 
-    /**
-     * Tracks which Well Positions have been issued for each fixture Plate.
-     *
-     * @var array Keys are WellPlate.barcode, Values are last issued Well Position
-     */
-    private $platePositions = [];
-
     public function getDependencies()
     {
         return [
@@ -91,10 +84,6 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
                         // Add Result to Well
                         $result = new SpecimenResultAntibody($well, $conclusion, $signal);
                         $result->setCreatedAt($resultDate);
-
-                        // Set Position normally coming from reporting result
-                        $position = $this->getNextPositionForPlate($well->getWellPlate());
-                        $well->setPositionAlphanumeric($position);
 
                         $em->persist($result);
                     }
@@ -186,23 +175,5 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
         }
 
         return $well;
-    }
-
-    private function getNextPositionForPlate(WellPlate $plate): string
-    {
-        do {
-            $barcode = $plate->getBarcode();
-
-            if (!isset($this->platePositions[$barcode])) {
-                $this->platePositions[$barcode] = 0;
-            }
-
-            // Get next position
-            $this->platePositions[$barcode]++;
-
-            $position = SpecimenWell::positionAlphanumericFromInt($this->platePositions[$barcode]);
-        } while (null !== $plate->getWellAtPosition($position));
-
-        return $position;
     }
 }
