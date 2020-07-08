@@ -13,17 +13,17 @@ use Doctrine\ORM\Mapping as ORM;
 class SpecimenResultAntibody extends SpecimenResult
 {
     // When result did not find evidence of antibodies in Specimen
-    const CONCLUSION_QUANT_NEGATIVE_TEXT = "NEGATIVE";
-    const CONCLUSION_QUANT_NEGATIVE_NUMBER = "0";
+    const SIGNAL_NEGATIVE_TEXT = "NEGATIVE";
+    const SIGNAL_NEGATIVE_NUMBER = "0";
 
-    const CONCLUSION_QUANT_PARTIAL_TEXT = "PARTIAL";
-    const CONCLUSION_QUANT_PARTIAL_NUMBER = "1";
+    const SIGNAL_PARTIAL_TEXT = "PARTIAL";
+    const SIGNAL_PARTIAL_NUMBER = "1";
 
-    const CONCLUSION_QUANT_WEAK_TEXT = "WEAK";
-    const CONCLUSION_QUANT_WEAK_NUMBER = "2";
+    const SIGNAL_WEAK_TEXT = "WEAK";
+    const SIGNAL_WEAK_NUMBER = "2";
 
-    const CONCLUSION_QUANT_STRONG_TEXT = "STRONG";
-    const CONCLUSION_QUANT_STRONG_NUMBER = "3";
+    const SIGNAL_STRONG_TEXT = "STRONG";
+    const SIGNAL_STRONG_NUMBER = "3";
 
     /**
      * Well analyzed to derive this result
@@ -47,15 +47,15 @@ class SpecimenResultAntibody extends SpecimenResult
      * Numerical representation of Conclusion.
      *
      * @var null|string
-     * @ORM\Column(name="conclusion_quantitative", type="string", length=255, nullable=true)
+     * @ORM\Column(name="signal", type="string", length=255, nullable=true)
      */
-    private $conclusionQuantitative;
+    private $signal;
 
     /**
-     * @param string $conclusion CONCLUSION_* constant
-     * @param null|string $conclusionQuantitative CONCLUSION_QUANT_*_NUMBER value, called "Signal"
+     * @param string      $conclusion CONCLUSION_* constant
+     * @param null|string $signal     SIGNAL_*_NUMBER value, called "Signal"
      */
-    public function __construct(SpecimenWell $well, string $conclusion, ?string $conclusionQuantitative)
+    public function __construct(SpecimenWell $well, string $conclusion, ?string $signal)
     {
         parent::__construct();
 
@@ -70,7 +70,7 @@ class SpecimenResultAntibody extends SpecimenResult
         $well->setAntibodyResult($this);
 
         $this->setConclusion($conclusion);
-        $this->setConclusionQuantitative($conclusionQuantitative);
+        $this->setSignal($signal);
     }
 
     public function getWell(): SpecimenWell
@@ -120,21 +120,21 @@ class SpecimenResultAntibody extends SpecimenResult
     /**
      * @return string[]
      */
-    public static function getFormConclusionQuantitative(): array
+    public static function getFormSignal(): array
     {
-        $validValues = range(self::CONCLUSION_QUANT_NEGATIVE_NUMBER, self::CONCLUSION_QUANT_STRONG_NUMBER);
+        $validValues = range(self::SIGNAL_NEGATIVE_NUMBER, self::SIGNAL_STRONG_NUMBER);
         $validValues = array_map('strval', $validValues);
 
         return array_combine($validValues, $validValues);
     }
 
     /**
-     * Check if given value is a valid quantitative conclusion.
+     * Check if given value is a valid signal.
      *
      * @param mixed $value Explicitly does not use typehint. See code.
      * @return bool
      */
-    public static function isValidConclusionQuantitative($value): bool
+    public static function isValidSignal($value): bool
     {
         // NULL is allowed
         // Explicitly does not use a typehint AND
@@ -151,22 +151,22 @@ class SpecimenResultAntibody extends SpecimenResult
         // Cast to string, since value must be string to be stored
         $testValue = (string) $value;
 
-        $valid = range(self::CONCLUSION_QUANT_NEGATIVE_NUMBER, self::CONCLUSION_QUANT_STRONG_NUMBER);
+        $valid = range(self::SIGNAL_NEGATIVE_NUMBER, self::SIGNAL_STRONG_NUMBER);
 
         return in_array($testValue, $valid);
     }
 
-    public function setConclusionQuantitative(string $signal)
+    public function setSignal(string $signal)
     {
-        if (!self::isValidConclusionQuantitative($signal)) {
-            throw new \InvalidArgumentException('Unknown signal value for setting quantitative Antibody result');
+        if (!self::isValidSignal($signal)) {
+            throw new \InvalidArgumentException('Cannot set invalid signal value for Antibody result');
         }
 
-        $this->conclusionQuantitative = $signal;
+        $this->signal = $signal;
     }
 
-    public function getConclusionQuantitative(): ?string
+    public function getSignal(): ?string
     {
-        return $this->conclusionQuantitative;
+        return $this->signal;
     }
 }

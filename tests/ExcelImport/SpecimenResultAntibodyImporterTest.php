@@ -86,7 +86,7 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             $specimenId = $result->getSpecimenAccessionId();
 
             $expected = $signalMap[$specimenId];
-            $this->assertSame($expected, $result->getConclusionQuantitative(), $specimenId . ' has wrong Signal');
+            $this->assertSame($expected, $result->getSignal(), $specimenId . ' has wrong Signal');
         }
     }
 }

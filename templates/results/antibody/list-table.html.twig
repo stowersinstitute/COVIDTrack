@@ -31,7 +31,7 @@
                 {% endif %}
             </td>
             <td>{{ result.conclusionText }}</td>
-            <td>{{ result.conclusionQuantitative }}</td>
+            <td>{{ result.signal }}</td>
             <td>
                 {% if userCanViewWellPlates %}
                     <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>

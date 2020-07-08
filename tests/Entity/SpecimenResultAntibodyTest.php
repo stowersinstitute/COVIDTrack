@@ -8,18 +8,18 @@ use PHPUnit\Framework\TestCase;
 class SpecimenResultAntibodyTest extends TestCase
 {
     /**
-     * Tests valid values for conclusionQuantitative.
+     * Tests valid values for signal.
      *
-     * @dataProvider provideValidConclusionQuantitative
+     * @dataProvider provideValidSignal
      */
-    public function testValidConclusionQuantitative($input, bool $expected)
+    public function testValidSignal($input, bool $expected)
     {
-        $actual = SpecimenResultAntibody::isValidConclusionQuantitative($input);
+        $actual = SpecimenResultAntibody::isValidSignal($input);
 
         $this->assertSame($expected, $actual);
     }
 
-    public function provideValidConclusionQuantitative()
+    public function provideValidSignal()
     {
         return [
             'NULL' => [null, true],

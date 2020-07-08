@@ -71,9 +71,9 @@ class AntibodyResultsForm extends AbstractType
                 'placeholder' => '- Select -',
                 'required' => true,
             ])
-            ->add('conclusionQuantitative', ChoiceType::class, [
+            ->add('signal', ChoiceType::class, [
                 'label' => 'Signal',
-                'choices' => SpecimenResultAntibody::getFormConclusionQuantitative(),
+                'choices' => SpecimenResultAntibody::getFormSignal(),
                 'placeholder' => '- Select -',
             ])
             ->add('save', SubmitType::class, [

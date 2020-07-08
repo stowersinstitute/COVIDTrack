@@ -83,7 +83,7 @@ class SpecimenResultAntibodyController extends AbstractController
             $well->setWellIdentifier($data['wellIdentifier']);
 
             $conclusion = $data['conclusion'];
-            $signal = $data['conclusionQuantitative'];
+            $signal = $data['signal'];
             $result = new SpecimenResultAntibody($well, $conclusion, $signal);
 
             $em->persist($result);
@@ -124,7 +124,7 @@ class SpecimenResultAntibodyController extends AbstractController
             'position' => $result->getWellPosition(),
             'wellIdentifier' => $result->getWellIdentifier(),
             'conclusion' => $result->getConclusion(),
-            'conclusionQuantitative' => $result->getConclusionQuantitative(),
+            'signal' => $result->getSignal(),
         ];
 
         $form = $this->createForm(AntibodyResultsForm::class, $data, [
@@ -136,7 +136,7 @@ class SpecimenResultAntibodyController extends AbstractController
             $formData = $form->getData();
 
             $result->setConclusion($formData['conclusion']);
-            $result->setConclusionQuantitative($formData['conclusionQuantitative']);
+            $result->setSignal($formData['signal']);
             $result->setWellIdentifier($formData['wellIdentifier']);
 
             $em->flush();

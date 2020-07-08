@@ -288,7 +288,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
         }
 
         // Check validity
-        if (!SpecimenResultAntibody::isValidConclusionQuantitative($rawSignal)) {
+        if (!SpecimenResultAntibody::isValidSignal($rawSignal)) {
             $this->messages[] = ImportMessage::newError(
                 'Signal value not supported',
                 $rowNumber,
