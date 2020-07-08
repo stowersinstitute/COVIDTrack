@@ -21,11 +21,22 @@ use App\Traits\TimestampableEntity;
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
  *     "qpcr" = "SpecimenResultQPCR",
+ *     "antibody" = "SpecimenResultAntibody",
  * })
  */
 abstract class SpecimenResult
 {
     use TimestampableEntity, SoftDeleteableEntity;
+
+    // When analysis did not find evidence of what it was searching for.
+    const CONCLUSION_NEGATIVE = "NEGATIVE";
+
+    // When analysis found evidence of what it was searching for.
+    const CONCLUSION_POSITIVE = "POSITIVE";
+
+    // When result is not negative, but not certainly positive.
+    // May be because of a dirty sample, or questionable analysis, or similar.
+    const CONCLUSION_NON_NEGATIVE = "NON-NEGATIVE";
 
     /**
      * @var int
@@ -42,6 +53,14 @@ abstract class SpecimenResult
      * @ORM\Column(name="is_failure", type="boolean")
      */
     private $isFailure = false;
+
+    /**
+     * Conclusion about the Specimen based on analyzing it.
+     *
+     * @var string
+     * @ORM\Column(name="conclusion", type="string", length=255)
+     */
+    private $conclusion;
 
     /**
      * Subclass should define its own annotations for how it maps to SpecimenWell,
@@ -82,6 +101,46 @@ abstract class SpecimenResult
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getConclusion(): string
+    {
+        return $this->conclusion;
+    }
+
+    public function setConclusion(string $conclusion): void
+    {
+        if (!static::isValidConclusion($conclusion)) {
+            throw new \InvalidArgumentException('Cannot set invalid result Conclusion');
+        }
+
+        $this->conclusion = $conclusion;
+    }
+
+    public static function isValidConclusion(string $conclusion): bool
+    {
+        return in_array($conclusion, static::getFormConclusions());
+    }
+
+    public function getConclusionText(): string
+    {
+        $conclusions = array_flip(static::getFormConclusions());
+
+        return $conclusions[$this->getConclusion()] ?? '';
+    }
+
+    /**
+     * Overwrite method to return Conclusions supported by each subclass.
+     *
+     * @return string[]
+     */
+    public static function getFormConclusions(): array
+    {
+        return [
+            'Negative' => static::CONCLUSION_NEGATIVE,
+            'Non-Negative' => static::CONCLUSION_NON_NEGATIVE,
+            'Positive' => static::CONCLUSION_POSITIVE,
+        ];
     }
 
     public function getReportedAt(): \DateTimeImmutable

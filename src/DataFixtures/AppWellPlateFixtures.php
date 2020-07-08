@@ -13,7 +13,8 @@ class AppWellPlateFixtures extends Fixture
         foreach ($this->getData() as $raw) {
             $p = new WellPlate($raw['barcode']);
 
-            // wellPlate.FIXPLATE1
+            // wellPlate.VIRALPLATE1
+            // wellPlate.ANTIBODYPLATE1
             $referenceId = 'wellPlate.' . $p->getBarcode();
             $this->addReference($referenceId, $p);
 
@@ -27,19 +28,34 @@ class AppWellPlateFixtures extends Fixture
     {
         return [
             [
-                'barcode' => 'FIXPLATE1',
+                'barcode' => 'VIRALPLATE1',
             ],
             [
-                'barcode' => 'FIXPLATE2',
+                'barcode' => 'VIRALPLATE2',
             ],
             [
-                'barcode' => 'FIXPLATE3',
+                'barcode' => 'VIRALPLATE3',
             ],
             [
-                'barcode' => 'FIXPLATE4',
+                'barcode' => 'VIRALPLATE4',
             ],
             [
-                'barcode' => 'FIXPLATE5',
+                'barcode' => 'VIRALPLATE5',
+            ],
+            [
+                'barcode' => 'ANTIBODYPLATE1',
+            ],
+            [
+                'barcode' => 'ANTIBODYPLATE2',
+            ],
+            [
+                'barcode' => 'ANTIBODYPLATE3',
+            ],
+            [
+                'barcode' => 'ANTIBODYPLATE4',
+            ],
+            [
+                'barcode' => 'ANTIBODYPLATE5',
             ],
         ];
     }

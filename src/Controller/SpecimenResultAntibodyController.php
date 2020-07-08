@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Specimen;
-use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
-use App\Form\SpecimenResultQPCRFilterForm;
-use App\Form\QPCRResultsForm;
+use App\Form\AntibodyResultsForm;
+use App\Form\SpecimenResultAntibodyFilterForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,25 +14,25 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Interact with Specimen Results for qPCR.
+ * Interact with Specimen Results for Antibodies.
  *
- * @Route(path="/results/qpcr")
+ * @Route(path="/results/antibody")
  */
-class SpecimenResultQPCRController extends AbstractController
+class SpecimenResultAntibodyController extends AbstractController
 {
     /**
      * List all Results
      *
-     * @Route(path="/", methods={"GET"}, name="app_results_qpcr_list")
+     * @Route(path="/", methods={"GET"}, name="app_results_antibody_list")
      */
     public function list(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
 
         $formFilterData = [];
-        $repo = $this->getDoctrine()->getRepository(SpecimenResultQPCR::class);
+        $repo = $this->getDoctrine()->getRepository(SpecimenResultAntibody::class);
 
-        $filterForm = $this->createForm(SpecimenResultQPCRFilterForm::class);
+        $filterForm = $this->createForm(SpecimenResultAntibodyFilterForm::class);
         $filterForm->handleRequest($request);
 
         if ($filterForm->isSubmitted() && $filterForm->isValid()) {
@@ -41,7 +41,7 @@ class SpecimenResultQPCRController extends AbstractController
 
         $results = $repo->filterByFormData($formFilterData);
 
-        return $this->render('results/qpcr/list.html.twig', [
+        return $this->render('results/antibody/list.html.twig', [
             'results' => $results,
             'filterForm' => $filterForm->createView(),
         ]);
@@ -54,7 +54,7 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * - accessionId (string) Specimen.accessionId to create results for
      *
-     * @Route(path="/new", methods={"GET", "POST"}, name="app_results_qpcr_new")
+     * @Route(path="/new", methods={"GET", "POST"}, name="app_results_antibody_new")
      */
     public function new(Request $request, EntityManagerInterface $em) : Response
     {
@@ -70,20 +70,21 @@ class SpecimenResultQPCRController extends AbstractController
             $data['specimen'] = $specimen;
         }
 
-        $form = $this->createForm(QPCRResultsForm::class, $data);
+        $form = $this->createForm(AntibodyResultsForm::class, $data);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
+            $data = $form->getData();
 
-            $specimen = $formData['specimen'];
-            $wellPlate = $formData['wellPlate'];
-            $position = $formData['position'];
+            $specimen = $data['specimen'];
+            $wellPlate = $data['wellPlate'];
+            $position = $data['position'];
             $well = new SpecimenWell($wellPlate, $specimen, $position);
+            $well->setWellIdentifier($data['wellIdentifier']);
 
-            $conclusion = $formData['conclusion'];
-
-            $result = new SpecimenResultQPCR($well, $conclusion);
+            $conclusion = $data['conclusion'];
+            $signal = $data['signal'];
+            $result = new SpecimenResultAntibody($well, $conclusion, $signal);
 
             $em->persist($result);
             $em->flush();
@@ -94,10 +95,10 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('app_results_qpcr_list');
+            return $this->redirectToRoute('app_results_antibody_list');
         }
 
-        return $this->render('results/qpcr/form.html.twig', [
+        return $this->render('results/antibody/form.html.twig', [
             'new' => true,
             'form'=> $form->createView(),
         ]);
@@ -110,7 +111,7 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * - accessionId (string) Redirect to this Specimen's page after edit is complete
      *
-     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_qpcr_edit")
+     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_antibody_edit")
      */
     public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
     {
@@ -121,10 +122,12 @@ class SpecimenResultQPCRController extends AbstractController
             'specimen' => $result->getSpecimen(),
             'wellPlate' => $result->getWellPlate(),
             'position' => $result->getWellPosition(),
+            'wellIdentifier' => $result->getWellIdentifier(),
             'conclusion' => $result->getConclusion(),
+            'signal' => $result->getSignal(),
         ];
 
-        $form = $this->createForm(QPCRResultsForm::class, $data, [
+        $form = $this->createForm(AntibodyResultsForm::class, $data, [
             'edit' => true,
         ]);
         $form->handleRequest($request);
@@ -133,6 +136,8 @@ class SpecimenResultQPCRController extends AbstractController
             $formData = $form->getData();
 
             $result->setConclusion($formData['conclusion']);
+            $result->setSignal($formData['signal']);
+            $result->setWellIdentifier($formData['wellIdentifier']);
 
             $em->flush();
 
@@ -144,27 +149,27 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('app_results_qpcr_list');
+            return $this->redirectToRoute('app_results_antibody_list');
         }
 
-        return $this->render('results/qpcr/form.html.twig', [
+        return $this->render('results/antibody/form.html.twig', [
             'new' => false,
             'form' => $form->createView(),
             'result' => $result,
         ]);
     }
 
-    private function findResult($id): SpecimenResultQPCR
+    private function findResult($id): SpecimenResultAntibody
     {
-        $q = $this->getDoctrine()
-            ->getRepository(SpecimenResultQPCR::class)
+        $r = $this->getDoctrine()
+            ->getRepository(SpecimenResultAntibody::class)
             ->find($id);
 
-        if (!$q) {
+        if (!$r) {
             throw new \InvalidArgumentException('Cannot find Result');
         }
 
-        return $q;
+        return $r;
     }
 
     private function mustFindSpecimen(string $accessionId): Specimen

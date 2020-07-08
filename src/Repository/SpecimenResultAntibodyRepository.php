@@ -2,28 +2,29 @@
 
 namespace App\Repository;
 
-use App\Entity\SpecimenResultQPCR;
-use App\Form\SpecimenResultQPCRFilterForm;
+use App\Entity\SpecimenResultAntibody;
+use App\Form\SpecimenResultAntibodyFilterForm;
 use App\Util\DateUtils;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * Query for SpecimenResultQPCR entities
+ * Query for SpecimenResultAntibody entities
  */
-class SpecimenResultQPCRRepository extends EntityRepository
+class SpecimenResultAntibodyRepository extends EntityRepository
 {
     /**
      * Find Results whose conclusion recommends for testing,
      * and result was created after a certain time. This excludes
      * results from control group specimen.
      *
-     * @return SpecimenResultQPCR[]
+     * @return SpecimenResultAntibody[]
      */
     public function findTestingRecommendedResultCreatedAfter(\DateTimeInterface $datetime): array
     {
+        throw new \RuntimeException('findTestingRecommendedResultCreatedAfter() Not yet supported');
         $conclusionRecommendingTesting = [
-            SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
-            SpecimenResultQPCR::CONCLUSION_POSITIVE,
+            SpecimenResultAntibody::CONCLUSION_RECOMMENDED,
+            SpecimenResultAntibody::CONCLUSION_POSITIVE,
         ];
 
         return $this->createQueryBuilder('r')
@@ -46,8 +47,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
     }
 
     /**
-     * @see SpecimenResultQPCRFilterForm
-     * @return SpecimenResultQPCR[]
+     * @see SpecimenResultAntibodyFilterForm
+     * @return SpecimenResultAntibody[]
      */
     public function filterByFormData(array $data): array
     {

@@ -11,12 +11,12 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing importing qPCR Results from an Excel workbook
+ * Creates test data for testing importing Antibody Results from an Excel workbook
  */
-class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFixtureInterface
+class SpecimenResultAntibodyImporterFixtures extends Fixture implements DependentFixtureInterface
 {
-    // Must match specimen-viral-results.xlsx
-    public const PLATE_BARCODE_WITH_RESULTS = 'QPCRResults';
+    // Must match specimen-antibody-results.xlsx
+    public const PLATE_BARCODE_WITH_RESULTS = 'AntibodyResults1';
 
     /**
      * @var SpecimenAccessionIdGenerator
@@ -38,9 +38,9 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
 
                 $counter++;
 
-                // Must match in specimen-viral-results.xlsx
-                // For example: SpecimenQPCRResults1
-                return sprintf("SpecimenQPCRResults%d", $counter);
+                // Must match in specimen-antibody-results.xlsx
+                // For example: SpecimenAntibodyResults1
+                return sprintf("SpecimenAntibodyResults%d", $counter);
             }
         };
     }
@@ -59,7 +59,6 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
         $em->persist($resultsWellPlate);
 
         // Simulate printing labels for Tubes
-        $tubes = [];
         foreach ($this->getTubeData() as $data) {
             $tube = new Tube($data['accessionId']);
             $this->addReference($data['accessionId'], $tube);
@@ -86,14 +85,17 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             $tube->markAccepted($checkinUsername);
 
             // Tubes/Specimens added to a Well Plate
-            $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+            $well = $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+
+            // Add Well Identifier
+            $well->setWellIdentifier($data['wellIdentifier']);
         }
 
         $em->flush();
     }
 
     /**
-     * This data must match what's in specimen-viral-results.xlsx
+     * This data must match what's in specimen-antibody-results.xlsx
      */
     public function getTubeData(): array
     {
@@ -101,67 +103,52 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
 
         return [
             [
-                'accessionId' => 'TubeQPCRResults0001',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults1',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A1',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0002',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A2',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0003',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
+                'wellIdentifier' => 'G814450900',
                 'wellPlatePosition' => 'A3',
             ],
             [
-                'accessionId' => 'TubeQPCRResults0004',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults2',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
+                'wellIdentifier' => 'G814450901',
                 'wellPlatePosition' => 'A4',
             ],
             [
-                'accessionId' => 'TubeQPCRResults0005',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults3',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A5',
+                'wellIdentifier' => 'G814450902',
+                'wellPlatePosition' => 'B4',
             ],
             [
-                'accessionId' => 'TubeQPCRResults0006',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults4',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A6',
+                'wellIdentifier' => 'G814450903',
+                'wellPlatePosition' => 'C1',
             ],
             [
-                'accessionId' => 'TubeQPCRResults0007',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults5',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A7',
+                'wellIdentifier' => 'G814450904',
+                'wellPlatePosition' => 'C04',
             ],
             [
-                'accessionId' => 'TubeQPCRResults0008',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'accessionId' => 'SpecimenAntibodyResults6',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A8',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0009',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A9',
+                'wellIdentifier' => 'G814450905',
+                'wellPlatePosition' => 'C05',
             ],
         ];
     }

@@ -51,6 +51,14 @@ class SpecimenWell
     private $resultQPCR;
 
     /**
+     * Result of Antibody testing Specimen contained in this well.
+     *
+     * @var SpecimenResultAntibody|null
+     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="well")
+     */
+    private $resultAntibody;
+
+    /**
      * Any identifier that identifies this well. For example, a Biobank Tube ID.
      * Uniqueness is not enforced on this field.
      *
@@ -60,7 +68,15 @@ class SpecimenWell
     private $wellIdentifier;
 
     /**
-     * Well position in alphanumeric format such as A1, B4, H12, etc.
+     * Well position in alphanumeric format.
+     *
+     * Supports positions with and without a left-padded 0.
+     * For example, these positions are equal:
+     *
+     *     A1 === A01
+     *     A5 === A05
+     *     B6 === B06
+     *     B11 === B11
      *
      * @var string
      * @ORM\Column(name="position_alphanumeric", type="string", length=255, nullable=true)
@@ -69,6 +85,9 @@ class SpecimenWell
 
     public function __construct(WellPlate $plate, Specimen $specimen, string $position = null)
     {
+        if (!self::isValidPosition($position)) {
+            throw new \InvalidArgumentException('Invalid well position');
+        }
         $this->positionAlphanumeric = $position;
 
         $this->wellPlate = $plate;
@@ -109,7 +128,7 @@ class SpecimenWell
             return false;
         }
 
-        if ($this->positionAlphanumeric !== $specimenWell->getPositionAlphanumeric()) {
+        if (false === $this->isAtPosition($specimenWell->getPositionAlphanumeric())) {
             return false;
         }
 
@@ -175,13 +194,78 @@ class SpecimenWell
         return Coordinate::stringFromColumnIndex($row) . $column;
     }
 
-    public function setPositionAlphanumeric(string $position): void
+    /**
+     * Whether given position is valid for specifying the Well Position.
+     */
+    private static function isValidPosition(?string $position): bool
     {
+        if ($position === null) {
+            return true;
+        }
+
+        // Empty string not allowed
+        if (strlen($position) === 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function setPositionAlphanumeric(?string $position): void
+    {
+        if (!self::isValidPosition($position)) {
+            throw new \InvalidArgumentException('Invalid well position');
+        }
+
         if ($this->wellPlate->hasWellAtPosition($position)) {
             throw new \InvalidArgumentException(sprintf('Position "%s" is already occupied', $position));
         }
 
         $this->positionAlphanumeric = $position;
+    }
+
+    /**
+     * Check whether two positions are the same.
+     */
+    public static function isSamePosition(?string $position1, ?string $position2): bool
+    {
+        // Having NO position is not the *same* position
+        if (null === $position1 && null === $position2) {
+            return false;
+        }
+
+        // Literal same are obviously the same
+        if ($position1 === $position2) {
+            return true;
+        }
+
+        // Support "G05" === "G5"
+        $pattern = '/^[A-G]0[1-9]$/';
+        $position1Normalized = $position1;
+        if (preg_match($pattern, $position1)) {
+            $position1Normalized = str_replace('0', '', $position1);
+        }
+        $position2Normalized = $position2;
+        if (preg_match($pattern, $position2)) {
+            $position2Normalized = str_replace('0', '', $position2);
+        }
+        if ($position1Normalized === $position2Normalized) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if this well is at given position.
+     */
+    public function isAtPosition(?string $checkPosition): bool
+    {
+        if (!self::isValidPosition($checkPosition)) {
+            throw new \InvalidArgumentException('Invalid well position');
+        }
+
+        return self::isSamePosition($this->getPositionAlphanumeric(), $checkPosition);
     }
 
     public function getPositionAlphanumeric(): ?string
@@ -227,5 +311,26 @@ class SpecimenWell
     public function getResultQPCR(): ?SpecimenResultQPCR
     {
         return $this->resultQPCR;
+    }
+
+    /**
+     * @internal Do not call directly. Instead call new SpecimenResultAntibody($specimen);
+     */
+    public function setAntibodyResult(?SpecimenResultAntibody $result)
+    {
+        if ($result && $this->resultAntibody) {
+            throw new \InvalidArgumentException('Cannot assign new Antibody result when one already exists');
+        }
+
+        $this->resultAntibody = $result;
+
+        if ($this->getSpecimen()) {
+            $this->getSpecimen()->updateStatusWhenResultsSet();
+        }
+    }
+
+    public function getResultAntibody(): ?SpecimenResultAntibody
+    {
+        return $this->resultAntibody;
     }
 }

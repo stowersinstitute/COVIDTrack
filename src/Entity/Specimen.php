@@ -90,6 +90,15 @@ class Specimen
     private $resultsQPCR;
 
     /**
+     * Antibody Results associated with this Specimen.
+     *
+     * @var SpecimenResultAntibody[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $resultsAntibody;
+
+    /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
      * For example, when they spit in the tube or did a blood draw.
      *
@@ -124,6 +133,7 @@ class Specimen
         $this->status = self::STATUS_CREATED;
         $this->wells = new ArrayCollection();
         $this->resultsQPCR = new ArrayCollection();
+        $this->resultsAntibody = new ArrayCollection();
         $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -627,7 +637,7 @@ class Specimen
         // Current recommendation
         $rec = $this->cliaTestingRecommendation;
 
-        // Latest result
+        // Latest viral result
         $qpcr = $this->getMostRecentQPCRResult();
 
         // When result available
@@ -654,5 +664,47 @@ class Specimen
 
         // Caller given latest rec
         return $this->cliaTestingRecommendation;
+    }
+
+    /**
+     * Add new Antibody Result for this Specimen.
+     *
+     * @internal Should only call from SpecimenResultAntibody::__construct()
+     */
+    public function addAntibodyResult(SpecimenResultAntibody $result): void
+    {
+        foreach ($this->resultsAntibody as $existingResult) {
+            if ($result === $existingResult) {
+                return;
+            }
+        }
+
+        $this->resultsAntibody->add($result);
+    }
+
+    /**
+     * Get Antibody Results for this Specimen.
+     *
+     * @param int $limit Max number of results to return
+     * @return SpecimenResultAntibody[]
+     */
+    public function getAntibodyResults(int $limit = null): array
+    {
+        $results = $this->resultsAntibody->getValues();
+
+        // Sort most recent createdAt first
+        uasort($results, function (SpecimenResultAntibody $a, SpecimenResultAntibody $b) {
+            return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
+        });
+
+        // Can return only X most recent
+        return $limit ? array_slice($results, 0, $limit) : $results;
+    }
+
+    public function getMostRecentAntibodyResult(): ?SpecimenResultAntibody
+    {
+        $results = $this->getAntibodyResults(1);
+
+        return array_shift($results);
     }
 }

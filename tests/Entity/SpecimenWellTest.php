@@ -34,7 +34,40 @@ class SpecimenWellTest extends TestCase
         $this->assertNull($well->getPositionAlphanumeric());
     }
 
-    public function testCreateSpecimenWellWithPosition()
+    public function testEmptyStringPositionNotAllowedWhenCreated()
+    {
+        $plateBarcode = 'BC101';
+        $plate = WellPlate::buildExample($plateBarcode);
+
+        $specimenAccessionId = 'SPEC998';
+        $specimen = Specimen::buildExample($specimenAccessionId);
+
+        $position = '';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $well = new SpecimenWell($plate, $specimen, $position);
+    }
+
+    public function testEmptyStringPositionNotAllowedBySetter()
+    {
+        $plateBarcode = 'BC102';
+        $plate = WellPlate::buildExample($plateBarcode);
+
+        $specimenAccessionId = 'SPEC997';
+        $specimen = Specimen::buildExample($specimenAccessionId);
+
+        $well = new SpecimenWell($plate, $specimen);
+
+        $position = '';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $well->setPositionAlphanumeric($position);
+    }
+
+    /**
+     * @dataProvider provideAllPositionFormats
+     */
+    public function testCreateSpecimenWellWithPosition(string $position)
     {
         $plateBarcode = 'BC101';
         $plate = WellPlate::buildExample($plateBarcode);
@@ -42,7 +75,6 @@ class SpecimenWellTest extends TestCase
         $specimenAccessionId = 'SPEC888';
         $specimen = Specimen::buildExample($specimenAccessionId);
 
-        $position = 'G2';
         $well = new SpecimenWell($plate, $specimen, $position);
 
         $this->assertSame($plate, $well->getWellPlate());
@@ -60,7 +92,45 @@ class SpecimenWellTest extends TestCase
         $this->assertSame($position, $well->getPositionAlphanumeric());
     }
 
-    public function testPlatePreventsWellsAtSamePosition()
+    public function provideAllPositionFormats()
+    {
+        return [
+            'Without Padded Zero' => ['F2'],
+            'With Padded Zero'    => ['F02'],
+            'First Tens'          => ['F10'],
+            'Max Row Number'      => ['F12'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideIsAtSamePosition
+     */
+    public function testIsAtSamePosition($position1, $position2, bool $expected)
+    {
+        $this->markTestSkipped();
+        $actual = SpecimenWell::isSamePosition($position1, $position2);
+
+        $this->assertSame($expected, $actual);
+    }
+
+    public function provideIsAtSamePosition()
+    {
+        return [
+            'Two NULLs' => [null, null, false],
+            'Two Empty Strings' => ['', '', false],
+            'Identical Without Leading' => ['G2', 'G2', true],
+            'Identical With Leading' => ['G03', 'G03', true],
+            'Same Example 1' => ['G4', 'G04', true],
+            'Same Example 2' => ['G05', 'G5', true],
+            'Identical Double Digit' => ['G11', 'G11', true],
+            'Identical Lots of Chars' => ['L8rG8r', 'L8rG8r', true],
+        ];
+    }
+
+    /**
+     * @dataProvider provideAllPositionFormats
+     */
+    public function testPlatePreventsWellsAtSamePosition(string $position)
     {
         $plate = WellPlate::buildExample('BC102');
 
@@ -68,7 +138,6 @@ class SpecimenWellTest extends TestCase
         $specimen2 = Specimen::buildExample('SPEC2');
 
         // Add Specimen to a specific position
-        $position = 'B2';
         $well1 = new SpecimenWell($plate, $specimen1, $position);
 
         // Add Specimen to duplicate position should throw Exception
@@ -139,6 +208,67 @@ class SpecimenWellTest extends TestCase
         // But assigning to occupied well not allowed
         $this->expectException(\InvalidArgumentException::class);
         $well2->setPositionAlphanumeric($well1->getPositionAlphanumeric());
+    }
+
+    /**
+     * @dataProvider providePreventsEditingWellPositionCollisionsWithLeadingZero
+     */
+    public function testPreventsEditingWellPositionCollisionsWithLeadingZero(string $position1, string $position2)
+    {
+        $plate = WellPlate::buildExample('BC102');
+
+        $specimen = Specimen::buildExample('SPEC1');
+
+        // Add Specimen but without a position
+        $well1 = new SpecimenWell($plate, $specimen);
+        $well2 = new SpecimenWell($plate, $specimen);
+
+        // Add well to position with leading zero
+        $well1->setPositionAlphanumeric($position1);
+
+        // But adding a different well to same position (without leading zero) causes error
+        $this->expectException(\InvalidArgumentException::class);
+        $well2->setPositionAlphanumeric($position2);
+    }
+
+    public function providePreventsEditingWellPositionCollisionsWithLeadingZero()
+    {
+        return [
+            'Leading Zero, then Without' => ['G04', 'G4'],
+            'Without, then Leading Zero' => ['F6', 'F06'],
+        ];
+    }
+
+    /**
+     * @dataProvider provideIsAtPosition
+     */
+    public function testIsAtPosition($setPosition, $testPosition, $expected)
+    {
+        $plate = WellPlate::buildExample();
+        $specimen = Specimen::buildExample('S100');
+
+        $well = new SpecimenWell($plate, $specimen, $setPosition);
+
+        $actual = $well->isAtPosition($testPosition);
+        $this->assertSame($expected, $actual);
+    }
+
+    public function provideIsAtPosition()
+    {
+        return [
+            // SpecimenWell with a NULL position is not in a specific well in the WellPlate,
+            // so isAtPosition() will always return false
+            'Well not set in a position' => [null, null, false],
+            'Test position null' => ['E3', null, false],
+            'Set position null' => [null, 'E4', false],
+
+            'Identical' => ['ASDF1', 'ASDF1', true],
+            'Test position without leading zero' => ['E05', 'E5', true],
+            'Test position with leading zero' => ['E6', 'E06', true],
+
+            'Mismatch' => ['E5', 'H9', false],
+            'Mismatch with trailing zero' => ['F10', 'F1', false],
+        ];
     }
 
     public function testGetWellPlatePositionDisplayString()

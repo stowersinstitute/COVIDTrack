@@ -4,14 +4,17 @@ namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppViralResultsFixtures extends Fixture implements DependentFixtureInterface
+/**
+ * Import test results of Blood Antibody testing.
+ */
+class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInterface
 {
     /**
      * Stores Specimen.id loaded with Results during this fixture class
@@ -37,7 +40,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
     {
         return [
             AppParticipantGroupsFixtures::class,
-            AppSalivaTubeFixtures::class,
+            AppBloodTubeFixtures::class,
         ];
     }
 
@@ -59,7 +62,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         $groups = $em->getRepository(ParticipantGroup::class)->findAll();
 
         // Reasonable positive/negative rate
-        $possibleResults = $this->buildQPCRResultsDistribution();
+        $possibleSignal = $this->buildSignalDistribution();
 
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
@@ -74,18 +77,24 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     if (!$specimen) continue;
 
                     // Set a random conclusion, if we have one
-                    $conclusion = $possibleResults[array_rand($possibleResults)];
-                    if ($conclusion) {
+                    $signal = $possibleSignal[array_rand($possibleSignal)];
+                    if ($signal !== null) {
                         $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
+                        $conclusion = SpecimenResultAntibody::CONCLUSION_NEGATIVE;
+                        if ($signal === SpecimenResultAntibody::SIGNAL_STRONG_NUMBER) {
+                            $conclusion = SpecimenResultAntibody::CONCLUSION_POSITIVE;
+                        }
+
                         // Add Result to Well
-                        $result = new SpecimenResultQPCR($well, $conclusion);
+                        $result = new SpecimenResultAntibody($well, $conclusion, $signal);
                         $result->setCreatedAt($resultDate);
 
                         // Set Position normally coming from reporting result
-                        $well->setPositionAlphanumeric($this->getNextPositionForPlate($well->getWellPlate()));
+                        $position = $this->getNextPositionForPlate($well->getWellPlate());
+                        $well->setPositionAlphanumeric($position);
 
                         $em->persist($result);
                     }
@@ -95,25 +104,25 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
     }
 
     /**
-     * Build array of possible Results across a probability distribution.
+     * Build array of possible Signal Results across a probability distribution.
      * Pull a random element from this array to get a random result.
      *
      * Returns NULL when no result available, such as when Awaiting Results.
      */
-    private function buildQPCRResultsDistribution(): array
+    private function buildSignalDistribution(): array
     {
         // Approximate hit rate out of 100
-        $positive = 6;
-        $recommended = 4;
+        $strong = 6;
+        $weak = 4;
+        $partial = 10;
         $negative = 72;
-        $nonNegative = 10;
         $awaitingResults = 8;
 
         $possible = array_merge(
-            array_fill(0, $positive, SpecimenResultQPCR::CONCLUSION_POSITIVE),
-            array_fill(0, $recommended, SpecimenResultQPCR::CONCLUSION_RECOMMENDED),
-            array_fill(0, $negative, SpecimenResultQPCR::CONCLUSION_NEGATIVE),
-            array_fill(0, $nonNegative, SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE),
+            array_fill(0, $strong, SpecimenResultAntibody::SIGNAL_STRONG_NUMBER),
+            array_fill(0, $weak, SpecimenResultAntibody::SIGNAL_WEAK_NUMBER),
+            array_fill(0, $partial, SpecimenResultAntibody::SIGNAL_PARTIAL_NUMBER),
+            array_fill(0, $negative, SpecimenResultAntibody::SIGNAL_NEGATIVE_NUMBER),
             array_fill(0, $awaitingResults, null)
         );
 
@@ -127,9 +136,9 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             ->createQueryBuilder('s')
             ->join('s.wells', 'wells')
 
-            // Saliva Specimen
+            // Blood Specimen
             ->andWhere('s.type = :type')
-            ->setParameter('type', Specimen::TYPE_SALIVA)
+            ->setParameter('type', Specimen::TYPE_BLOOD)
 
             // Group
             ->andWhere('s.participantGroup = :group')
@@ -141,10 +150,6 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
 
             // Is on a Well Plate
             ->andWhere('wells.wellPlate IS NOT NULL')
-
-            // Doesn't have a CLIA testing rec yet
-            ->andWhere('s.cliaTestingRecommendation = :recommendation')
-            ->setParameter('recommendation', Specimen::CLIA_REC_PENDING)
 
             ->setMaxResults(1);
 
@@ -176,8 +181,8 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         }
 
         $well = array_shift($wells);
-        if ($well->getResultQPCR()) {
-            throw new \RuntimeException(sprintf('Specimen %s in Well %s on Well Plate %s already has results', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
+        if ($well->getResultAntibody()) {
+            throw new \RuntimeException(sprintf('Antibody results already present on Specimen %s in Well %s on Well Plate %s', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
         }
 
         return $well;

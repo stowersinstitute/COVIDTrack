@@ -16,7 +16,7 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             SpecimenResultQPCRImporterFixtures::class,
         ]);
 
-        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/specimen-results.xlsx');
+        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/specimen-viral-results.xlsx');
         $importer = new SpecimenResultQPCRImporter($this->em, $workbook->getFirstWorksheet());
 
         $processedResults = $importer->process(true);
@@ -25,7 +25,7 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         $this->assertCount(9, $processedResults); // Count dependent on SpecimenResultQPCRImporterFixtures::getData()
         $this->assertSame(9, $importer->getNumImportedItems());
 
-        // Data must match specimen-results.xlsx
+        // Data must match specimen-viral-results.xlsx
         $ensureHasConclusion = [
             'SpecimenQPCRResults1' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
             'SpecimenQPCRResults2' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
