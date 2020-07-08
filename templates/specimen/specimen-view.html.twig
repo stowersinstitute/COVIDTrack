@@ -2,6 +2,8 @@
 {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
 {% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+{% set bloodConstant = constant('App\\Entity\\Specimen::TYPE_BLOOD') %}
+{% set salivaConstant = constant('App\\Entity\\Specimen::TYPE_SALIVA') %}
 
 {% block page_title %}
     Specimen {{ specimen.accessionId }}
@@ -31,7 +33,7 @@
                         {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
-                    {% if specimen.type == "SALIVA" %}
+                    {% if specimen.type == salivaConstant %}
                     <dt>CLIA Testing Recommended?</dt><dd>{{ specimen.cliaTestingRecommendedText }}</dd>
                     {% endif %}
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
@@ -48,7 +50,7 @@
 
 {% if userCanViewResults %}
 
-{% if specimen.type == "SALIVA" %}
+{% if specimen.type == salivaConstant %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
@@ -94,7 +96,7 @@
 </div>
 {% endif %}{# End viralResults #}
 
-{% if specimen.type == "BLOOD" %}
+{% if specimen.type == bloodConstant %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
