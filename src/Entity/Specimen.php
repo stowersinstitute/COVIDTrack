@@ -640,7 +640,7 @@ class Specimen
                 SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
-                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE => self::CLIA_REC_NO,
             ];
 
             // Use mapped recommendation value, else keep existing rec

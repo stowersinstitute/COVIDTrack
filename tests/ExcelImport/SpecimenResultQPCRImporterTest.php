@@ -34,7 +34,7 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenQPCRResults5' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
             'SpecimenQPCRResults6' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
             'SpecimenQPCRResults7' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
-            'SpecimenQPCRResults8' => SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE,
+            'SpecimenQPCRResults8' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
             'SpecimenQPCRResults9' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
         ];
         foreach ($processedResults as $result) {
