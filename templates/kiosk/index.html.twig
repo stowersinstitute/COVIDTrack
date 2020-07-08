@@ -19,6 +19,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 
     {% block scan_help %}
     {% include 'kiosk/scan-help.html.twig' with {
+        image: 'images/badge-w-qr.svg',
         scanTipHtml: 'Scan Group barcode<br>below the screen'
     }%}
     {% endblock %}

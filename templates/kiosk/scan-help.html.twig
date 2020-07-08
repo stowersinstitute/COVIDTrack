@@ -1,9 +1,24 @@
-<div id="scanTip" class="bouncing-box">
-    {{ scanTipHtml|raw }}
-    <div><i class="fa fa-chevron-down"></i></div>
+<div id="scanTip">
+
+    {% if image %}
+        <img id="scanHint" src="{{ asset(image) }}">
+    {%  endif %}
+
+    <div class="bouncing-box">
+        {{ scanTipHtml|raw }}
+        <div><i class="fa fa-chevron-down"></i></div>
+    </div>
 </div>
 
+
 <style>
+    img#scanHint {
+        height: 20rem;
+        width: auto;
+        display: block;
+        margin: 10rem auto;
+    }
+
     .bouncing-box {
         animation-duration: 2s;
         animation-name: bounce;

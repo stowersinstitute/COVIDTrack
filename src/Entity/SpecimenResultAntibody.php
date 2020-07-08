@@ -113,7 +113,7 @@ class SpecimenResultAntibody extends SpecimenResult
         return [
             'Negative' => self::CONCLUSION_NEGATIVE,
             'Positive' => self::CONCLUSION_POSITIVE,
-            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
+            'Non-Negative' => self::CONCLUSION_NON_NEGATIVE,
         ];
     }
 

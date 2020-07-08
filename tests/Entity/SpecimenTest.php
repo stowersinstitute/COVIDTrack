@@ -249,9 +249,9 @@ class SpecimenTest extends TestCase
         $r4 = new SpecimenResultQPCR($well4, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
 
-        // Back to Inconclusive Result
+        // Back to Non-Negative Result
         $well5 = SpecimenWell::buildExample($specimen);
-        $r5 = new SpecimenResultQPCR($well5, SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE);
+        $r5 = new SpecimenResultQPCR($well5, SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE);
         $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
     }
 

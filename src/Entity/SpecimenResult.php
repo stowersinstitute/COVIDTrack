@@ -34,8 +34,9 @@ abstract class SpecimenResult
     // When analysis found evidence of what it was searching for.
     const CONCLUSION_POSITIVE = "POSITIVE";
 
-    // When a result could not be determined.
-    const CONCLUSION_INCONCLUSIVE = "INCONCLUSIVE";
+    // When result is not negative, but not certainly positive.
+    // May be because of a dirty sample, or questionable analysis, or similar.
+    const CONCLUSION_NON_NEGATIVE = "NON-NEGATIVE";
 
     /**
      * @var int
@@ -137,7 +138,7 @@ abstract class SpecimenResult
     {
         return [
             'Negative' => static::CONCLUSION_NEGATIVE,
-            'Inconclusive' => static::CONCLUSION_INCONCLUSIVE,
+            'Non-Negative' => static::CONCLUSION_NON_NEGATIVE,
             'Positive' => static::CONCLUSION_POSITIVE,
         ];
     }

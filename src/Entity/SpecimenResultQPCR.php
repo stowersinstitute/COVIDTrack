@@ -89,7 +89,7 @@ class SpecimenResultQPCR extends SpecimenResult
     {
         return [
             'Negative' => self::CONCLUSION_NEGATIVE,
-            'Inconclusive' => self::CONCLUSION_INCONCLUSIVE,
+            'Non-Negative' => self::CONCLUSION_NON_NEGATIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,
             'Positive' => self::CONCLUSION_POSITIVE,
         ];

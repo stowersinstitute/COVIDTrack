@@ -106,14 +106,14 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         $positive = 6;
         $recommended = 4;
         $negative = 72;
-        $inconclusive = 10;
+        $nonNegative = 10;
         $awaitingResults = 8;
 
         $possible = array_merge(
             array_fill(0, $positive, SpecimenResultQPCR::CONCLUSION_POSITIVE),
             array_fill(0, $recommended, SpecimenResultQPCR::CONCLUSION_RECOMMENDED),
             array_fill(0, $negative, SpecimenResultQPCR::CONCLUSION_NEGATIVE),
-            array_fill(0, $inconclusive, SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE),
+            array_fill(0, $nonNegative, SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE),
             array_fill(0, $awaitingResults, null)
         );
 
