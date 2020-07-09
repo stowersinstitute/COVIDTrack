@@ -6,6 +6,7 @@ use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use App\Entity\Tube;
@@ -222,14 +223,14 @@ class SpecimenTest extends TestCase
         $this->assertSame($r2, $specimen->getMostRecentQPCRResult());
     }
 
-    public function testGetCliaTestingText()
+    public function testGetCliaTestingTextForSalivaSpecimens()
     {
-        $specimen = Specimen::buildExample('C100');
+        $specimen = Specimen::buildExampleSaliva('S100');
 
         // Default when Specimen test results not yet available
         $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
 
-        // Add Pending Result
+        // Add Positive Result
         $well1 = SpecimenWell::buildExample($specimen);
         $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
@@ -255,6 +256,33 @@ class SpecimenTest extends TestCase
         $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
     }
 
+    public function testGetCliaTestingTextForBloodSpecimens()
+    {
+        $specimen = Specimen::buildExampleBlood('B100');
+
+        // Blood Specimens do not have CLIA testing recommendations
+        $this->assertSame(null, $specimen->getCliaTestingRecommendation());
+        $this->assertSame('', $specimen->getCliaTestingRecommendedText());
+
+        // Add Positive Result
+        $well1 = SpecimenWell::buildExample($specimen);
+        $r1 = new SpecimenResultAntibody($well1, SpecimenResultAntibody::CONCLUSION_POSITIVE, SpecimenResultAntibody::SIGNAL_STRONG_NUMBER);
+        $this->assertSame(null, $specimen->getCliaTestingRecommendation());
+        $this->assertSame('', $specimen->getCliaTestingRecommendedText());
+
+        // Add Negative Result
+        $well2 = SpecimenWell::buildExample($specimen);
+        $r2 = new SpecimenResultAntibody($well2, SpecimenResultAntibody::CONCLUSION_NEGATIVE, SpecimenResultAntibody::SIGNAL_NEGATIVE_NUMBER);
+        $this->assertSame(null, $specimen->getCliaTestingRecommendation());
+        $this->assertSame('', $specimen->getCliaTestingRecommendedText());
+
+        // Add Non-Negative Result
+        $well3 = SpecimenWell::buildExample($specimen);
+        $r3 = new SpecimenResultAntibody($well3, SpecimenResultAntibody::CONCLUSION_NON_NEGATIVE, SpecimenResultAntibody::SIGNAL_PARTIAL_NUMBER);
+        $this->assertSame(null, $specimen->getCliaTestingRecommendation());
+        $this->assertSame('', $specimen->getCliaTestingRecommendedText());
+    }
+
     public function testCreateFromTube()
     {
         $tube = new Tube('TUBE-100');
@@ -275,6 +303,22 @@ class SpecimenTest extends TestCase
         $this->assertSame(Specimen::TYPE_BLOOD, $specimen->getType());
         $this->assertEquals($collectedAt, $specimen->getCollectedAt());
         $this->assertTrue(EntityUtils::isSameEntity($tube->getParticipantGroup(), $specimen->getParticipantGroup()));
+    }
+
+    public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()
+    {
+        $group = ParticipantGroup::buildExample('GRP1');
+        $specimen = new Specimen('S100', $group);
+
+        $this->assertEmpty($specimen->getType());
+        $this->assertEmpty($specimen->getTypeText());
+        $this->assertEmpty($specimen->getCliaTestingRecommendation());
+        $this->assertEmpty($specimen->getCliaTestingRecommendedText());
+
+        $specimen->setType(Specimen::TYPE_SALIVA);
+
+        $this->assertSame($specimen->getCliaTestingRecommendation(), Specimen::CLIA_REC_PENDING);
+        $this->assertSame($specimen->getCliaTestingRecommendedText(), 'Awaiting Results');
     }
 
     /**

@@ -113,7 +113,7 @@ class Specimen
      * should undergo CLIA-based testing.
      *
      * @var string
-     * @ORM\Column(name="clia_testing_recommendation", type="string")
+     * @ORM\Column(name="clia_testing_recommendation", type="string", nullable=true)
      * @Gedmo\Versioned
      */
     private $cliaTestingRecommendation;
@@ -134,7 +134,6 @@ class Specimen
         $this->wells = new ArrayCollection();
         $this->resultsQPCR = new ArrayCollection();
         $this->resultsAntibody = new ArrayCollection();
-        $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -191,11 +190,27 @@ class Specimen
     /**
      * Build for tests.
      */
-    public static function buildExample(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null): self
     {
         $group = $group ?: ParticipantGroup::buildExample('G100');
 
         return new static($accessionId, $group);
+    }
+
+    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $specimen = static::buildExample($accessionId, $group);
+        $specimen->setType(static::TYPE_SALIVA);
+
+        return $specimen;
+    }
+
+    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $specimen = static::buildExample($accessionId, $group);
+        $specimen->setType(static::TYPE_BLOOD);
+
+        return $specimen;
     }
 
     /**
@@ -290,6 +305,7 @@ class Specimen
     {
         $this->ensureValidType($type);
         $this->type = $type;
+        $this->recalculateCliaTestingRecommendation();
     }
 
     /**
@@ -419,7 +435,7 @@ class Specimen
     /**
      * @return string CLIA_REC_* constant
      */
-    public function getCliaTestingRecommendation(): string
+    public function getCliaTestingRecommendation(): ?string
     {
         return $this->cliaTestingRecommendation;
     }
@@ -431,10 +447,10 @@ class Specimen
     }
 
     /**
-     * @param string $rec CLIA_REC_* constant
+     * @param null|string $rec CLIA_REC_* constant
      * @return string
      */
-    public static function lookupCliaTestingRecommendationText(string $rec): string
+    public static function lookupCliaTestingRecommendationText(?string $rec): string
     {
         $map = [
             self::CLIA_REC_PENDING => 'Awaiting Results',
@@ -634,8 +650,14 @@ class Specimen
      */
     public function recalculateCliaTestingRecommendation(): string
     {
+        // Only Saliva specimens support CLIA recommendations
+        if ($this->getType() !== self::TYPE_SALIVA) {
+            $this->cliaTestingRecommendation = null;
+            return '';
+        }
+
         // Current recommendation
-        $rec = $this->cliaTestingRecommendation;
+        $rec = $this->cliaTestingRecommendation ?? self::CLIA_REC_PENDING;
 
         // Latest viral result
         $qpcr = $this->getMostRecentQPCRResult();
