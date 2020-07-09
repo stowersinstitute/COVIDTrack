@@ -132,7 +132,7 @@ class ReportController extends AbstractController
         $resultDates = $specimenRepo->findAvailableGroupResultDates();
 
         // Y axis
-        $groups = $groupRepo->findActiveAlphabetical();
+        $groups = $groupRepo->findActive();
         foreach ($groups as $group) {
             /**
              * Keys: Results Date string like "2020-05-05". Printed in report.

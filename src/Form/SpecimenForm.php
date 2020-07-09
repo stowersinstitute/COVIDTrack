@@ -35,7 +35,7 @@ class SpecimenForm extends AbstractType
                 'required' => true,
                 'placeholder' => '',
                 'query_builder' => function (ParticipantGroupRepository $repo) {
-                    return $repo->findActiveAlphabetical();
+                    return $repo->findActive();
                 },
             ])
             ->add('type', ChoiceType::class, [

@@ -13,7 +13,7 @@ class ParticipantGroupRepository extends EntityRepository
     /**
      * @return ParticipantGroup[]
      */
-    public function findActiveAlphabetical(): array
+    public function findActive(): array
     {
         return $this->getDefaultQueryBuilder('g')
             ->where('g.isActive = true')

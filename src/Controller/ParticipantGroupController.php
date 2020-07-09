@@ -81,7 +81,7 @@ class ParticipantGroupController extends AbstractController
         }
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
-            'groups' => $groupRepo->findActiveAlphabetical(),
+            'groups' => $groupRepo->findActive(),
             'form' => $form->createView(),
         ]);
     }
