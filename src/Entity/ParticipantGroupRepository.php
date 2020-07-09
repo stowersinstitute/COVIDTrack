@@ -26,14 +26,6 @@ class ParticipantGroupRepository extends EntityRepository
     /**
      * @return ParticipantGroup[]
      */
-    public function findActive()
-    {
-        return $this->findBy(['isActive' => true], ['title' => 'ASC']);
-    }
-
-    /**
-     * @return ParticipantGroup[]
-     */
     public function findActiveAlphabetical(): array
     {
         return $this->findBy(
