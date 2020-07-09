@@ -152,7 +152,7 @@ class ReportController extends AbstractController
         /** @var ParticipantGroup[] $allGroups */
         $allGroups = $this->getDoctrine()
             ->getRepository(ParticipantGroup::class)
-            ->findAll();
+            ->findBy([], ['title' => 'ASC']);
 
         return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,
