@@ -15,16 +15,10 @@ class ParticipantGroupRepository extends EntityRepository
      */
     public function findActiveAlphabetical(): array
     {
-        return $this->findBy(
-            // Params
-            [
-                'isActive' => true,
-            ],
-            // Sort
-            [
-                'title' => 'ASC',
-            ]
-        );
+        return $this->getDefaultQueryBuilder('g')
+            ->where('g.isActive = true')
+            ->getQuery()
+            ->execute();
     }
 
     /**
@@ -44,7 +38,7 @@ class ParticipantGroupRepository extends EntityRepository
             $groupIds[] = $group->getId();
         }
 
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->where('
                 g.isActive = true
                 AND
@@ -56,7 +50,7 @@ class ParticipantGroupRepository extends EntityRepository
 
     public function getActiveCount() : int
     {
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->select('count(g.id)')
             ->where('g.isActive = true')
             ->getQuery()->getSingleScalarResult();
@@ -67,8 +61,14 @@ class ParticipantGroupRepository extends EntityRepository
      */
     public function findInactive()
     {
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->where('g.isActive = false')
             ->getQuery()->getResult();
+    }
+
+    private function getDefaultQueryBuilder(string $alias = 'g'): QueryBuilder
+    {
+        return $this->createQueryBuilder($alias)
+            ->orderBy($alias.'.title', 'ASC');
     }
 }
