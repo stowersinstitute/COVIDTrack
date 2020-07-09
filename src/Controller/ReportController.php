@@ -22,7 +22,7 @@ class ReportController extends AbstractController
 {
     /**
      * List notifications previously sent to the Study Coordinator that
-     * recommend Participant Groups with a positive test should undergo
+     * recommend Participant Groups with a positive viral test should undergo
      * further testing.
      *
      * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
@@ -129,7 +129,7 @@ class ReportController extends AbstractController
 
         // X axis
         /** @var \DateTime[] $resultDates */
-        $resultDates = $specimenRepo->findAvailableGroupResultDates();
+        $resultDates = $specimenRepo->findAvailableGroupViralResultDates();
 
         // Y axis
         $groups = $groupRepo->findActive();
@@ -152,7 +152,7 @@ class ReportController extends AbstractController
         /** @var ParticipantGroup[] $allGroups */
         $allGroups = $this->getDoctrine()
             ->getRepository(ParticipantGroup::class)
-            ->findAll();
+            ->findBy([], ['title' => 'ASC']);
 
         return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,
