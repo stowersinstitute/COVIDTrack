@@ -31,11 +31,11 @@ class SpecimenRepository extends EntityRepository
     }
 
     /**
-     * Find unique list of DateTimes for when Results were uploaded for Specimens.
+     * Find unique list of DateTimes for when Viral Results were uploaded for Specimens.
      *
      * @return \DateTime[]
      */
-    public function findAvailableGroupResultDates(): array
+    public function findAvailableGroupViralResultDates(): array
     {
         $asName = 'resultDate';
         $results = $this->createResultsQB('s')
@@ -90,10 +90,11 @@ class SpecimenRepository extends EntityRepository
     /**
      * Find Specimens belonging to members of given Participation Group,
      * but only those with Results reported on a specific date.
+     * Only returns Specimens with Viral Results.
      *
      * @return Specimen[]
      */
-    public function findByGroupForResultsPeriod(ParticipantGroup $group, \DateTimeInterface $resultedOnDate): array
+    public function findByGroupForViralResultsPeriod(ParticipantGroup $group, \DateTimeInterface $resultedOnDate): array
     {
         list($range) = DateUtils::getDaysFromRange($resultedOnDate, $resultedOnDate);
 

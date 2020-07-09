@@ -30,7 +30,7 @@ class GroupTestingRecommendationReport
     {
         // Collect all Specimens for this group and period
         $specimens = $this->specimenRepo
-            ->findByGroupForResultsPeriod($group, $resultedAt);
+            ->findByGroupForViralResultsPeriod($group, $resultedAt);
 
         return GroupTestingRecommendation::createForSpecimens($specimens);
     }
