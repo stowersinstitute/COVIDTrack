@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 
 /**
  * Query for ParticipantGroup entities.
@@ -10,42 +11,14 @@ use Doctrine\ORM\EntityRepository;
 class ParticipantGroupRepository extends EntityRepository
 {
     /**
-     * @param int|string $id ParticipantGroup.id or ParticipantGroup.accessionId
-     */
-    public function findOneByAnyId($id): ?ParticipantGroup
-    {
-        if (is_int($id)) {
-            return $this->find($id);
-        }
-
-        return $this->findOneBy([
-            'title' => $id,
-        ]);
-    }
-
-    /**
      * @return ParticipantGroup[]
      */
-    public function findActive()
+    public function findActive(): array
     {
-        return $this->findBy(['isActive' => true], ['accessionId' => 'ASC']);
-    }
-
-    /**
-     * @return ParticipantGroup[]
-     */
-    public function findActiveAlphabetical(): array
-    {
-        return $this->findBy(
-            // Params
-            [
-                'isActive' => true,
-            ],
-            // Sort
-            [
-                'title' => 'ASC',
-            ]
-        );
+        return $this->getDefaultQueryBuilder('g')
+            ->where('g.isActive = true')
+            ->getQuery()
+            ->execute();
     }
 
     /**
@@ -65,7 +38,7 @@ class ParticipantGroupRepository extends EntityRepository
             $groupIds[] = $group->getId();
         }
 
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->where('
                 g.isActive = true
                 AND
@@ -77,7 +50,7 @@ class ParticipantGroupRepository extends EntityRepository
 
     public function getActiveCount() : int
     {
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->select('count(g.id)')
             ->where('g.isActive = true')
             ->getQuery()->getSingleScalarResult();
@@ -88,8 +61,14 @@ class ParticipantGroupRepository extends EntityRepository
      */
     public function findInactive()
     {
-        return $this->createQueryBuilder('g')
+        return $this->getDefaultQueryBuilder('g')
             ->where('g.isActive = false')
             ->getQuery()->getResult();
+    }
+
+    private function getDefaultQueryBuilder(string $alias = 'g'): QueryBuilder
+    {
+        return $this->createQueryBuilder($alias)
+            ->orderBy($alias.'.title', 'ASC');
     }
 }
