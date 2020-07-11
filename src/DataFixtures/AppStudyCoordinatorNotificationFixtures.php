@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\StudyCoordinatorCliaRecommendationNotification;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -20,7 +20,7 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
     public function load(ObjectManager $em)
     {
         foreach ($this->getData() as $data) {
-            $n = new StudyCoordinatorNotification();
+            $n = new StudyCoordinatorCliaRecommendationNotification();
             $n->setCreatedAt($data['sentAt']);
 
             $n->setToAddressesString('Study Coordinator <coordinator@no-reply>');

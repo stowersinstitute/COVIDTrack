@@ -4,7 +4,7 @@ namespace App\Command\Report;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\StudyCoordinatorCliaRecommendationNotification;
 use App\Util\DateUtils;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Mime\Email;
@@ -21,6 +21,8 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
 
     protected function configure()
     {
+        parent::configure();
+
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
             ->addOption('all-positive-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published today')
@@ -95,7 +97,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $recommendations = $this->getNewTestingRecommendations();
         $groups = $recommendations['groups'];
 
-        $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
+        $notif = StudyCoordinatorCliaRecommendationNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
         $this->em->flush();
     }
@@ -121,7 +123,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         ];
 
         $lastNotificationSent = $this->em
-            ->getRepository(StudyCoordinatorNotification::class)
+            ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
             ->getMostRecentSentAt();
         if ($this->input->getOption('all-positive-groups-today')) {
             // CLI options want us to email about all groups with positive result today
@@ -164,9 +166,9 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         // Remove Groups already notified today
         if (!$this->input->getOption('all-positive-groups-today') && !$this->input->getOption('all-positive-groups-ever')) {
             $now = new \DateTime();
-            /** @var StudyCoordinatorNotification[] $groupsNotifiedToday */
+            /** @var StudyCoordinatorCliaRecommendationNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em
-                ->getRepository(StudyCoordinatorNotification::class)
+                ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
                 ->getGroupsNotifiedOnDate($now);
 
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {

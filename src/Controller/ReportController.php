@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\StudyCoordinatorCliaRecommendationNotification;
 use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,7 +40,7 @@ class ReportController extends AbstractController
 
         $limit = 100;
         $logs = $this->getDoctrine()
-            ->getRepository(StudyCoordinatorNotification::class)
+            ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
             ->findMostRecent($limit);
 
         return $this->render('reports/coordinator-notifications/index.html.twig', [

@@ -4,7 +4,6 @@ namespace App\Command\Report;
 
 use App\Email\EmailBuilder;
 use App\Entity\AppUser;
-use App\Entity\StudyCoordinatorNotification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
