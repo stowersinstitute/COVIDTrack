@@ -6,36 +6,38 @@ use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\StudyCoordinatorNotification;
 use App\Util\DateUtils;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies users that should be notified when a new Positive Result is available.
+ * Notifies users that should be notified when a new Non-Negative Result is available.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
+class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 {
-    protected static $defaultName = 'app:report:notify-on-positive-result';
+    protected static $defaultName = 'app:report:notify-on-non-negative-result';
 
     protected function configure()
     {
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
-            ->addOption('all-positive-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published today')
-            ->addOption('all-positive-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published from the beginning of time')
+            ->addOption('all-non-negative-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published today')
+            ->addOption('all-non-negative-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published from the beginning of time')
         ;
     }
 
     protected function getSubject(): string
     {
-        return 'New Group Testing Recommendation';
+        return 'Non-Negative Group Results';
     }
 
     protected function getHtmlEmailBody(): string
     {
-        $recommendations = $this->getNewTestingRecommendations();
+        $recommendations = $this->getGroupsWithTimestamps();
         $groups = $recommendations['groups'];
         $timestamps = $recommendations['timestamps'];
 
@@ -49,7 +51,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
-            <p>Participant Groups have been recommended for diagnostic testing.</p>
+            <p>Non-Negative results have been reported for these Participant Groups:</p>
 
             <p>Results published:</p>
             <ul>
@@ -73,33 +75,6 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         return $html;
     }
 
-    protected function getReasonToNotSend(): ?string
-    {
-        $recommendations = $this->getNewTestingRecommendations();
-        $groups = $recommendations['groups'];
-
-        if (count($groups) < 1) {
-            return 'No new Participant Groups need contacting';
-        }
-
-        return null;
-    }
-
-    protected function logSentEmail(Email $email)
-    {
-        $save = !$this->input->getOption('skip-saving');
-        if (!$save) {
-            return;
-        }
-
-        $recommendations = $this->getNewTestingRecommendations();
-        $groups = $recommendations['groups'];
-
-        $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
-        $this->em->persist($notif);
-        $this->em->flush();
-    }
-
     /**
      * Get Participant Groups and the timestamp when their recommended result
      * was uploaded.
@@ -113,9 +88,14 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
      * $groups === ParticipantGroup[] - Unique list of groups recommended for further testing
      * $resultsUploadedAt === \DateTimeImmutable[] - Unique list of times found results were uploaded
      */
-    private function getNewTestingRecommendations(): array
+    private function getGroupsWithTimestamps(): array
     {
-        $output = [
+        // Ensure this method only runs once
+        if (!empty($output)) {
+            return $output;
+        }
+
+        static $output = [
             'groups' => [],
             'timestamps' => [],
         ];
@@ -181,5 +161,32 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $output['timestamps'] = array_values($resultsTimestamps);
 
         return $output;
+    }
+
+    protected function getReasonToNotSend(): ?string
+    {
+        $recommendations = $this->getGroupsWithTimestamps();
+        $groups = $recommendations['groups'];
+
+        if (count($groups) < 1) {
+            return 'No new Participant Groups need contacting';
+        }
+
+        return null;
+    }
+
+    protected function logSentEmail(Email $email)
+    {
+        $save = !$this->input->getOption('skip-saving');
+        if (!$save) {
+            return;
+        }
+
+        $recommendations = $this->getGroupsWithTimestamps();
+        $groups = $recommendations['groups'];
+
+        $notif = StudyCoordinatorNotification::createFromEmail($email, $groups);
+        $this->em->persist($notif);
+        $this->em->flush();
     }
 }
