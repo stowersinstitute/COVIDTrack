@@ -25,8 +25,6 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
 
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
-            ->addOption('all-positive-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published today')
-            ->addOption('all-positive-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a recommended result published from the beginning of time')
         ;
     }
 
@@ -125,11 +123,11 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $lastNotificationSent = $this->em
             ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
             ->getMostRecentSentAt();
-        if ($this->input->getOption('all-positive-groups-today')) {
+        if ($this->input->getOption('all-groups-today')) {
             // CLI options want us to email about all groups with positive result today
             // Assume since midnight today
             $lastNotificationSent = DateUtils::dayFloor(new \DateTime());
-        } else if ($this->input->getOption('all-positive-groups-ever') || !$lastNotificationSent) {
+        } else if ($this->input->getOption('all-groups-ever') || !$lastNotificationSent) {
             // Study Coordinator never notified
             // Search for since earliest possible date
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
@@ -164,7 +162,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         }
 
         // Remove Groups already notified today
-        if (!$this->input->getOption('all-positive-groups-today') && !$this->input->getOption('all-positive-groups-ever')) {
+        if (!$this->input->getOption('all-groups-today') && !$this->input->getOption('all-groups-ever')) {
             $now = new \DateTime();
             /** @var StudyCoordinatorCliaRecommendationNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em

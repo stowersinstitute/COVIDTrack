@@ -6,7 +6,6 @@ use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\StudyCoordinatorNonNegativeNotification;
 use App\Util\DateUtils;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
@@ -25,8 +24,6 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 
         $this
             ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
-            ->addOption('all-non-negative-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published today')
-            ->addOption('all-non-negative-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published from the beginning of time')
         ;
     }
 
@@ -103,11 +100,11 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         $lastNotificationSent = $this->em
             ->getRepository(StudyCoordinatorNonNegativeNotification::class)
             ->getMostRecentSentAt();
-        if ($this->input->getOption('all-positive-groups-today')) {
+        if ($this->input->getOption('all-groups-today')) {
             // CLI options want us to email about all groups with positive result today
             // Assume since midnight today
             $lastNotificationSent = DateUtils::dayFloor(new \DateTime());
-        } else if ($this->input->getOption('all-positive-groups-ever') || !$lastNotificationSent) {
+        } else if ($this->input->getOption('all-groups-ever') || !$lastNotificationSent) {
             // Study Coordinator never notified
             // Search for since earliest possible date
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
@@ -142,7 +139,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         }
 
         // Remove Groups already notified today
-        if (!$this->input->getOption('all-positive-groups-today') && !$this->input->getOption('all-positive-groups-ever')) {
+        if (!$this->input->getOption('all-groups-today') && !$this->input->getOption('all-groups-ever')) {
             $now = new \DateTime();
             /** @var StudyCoordinatorNonNegativeNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em

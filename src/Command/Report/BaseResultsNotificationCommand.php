@@ -62,6 +62,8 @@ abstract class BaseResultsNotificationCommand extends Command
         $this
             ->addOption('do-not-send', null, InputOption::VALUE_NONE, 'Do not send real email when run')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save a record of this notification being sent')
+            ->addOption('all-groups-today', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published today')
+            ->addOption('all-groups-ever', null, InputOption::VALUE_NONE, 'Use to notify about all Groups with a non-negative result published from the beginning of time')
         ;
     }
 
