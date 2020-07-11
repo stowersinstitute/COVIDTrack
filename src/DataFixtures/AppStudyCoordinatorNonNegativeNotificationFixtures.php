@@ -3,12 +3,12 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorCliaRecommendationNotification;
+use App\Entity\StudyCoordinatorNonNegativeNotification;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppStudyCoordinatorNotificationFixtures extends Fixture implements DependentFixtureInterface
+class AppStudyCoordinatorNonNegativeNotificationFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
@@ -20,11 +20,11 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
     public function load(ObjectManager $em)
     {
         foreach ($this->getData() as $data) {
-            $n = new StudyCoordinatorCliaRecommendationNotification();
+            $n = new StudyCoordinatorNonNegativeNotification();
             $n->setCreatedAt($data['sentAt']);
 
             $n->setToAddressesString('Study Coordinator <coordinator@no-reply>');
-            $n->setSubject('Fixture Notification');
+            $n->setSubject('Non-Negative Notification');
 
             foreach ($data['groups'] as $group) {
                 $n->addRecommendedGroup($group);
@@ -87,7 +87,7 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
 
         // Example message, it's OK if this drifts out of date with real implementation
         return sprintf("
-            <p>Participant Groups have been recommended for diagnostic testing.</p>
+            <p>Non-Negative results received:</p>
 
             <p>Results published:</p>
             <ul>
