@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\CliaRecommendationViralNotification;
@@ -43,6 +44,7 @@ class ReportController extends AbstractController
             ->findMostRecent($limit);
 
         return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'notification_type_text' => 'CLIA Recommendation',
             'logs' => $logs,
             'limit' => $limit,
         ]);
@@ -97,6 +99,34 @@ class ReportController extends AbstractController
         return $this->json([
             'success' => $success,
             'message' => $message,
+        ]);
+    }
+
+    /**
+     * List Non-Negative Notifications previously sent.
+     *
+     * @Route(path="/notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
+     */
+    public function notificationsNonNegative()
+    {
+        // User must have one or more of these
+        $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
+            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
+            // Users who view reports on Groups
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(NonNegativeViralNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'notification_type_text' => 'Non-Negative',
+            'logs' => $logs,
+            'limit' => $limit,
         ]);
     }
 
