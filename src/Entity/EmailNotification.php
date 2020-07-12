@@ -9,10 +9,10 @@ use App\Traits\TimestampableEntity;
 use Symfony\Component\Mime\Email;
 
 /**
- * Log of notifications sent to Study Coordinator. Subclass for different
- * notification types.
+ * Log of notifications sent via email. Subclass for notifications sent for
+ * different purposes.
  *
- * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\EmailNotificationRepository")
  * @ORM\Table(name="study_coordinator_notifications")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
@@ -21,7 +21,7 @@ use Symfony\Component\Mime\Email;
  *     "nonNegativeViral" = "NonNegativeViralNotification",
  * })
  */
-abstract class StudyCoordinatorNotification
+abstract class EmailNotification
 {
     use TimestampableEntity;
 

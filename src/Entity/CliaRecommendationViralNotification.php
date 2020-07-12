@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
  * Log of notifications sent to Study Coordinator, notifying them about
  * Participant Groups that are recommended for CLIA testing.
  *
- * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\EmailNotificationRepository")
  */
-class CliaRecommendationViralNotification extends StudyCoordinatorNotification
+class CliaRecommendationViralNotification extends EmailNotification
 {
 }

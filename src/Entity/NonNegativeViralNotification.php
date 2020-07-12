@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
  * "Non-Negative" does not mean "anything but Negative" and is instead an
  * explicit status.
  *
- * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\EmailNotificationRepository")
  */
-class NonNegativeViralNotification extends StudyCoordinatorNotification
+class NonNegativeViralNotification extends EmailNotification
 {
 }
