@@ -24,9 +24,9 @@ class ReportController extends AbstractController
      * List CLIA notifications previously sent that recommend certain
      * Participant Groups should undergo further testing.
      *
-     * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
+     * @Route(path="/notifications/clia", methods={"GET"}, name="report_notification_clia")
      */
-    public function coordinatorNotifications()
+    public function notificationsClia()
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
@@ -54,9 +54,9 @@ class ReportController extends AbstractController
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/coordinator/notifications/check", methods={"POST"}, name="report_coordinator_notifications_check")
+     * @Route(path="/notifications/clia/check", methods={"POST"}, name="report_notification_clia_check")
      */
-    public function checkCoordinatorNotifications(KernelInterface $kernel)
+    public function checkCliaNotifications(KernelInterface $kernel)
     {
         try {
             // User must have one or more of these
