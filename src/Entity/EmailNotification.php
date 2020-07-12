@@ -13,7 +13,7 @@ use Symfony\Component\Mime\Email;
  * different purposes.
  *
  * @ORM\Entity(repositoryClass="App\Repository\EmailNotificationRepository")
- * @ORM\Table(name="study_coordinator_notifications")
+ * @ORM\Table(name="study_coordinator_notifications") TODO: CVDLS-158
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
