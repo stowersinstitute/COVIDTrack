@@ -3,12 +3,15 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorNonNegativeNotification;
+use App\Entity\NonNegativeViralNotification;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppStudyCoordinatorNonNegativeNotificationFixtures extends Fixture implements DependentFixtureInterface
+/**
+ * Fixtures for Non-Negative Notifications.
+ */
+class AppNonNegativeViralNotificationFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
@@ -20,7 +23,7 @@ class AppStudyCoordinatorNonNegativeNotificationFixtures extends Fixture impleme
     public function load(ObjectManager $em)
     {
         foreach ($this->getData() as $data) {
-            $n = new StudyCoordinatorNonNegativeNotification();
+            $n = new NonNegativeViralNotification();
             $n->setCreatedAt($data['sentAt']);
 
             $n->setToAddressesString('Study Coordinator <coordinator@no-reply>');

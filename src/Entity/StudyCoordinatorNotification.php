@@ -18,7 +18,7 @@ use Symfony\Component\Mime\Email;
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
  *     "clia" = "StudyCoordinatorCliaRecommendationNotification",
- *     "nonNegative" = "StudyCoordinatorNonNegativeNotification",
+ *     "nonNegativeViral" = "NonNegativeViralNotification",
  * })
  */
 abstract class StudyCoordinatorNotification

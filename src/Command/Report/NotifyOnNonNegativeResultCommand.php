@@ -4,7 +4,7 @@ namespace App\Command\Report;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\StudyCoordinatorNonNegativeNotification;
+use App\Entity\NonNegativeViralNotification;
 use App\Util\DateUtils;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
@@ -98,7 +98,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         ];
 
         $lastNotificationSent = $this->em
-            ->getRepository(StudyCoordinatorNonNegativeNotification::class)
+            ->getRepository(NonNegativeViralNotification::class)
             ->getMostRecentSentAt();
         if ($this->input->getOption('all-groups-today')) {
             // CLI options want us to email about all groups with positive result today
@@ -141,9 +141,9 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         // Remove Groups already notified today
         if (!$this->input->getOption('all-groups-today') && !$this->input->getOption('all-groups-ever')) {
             $now = new \DateTime();
-            /** @var StudyCoordinatorNonNegativeNotification[] $groupsNotifiedToday */
+            /** @var NonNegativeViralNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em
-                ->getRepository(StudyCoordinatorNonNegativeNotification::class)
+                ->getRepository(NonNegativeViralNotification::class)
                 ->getGroupsNotifiedOnDate($now);
 
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
@@ -182,7 +182,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         $recommendations = $this->getGroupsWithTimestamps();
         $groups = $recommendations['groups'];
 
-        $notif = StudyCoordinatorNonNegativeNotification::createFromEmail($email, $groups);
+        $notif = NonNegativeViralNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
         $this->em->flush();
     }
