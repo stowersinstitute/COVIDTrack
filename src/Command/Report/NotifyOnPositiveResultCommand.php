@@ -6,12 +6,11 @@ use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\CliaRecommendationViralNotification;
 use App\Util\DateUtils;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies users that should be notified when a new Positive Result is available.
+ * Notifies privileged users when a new Positive Result is available.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
@@ -21,10 +20,11 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
 
     protected function configure()
     {
+        // See parent for CLI options
         parent::configure();
 
         $this
-            ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
+            ->setDescription('Notifies privileged users when a new Result recommending CLIA testing is available.')
         ;
     }
 

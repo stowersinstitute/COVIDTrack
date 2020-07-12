@@ -10,7 +10,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies users that should be notified when a new Non-Negative Result is available.
+ * Notifies privileged users when a new Non-Negative Result is available.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
@@ -20,16 +20,17 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 
     protected function configure()
     {
+        // See parent for CLI options
         parent::configure();
 
         $this
-            ->setDescription('Notifies users that should be notified when a new Positive Result is available.')
+            ->setDescription('Notifies privileged users when a new Non-Negative Result is available.')
         ;
     }
 
     protected function getSubject(): string
     {
-        return 'Non-Negative Group Results';
+        return 'New Non-Negative Group Results';
     }
 
     protected function getHtmlEmailBody(): string
