@@ -21,9 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * List notifications previously sent to the Study Coordinator that
-     * recommend Participant Groups with a positive viral test should undergo
-     * further testing.
+     * List CLIA notifications previously sent that recommend certain
+     * Participant Groups should undergo further testing.
      *
      * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
      */
@@ -50,7 +49,7 @@ class ReportController extends AbstractController
     }
 
     /**
-     * Run logic that would send the Study Coordinator a notification if new
+     * Run logic that would send the CLIA notification if new
      * results need to be reported.
      *
      * Meant to be called from the UI via AJAX.
@@ -89,7 +88,7 @@ class ReportController extends AbstractController
         $exitCode = $application->run($input, $output);
 
         $success = true;
-        $message = 'If new results were available, the Study Coordinator has been notified';
+        $message = 'If new results were available, an email has been sent';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';

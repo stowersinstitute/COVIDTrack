@@ -28,8 +28,7 @@ class EmailNotificationRepository extends EntityRepository
     }
 
     /**
-     * Get the most recent timestamp when the Study Coordinator Notification
-     * was last sent.
+     * Get the most recent timestamp when a Notification was last sent.
      */
     public function getMostRecentSentAt(): ?\DateTimeImmutable
     {
@@ -42,8 +41,8 @@ class EmailNotificationRepository extends EntityRepository
     }
 
     /**
-     * Find list of Participant Groups that the Study Coordinator was
-     * notified about on a specific date.
+     * Find list of Participant Groups that were included in a Notification
+     * on given date.
      *
      * @param \DateTime $date Date when Notification was created
      * @return ParticipantGroup[]

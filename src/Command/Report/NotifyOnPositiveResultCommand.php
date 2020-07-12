@@ -128,7 +128,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
             // Assume since midnight today
             $lastNotificationSent = DateUtils::dayFloor(new \DateTime());
         } else if ($this->input->getOption('all-groups-ever') || !$lastNotificationSent) {
-            // Study Coordinator never notified
+            // Email Notification not yet sent
             // Search for since earliest possible date
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
         }
@@ -174,8 +174,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
             }
         }
 
-        // Remaining are Groups the Study Coordinator has
-        // not been notified about yet today
+        // Remaining are Groups not yet included in this Email Notification today
         $output['groups'] = array_values($groups);
         $output['timestamps'] = array_values($resultsTimestamps);
 

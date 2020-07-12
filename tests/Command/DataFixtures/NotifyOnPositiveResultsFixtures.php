@@ -14,8 +14,8 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing sending Study Coordinator email about
- * Participant Groups with positive results.
+ * Creates test data for testing sending email notifications about
+ * Participant Groups with results recommending testing.
  */
 class NotifyOnPositiveResultsFixtures extends Fixture
 {
