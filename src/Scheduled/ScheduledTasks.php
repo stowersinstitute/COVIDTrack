@@ -18,7 +18,11 @@ class ScheduledTasks implements ScheduleBuilder
             ->dailyAt('03:00');
 
         $schedule->addCommand('app:report:notify-on-positive-result')
-            ->description('Notify privileged users like Study Coordinator when a new result indicates a Participant Group recommended for CLIA testing')
+            ->description('Notify privileged users like Study Coordinator when a new viral result indicates a Participant Group recommended for CLIA testing')
+            ->everyFiveMinutes();
+
+        $schedule->addCommand('app:report:notify-on-non-negative-viral-result')
+            ->description('Notify privileged users like Study Coordinator when a new Non-Negative viral result is reported')
             ->everyFiveMinutes();
     }
 
