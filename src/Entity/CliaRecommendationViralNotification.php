@@ -10,6 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
  */
-class StudyCoordinatorCliaRecommendationNotification extends StudyCoordinatorNotification
+class CliaRecommendationViralNotification extends StudyCoordinatorNotification
 {
 }

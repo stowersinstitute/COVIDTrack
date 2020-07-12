@@ -4,7 +4,7 @@ namespace App\Command\Report;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\StudyCoordinatorCliaRecommendationNotification;
+use App\Entity\CliaRecommendationViralNotification;
 use App\Util\DateUtils;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Mime\Email;
@@ -95,7 +95,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $recommendations = $this->getNewTestingRecommendations();
         $groups = $recommendations['groups'];
 
-        $notif = StudyCoordinatorCliaRecommendationNotification::createFromEmail($email, $groups);
+        $notif = CliaRecommendationViralNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
         $this->em->flush();
     }
@@ -121,7 +121,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         ];
 
         $lastNotificationSent = $this->em
-            ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
+            ->getRepository(CliaRecommendationViralNotification::class)
             ->getMostRecentSentAt();
         if ($this->input->getOption('all-groups-today')) {
             // CLI options want us to email about all groups with positive result today
@@ -164,9 +164,8 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         // Remove Groups already notified today
         if (!$this->input->getOption('all-groups-today') && !$this->input->getOption('all-groups-ever')) {
             $now = new \DateTime();
-            /** @var StudyCoordinatorCliaRecommendationNotification[] $groupsNotifiedToday */
             $groupsNotifiedToday = $this->em
-                ->getRepository(StudyCoordinatorCliaRecommendationNotification::class)
+                ->getRepository(CliaRecommendationViralNotification::class)
                 ->getGroupsNotifiedOnDate($now);
 
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {

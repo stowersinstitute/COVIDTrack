@@ -17,7 +17,7 @@ use Symfony\Component\Mime\Email;
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
  * @ORM\DiscriminatorMap({
- *     "clia" = "StudyCoordinatorCliaRecommendationNotification",
+ *     "clia" = "CliaRecommendationViralNotification",
  *     "nonNegativeViral" = "NonNegativeViralNotification",
  * })
  */

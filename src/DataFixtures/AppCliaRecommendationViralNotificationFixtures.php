@@ -3,12 +3,15 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorCliaRecommendationNotification;
+use App\Entity\CliaRecommendationViralNotification;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppStudyCoordinatorCliaRecommendationNotificationFixtures extends Fixture implements DependentFixtureInterface
+/**
+ * Fixtures for CLIA Recommendation Notifications.
+ */
+class AppCliaRecommendationViralNotificationFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
@@ -20,7 +23,7 @@ class AppStudyCoordinatorCliaRecommendationNotificationFixtures extends Fixture 
     public function load(ObjectManager $em)
     {
         foreach ($this->getData() as $data) {
-            $n = new StudyCoordinatorCliaRecommendationNotification();
+            $n = new CliaRecommendationViralNotification();
             $n->setCreatedAt($data['sentAt']);
 
             $n->setToAddressesString('Study Coordinator <coordinator@no-reply>');
