@@ -79,7 +79,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $groups = $recommendations['groups'];
 
         if (count($groups) < 1) {
-            return 'No new Participant Groups need contacting';
+            return 'No new Participant Groups to notify about';
         }
 
         return null;

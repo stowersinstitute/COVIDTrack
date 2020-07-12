@@ -10,13 +10,13 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies privileged users when a new Non-Negative Result is available.
+ * Notifies privileged users when a new Non-Negative Viral Result is available.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
 class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 {
-    protected static $defaultName = 'app:report:notify-on-non-negative-result';
+    protected static $defaultName = 'app:report:notify-on-non-negative-viral-result';
 
     protected function configure()
     {
@@ -24,18 +24,18 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         parent::configure();
 
         $this
-            ->setDescription('Notifies privileged users when a new Non-Negative Result is available.')
+            ->setDescription('Notifies privileged users when a new Non-Negative Viral Result is available.')
         ;
     }
 
     protected function getSubject(): string
     {
-        return 'New Non-Negative Group Results';
+        return 'New Non-Negative Viral Group Results';
     }
 
     protected function getHtmlEmailBody(): string
     {
-        $recommendations = $this->getGroupsWithTimestamps();
+        $recommendations = $this->buildNotificationData();
         $groups = $recommendations['groups'];
         $timestamps = $recommendations['timestamps'];
 
@@ -49,7 +49,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
-            <p>Non-Negative results have been reported for these Participant Groups:</p>
+            <p>Non-Negative viral results have been reported for these Participant Groups:</p>
 
             <p>Results published:</p>
             <ul>
@@ -74,19 +74,19 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
     }
 
     /**
-     * Get Participant Groups and the timestamp when their recommended result
+     * Get Participant Groups and the timestamp when the non-negative viral result
      * was uploaded.
      *
      * Usage:
      *
-     * $rec = $this->getGroupsWithTimestamps();
-     * $groups = $rec['groups'];
-     * $timestamps = $rec['timestamps'];
+     * $data = $this->buildNotificationData();
+     * $groups = $data['groups'];
+     * $timestamps = $data['timestamps'];
      *
-     * $groups === ParticipantGroup[] - Unique list of groups recommended for further testing
+     * $groups === ParticipantGroup[] - Unique list of groups with non-negative viral result
      * $resultsUploadedAt === \DateTimeImmutable[] - Unique list of times found results were uploaded
      */
-    private function getGroupsWithTimestamps(): array
+    private function buildNotificationData(): array
     {
         // Ensure this method only runs once
         if (!empty($output)) {
@@ -111,32 +111,36 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
         }
 
-        $this->outputDebug('Searching for new recommended results since ' . $lastNotificationSent->format("Y-m-d H:i:s"));
+        $this->outputDebug('Searching for new non-negative viral results since ' . $lastNotificationSent->format("Y-m-d H:i:s"));
 
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
             ->getRepository(SpecimenResultQPCR::class)
-            ->findTestingRecommendedResultCreatedAfter($lastNotificationSent);
+            ->findTestingResultNonNegativeCreatedAfter($lastNotificationSent);
         if (!$results) {
             return $output;
         }
 
-        $this->outputDebug('Found new recommended results: ' . count($results));
+        $this->outputDebug('Found new non-negative viral results: ' . count($results));
 
-        // Get recommendations for testing
+        // Build Group data
         $groups = [];
-        $resultsTimestamps = [];
         foreach ($results as $result) {
-            // Group
             $group = $result->getSpecimen()->getParticipantGroup();
             $groups[$group->getId()] = $group;
+        }
 
+        // Build Timestamp data
+        $resultsTimestamps = [];
+        foreach ($results as $result) {
             // Result timestamp
             $timestamp = $result->getCreatedAt();
-            if ($timestamp) {
-                $idx = $timestamp->format(self::RESULTS_DATETIME_FORMAT);
-                $resultsTimestamps[$idx] = $timestamp;
+            if (!$timestamp) {
+                continue;
             }
+
+            $idx = $timestamp->format(self::RESULTS_DATETIME_FORMAT);
+            $resultsTimestamps[$idx] = $timestamp;
         }
 
         // Remove Groups already notified today
@@ -162,11 +166,11 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 
     protected function getReasonToNotSend(): ?string
     {
-        $recommendations = $this->getGroupsWithTimestamps();
-        $groups = $recommendations['groups'];
+        $report = $this->buildNotificationData();
+        $groups = $report['groups'];
 
         if (count($groups) < 1) {
-            return 'No new Participant Groups need contacting';
+            return 'No new Participant Groups to notify about';
         }
 
         return null;
@@ -179,8 +183,8 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
             return;
         }
 
-        $recommendations = $this->getGroupsWithTimestamps();
-        $groups = $recommendations['groups'];
+        $report = $this->buildNotificationData();
+        $groups = $report['groups'];
 
         $notif = NonNegativeViralNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
