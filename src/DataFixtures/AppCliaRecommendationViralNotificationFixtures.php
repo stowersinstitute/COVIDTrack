@@ -46,26 +46,26 @@ class AppCliaRecommendationViralNotificationFixtures extends Fixture implements 
     {
         return [
             [
-                'sentAt' => new \DateTimeImmutable('-4 days 10:00am'),
+                'sentAt' => new \DateTimeImmutable('-14 days 10:00am'),
                 'groups' => [
                     $this->getReference('group.Red'),
                     $this->getReference('group.Orange'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-3 days 11:00am'),
+                'sentAt' => new \DateTimeImmutable('-13 days 11:00am'),
                 'groups' => [
                     $this->getReference('group.Yellow'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-2 days 12:00pm'),
+                'sentAt' => new \DateTimeImmutable('-12 days 12:00pm'),
                 'groups' => [
                     $this->getReference('group.Green'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-1 days 1:00pm'),
+                'sentAt' => new \DateTimeImmutable('-11 days 1:00pm'),
                 'groups' => [
                     $this->getReference('group.Blue'),
                 ],
