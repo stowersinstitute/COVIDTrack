@@ -2,6 +2,7 @@
 
 namespace App\Command\Report;
 
+use App\Entity\CliaRecommendationViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\NonNegativeViralNotification;
@@ -146,18 +147,28 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         // Remove Groups already notified today
         if (!$this->input->getOption('all-groups-today') && !$this->input->getOption('all-groups-ever')) {
             $now = new \DateTime();
-            /** @var NonNegativeViralNotification[] $groupsNotifiedToday */
-            $groupsNotifiedToday = $this->em
+
+            // Groups notified due to Non-Negative
+            /** @var ParticipantGroup[] $groupsNonNegative */
+            $groupsNonNegative = $this->em
                 ->getRepository(NonNegativeViralNotification::class)
                 ->getGroupsNotifiedOnDate($now);
 
-            foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
+            // Also remove Groups notified of Recommended CLIA testing,
+            // so don't notify about a Non-Negative when already notified about Recommended
+            /** @var ParticipantGroup[] $groupsRecommended */
+            $groupsRecommended = $this->em
+                ->getRepository(CliaRecommendationViralNotification::class)
+                ->getGroupsNotifiedOnDate($now);
+
+            $groupsToRemove = array_merge($groupsNonNegative, $groupsRecommended);
+            foreach ($groupsToRemove as $groupPreviouslyNotified) {
                 $id = $groupPreviouslyNotified->getId();
                 unset($groups[$id]);
             }
         }
 
-        // Remaining are Groups not yet included in this Email Notification today
+        // Remaining are Groups not yet notified about a Recommended or Non-Negative result today
         $output['groups'] = array_values($groups);
         $output['timestamps'] = array_values($resultsTimestamps);
 
