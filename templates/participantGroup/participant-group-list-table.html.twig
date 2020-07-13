@@ -1,19 +1,30 @@
 {% block body %}
+{% set userCanEditGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
+{% set userCanPrintLabels = is_granted('ROLE_PRINT_GROUP_LABELS') %}
+
+{% if userCanPrintLabels %}
 {{ form_start(form) }}
 {{ form_row(form.printer) }}
 {{ form_row(form.print) }}
+{% endif %}
 
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
+            {% if userCanPrintLabels %}
             <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            {% endif %}
+
+            {% if userCanEditGroups %}
             <th>&nbsp;</th>
+            {% endif %}
+
             <th>Title</th>
             <th>Participants</th>
             <th>Drop-off Times</th>
             <th>Created</th>
             <th>Last Modified</th>
-            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
+            {% if userCanPrintLabels %}
             <th></th>
             {% endif %}
         </tr>
@@ -21,12 +32,18 @@
     <tbody>
     {% for group in groups %}
         <tr>
+            {% if userCanPrintLabels %}
             <td>
                 <input type="checkbox" class="tube-checkbox" name="groups[]" value="{{ group.title }}">
             </td>
+            {% endif %}
+
+            {% if userCanEditGroups %}
             <td>
                 <a href="{{ path('app_participant_group_edit', {title: group.title}) }}">Edit</a>
             </td>
+            {% endif %}
+
             <td>
                 <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
@@ -39,18 +56,21 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            {% if is_granted('ROLE_PRINT_GROUP_LABELS') %}
+            {% if userCanPrintLabels %}
             <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a></td>
             {% endif %}
         </tr>
     {% endfor %}
     </tbody>
 </table>
+
+{% if userCanPrintLabels %}
 {{ form_end(form) }}
 <script type="application/javascript">
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
     });
 </script>
+{% endif %}
 
 {% endblock %}

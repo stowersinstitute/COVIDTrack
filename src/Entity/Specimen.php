@@ -27,11 +27,9 @@ class Specimen
     const STATUS_RETURNED = "RETURNED";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
-    const STATUS_IN_PROCESS = "IN_PROCESS";
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
-    const TYPE_BUCCAL = "BUCCAL";
     const TYPE_NASAL = "NASAL";
     const TYPE_SALIVA = "SALIVA";
 
@@ -79,9 +77,26 @@ class Specimen
      *
      * @var SpecimenWell[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC"})
      */
     private $wells;
+
+    /**
+     * qPCR Results associated with this Specimen.
+     *
+     * @var SpecimenResultQPCR[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $resultsQPCR;
+
+    /**
+     * Antibody Results associated with this Specimen.
+     *
+     * @var SpecimenResultAntibody[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $resultsAntibody;
 
     /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
@@ -98,7 +113,7 @@ class Specimen
      * should undergo CLIA-based testing.
      *
      * @var string
-     * @ORM\Column(name="clia_testing_recommendation", type="string")
+     * @ORM\Column(name="clia_testing_recommendation", type="string", nullable=true)
      * @Gedmo\Versioned
      */
     private $cliaTestingRecommendation;
@@ -110,23 +125,15 @@ class Specimen
      */
     private $status;
 
-    /**
-     * Results of analyzing a Specimen.
-     *
-     * @var SpecimenResult[]|ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResult", mappedBy="specimen")
-     * @ORM\OrderBy({"createdAt" = "DESC"})
-     */
-    private $results;
-
     public function __construct(string $accessionId, ParticipantGroup $group)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
 
         $this->status = self::STATUS_CREATED;
-        $this->results = new ArrayCollection();
-        $this->cliaTestingRecommendation = self::CLIA_REC_PENDING;
+        $this->wells = new ArrayCollection();
+        $this->resultsQPCR = new ArrayCollection();
+        $this->resultsAntibody = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -183,11 +190,27 @@ class Specimen
     /**
      * Build for tests.
      */
-    public static function buildExample(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null): self
     {
         $group = $group ?: ParticipantGroup::buildExample('G100');
 
         return new static($accessionId, $group);
+    }
+
+    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $specimen = static::buildExample($accessionId, $group);
+        $specimen->setType(static::TYPE_SALIVA);
+
+        return $specimen;
+    }
+
+    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null): self
+    {
+        $specimen = static::buildExample($accessionId, $group);
+        $specimen->setType(static::TYPE_BLOOD);
+
+        return $specimen;
     }
 
     /**
@@ -197,14 +220,14 @@ class Specimen
      * and values like this:
      *
      *     [
-     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -282,6 +305,7 @@ class Specimen
     {
         $this->ensureValidType($type);
         $this->type = $type;
+        $this->recalculateCliaTestingRecommendation();
     }
 
     /**
@@ -291,7 +315,6 @@ class Specimen
     {
         return [
             'Blood' => self::TYPE_BLOOD,
-            'Buccal' => self::TYPE_BUCCAL,
             'Nasal' => self::TYPE_NASAL,
             'Saliva' => self::TYPE_SALIVA,
         ];
@@ -347,6 +370,43 @@ class Specimen
     }
 
     /**
+     * Update current status after results have been added.
+     * Should not change status if already in a final status
+     * such as deleted.
+     *
+     * @return string Current status after latest update
+     */
+    public function updateStatusWhenResultsSet(): string
+    {
+        if ($this->isDeleted()) {
+            // Do not change
+            return $this->status;
+        }
+
+        if (self::STATUS_REJECTED === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
+        if (self::STATUS_RESULTS === $this->status) {
+            // Do not change
+            return $this->status;
+        }
+
+        $updateIfInStatus = [
+            self::STATUS_CREATED,
+            self::STATUS_RETURNED,
+            self::STATUS_ACCEPTED,
+        ];
+        if (in_array($this->status, $updateIfInStatus)) {
+            $newStatus = self::STATUS_RESULTS;
+            $this->setStatus($newStatus);
+        }
+
+        return $this->getStatus();
+    }
+
+    /**
      * @return string[]
      */
     public static function getFormStatuses(): array
@@ -356,7 +416,6 @@ class Specimen
             'Returned' => self::STATUS_RETURNED,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
-            'In Process' => self::STATUS_IN_PROCESS,
             'Results Available' => self::STATUS_RESULTS,
         ];
     }
@@ -376,7 +435,7 @@ class Specimen
     /**
      * @return string CLIA_REC_* constant
      */
-    public function getCliaTestingRecommendation(): string
+    public function getCliaTestingRecommendation(): ?string
     {
         return $this->cliaTestingRecommendation;
     }
@@ -388,10 +447,10 @@ class Specimen
     }
 
     /**
-     * @param string $rec CLIA_REC_* constant
+     * @param null|string $rec CLIA_REC_* constant
      * @return string
      */
-    public static function lookupCliaTestingRecommendationText(string $rec): string
+    public static function lookupCliaTestingRecommendationText(?string $rec): string
     {
         $map = [
             self::CLIA_REC_PENDING => 'Awaiting Results',
@@ -403,21 +462,26 @@ class Specimen
     }
 
     /**
-     * Add this Specimen to given Well Plate at given position.
-     *
-     * If Specimen is already on this Well Plate, it will be updated to being
-     * at the given position.
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
      */
-    public function addWellPlate(WellPlate $plate, int $position = null): void
+    public function addWell(SpecimenWell $well): void
     {
-        $existingWell = $this->getWellOnPlate($plate);
-        if ($existingWell) {
-            // Update position on existing Well Plate
-            $existingWell->setPosition($position);
-        } else {
-            // Add new
-            $this->wells->add(new SpecimenWell($plate, $this, $position));
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                // Abort adding
+                return;
+            }
         }
+
+        $this->wells->add($well);
+    }
+
+    /**
+     * @return SpecimenWell[]
+     */
+    public function getWells(): array
+    {
+        return $this->wells->getValues();
     }
 
     /**
@@ -425,21 +489,45 @@ class Specimen
      */
     public function isOnWellPlate(WellPlate $plate): bool
     {
-        return (bool) $this->getWellOnPlate($plate);
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Get SpecimenWell if this Specimen already on given WellPlate.
+     * Get Well where Specimen stored on given WellPlate at given position.
      */
-    private function getWellOnPlate(WellPlate $plate): ?SpecimenWell
+    public function getWellAtPosition(WellPlate $plate, string $position): ?SpecimenWell
     {
-        foreach ($this->wells as $well) {
-            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+        $wells = $this->getWellsOnPlate($plate);
+        foreach ($wells as $well) {
+            if ($well->getPositionAlphanumeric() === $position) {
                 return $well;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Get Wells where Specimen is stored on given WellPlate.
+     *
+     * @return SpecimenWell[]
+     */
+    public function getWellsOnPlate(WellPlate $plate): array
+    {
+        $found = [];
+        foreach ($this->wells as $well) {
+            if (EntityUtils::isSameEntity($plate, $well->getWellPlate())) {
+                $found[] = $well;
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -453,11 +541,12 @@ class Specimen
         foreach ($this->wells as $well) {
             $plate = $well->getWellPlate();
             if ($plate) {
-                $plates[] = $plate;
+                // Indexed to make unique array
+                $plates[$plate->getBarcode()] = $plate;
             }
         }
 
-        return $plates;
+        return array_values($plates);
     }
 
     public function getCollectedAt(): ?\DateTimeInterface
@@ -486,6 +575,20 @@ class Specimen
         return $barcodes;
     }
 
+    /**
+     * Whether this Specimen is in the correct state to accept published
+     * results.
+     */
+    public function willAllowAddingResults(): bool
+    {
+        $valid = [
+            self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
+            self::STATUS_RESULTS,  // Can add more than 1 result
+        ];
+
+        return in_array($this->status, $valid);
+    }
+
     private function ensureValidType(?string $type): void
     {
         // NULL is ok
@@ -499,26 +602,19 @@ class Specimen
     }
 
     /**
-     * List of all Results collected on this Specimen.
+     * Add new qPCR Result for this Specimen.
      *
-     * @return SpecimenResult[]
+     * @internal Should only call from SpecimenResultQPCR::__construct()
      */
-    public function getResults(): array
+    public function addQPCRResult(SpecimenResultQPCR $result): void
     {
-        return $this->results->getValues();
-    }
+        foreach ($this->resultsQPCR as $existingResult) {
+            if ($result === $existingResult) {
+                return;
+            }
+        }
 
-    /**
-     * @internal Call new SpecimenResults($specimen) to associate
-     */
-    public function addResult(SpecimenResult $result): void
-    {
-        // TODO: Add de-duplicating logic
-        $this->results->add($result);
-
-        $this->recalculateCliaTestingRecommendation();
-
-        $this->setStatus(self::STATUS_RESULTS);
+        $this->resultsQPCR->add($result);
     }
 
     /**
@@ -529,13 +625,10 @@ class Specimen
      */
     public function getQPCRResults(int $limit = null): array
     {
-        $results = $this->results
-            ->filter(function(SpecimenResult $r) {
-                return ($r instanceof SpecimenResultQPCR);
-            })->getValues();
+        $results = $this->resultsQPCR->getValues();
 
         // Sort most recent createdAt first
-        uasort($results, function (SpecimenResult $a, SpecimenResult $b) {
+        uasort($results, function (SpecimenResultQPCR $a, SpecimenResultQPCR $b) {
             return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
         });
 
@@ -551,38 +644,22 @@ class Specimen
     }
 
     /**
-     * @return SpecimenResultDDPCR[]
-     */
-    public function getDDPCRResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultDDPCR);
-        })->getValues();
-    }
-
-    /**
-     * @return SpecimenResultSequencing[]
-     */
-    public function getSequencingResults(): array
-    {
-        // TODO: This needs to sort by createdAt with newest first
-        return $this->results->filter(function(SpecimenResult $r) {
-            return ($r instanceof SpecimenResultSequencing);
-        })->getValues();
-    }
-
-    /**
      * Calculate CLIA testing recommendation given current state of Specimen.
      *
      * @return string CLIA_REC_* constant
      */
     public function recalculateCliaTestingRecommendation(): string
     {
-        // Current recommendation
-        $rec = $this->cliaTestingRecommendation;
+        // Only Saliva specimens support CLIA recommendations
+        if ($this->getType() !== self::TYPE_SALIVA) {
+            $this->cliaTestingRecommendation = null;
+            return '';
+        }
 
-        // Latest result
+        // Current recommendation
+        $rec = $this->cliaTestingRecommendation ?? self::CLIA_REC_PENDING;
+
+        // Latest viral result
         $qpcr = $this->getMostRecentQPCRResult();
 
         // When result available
@@ -592,11 +669,10 @@ class Specimen
 
             // conclusion ==> CLIA Recommendation
             $map = [
-                SpecimenResultQPCR::CONCLUSION_PENDING => self::CLIA_REC_PENDING,
                 SpecimenResultQPCR::CONCLUSION_POSITIVE => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_RECOMMENDED => self::CLIA_REC_YES,
                 SpecimenResultQPCR::CONCLUSION_NEGATIVE => self::CLIA_REC_NO,
-                SpecimenResultQPCR::CONCLUSION_INCONCLUSIVE => self::CLIA_REC_NO,
+                SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE => self::CLIA_REC_NO,
             ];
 
             // Use mapped recommendation value, else keep existing rec
@@ -610,5 +686,47 @@ class Specimen
 
         // Caller given latest rec
         return $this->cliaTestingRecommendation;
+    }
+
+    /**
+     * Add new Antibody Result for this Specimen.
+     *
+     * @internal Should only call from SpecimenResultAntibody::__construct()
+     */
+    public function addAntibodyResult(SpecimenResultAntibody $result): void
+    {
+        foreach ($this->resultsAntibody as $existingResult) {
+            if ($result === $existingResult) {
+                return;
+            }
+        }
+
+        $this->resultsAntibody->add($result);
+    }
+
+    /**
+     * Get Antibody Results for this Specimen.
+     *
+     * @param int $limit Max number of results to return
+     * @return SpecimenResultAntibody[]
+     */
+    public function getAntibodyResults(int $limit = null): array
+    {
+        $results = $this->resultsAntibody->getValues();
+
+        // Sort most recent createdAt first
+        uasort($results, function (SpecimenResultAntibody $a, SpecimenResultAntibody $b) {
+            return ($a->getCreatedAt() > $b->getCreatedAt()) ? -1 : 1;
+        });
+
+        // Can return only X most recent
+        return $limit ? array_slice($results, 0, $limit) : $results;
+    }
+
+    public function getMostRecentAntibodyResult(): ?SpecimenResultAntibody
+    {
+        $results = $this->getAntibodyResults(1);
+
+        return array_shift($results);
     }
 }

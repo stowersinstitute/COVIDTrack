@@ -6,6 +6,9 @@ namespace App\Controller;
 
 use App\Entity\DropOffSchedule;
 use Doctrine\ORM\EntityManagerInterface;
+use Recurr\Rule;
+use Recurr\Transformer\ArrayTransformer;
+use Recurr\Transformer\ArrayTransformerConfig;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -26,9 +29,15 @@ class ParticipantGroupSchedulingController extends AbstractController
      */
     public function index()
     {
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW');
         $schedule = $this->getDefaultSiteDropOffSchedule();
 
+        $nextDropOffWindowStartsAt = $schedule->getNextDropOffWindowStartsAt();
+        $nextWindowParticipantTotals = $schedule->getParticipantTotalsOn($nextDropOffWindowStartsAt);
+
         return $this->render('participant-group-scheduling/index.html.twig', [
+            'nextDropOffWindowStartsAt' => $nextDropOffWindowStartsAt,
+            'nextWindowParticipantTotals' => $nextWindowParticipantTotals,
             'schedule' => $schedule,
         ]);
     }

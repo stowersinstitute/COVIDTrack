@@ -4,8 +4,13 @@ namespace App\Controller;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\StudyCoordinatorNotification;
 use App\Report\GroupTestingRecommendationReport;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -15,6 +20,87 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ReportController extends AbstractController
 {
+    /**
+     * List notifications previously sent to the Study Coordinator that
+     * recommend Participant Groups with a positive viral test should undergo
+     * further testing.
+     *
+     * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
+     */
+    public function coordinatorNotifications()
+    {
+        // User must have one or more of these
+        $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
+            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
+            // Users who view reports on Groups
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(StudyCoordinatorNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'logs' => $logs,
+            'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * Run logic that would send the Study Coordinator a notification if new
+     * results need to be reported.
+     *
+     * Meant to be called from the UI via AJAX.
+     *
+     * @Route(path="/coordinator/notifications/check", methods={"POST"}, name="report_coordinator_notifications_check")
+     */
+    public function checkCoordinatorNotifications(KernelInterface $kernel)
+    {
+        try {
+            // User must have one or more of these
+            $this->denyAccessUnlessGranted([
+                // Users who receive the notification can check it for themselves
+                'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+
+                // Users who can edit results
+                'ROLE_RESULTS_EDIT',
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        // Execute Symfony Command programmatically
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $commandName = 'app:report:notify-on-positive-result';
+        $input = new ArrayInput([
+            'command' => $commandName,
+        ]);
+
+        // Output is not used
+        $output = new NullOutput();
+        $exitCode = $application->run($input, $output);
+
+        $success = true;
+        $message = 'If new results were available, the Study Coordinator has been notified';
+        if ($exitCode !== 0) {
+            $success = false;
+            $message = 'Error occurred when checking for new results';
+        }
+
+        return $this->json([
+            'success' => $success,
+            'message' => $message,
+        ]);
+    }
+
     /**
      * CLIA Testing Recommendations by Participant Group
      *
@@ -43,10 +129,10 @@ class ReportController extends AbstractController
 
         // X axis
         /** @var \DateTime[] $resultDates */
-        $resultDates = $specimenRepo->findAvailableGroupResultDates();
+        $resultDates = $specimenRepo->findAvailableGroupViralResultDates();
 
         // Y axis
-        $groups = $groupRepo->findActiveAlphabetical();
+        $groups = $groupRepo->findActive();
         foreach ($groups as $group) {
             /**
              * Keys: Results Date string like "2020-05-05". Printed in report.
@@ -66,7 +152,7 @@ class ReportController extends AbstractController
         /** @var ParticipantGroup[] $allGroups */
         $allGroups = $this->getDoctrine()
             ->getRepository(ParticipantGroup::class)
-            ->findAll();
+            ->findBy([], ['title' => 'ASC']);
 
         return $this->render('reports/group-results/index.html.twig', [
             'allGroups' => $allGroups,

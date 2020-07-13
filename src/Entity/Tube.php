@@ -185,14 +185,14 @@ class Tube
      * and values like this:
      *
      *     [
-     *         "status" => "IN_PROCESS", // STATUS_IN_PROCESS constant value
+     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -353,9 +353,16 @@ class Tube
         return $this->specimen->getRnaWellPlateBarcodes();
     }
 
-    public function addWellPlate(WellPlate $plate, int $position = null): void
+    public function addToWellPlate(WellPlate $plate, string $position = null): SpecimenWell
     {
-        $this->specimen->addWellPlate($plate, $position);
+        if (!$this->specimen) {
+            throw new \RuntimeException('Tube must be checked in at a Kiosk before adding to a Well Plate');
+        }
+
+        $well = new SpecimenWell($plate, $this->specimen, $position);
+        $this->specimen->addWell($well);
+
+        return $well;
     }
 
     public function getKitType(): ?string
@@ -428,23 +435,35 @@ class Tube
     }
 
     /**
+     * Whether this Tube is in the correct state to be dropped off at a kiosk
+     */
+    public function willAllowDropOff()
+    {
+        return in_array($this->status, [self::STATUS_PRINTED, self::STATUS_CREATED]);
+    }
+
+    /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
      */
     public function willAllowCheckinDecision(): bool
     {
-        // Has a check-in decision, but not yet further along
-        // Accepted
-        if ($this->status === self::STATUS_ACCEPTED) {
-            return true;
-        }
-        // Rejected
+        // Allow Rejected tubes to be switched to Accepted
         if ($this->status === self::STATUS_REJECTED) {
             return true;
         }
 
         // Status before Accepted/Rejected
         return $this->status === self::STATUS_RETURNED;
+    }
+
+    /**
+     * Whether this Tube is in the correct state to be run through the Tecan
+     * import operation.
+     */
+    public function willAllowTecanImport(): bool
+    {
+        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
     }
 
     public function getCheckInDecision(): ?string

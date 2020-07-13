@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Specimen;
 use App\Entity\Tube;
 use Doctrine\ORM\EntityRepository;
 
@@ -11,43 +10,11 @@ use Doctrine\ORM\EntityRepository;
  */
 class TubeRepository extends EntityRepository
 {
-    /**
-     * @param int|string $id Tube.id or Tube.accessionId
-     */
-    public function findOneByAnyId($id): ?Tube
+    public function findOneByAccessionId(string $id): ?Tube
     {
-        if (is_int($id)) {
-            // Using findOneBy() instead of find()
-            // so Exception not thrown when not found.
-            return $this->findOneBy([
-                'id' => $id,
-            ]);
-        }
-
         return $this->findOneBy([
             'accessionId' => $id,
         ]);
-    }
-
-    /**
-     * Find a Tube and join its Specimen record, so it doesn't trigger a second
-     * query later.
-     */
-    public function findOneWithSpecimenLoaded(string $accessionId): ?Tube
-    {
-        $tubes = $this->createQueryBuilder('t')
-            ->addSelect('s')
-            ->join('t.specimen', 's')
-            ->where('t.accessionId = :accessionId')
-            ->setParameter('accessionId', $accessionId)
-            ->getQuery()
-            ->execute();
-
-        if (count($tubes) === 0) {
-            return null;
-        }
-
-        return array_shift($tubes);
     }
 
     public function getReturnedCount() : int

@@ -6,12 +6,34 @@
 
 {% block body %}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="box box-primary">
             <div class="box-body">
                 {% include 'well-plate/specimen-table.html.twig' with {
                     wells: wellPlate.wells
                 } %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    Details
+
+                    {% if is_granted('ROLE_WELL_PLATE_EDIT') %}
+                        <a href="{{ path('well_plate_edit', {barcode: wellPlate.barcode}) }}" class="btn btn-primary btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-edit"></i> Edit</a>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="box-body">
+                <dl class="dl-horizontal">
+                    <dt>Barcode</dt><dd>{{ wellPlate.barcode }}</dd>
+                    <dt>Storage Location</dt><dd>{{ wellPlate.storageLocation }}</dd>
+                    <dt>Last Modified</dt><dd>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</dd>
+                    <dt>Created At</dt><dd>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</dd>
+                </dl>
             </div>
         </div>
     </div>

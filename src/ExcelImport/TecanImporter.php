@@ -6,10 +6,12 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
+use App\Entity\Specimen;
+use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityManager;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -36,13 +38,18 @@ class TecanImporter extends BaseExcelImporter
     private $tubeRepo;
 
     /**
+     * @var Tube[]
+     */
+    private $processedTubes = [];
+
+    /**
      * Cache of found Tubes used instead of query caching
      *
      * @var array Keys Tube.accessionId; Values Tube entity
      */
     private $seenTubes = [];
 
-    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
         $this->tubeRepo = $em->getRepository(Tube::class);
@@ -75,35 +82,12 @@ class TecanImporter extends BaseExcelImporter
         return count($this->output[$action]) > 0;
     }
 
-    public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
-    {
-        return IOFactory::load($filepath);
-    }
-
+    /**
+     * OVERRIDDEN to validate Workbook meets import expectations
+     */
     public static function createExcelImportWorkbookFromUpload(UploadedFile $file, AppUser $uploadedByUser): ExcelImportWorkbook
     {
-        $filepath = $file->getRealPath();
-        $spreadsheet = static::createSpreadsheetFromPath($filepath);
-
-        $importWorkbook = new ExcelImportWorkbook();
-        $importWorkbook->setFilename($file->getClientOriginalName());
-        $importWorkbook->setFileMimeType($file->getMimeType());
-        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
-        $importWorkbook->setUploadedBy($uploadedByUser);
-
-        foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
-
-            foreach ($sheet->getRowIterator() as $row) {
-                foreach ($row->getCellIterator() as $cell) {
-                    $importCell = new ExcelImportCell($importWorksheet);
-                    $importCell->setRowIndex($row->getRowIndex());
-                    $importCell->setColIndex($cell->getColumn());
-
-                    $importCell->setValueFromExcelCell($cell);
-                }
-            }
-        }
+        $importWorkbook = parent::createExcelImportWorkbookFromUpload($file, $uploadedByUser);
 
         self::mustMeetFileFormatExpectations($importWorkbook->getFirstWorksheet());
 
@@ -138,24 +122,7 @@ class TecanImporter extends BaseExcelImporter
         $spreadsheet = static::createSpreadsheetFromPath($filepath);
         $worksheet = $spreadsheet->getActiveSheet();
 
-        $max = $worksheet->getHighestRow(self::TUBE_ID_COLUMN);
-
-        $tubeAccessionIds = [];
-        for ($rowNumber = static::STARTING_ROW; $rowNumber <= $max; $rowNumber++) {
-            $columnIdx = Coordinate::columnIndexFromString(static::TUBE_ID_COLUMN);
-
-            $cell = $worksheet->getCellByColumnAndRow($columnIdx, $rowNumber);
-            if (!$cell) {
-                throw new \RuntimeException(sprintf('Cannot find Cell for Column %s Row %d', self::TUBE_ID_COLUMN, $rowNumber));
-            }
-
-            $rawTubeId = trim($cell->getValue());
-            if ($rawTubeId) {
-                $tubeAccessionIds[] = $rawTubeId;
-            }
-        }
-
-        return $tubeAccessionIds;
+        return static::getColumnValues($worksheet, static::TUBE_ID_COLUMN, static::STARTING_ROW);
     }
 
     /**
@@ -164,10 +131,14 @@ class TecanImporter extends BaseExcelImporter
      * Results will be stored in the $output property
      *
      * Messages (including errors) will be stored in the $messages property
+     *
+     * @return Tube[]
      */
     public function process($commit = false)
     {
-        if ($this->output !== null) return $this->output;
+        if ($this->output !== null) {
+            return $this->processedTubes;
+        }
 
         $output = [
             'created' => [],
@@ -210,15 +181,32 @@ class TecanImporter extends BaseExcelImporter
             // Whether created or updated
             $resultAction = $specimen->isOnWellPlate($wellPlate) ? 'updated' : 'created';
 
-            // Add Specimen to Well Plate at Position from upload
-            $specimen->addWellPlate($wellPlate, $rawWellPosition);
+            // Get SpecimenWell where this Specimen is stored on the Well Plate
+            $well = $this->findOrCreateWell($wellPlate, $specimen);
+
+            // Set position on this Well Plate
+            // Positions from Excel begin at 1
+            try {
+                $alphanumericPosition = SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
+                $well->setPositionAlphanumeric($alphanumericPosition);
+            } catch (\Exception $e) {
+                $this->messages[] = ImportMessage::newError(
+                    $e->getMessage(),
+                    $rowNumber,
+                    $this->columnMap['wellPosition']
+                );
+            }
+
+            $this->em->persist($well);
 
             // Store in output
             $output[$resultAction][] = [
                 'tubeAccessionId' => $rawTubeId,
                 'rnaWellPlateId' => $rawWellPlateId,
-                'rnaWellPosition' => $rawWellPosition,
+                'rnaWellPosition' => sprintf("%s (%d)", $well->getPositionAlphanumeric(), $rawWellPosition),
             ];
+
+            $this->processedTubes[] = $tube;
         }
 
         $this->output = $output;
@@ -228,11 +216,14 @@ class TecanImporter extends BaseExcelImporter
             $this->getEntityManager()->clear();
         }
 
-        return $this->output;
+        return $this->processedTubes;
     }
 
     /**
-     * Returns true if $raw is valid
+     * Tecan upload provides Position in integer format as 1 thru 96.
+     * Verify this position is valid.
+     *
+     * Returns true if $rawWellPosition is valid.
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
@@ -245,6 +236,28 @@ class TecanImporter extends BaseExcelImporter
                 $this->columnMap['wellPosition']
             );
             return false;
+        }
+
+        $invalidPositionMsg = sprintf('Position must be between %d and %d', SpecimenWell::minIntegerPosition, SpecimenWell::maxIntegerPosition);
+        if (
+            $rawWellPosition < SpecimenWell::minIntegerPosition
+            || $rawWellPosition > SpecimenWell::maxIntegerPosition
+        ) {
+            $this->messages[] = ImportMessage::newError(
+                $invalidPositionMsg,
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
+        }
+
+        try {
+            SpecimenWell::positionAlphanumericFromInt($rawWellPosition);
+        } catch (\Exception $e) {
+            $this->messages[] = ImportMessage::newError(
+                $invalidPositionMsg,
+                $rowNumber,
+                $this->columnMap['wellPosition']
+            );
         }
 
         return true;
@@ -287,6 +300,16 @@ class TecanImporter extends BaseExcelImporter
             return false;
         }
 
+        // Ensure Tube in correct status
+        if (!$tube->willAllowTecanImport()) {
+            $this->messages[] = ImportMessage::newError(
+                'Tube not in correct status to allow importing',
+                $rowNumber,
+                $this->columnMap['tubeAccessionId']
+            );
+            return false;
+        }
+
         return true;
     }
 
@@ -297,7 +320,7 @@ class TecanImporter extends BaseExcelImporter
             return $this->seenTubes[$rawTubeAccessionId];
         }
 
-        $tube = $this->tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
+        $tube = $this->tubeRepo->findOneByAccessionId($rawTubeAccessionId);
         if (!$tube) {
             return null;
         }
@@ -342,5 +365,27 @@ class TecanImporter extends BaseExcelImporter
         if (self::TUBE_ID_HEADER !== $found) {
             throw new \RuntimeException(sprintf('Cannot find column %s. Expected to find at cell %s%d', self::TUBE_ID_HEADER, $column, $row));
         }
+    }
+
+    private function findOrCreateWell(WellPlate $wellPlate, Specimen $specimen): SpecimenWell
+    {
+        $well = null;
+
+        if ($specimen->isOnWellPlate($wellPlate)) {
+            // Specimen is already on this plate
+            // Find if there's a well without a position
+            foreach($specimen->getWellsOnPlate($wellPlate) as $existingWell) {
+                if (!$existingWell->getPositionAlphanumeric()) {
+                    $well = $existingWell;
+                    break;
+                }
+            }
+        }
+
+        if (!$well) {
+            $well = new SpecimenWell($wellPlate, $specimen);
+        }
+
+        return $well;
     }
 }

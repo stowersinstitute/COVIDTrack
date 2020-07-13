@@ -1,4 +1,9 @@
 {% extends 'base.html.twig' %}
+{% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
+{% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
+{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+{% set bloodConstant = constant('App\\Entity\\Specimen::TYPE_BLOOD') %}
+{% set salivaConstant = constant('App\\Entity\\Specimen::TYPE_SALIVA') %}
 
 {% block page_title %}
     Specimen {{ specimen.accessionId }}
@@ -9,20 +14,28 @@
     <div class="col-md-6">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">General <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}" class="btn btn-primary btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-edit"></i> Edit</a></h3>
+                <h3 class="box-title">
+                    General
+
+                    {% if userCanEditSpecimens %}
+                    <a href="{{ path('app_specimen_edit', {accessionId: specimen.accessionId}) }}" class="btn btn-primary btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-edit"></i> Edit</a>
+                    {% endif %}
+                </h3>
             </div>
             <div class="box-body">
                 <dl class="dl-horizontal">
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
                     <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
-                    <dt>RNA Well Plate</dt><dd>
-                        {% for barcode in specimen.rnaWellPlateBarcodes %}
-                        <a href="{{ path('well_plate_view', {barcode: barcode}) }}">{{ barcode }}</a><br>
+                    <dt>Well Plate</dt><dd>
+                        {% for well in specimen.wells %}
+                        <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a><br>
                         {% endfor %}
                     </dd>
                     <dt>Collection Time</dt><dd>{{ specimen.collectedAt is empty ? "" : specimen.collectedAt|date("Y-m-d g:ia") }}</dd>
+                    {% if specimen.cliaTestingRecommendedText %}
                     <dt>CLIA Testing Recommended?</dt><dd>{{ specimen.cliaTestingRecommendedText }}</dd>
+                    {% endif %}
                     <dt>Status</dt><dd>{{ specimen.statusText }}</dd>
                 </dl>
             </div>
@@ -35,29 +48,44 @@
 
 </div>
 
+{% if userCanViewResults %}
+
+{% if specimen.type == salivaConstant %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
             <div class="box-header with-border">
-                <h3 class="box-title">Results <a href="{{ path('app_results_qpcr_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a></h3>
+                <h3 class="box-title">
+                    Viral Results
+
+                    {% if userCanEditResults %}
+                    <a href="{{ path('app_results_qpcr_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
+                    {% endif %}
+                </h3>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-                        <th>&nbsp;</th>
+                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
                         <th>Conclusion</th>
-                        <th>Created At</th>
+                        <th>Well Plate Barcode</th>
+                        <th>Well Position</th>
+                        <th>Reported At</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for result in specimen.QPCRResults %}
                         <tr>
+                            {% if userCanEditResults %}
                             <td>
                                 <a href="{{ path('app_results_qpcr_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
+                            {% endif %}
                             <td>{{ result.conclusionText }}</td>
-                            <td>{{ result.createdAt | date("Y-m-d H:i:s") }}</td>
+                            <td>{{ result.wellPlateBarcode }}</td>
+                            <td>{{ result.wellPosition }}</td>
+                            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -66,31 +94,48 @@
         </div>
     </div>
 </div>
+{% endif %}{# End viralResults #}
 
-{% if specimen.DDPCRResults|length > 0 %}
+{% if specimen.type == bloodConstant %}
 <div class="row">
     <div class="col-md-12">
         <div class="box box-success">
             <div class="box-header with-border">
-                <h3 class="box-title">ddPCR</h3>
+                <h3 class="box-title">
+                    Antibody Results
+
+                    {% if userCanEditResults %}
+                    <a href="{{ path('app_results_antibody_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
+                    {% endif %}
+                </h3>
             </div>
             <div class="box-body">
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-{#                        <th>&nbsp;</th>#}
-                        <th>Failure?</th>
-                        <th>Created At</th>
+                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        <th>Conclusion</th>
+                        <th>Signal</th>
+                        <th>Well Plate Barcode</th>
+                        <th>Well Position</th>
+                        <th>Well ID</th>
+                        <th>Reported At</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for result in specimen.ddpcrResults %}
+                    {% for result in specimen.antibodyResults %}
                         <tr>
-{#                            <td>#}
-{#                                <a href="{{ path('app_ddpcr_edit', {id: result.id}) }}">Edit</a>#}
-{#                            </td>#}
-                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
-                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
+                            {% if userCanEditResults %}
+                            <td>
+                                <a href="{{ path('app_results_antibody_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
+                            </td>
+                            {% endif %}
+                            <td>{{ result.conclusionText }}</td>
+                            <td>{{ result.signal }}</td>
+                            <td>{{ result.wellPlateBarcode }}</td>
+                            <td>{{ result.wellPosition }}</td>
+                            <td>{{ result.wellIdentifier }}</td>
+                            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -99,40 +144,8 @@
         </div>
     </div>
 </div>
-{% endif %}
+{% endif %}{# End viralResults #}
 
-{% if specimen.sequencingResults|length > 0 %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-success">
-            <div class="box-header with-border">
-                <h3 class="box-title">Sequencing</h3>
-            </div>
-            <div class="box-body">
-                <table class="table table-condensed">
-                    <thead>
-                    <tr>
-{#                        <th>&nbsp;</th>#}
-                        <th>Failure?</th>
-                        <th>Created At</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for result in specimen.sequencingResults %}
-                        <tr>
-{#                            <td>#}
-{#                                <a href="{{ path('app_sequencing_edit', {id: result.id}) }}">Edit</a>#}
-{#                            </td>#}
-                            <td>{{ result.isFailure ? 'Yes' : '' }}</td>
-                            <td>{{ specimen.createdAt | date("Y-m-d H:i:s") }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+{% endif %}{# End if userCanViewResults #}
 
 {% endblock %}

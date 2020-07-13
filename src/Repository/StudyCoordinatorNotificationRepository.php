@@ -13,6 +13,21 @@ use Doctrine\ORM\EntityRepository;
 class StudyCoordinatorNotificationRepository extends EntityRepository
 {
     /**
+     * Get the most recently sent notifications.
+     *
+     * @param int $limit
+     * @return StudyCoordinatorNotification[]
+     */
+    public function findMostRecent(int $limit = 100): array
+    {
+        return $this->createQueryBuilder('n')
+            ->addOrderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * Get the most recent timestamp when the Study Coordinator Notification
      * was last sent.
      */

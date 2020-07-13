@@ -63,6 +63,7 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
             $data = $form->getData();
             $groupTitles = $request->request->get('groups', []);
 
@@ -159,7 +160,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function view(string $title)
     {
-        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_VIEW');
 
         $group = $this->findGroupByTitle($title);
 
@@ -298,7 +299,7 @@ class ParticipantGroupController extends AbstractController
             ]);
         }
 
-        return $this->render('excel-import/base-excel-import-start.twig', [
+        return $this->render('excel-import/base-excel-import-start.html.twig', [
             'itemLabel' => 'Participant Groups',
             'importForm' => $form->createView(),
         ]);

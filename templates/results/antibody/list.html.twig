@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
+
+{% block page_title %}Antibody Results{% endblock %}
+
+{% block body %}
+{% if userCanViewResults %}
+<div class="row margin-bottom">
+    <div class="col-md-12">
+        <div class="pull-left">
+            {{ form(filterForm) }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body">
+                {% include('results/antibody/list-table.html.twig') %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -4,10 +4,10 @@ namespace App\Form;
 
 use App\Entity\Tube;
 use App\Form\Type\RadioButtonGroupType;
+use App\Form\Type\TextLookupType;
 use App\Util\DateUtils;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -26,7 +26,11 @@ class KioskAddTubeForm extends AbstractType
         $days = [];
         foreach (range(3, 0) as $daysAgo) {
             $date = new \DateTime(sprintf('-%d days', $daysAgo));
-            $days[$date->format('M d')] = $date->format('Y-m-d');
+            $prnDate = $date->format('M d');
+            if ($daysAgo === 0) {
+                $prnDate .= " (Today)";
+            }
+            $days[$prnDate] = $date->format('Y-m-d');
         }
 
         $times = [];
@@ -39,9 +43,10 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $builder
-            ->add('accessionId', TextType::class, [
+            ->add('accessionId', TextLookupType::class, [
                 'label' => 'Tube Label ID',
-                'attr' => [ 'data-scanner-input' => null ]
+                'attr' => [ 'data-scanner-input' => null ],
+                'button_text' => 'Lookup',
             ])
             ->add('tubeType', RadioButtonGroupType::class, [
                 'choices' => [

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Import Saved{% endblock %}
+
+{% block body %}
+    {% include 'checkin/blood/excel-import-summary-widgets.html.twig' %}
+
+    <a class="btn btn-primary" href="{{ path('checkin_queue') }}">Return to Check-in Queue</a><br>
+    <br>
+    <a class="btn btn-success" href="{{ path('checkin_blood_download_conversion', {importId: importId}) }}"><i class="fa fa-file-download" style="margin-right:4px"></i> Download with Specimen Accession IDs</a>
+{% endblock %}

@@ -132,7 +132,8 @@ class TecanConversionController extends AbstractController
             $importingWorkbook->getFirstWorksheet()
         );
 
-        $output = $importer->process();
+        $importer->process();
+        $output = $importer->getOutput();
 
         return $this->render('tecan-conversion/import-preview.html.twig', [
             'importId' => $importId,

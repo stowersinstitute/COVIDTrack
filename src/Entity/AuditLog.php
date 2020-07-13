@@ -20,7 +20,7 @@ class AuditLog extends LogEntry
      * For example:
      *
      *     [
-     *         "Status" => "In Process",
+     *         "Status" => "Accepted",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *

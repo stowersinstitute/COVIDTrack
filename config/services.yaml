@@ -36,9 +36,12 @@ services:
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
+    # For loading fixtures see:
+    #     dev environment -- config/packages/dev/services.yaml
+    #     test environment -- config/packages/test/services.yaml
     App\:
         resource: '../src/*'
-        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+        exclude: '../src/{DataFixtures,DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -50,6 +53,7 @@ services:
         arguments:
             $fromAddress: '%env(CT_DEFAULT_FROM_ADDRESS)%'
             $replyToAddress: '%env(CT_DEFAULT_REPLY_TO_ADDRESS)%'
+            $indicateIsTestingEmail: '%env(bool:CT_SEND_TEST_EMAILS)%'
 
     App\Security\LoginFormAuthenticator:
         arguments:

@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Traits\TimestampableEntity;
 
 /**
- * Well Plate with one Specimen per Well
+ * 96-Well Plate with one Specimen per Well.
  *
  * @ORM\Entity(repositoryClass="App\Repository\WellPlateRepository")
  * @ORM\Table(name="well_plates")
@@ -33,11 +33,18 @@ class WellPlate
     private $barcode;
 
     /**
+     * Where this Well Plate is physically stored.
+     *
+     * @var null|string
+     * @ORM\Column(name="storage_location", type="string", length=255, nullable=true)
+     */
+    private $storageLocation;
+
+    /**
      * Wells that contain Specimens.
      *
      * @var SpecimenWell[]|ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\SpecimenWell", mappedBy="wellPlate", cascade={"persist", "remove"}, orphanRemoval=true)
-     * @ORM\OrderBy({"position" = "ASC"})
      */
     private $wells;
 
@@ -45,6 +52,11 @@ class WellPlate
     {
         $this->wells = new ArrayCollection();
         $this->setBarcode($barcode);
+    }
+
+    public static function buildExample(string $barcode = 'ABC100'): self
+    {
+        return new static($barcode);
     }
 
     public function __toString()
@@ -57,7 +69,7 @@ class WellPlate
         return $this->id;
     }
 
-    public function getBarcode(): ?string
+    public function getBarcode(): string
     {
         return $this->barcode;
     }
@@ -72,12 +84,85 @@ class WellPlate
         $this->barcode = $barcode;
     }
 
+    public function getStorageLocation(): ?string
+    {
+        return $this->storageLocation;
+    }
+
+    public function setStorageLocation(?string $storageLocation): void
+    {
+        $this->storageLocation = $storageLocation;
+    }
+
     /**
+     * @internal Do not call directly. Instead use `new SpecimenWell($plate, $specimen, $position)`
+     */
+    public function addWell(SpecimenWell $well): void
+    {
+        // Same Well can't be added twice
+        if ($this->hasWell($well)) {
+            throw new \InvalidArgumentException('Cannot add same SpecimenWell to WellPlate multiple times');
+        }
+
+        // Prevent adding Wells at currently occupied positions
+        $atPosition = $well->getPositionAlphanumeric();
+        if ($atPosition && $this->hasWellAtPosition($atPosition)) {
+            $wellAtPosition = $this->getWellAtPosition($atPosition);
+            $specimenId = $wellAtPosition->getSpecimen()->getAccessionId();
+            throw new \InvalidArgumentException(sprintf('Cannot add a new Well at Position %s. Well with Specimen "%s" already exists at that Position.', $atPosition, $specimenId));
+        }
+
+        $this->wells->add($well);
+    }
+
+    /**
+     * Whether given Well is already associated with this Well Plate
+     */
+    public function hasWell(SpecimenWell $well): bool
+    {
+        foreach ($this->wells as $existingWell) {
+            if ($existingWell->isSame($well)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasWellAtPosition(?string $atPosition): bool
+    {
+        return (bool) $this->getWellAtPosition($atPosition);
+    }
+
+    public function getWellAtPosition(?string $atPosition): ?SpecimenWell
+    {
+        if (null === $atPosition) return null;
+
+        foreach ($this->wells as $well) {
+            if ($well->isAtPosition($atPosition)) {
+                return $well;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Return all Wells on this WellPlate, ordered by position.
+     *
      * @return SpecimenWell[]
      */
     public function getWells(): array
     {
-        return $this->wells->getValues();
+        $wells = $this->wells->getValues();
+
+        // Sort by alphanumeric position
+        usort($wells, function(SpecimenWell $a, SpecimenWell $b) {
+            // NOTE: Uses "natural" sort
+            return strnatcmp($a->getPositionAlphanumeric(), $b->getPositionAlphanumeric());
+        });
+
+        return $wells;
     }
 
     /**
@@ -88,9 +173,10 @@ class WellPlate
         $specimens = [];
 
         foreach ($this->wells as $well) {
-            $specimens[] = $well->getSpecimen();
+            $s = $well->getSpecimen();
+            $specimens[$s->getAccessionId()] = $s;
         }
 
-        return $specimens;
+        return array_values($specimens);
     }
 }

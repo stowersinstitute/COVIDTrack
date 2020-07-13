@@ -43,8 +43,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
             ]);
         }
 
-        return $this->render('excel-import/base-excel-import-start.twig', [
-            'itemLabel' => 'Results',
+        return $this->render('excel-import/base-excel-import-start.html.twig', [
+            'itemLabel' => 'Viral Results',
             'importForm' => $form->createView(),
         ]);
     }
@@ -64,7 +64,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
             $importingWorkbook->getFirstWorksheet()
         );
 
-        $output = $importer->process();
+        $importer->process();
+        $output = $importer->getOutput();
 
         return $this->render('results/qpcr/excel-import-preview.html.twig', [
             'importId' => $importId,

@@ -1,5 +1,5 @@
 {% macro renderCancelButton() %}
-    <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#cancelDropOff">
+    <button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#cancelDropOff">
         <i class="fa fa-fw fa-trash"></i>
         Cancel Drop Off
     </button>
@@ -10,21 +10,58 @@
 {% block page_title %}COVIDTrack Kiosk{% endblock %}
 
 {% block body %}
+    <div class="row margin-bottom">
+        <div class="col-xs-6">
+            <h3 class="no-margin" style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+                {{ kioskSession.participantGroup.title }} Group
+            </h3>
+        </div>
+        <div class="col-xs-6">
+            {% block header_buttons %}
+            <div class="pull-right" id="buttons-before-tube-entered">
+                {{ _self.renderCancelButton() }}
+                {% if kioskSession.tubeData|length > 0 %}
+                <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-success btn-xs">
+                    Review <i class="fa fa-fw fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endblock %}
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
-            <h3 style="margin-top:0; padding-bottom:10px; border-bottom:1px solid #ddd;"><strong>{{ kioskSession.participantGroup.title }} Group</strong></h3>
-
             {% block body_content %}
 
             {{ form_start(form) }}
             {{ form_errors(form) }}
-            {{ form_row(form.accessionId, {
-                'label': false,
-                'attr': {'class': 'input-lg', 'placeholder': 'Scan Tube barcode using kiosk scanner'}
-            }) }}
+            <div class="row" id="tube-input-group">
+                <div class="col-xs-12">
+                    {{ form_row(form.accessionId, {
+                        'label': false,
+                        'attr': {'placeholder': 'Scan Tube barcode using kiosk scanner'},
+                        'input_group_attr': {'class': 'input-group-lg'},
+                        'button_text': 'Continue',
+                        'button_attr': {'class': 'btn-success btn-lg'},
+                        'right_button_icon_class': 'fa fa-fw fa-chevron-right'
+                    }) }}
+                </div>
+            </div>
+            <div class="callout callout-danger hidden" id="tube-error-callout">
+                <h4>Tube Barcode Error</h4>
+                <p></p>
+            </div>
 
-            <div id="tubeDetails" class="collapse">
-                {{ form_row(form.tubeType) }}
+            <div id="tubeDetailSelection" class="collapse">
+                {{ form_row(form.tubeType, {
+                    'label': 'What type of tube are you returning?',
+                    'label_attr': {'style': 'font-size: 1.25em;'}
+                }) }}
+
+
+            </div>
+
+            <div id="tubeTimeSelection" class="collapse">
                 <div class="row">
                     <div class="col-xs-6">
                         {{ form_row(form.collectedAtDate) }}
@@ -34,6 +71,9 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div id="tubeContinueButtons" class="collapse">
                 <div class="row">
                     <div class="col-xs-6 text-right">
                         {{ form_row(form.save) }}
@@ -42,34 +82,29 @@
                         {{ form_row(form.review) }}
                     </div>
                 </div>
-
                 <div class="row col-xs-12 text-center">
                     {{ _self.renderCancelButton() }}
                 </div>
             </div>
 
-            <div class="row" id="buttons-before-tube-entered">
-                <div class="col-xs-6 text-right">
-                    {{ _self.renderCancelButton() }}
-                </div>
-                <div class="col-xs-6">
-                    <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-sm btn-success">
-                        Continue <i class="fa fa-fw fa-chevron-right"></i>
-                    </a>
-                </div>
-            </div>
-
             {{ form_end(form) }}
 
-            {% endblock %}
+        {% endblock %}
         </div>
     </div>
 
     {% block scan_help %}
     {%  include 'kiosk/scan-help.html.twig' with {
+        image: 'images/vial-1d-barcode.svg',
         scanTipHtml: 'Scan Tube barcode<br>below the screen'
     } %}
     {% endblock %}
+
+
+    <style type="text/css">
+        #tube-input-group { position: relative; }
+        #tube-check-status { position: absolute; right: 1rem; }
+    </style>
 {% endblock %}
 
 {% block modal %}
@@ -102,27 +137,143 @@
     <script>
         // What to do when scanner input
         $(document).on( "scannerinput", function(e, inputString) {
-            if (!$("[data-scanner-input]").focused) {
-                $("[data-scanner-input]").val(inputString).trigger('input');
-            }
+            // We don't want the scanner typing in the input field.
+            $("[data-scanner-input]").blur();
+            $("[data-scanner-input]").val(inputString).trigger('input');
+            $("#kiosk_add_tube_form_accessionId_button").trigger('click');
         });
 
         $(document).ready(function(){
-            // React when inputting Tube Label ID
-            $("input").on('input', function(e) {
-                console.log(e);
-                if($(e.target).val() !== "") {
-                    // Expand to show form details
-                    $("#tubeDetails").collapse('show');
-                    $("#scanTip").hide();
-                    $("#buttons-before-tube-entered").hide();
+            setTubeInputStatus();
+
+            // Reset the detail sections when the input is changed
+            $("#kiosk_add_tube_form_accessionId").on('input', function() {
+                setTubeInputStatus();
+                showTubeDetailSelection(false);
+            });
+
+            $("#kiosk_add_tube_form_accessionId_button").click(function(){
+                var val = $('#kiosk_add_tube_form_accessionId').val();
+
+                if(val !== "") {
+                    setTubeInputStatus('LOADING');
+                    showTubeDetailSelection(false);
+
+                    $.ajax('{{ path('kiosk_tube_available_check') }}', {
+                        method: 'POST',
+                        data: { accessionId: val },
+
+                        success: onAvailableCheckResponse,
+
+                        // Unexpected errors like 500 server or network down
+                        error: function(xhr, textStatus, error) {
+                            console.log("error in response: " + textStatus + " " + error);
+                        }
+                    });
                 } else {
                     // Collapse form details
-                    $("#tubeDetails").collapse('hide');
-                    $("#scanTip").show();
-                    $("#buttons-before-tube-entered").show();
+                    setTubeInputStatus();
+                    showTubeDetailSelection(false);
                 }
             });
+
+            $("#kiosk_add_tube_form_tubeType").on('input', function(e) {
+                if($(e.target).val() !== "") {
+                    showTubeTimeSelection(true);
+                } else {
+                    showTubeTimeSelection(false);
+                }
+            });
+
+            $("#kiosk_add_tube_form_collectedAtDate, #kiosk_add_tube_form_collectedAtTime").on('input', function(e) {
+                if ($("#kiosk_add_tube_form_collectedAtDate").val() && $("#kiosk_add_tube_form_collectedAtTime").val()) {
+                    showTubeContinueButtons(true);
+                } else {
+                    showTubeContinueButtons(false);
+                }
+            });
+
+            /**
+             * What to do when we get a tube check response from the server
+             * @param data AJAX Response Data
+             */
+            function onAvailableCheckResponse(data) {
+                if (data.isError) {
+                    setTubeInputStatus('ERROR', data.message);
+                    showTubeDetailSelection(false);
+                    return;
+                }
+
+                showTubeDetailSelection(true);
+                setTubeInputStatus('SUCCESS');
+            }
+
+            /**
+             * Sets the icon in the tube input field and any error message in the callout below the input field
+             * @param status Options: LOADING, ERROR, or SUCCESS
+             * @param message Error message to show in the callout
+             */
+            function setTubeInputStatus(status = '', message = '') {
+                var statusWrapper = $("#lookup-status");
+
+                statusWrapper.empty();
+                $("#tube-error-callout").toggleClass('hidden', true);
+
+                switch (status) {
+                    case 'LOADING':
+                        statusWrapper.append('<i class="fa fa-fw fa-virus fa-spin"></i>');
+                        break;
+                    case 'ERROR':
+                        statusWrapper.append('<i class="fa fa-fw fa-times text-red"></i>');
+                        $("#tube-error-callout").toggleClass('hidden', false);
+                        $("#tube-error-callout p").html(message);
+                        break;
+                    case 'SUCCESS':
+                        statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
+                        break;
+                    default:
+                        statusWrapper.append('<i class="fa fa-fw fa-question text-gray"></i>');
+                        break;
+                }
+            }
+
+            /**
+             * Shows (and hides) the tube detail section (Tube Type and Time UI) handles display of the scanning hint
+             */
+            function showTubeDetailSelection(show = true) {
+                if (show) {
+                    $("#tubeDetailSelection").collapse('show');
+                    $("#scanTip").hide();
+                    $("#kiosk_add_tube_form_accessionId_button").hide();
+                } else {
+                    $("#kiosk_add_tube_form_tubeType").val('').trigger('input');
+                    $("#tubeDetailSelection").collapse('hide');
+                    $("#scanTip").show();
+                    $("#kiosk_add_tube_form_accessionId_button").show();
+                }
+            }
+
+            /**
+             * Shows (and hides) the tube day and time fields and pre-complete buttons
+             * @param show
+             */
+            function showTubeTimeSelection(show = true) {
+                if (show) {
+                    $("#tubeTimeSelection").collapse('show');
+                } else {
+                    $("#kiosk_add_tube_form_collectedAtDate").val('').trigger('input');
+                    $("#kiosk_add_tube_form_collectedAtTime").val('').trigger('input');
+                    $("#tubeTimeSelection").collapse('hide');
+                }
+            }
+
+            function showTubeContinueButtons(show = true) {
+                if (show) {
+                    $("#tubeContinueButtons").collapse('show');
+                } else {
+                    $("#tubeContinueButtons").collapse('hide');
+                }
+            }
 
             // Confirming Cancel does POST to do real cancel
             $('#confirm-cancel-dropoff').on('click', function(e) {

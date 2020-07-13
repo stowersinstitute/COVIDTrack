@@ -1,0 +1,28 @@
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Tube Accession ID</th>
+            <th>Accepted/Rejected</th>
+            <th>Well Plate Barcode</th>
+            <th>Well ID</th>
+            <th>Well Position</th>
+            <th>Kit Type</th>
+            <th>Checked-in By Username</th>
+        </tr>
+    </thead>
+
+    <tbody>
+{#  rawRow is raw data for each row, keyed by keys from TubeCheckinBloodImporter.columnMap keys #}
+    {% for rawRow in checkins  %}
+        <tr>
+            <td>{{ rawRow.tubeAccessionId }}</td>
+            <td>{{ rawRow.acceptedStatus }}</td>
+            <td>{{ rawRow.wellPlateBarcode }}</td>
+            <td>{{ rawRow.wellIdentifier }}</td>
+            <td>{{ rawRow.wellPosition }}</td>
+            <td>{{ rawRow.kitType }}</td>
+            <td>{{ rawRow.username }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

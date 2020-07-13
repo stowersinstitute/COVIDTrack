@@ -34,6 +34,7 @@ class AppPermissions
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',
         'ROLE_PARTICIPANT_GROUP_VIEW',
+        'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW',
 
         // Printing
         'ROLE_PRINT_TUBE_LABELS',
@@ -48,6 +49,10 @@ class AppPermissions
 
         // Tubes
         'ROLE_TUBE_CHECK_IN',
+
+        // Well Plates
+        'ROLE_WELL_PLATE_EDIT',
+        'ROLE_WELL_PLATE_VIEW',
     ];
 
     /**

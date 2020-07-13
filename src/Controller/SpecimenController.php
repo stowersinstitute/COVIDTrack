@@ -24,7 +24,7 @@ class SpecimenController extends AbstractController
      */
     public function list()
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_VIEW');
 
         $specimens = $this->getDoctrine()
             ->getRepository(Specimen::class)
@@ -42,7 +42,7 @@ class SpecimenController extends AbstractController
      */
     public function view(string $accessionId)
     {
-        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_EDIT');
+        $this->denyAccessUnlessGranted('ROLE_SPECIMEN_VIEW');
 
         $specimen = $this->findSpecimen($accessionId);
 

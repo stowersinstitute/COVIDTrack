@@ -1,0 +1,23 @@
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Tube Accession ID</th>
+            <th>Accepted/Rejected</th>
+            <th>Well Plate Barcode</th>
+            <th>Kit Type</th>
+            <th>Checked-in By Username</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for checkin in checkins  %}
+        <tr>
+            <td>{{ checkin.accessionId }}</td>
+            <td>{{ checkin.checkInDecisionText }}</td>
+            <td>{{ checkin.rnaWellPlateBarcodes|length > 0 ? checkin.rnaWellPlateBarcodes|join(", ") : '' }}</td>
+            <td>{{ checkin.kitType }}</td>
+            <td>{{ checkin.checkedInByUsername }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

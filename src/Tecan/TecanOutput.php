@@ -30,10 +30,14 @@ class TecanOutput
         // Parse Tube Accession IDs from spreadsheet
         $rawTubeAccessionIds = TecanImporter::getRawTubeAccessionIds($inputFilePath);
         foreach ($rawTubeAccessionIds as $rawTubeAccessionId) {
-            $tube = $tubeRepo->findOneWithSpecimenLoaded($rawTubeAccessionId);
+            $tube = $tubeRepo->findOneByAccessionId($rawTubeAccessionId);
 
-            if (!$tube || !$tube->getSpecimen()) {
+            if (!$tube) {
                 throw new \InvalidArgumentException(sprintf('Cannot find Tube for Tube Accession ID "%s"', $rawTubeAccessionId ));
+            }
+
+            if (!$tube->getSpecimen()) {
+                throw new \InvalidArgumentException(sprintf('Tube Accession ID "%s" does not yet have a Specimen created', $rawTubeAccessionId));
             }
 
             // Replace Tube ID with Specimen ID anywhere in file

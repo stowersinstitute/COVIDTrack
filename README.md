@@ -108,9 +108,15 @@ Instead of using Docker, develop with tools installed directly on the host machi
 
 Tests written using [PHPUnit](https://phpunit.de/) and executed using [Symfony PHPUnit Bridge](https://symfony.com/doc/4.4/testing.html).
 
-Run test suite from command-line:
+Run test suite from command-line of a local development environment:
 
-    ./vendor/bin/simple-phpunit
+    $ bin/run-tests.sh
+
+To run on a CI server, create a fresh local development environment then run:
+
+    $ git clone ...
+    $ bin/setup.php --for-local-development
+    $ bin/run-tests.sh
 
 ## Data Fixtures
 
@@ -132,8 +138,10 @@ These users are available when fixtures are loaded. Same username/password:
 
 * ctadmin - Sysadmin / Developer
 * coordinator - Study Coordinator
+* mediaprep - Media Prep Team (specimen collection kit management)
 * samplecollection - Sample Collection Team
-* analysistech - Viral Testing Team / Results
+* testingtech - Viral Testing Team / Results
+* analysistech - Viral Analysis Team
 * kiosk - Kiosk UI
 
 ## Development Environment - Monitoring Sent Email
@@ -156,3 +164,7 @@ View mail in Mailhog: <http://0.0.0.0:8025>
 * [AdminLTE Theme 2.4.18](https://github.com/ColorlibHQ/AdminLTE) application theme – [Documentation](https://adminlte.io/docs/2.4/installation)
 * [Bootstrap 3.4.1](https://getbootstrap.com/docs/3.4/components/) has built-in styles and components
 * [Font Awesome 5.13](https://fontawesome.com/icons?d=gallery&m=free) for extra icons
+
+### User Documentation
+
+[User Documentation](https://confluence.stowers.org/x/GQB8CQ) for using software from user's perspective is available.

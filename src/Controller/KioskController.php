@@ -152,7 +152,7 @@ class KioskController extends AbstractController
             /** @var Tube $tube */
             $tube = $this->getDoctrine()
                 ->getRepository(Tube::class)
-                ->findOneByAnyId($formData['accessionId']);
+                ->findOneByAccessionId($formData['accessionId']);
             if (!$tube) {
                 // TODO: Need a user-friendly error
                 throw new \InvalidArgumentException('Tube ID does not exist');
@@ -181,6 +181,32 @@ class KioskController extends AbstractController
             'form' => $form->createView(),
             'kioskSession' => $kioskSession,
             'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
+        ]);
+    }
+
+    /**
+     * Checks if the given tube is available for checkin
+     *
+     * @Route(path="/tube-available-check", methods={"POST"}, name="kiosk_tube_available_check")
+     */
+    public function tubeAvailableCheck(Request $request, EntityManagerInterface $em)
+    {
+        $this->mustHavePermissions();
+        $this->mustFindKiosk($request);
+
+        $accessionId = $request->get('accessionId');
+
+        $tube = $em->getRepository(Tube::class)->findOneByAccessionId($accessionId);
+
+        if (!$tube || !$tube->willAllowDropOff()) {
+            return new JsonResponse([
+                'isError' => true,
+                'message' => "This tube is unavailable for drop-off. Please contact staff for assistance.",
+            ]);
+        }
+
+        return new JsonResponse([
+            'result' => true,
         ]);
     }
 

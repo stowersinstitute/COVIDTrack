@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
  * A workbook created by parsing an uploaded Excel file
@@ -69,6 +70,35 @@ class ExcelImportWorkbook
     {
         $this->uploadedAt = new \DateTimeImmutable();
         $this->worksheets = new ArrayCollection();
+    }
+
+    /**
+     * @param string $path Path to Excel XLS/XLSX/CSV workbook
+     */
+    public static function createFromFilePath(string $path): ExcelImportWorkbook
+    {
+        $spreadsheet = IOFactory::load($path);
+        $filename = basename($path);
+
+        $importWorkbook = new ExcelImportWorkbook();
+        $importWorkbook->setFilename($filename);
+        $importWorkbook->setUploadedAt(new \DateTimeImmutable());
+
+        foreach ($spreadsheet->getAllSheets() as $sheet) {
+            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
+
+            foreach ($sheet->getRowIterator() as $row) {
+                foreach ($row->getCellIterator() as $cell) {
+                    $importCell = new ExcelImportCell($importWorksheet);
+                    $importCell->setRowIndex($row->getRowIndex());
+                    $importCell->setColIndex($cell->getColumn());
+
+                    $importCell->setValueFromExcelCell($cell);
+                }
+            }
+        }
+
+        return $importWorkbook;
     }
 
     public function getFirstWorksheet() : ?ExcelImportWorksheet

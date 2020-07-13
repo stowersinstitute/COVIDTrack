@@ -31,15 +31,16 @@ class SpecimenRepository extends EntityRepository
     }
 
     /**
-     * Find unique list of DateTimes for when Results were uploaded for Specimens.
+     * Find unique list of DateTimes for when Viral Results were uploaded for Specimens.
      *
      * @return \DateTime[]
      */
-    public function findAvailableGroupResultDates(): array
+    public function findAvailableGroupViralResultDates(): array
     {
         $asName = 'resultDate';
         $results = $this->createResultsQB('s')
-            ->join('s.results', 'r')
+            ->join('s.wells', 'w')
+            ->join('w.resultQPCR', 'r')
             // Requires database value has exact same time,
             // we may want to round dates to regular intervals
             ->select('DISTINCT(r.createdAt) as '.$asName)
@@ -89,10 +90,11 @@ class SpecimenRepository extends EntityRepository
     /**
      * Find Specimens belonging to members of given Participation Group,
      * but only those with Results reported on a specific date.
+     * Only returns Specimens with Viral Results.
      *
      * @return Specimen[]
      */
-    public function findByGroupForResultsPeriod(ParticipantGroup $group, \DateTimeInterface $resultedOnDate): array
+    public function findByGroupForViralResultsPeriod(ParticipantGroup $group, \DateTimeInterface $resultedOnDate): array
     {
         list($range) = DateUtils::getDaysFromRange($resultedOnDate, $resultedOnDate);
 
@@ -100,7 +102,8 @@ class SpecimenRepository extends EntityRepository
         $end = $range['end'];
 
         return $this->createQueryBuilder('s')
-            ->join('s.results', 'r')
+            ->join('s.wells', 'w')
+            ->join('w.resultQPCR', 'r')
             ->where('s.participantGroup = :group')
             ->setParameter('group', $group)
 
@@ -112,13 +115,21 @@ class SpecimenRepository extends EntityRepository
             ->execute();
     }
 
-    public function getInProcessCount() : int
+    public function getPendingResultsCount() : int
     {
         return $this->createQueryBuilder('s')
             ->select('count(s.id)')
-            ->where('s.status = :inProcessStatus')
-            ->setParameter('inProcessStatus', Specimen::STATUS_IN_PROCESS)
-            ->getQuery()->getSingleScalarResult();
+            ->join('s.participantGroup', 'participantGroup')
+
+            // Correct status
+            ->where('s.status = :status')
+            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+
+            // Not in a control group
+            ->andWhere('participantGroup.isControl = false')
+
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**

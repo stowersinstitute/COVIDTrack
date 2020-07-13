@@ -62,11 +62,13 @@ Renders a top-level navigation node in the tree navigation.
             _self.treenode('Participant Groups', 'fa-users', [
                 {
                     text: 'Drop-off Schedule',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'],
                     iconClass: 'fa-calendar',
                     route: 'participant_group_scheduling_index'
                 },
                 {
                     text: 'List',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_participant_group_list'
                 },
@@ -79,9 +81,10 @@ Renders a top-level navigation node in the tree navigation.
                 {
                     text: 'Import',
                     iconClass: 'fa-upload',
-                    route: 'group_excel_import'
+                    route: 'group_excel_import',
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW'])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'])
         }}
         {{
             _self.treenode('Tubes', 'fa-vial', [
@@ -107,14 +110,16 @@ Renders a top-level navigation node in the tree navigation.
                 {
                     text: 'List',
                     iconClass: 'fa-list',
-                    route: 'app_specimen_list'
+                    route: 'app_specimen_list',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_VIEW'],
                 },
                 {
                     text: 'New',
                     iconClass: 'fa-plus',
-                    route: 'app_specimen_new'
+                    route: 'app_specimen_new',
+                    mustHaveOneRoleToView: ['ROLE_SPECIMEN_EDIT'],
                 },
-            ], ['ROLE_SPECIMEN_EDIT'])
+            ], ['ROLE_SPECIMEN_VIEW', 'ROLE_SPECIMEN_EDIT'])
         }}
         {{
             _self.treenode('Check-In', 'fa-clipboard-check', [
@@ -124,9 +129,14 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'checkin_queue'
                 },
                 {
-                    text: 'Import Accepted/Rejected',
+                    text: 'Import Saliva Tubes',
                     iconClass: 'fa-upload',
-                    route: 'checkin_import_start'
+                    route: 'checkin_saliva_import_start'
+                },
+                {
+                    text: 'Import Blood Tubes',
+                    iconClass: 'fa-upload',
+                    route: 'checkin_blood_import_start'
                 },
             ], ['ROLE_TUBE_CHECK_IN'])
         }}
@@ -149,42 +159,68 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'tecan_import_start'
                 },
                 {
-                    text: 'List',
+                    text: 'Viral Results',
                     mustHaveOneRoleToView: ['ROLE_RESULTS_VIEW'],
                     iconClass: 'fa-list',
                     route: 'app_results_qpcr_list'
                 },
                 {
-                    text: 'Import',
+                    text: 'Viral Import',
                     mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
                     iconClass: 'fa-upload',
                     route: 'qpcr_excel_import'
+                },
+                {
+                    text: 'Antibody Results',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_VIEW'],
+                    iconClass: 'fa-list',
+                    route: 'app_results_antibody_list'
+                },
+                {
+                    text: 'Antibody Import',
+                    mustHaveOneRoleToView: ['ROLE_RESULTS_EDIT'],
+                    iconClass: 'fa-upload',
+                    route: 'antibody_excel_import'
                 },
             ], ['ROLE_RESULTS_VIEW', 'ROLE_RESULTS_EDIT'])
         }}
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
                 {
-                    text: 'Group Results',
-                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW'],
-                    iconClass: 'fa-list',
-                    route: 'app_report_group_results'
+                    text: 'Coordinator Notifications',
+                    iconClass: 'fa-envelope',
+                    route: 'report_coordinator_notifications',
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'],
                 },
-            ], ['ROLE_REPORTS_GROUP_VIEW'])
+                {
+                    text: 'Viral Group Results',
+                    iconClass: 'fa-list',
+                    route: 'app_report_group_results',
+                    mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW']
+                },
+            ], ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
-            _self.treenode('Label Printers', 'fa-print', [
+            _self.treenode('Label Printing', 'fa-print', [
                 {
-                    text: 'List',
+                    text: 'Printers',
                     iconClass: 'fa-list',
-                    route: 'app_labelprinter_list'
+                    route: 'app_labelprinter_list',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                 },
                 {
                     text: 'Print Test Label',
                     iconClass: 'fa-plus',
-                    route: 'app_labelprinter_testprint'
+                    route: 'app_labelprinter_testprint',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
                 },
-            ], ['ROLE_ADMIN'])
+                {
+                    text: 'Print Generic Labels',
+                    iconClass: 'fa-tag',
+                    route: 'app_labelprinter_genericprint',
+                    mustHaveOneRoleToView: ['ROLE_ADMIN', 'ROLE_PRINT_TUBE_LABELS'],
+                },
+            ], ['ROLE_ADMIN', 'ROLE_PRINT_TUBE_LABELS'])
         }}
         {{
             _self.treenode('Users', 'fa-users', [
