@@ -91,7 +91,7 @@ class ReportController extends AbstractController
         $exitCode = $application->run($input, $output);
 
         $success = true;
-        $message = 'If new results were available, an email has been sent';
+        $message = 'Check for new results complete';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';
