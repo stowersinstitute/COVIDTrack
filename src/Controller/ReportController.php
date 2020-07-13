@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Command\Report\BaseResultsNotificationCommand;
 use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
@@ -32,7 +33,7 @@ class ReportController extends AbstractController
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
-            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
@@ -64,7 +65,7 @@ class ReportController extends AbstractController
             // User must have one or more of these
             $this->denyAccessUnlessGranted([
                 // Users who receive the notification can check it for themselves
-                'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
                 // Users who can edit results
                 'ROLE_RESULTS_EDIT',
@@ -112,7 +113,7 @@ class ReportController extends AbstractController
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
-            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
