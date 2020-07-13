@@ -24,7 +24,7 @@ class KioskAddTubeForm extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $days = [];
-        foreach (range(3, 0) as $daysAgo) {
+        foreach (range($options['numDaysInPastForCollectionDate'], 0) as $daysAgo) {
             $date = new \DateTime(sprintf('-%d days', $daysAgo));
             $prnDate = $date->format('M d');
             if ($daysAgo === 0) {
