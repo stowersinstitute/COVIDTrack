@@ -62,6 +62,10 @@
             </div>
 
             <div id="tubeTimeSelection" class="collapse">
+                <div id="date-time-error" class="callout callout-danger hidden" style="text-align:center">
+                    <h4>Collection Time Error</h4>
+                    <p>You must select a Collection Time in the past</p>
+                </div>
                 <div class="row">
                     <div class="col-xs-6">
                         {{ form_row(form.collectedAtDate) }}
@@ -186,11 +190,32 @@
             });
 
             $("#kiosk_add_tube_form_collectedAtDate, #kiosk_add_tube_form_collectedAtTime").on('input', function(e) {
-                if ($("#kiosk_add_tube_form_collectedAtDate").val() && $("#kiosk_add_tube_form_collectedAtTime").val()) {
-                    showTubeContinueButtons(true);
-                } else {
+                let dateVal = $("#kiosk_add_tube_form_collectedAtDate").val();
+                let timeVal = $("#kiosk_add_tube_form_collectedAtTime").val();
+
+                // Only continue if both date and time selected
+                if (!dateVal || !timeVal) {
                     showTubeContinueButtons(false);
+                    return;
                 }
+
+                // Check if date/time selected is in the future
+                let selected = new Date(dateVal + ' ' + timeVal).getTime();
+
+                let maxFutureTime = new Date();
+                let addHours = maxFutureTime.getHours()+1; // +1 hour buffer
+                maxFutureTime.setHours(addHours);
+
+                let isSelectedFutureTime = selected > maxFutureTime;
+                if (isSelectedFutureTime) {
+                    showTubeContinueButtons(false);
+                    $("#date-time-error").toggleClass('hidden', false);
+                    $("#date-time-error").collapse('show');
+                    return false; // Prevent changing radio button
+                }
+
+                $("#date-time-error").collapse('hide');
+                showTubeContinueButtons(true);
             });
 
             /**
