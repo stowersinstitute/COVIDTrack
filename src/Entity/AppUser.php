@@ -227,6 +227,13 @@ class AppUser implements UserInterface
         return $this;
     }
 
+    public function removeRole(string $role): void
+    {
+        $this->roles = array_filter($this->roles, function(string $currentRole) use ($role) {
+            return $currentRole !== $role;
+        });
+    }
+
     /**
      * @see UserInterface
      */
