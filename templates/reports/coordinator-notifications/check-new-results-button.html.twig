@@ -10,7 +10,7 @@
         $btn = $(this);
         $btn.addClass('disabled');
 
-        const url = "{{ path('report_coordinator_notifications_check') }}";
+        const url = "{{ path('report_notification_clia_check') }}";
         $.post(url)
             .fail(function(responseObj) {
                 // Error happened, show it

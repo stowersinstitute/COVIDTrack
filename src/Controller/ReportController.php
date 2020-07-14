@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Command\Report\BaseResultsNotificationCommand;
+use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\CliaRecommendationViralNotification;
 use App\Report\GroupTestingRecommendationReport;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,18 +23,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class ReportController extends AbstractController
 {
     /**
-     * List notifications previously sent to the Study Coordinator that
-     * recommend Participant Groups with a positive viral test should undergo
-     * further testing.
+     * List CLIA notifications previously sent that recommend certain
+     * Participant Groups should undergo further testing.
      *
-     * @Route(path="/coordinator/notifications", methods={"GET"}, name="report_coordinator_notifications")
+     * @Route(path="/notifications/clia", methods={"GET"}, name="report_notification_clia")
      */
-    public function coordinatorNotifications()
+    public function notificationsClia()
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
-            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
@@ -40,30 +41,31 @@ class ReportController extends AbstractController
 
         $limit = 100;
         $logs = $this->getDoctrine()
-            ->getRepository(StudyCoordinatorNotification::class)
+            ->getRepository(CliaRecommendationViralNotification::class)
             ->findMostRecent($limit);
 
         return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'notification_type_text' => 'CLIA Recommendation',
             'logs' => $logs,
             'limit' => $limit,
         ]);
     }
 
     /**
-     * Run logic that would send the Study Coordinator a notification if new
+     * Run logic that would send the CLIA notification if new
      * results need to be reported.
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/coordinator/notifications/check", methods={"POST"}, name="report_coordinator_notifications_check")
+     * @Route(path="/notifications/clia/check", methods={"POST"}, name="report_notification_clia_check")
      */
-    public function checkCoordinatorNotifications(KernelInterface $kernel)
+    public function checkCliaNotifications(KernelInterface $kernel)
     {
         try {
             // User must have one or more of these
             $this->denyAccessUnlessGranted([
                 // Users who receive the notification can check it for themselves
-                'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
                 // Users who can edit results
                 'ROLE_RESULTS_EDIT',
@@ -89,7 +91,7 @@ class ReportController extends AbstractController
         $exitCode = $application->run($input, $output);
 
         $success = true;
-        $message = 'If new results were available, the Study Coordinator has been notified';
+        $message = 'Check for new results complete';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';
@@ -98,6 +100,34 @@ class ReportController extends AbstractController
         return $this->json([
             'success' => $success,
             'message' => $message,
+        ]);
+    }
+
+    /**
+     * List Non-Negative Notifications previously sent.
+     *
+     * @Route(path="/notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
+     */
+    public function notificationsNonNegative()
+    {
+        // User must have one or more of these
+        $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
+
+            // Users who view reports on Groups
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(NonNegativeViralNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/coordinator-notifications/index.html.twig', [
+            'notification_type_text' => 'Non-Negative',
+            'logs' => $logs,
+            'limit' => $limit,
         ]);
     }
 

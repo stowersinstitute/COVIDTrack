@@ -3,20 +3,20 @@
 namespace App\Repository;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\EmailNotification;
 use App\Util\DateUtils;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * Query for StudyCoordinatorNotification entities
+ * Query for EmailNotification entities
  */
-class StudyCoordinatorNotificationRepository extends EntityRepository
+class EmailNotificationRepository extends EntityRepository
 {
     /**
      * Get the most recently sent notifications.
      *
      * @param int $limit
-     * @return StudyCoordinatorNotification[]
+     * @return EmailNotification[]
      */
     public function findMostRecent(int $limit = 100): array
     {
@@ -28,8 +28,7 @@ class StudyCoordinatorNotificationRepository extends EntityRepository
     }
 
     /**
-     * Get the most recent timestamp when the Study Coordinator Notification
-     * was last sent.
+     * Get the most recent timestamp when a Notification was last sent.
      */
     public function getMostRecentSentAt(): ?\DateTimeImmutable
     {
@@ -42,15 +41,15 @@ class StudyCoordinatorNotificationRepository extends EntityRepository
     }
 
     /**
-     * Find list of Participant Groups that the Study Coordinator was
-     * notified about on a specific date.
+     * Find list of Participant Groups that were included in a Notification
+     * on given date.
      *
      * @param \DateTime $date Date when Notification was created
      * @return ParticipantGroup[]
      */
     public function getGroupsNotifiedOnDate(\DateTime $date): array
     {
-        /** @var StudyCoordinatorNotification[] $notifications */
+        /** @var EmailNotification[] $notifications */
         $notifications = $this->createQueryBuilder('n')
             ->select('n, g')
             ->join('n.recommendedGroups', 'g')

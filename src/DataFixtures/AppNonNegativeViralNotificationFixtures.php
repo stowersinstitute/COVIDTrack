@@ -3,12 +3,15 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Entity\StudyCoordinatorNotification;
+use App\Entity\NonNegativeViralNotification;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppStudyCoordinatorNotificationFixtures extends Fixture implements DependentFixtureInterface
+/**
+ * Fixtures for Non-Negative Notifications.
+ */
+class AppNonNegativeViralNotificationFixtures extends Fixture implements DependentFixtureInterface
 {
     public function getDependencies()
     {
@@ -20,11 +23,11 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
     public function load(ObjectManager $em)
     {
         foreach ($this->getData() as $data) {
-            $n = new StudyCoordinatorNotification();
+            $n = new NonNegativeViralNotification();
             $n->setCreatedAt($data['sentAt']);
 
             $n->setToAddressesString('Study Coordinator <coordinator@no-reply>');
-            $n->setSubject('Fixture Notification');
+            $n->setSubject('Non-Negative Notification');
 
             foreach ($data['groups'] as $group) {
                 $n->addRecommendedGroup($group);
@@ -43,26 +46,26 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
     {
         return [
             [
-                'sentAt' => new \DateTimeImmutable('-4 days 10:00am'),
+                'sentAt' => new \DateTimeImmutable('-14 days 10:00am'),
                 'groups' => [
                     $this->getReference('group.Red'),
                     $this->getReference('group.Orange'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-3 days 11:00am'),
+                'sentAt' => new \DateTimeImmutable('-13 days 11:00am'),
                 'groups' => [
                     $this->getReference('group.Yellow'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-2 days 12:00pm'),
+                'sentAt' => new \DateTimeImmutable('-12 days 12:00pm'),
                 'groups' => [
                     $this->getReference('group.Green'),
                 ],
             ],
             [
-                'sentAt' => new \DateTimeImmutable('-1 days 1:00pm'),
+                'sentAt' => new \DateTimeImmutable('-11 days 1:00pm'),
                 'groups' => [
                     $this->getReference('group.Blue'),
                 ],
@@ -87,7 +90,7 @@ class AppStudyCoordinatorNotificationFixtures extends Fixture implements Depende
 
         // Example message, it's OK if this drifts out of date with real implementation
         return sprintf("
-            <p>Participant Groups have been recommended for diagnostic testing.</p>
+            <p>Non-Negative results received:</p>
 
             <p>Results published:</p>
             <ul>

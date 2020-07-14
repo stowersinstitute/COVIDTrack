@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block page_title %}Study Coordinator Notifications (Limit {{ limit }} most recent){% endblock %}
+{% block page_title %}
+    {{ notification_type_text }} Notifications (Limit {{ limit }} most recent)
+{% endblock %}
 
 {% block body %}
 <div class="row margin-bottom">

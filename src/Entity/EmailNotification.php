@@ -9,13 +9,19 @@ use App\Traits\TimestampableEntity;
 use Symfony\Component\Mime\Email;
 
 /**
- * Log of notifications sent to Study Coordinator, notifying them about
- * Participant Groups that are recommended for testing.
+ * Log of notifications sent via email. Subclass for notifications sent for
+ * different purposes.
  *
- * @ORM\Entity(repositoryClass="App\Repository\StudyCoordinatorNotificationRepository")
- * @ORM\Table(name="study_coordinator_notifications")
+ * @ORM\Entity(repositoryClass="App\Repository\EmailNotificationRepository")
+ * @ORM\Table(name="study_coordinator_notifications") TODO: CVDLS-158
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="discr", type="string")
+ * @ORM\DiscriminatorMap({
+ *     "clia" = "CliaRecommendationViralNotification",
+ *     "nonNegativeViral" = "NonNegativeViralNotification",
+ * })
  */
-class StudyCoordinatorNotification
+abstract class EmailNotification
 {
     use TimestampableEntity;
 
@@ -25,7 +31,7 @@ class StudyCoordinatorNotification
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * Participant Groups that were recommended for testing by this notification.
@@ -41,31 +47,31 @@ class StudyCoordinatorNotification
      *     }
      * )
      */
-    private $recommendedGroups;
+    protected $recommendedGroups;
 
     /**
      * @var string|null
      * @ORM\Column(name="fromAddresses", type="text", nullable=true)
      */
-    private $fromAddresses;
+    protected $fromAddresses;
 
     /**
      * @var string|null
      * @ORM\Column(name="toAddresses", type="text", nullable=true)
      */
-    private $toAddresses;
+    protected $toAddresses;
 
     /**
      * @var string|null
      * @ORM\Column(name="subject", type="text", nullable=true)
      */
-    private $subject;
+    protected $subject;
 
     /**
      * @var string|null
      * @ORM\Column(name="message", type="text", nullable=true)
      */
-    private $message;
+    protected $message;
 
     public function __construct()
     {

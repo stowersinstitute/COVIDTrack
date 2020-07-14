@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\SpecimenResultQPCR;
 use App\Form\SpecimenResultQPCRFilterForm;
 use App\Util\DateUtils;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -28,7 +29,7 @@ class SpecimenResultQPCRRepository extends EntityRepository
 
         return $this->createQueryBuilder('r')
             ->where('r.createdAt >= :since')
-            ->setParameter('since', $datetime)
+            ->setParameter('since', $datetime, Type::DATETIME)
 
             // Do not include results from "control" groups
             ->join('r.well', 'w')
@@ -38,6 +39,34 @@ class SpecimenResultQPCRRepository extends EntityRepository
 
             ->andWhere('r.conclusion IN (:conclusions)')
             ->setParameter('conclusions', $conclusionRecommendingTesting)
+
+            ->orderBy('r.createdAt')
+
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * Find Results whose conclusion was reported Non-Negative.
+     * This excludes results from Control Participant Groups.
+     *
+     * @return SpecimenResultQPCR[]
+     */
+    public function findTestingResultNonNegativeCreatedAfter(\DateTimeInterface $datetime): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.createdAt >= :since')
+            ->setParameter('since', $datetime, Type::DATETIME)
+
+            // Do not include results from "control" groups
+            ->join('r.well', 'w')
+            ->join('w.specimen', 's')
+            ->join('s.participantGroup', 'g')
+            ->andWhere('g.isControl = false')
+
+            // Only Non-Negative Results
+            ->andWhere('r.conclusion = :conclusion')
+            ->setParameter('conclusion', SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE)
 
             ->orderBy('r.createdAt')
 
