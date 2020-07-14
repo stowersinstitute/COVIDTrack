@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -21,7 +21,17 @@ class RadioButtonGroupType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['choices'] = $options['choices'];
-        $view->vars['layout'] = $options['layout'] === 'vertical' ? 'btn-group-vertical' : 'btn-group btn-group-justified';
+
+        switch ($options['layout']) {
+            case 'vertical':
+                $view->vars['layout'] = 'btn-group-vertical';
+                break;
+
+            case 'horizontal':
+            default:
+                $view->vars['layout'] = 'btn-group btn-group-justified';
+                break;
+        }
     }
 
     public function getParent()
@@ -29,4 +39,3 @@ class RadioButtonGroupType extends AbstractType
         return TextType::class;
     }
 }
-

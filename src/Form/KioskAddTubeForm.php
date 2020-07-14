@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Tube;
+use App\Form\Type\CollectionTimeType;
 use App\Form\Type\RadioButtonGroupType;
 use App\Form\Type\TextLookupType;
 use Symfony\Component\Form\AbstractType;
@@ -33,12 +34,21 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $times = [];
-        foreach (range(6, 22, 2) as $hour) {
+        foreach (range(0, 22, 2) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
-            // Array Keys: Display value
-            // Array Value: Submit value
-            $times[$date->format('g:ia')] = $date->format('H:i');
+
+            $userReadableText = $date->format('g:ia');
+            if ($userReadableText === '12:00am') {
+                $userReadableText .= ' (Midnight)';
+            }
+            if ($userReadableText === '12:00pm') {
+                $userReadableText .= ' (Noon)';
+            }
+
+            $formSubmitValue = $date->format('H:i');
+
+            $times[$userReadableText] = $formSubmitValue;
         }
 
         $builder
@@ -63,7 +73,7 @@ class KioskAddTubeForm extends AbstractType
                 'required' => true,
                 'constraints' => [new NotBlank()],
             ])
-            ->add('collectedAtTime', RadioButtonGroupType::class, [
+            ->add('collectedAtTime', CollectionTimeType::class, [
                 'choices' => $times,
                 'layout' => 'vertical',
                 'label' => 'Approximate Collection Time',

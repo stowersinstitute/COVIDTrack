@@ -39,6 +39,57 @@
     </style>
 {% endblock %}
 
+{% block collection_time_row %}
+    <div class="form-group">
+        {{- form_label(form) -}}
+        <div class="input-group">
+            <div class="btn-group-radio {{ layout }}">
+                {# Column 1 #}
+                {% for title, value in choices %}
+                    {% if 'am' in title %}
+                        <a class="btn btn-primary btn-lg not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="btn-group-radio {{ layout }}" style="margin-left:1.5em">
+                {# Column 2 #}
+                {% for title, value in choices %}
+                    {% if 'pm' in title %}
+                        <a class="btn btn-primary btn-lg not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
+        </div>
+    </div>
+
+    <script>
+        $('.btn-group-radio a').on('click', function(){
+            var sel = $(this).data('title');
+            var tog = $(this).data('toggle');
+            $('#'+tog).prop('value', sel);
+            $('#'+tog).trigger('input');
+
+            $('a[data-toggle="'+tog+'"]').not('[data-title="'+sel+'"]').removeClass('active').addClass('not-active');
+            $('a[data-toggle="'+tog+'"][data-title="'+sel+'"]').removeClass('not-active').addClass('active');
+        });
+
+        // Handle field value getting cleared
+        $('#{{ id }}').bind('input', function(e) {
+            if($(e.target).val() === '') {
+                $('a[data-toggle="{{ id }}"]').removeClass('active').addClass('not-active');
+            }
+        });
+    </script>
+
+    <style>
+        .btn-group-radio .not-active i { display: none; }
+        .btn-group-radio .active i { display: inline-block; }
+    </style>
+{% endblock %}
+
 {% block text_lookup_row %}
     <div class="form-group">
         {# Field Label #}
