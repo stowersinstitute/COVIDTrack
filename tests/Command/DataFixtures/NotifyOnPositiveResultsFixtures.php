@@ -3,7 +3,7 @@
 namespace App\Tests\Command\DataFixtures;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
-use App\Command\Report\NotifyOnPositiveResultCommand;
+use App\Command\Report\BaseResultsNotificationCommand;
 use App\Entity\AppUser;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
@@ -77,7 +77,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
             $user->setEmail($data['email']);
 
             if ($data['notify'] === true) {
-                $user->addRole(NotifyOnPositiveResultCommand::NOTIFY_USERS_WITH_ROLE_OLD);
+                $user->addRole(BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD);
             }
 
             $em->persist($user);
