@@ -23,7 +23,7 @@ final class Version118 extends AbstractMigration
         $this->addSql('ALTER TABLE study_coordinator_notifications ADD discr VARCHAR(255) DEFAULT "clia"');
 
         // Update column `discr` to not allow NULL values
-        $this->addSql('ALTER TABLE study_coordinator_notifications ALTER discr discr VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE study_coordinator_notifications MODIFY discr VARCHAR(255) NOT NULL');
     }
 
     public function down(Schema $schema) : void
