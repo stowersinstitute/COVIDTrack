@@ -77,7 +77,7 @@ class NotifyOnPositiveResultsFixtures extends Fixture
             $user->setEmail($data['email']);
 
             if ($data['notify'] === true) {
-                $user->addRole(NotifyOnPositiveResultCommand::NOTIFY_USERS_WITH_ROLE);
+                $user->addRole(NotifyOnPositiveResultCommand::NOTIFY_USERS_WITH_ROLE_OLD);
             }
 
             $em->persist($user);

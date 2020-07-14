@@ -22,7 +22,7 @@ abstract class BaseResultsNotificationCommand extends Command
     /**
      * Users who explicitly have this role will be notified.
      */
-    const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
+    const NOTIFY_USERS_WITH_ROLE_OLD = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
 
     /**
      * Date format for printing results in email
@@ -154,7 +154,7 @@ abstract class BaseResultsNotificationCommand extends Command
             }
 
             // Only users assigned a permission on their Edit User page
-            return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE);
+            return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE_OLD);
         });
 
         // Create Address objects accepted by Symfony Mailer
