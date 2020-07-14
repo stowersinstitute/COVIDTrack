@@ -34,6 +34,7 @@ class ReportController extends AbstractController
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
@@ -66,6 +67,7 @@ class ReportController extends AbstractController
             $this->denyAccessUnlessGranted([
                 // Users who receive the notification can check it for themselves
                 BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
                 // Users who can edit results
                 'ROLE_RESULTS_EDIT',
@@ -114,6 +116,7 @@ class ReportController extends AbstractController
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
             'ROLE_REPORTS_GROUP_VIEW',
