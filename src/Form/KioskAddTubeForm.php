@@ -9,13 +9,21 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class KioskAddTubeForm extends AbstractType
 {
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefault('numDaysInPastForCollectionDate', 3);
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $days = [];
-        foreach (range(3, 0) as $daysAgo) {
+        foreach (range($options['numDaysInPastForCollectionDate'], 0) as $daysAgo) {
             $date = new \DateTime(sprintf('-%d days', $daysAgo));
             $prnDate = $date->format('M d');
             if ($daysAgo === 0) {
