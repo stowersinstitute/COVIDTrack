@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Tube;
+use App\Form\Type\CollectionTimeType;
 use App\Form\Type\RadioButtonGroupType;
 use App\Form\Type\TextLookupType;
 use Symfony\Component\Form\AbstractType;
@@ -72,7 +73,7 @@ class KioskAddTubeForm extends AbstractType
                 'required' => true,
                 'constraints' => [new NotBlank()],
             ])
-            ->add('collectedAtTime', RadioButtonGroupType::class, [
+            ->add('collectedAtTime', CollectionTimeType::class, [
                 'choices' => $times,
                 'layout' => 'vertical',
                 'label' => 'Approximate Collection Time',
