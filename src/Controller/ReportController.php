@@ -44,7 +44,7 @@ class ReportController extends AbstractController
             ->getRepository(CliaRecommendationViralNotification::class)
             ->findMostRecent($limit);
 
-        return $this->render('reports/coordinator-notifications/index.html.twig', [
+        return $this->render('reports/notifications/index.html.twig', [
             'notification_type_text' => 'CLIA Recommendation',
             'logs' => $logs,
             'limit' => $limit,
@@ -124,7 +124,7 @@ class ReportController extends AbstractController
             ->getRepository(NonNegativeViralNotification::class)
             ->findMostRecent($limit);
 
-        return $this->render('reports/coordinator-notifications/index.html.twig', [
+        return $this->render('reports/notifications/index.html.twig', [
             'notification_type_text' => 'Non-Negative',
             'logs' => $logs,
             'limit' => $limit,
