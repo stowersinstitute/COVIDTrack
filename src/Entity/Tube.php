@@ -359,10 +359,7 @@ class Tube
             throw new \RuntimeException('Tube must be checked in at a Kiosk before adding to a Well Plate');
         }
 
-        $well = new SpecimenWell($plate, $this->specimen, $position);
-        $this->specimen->addWell($well);
-
-        return $well;
+        return new SpecimenWell($plate, $this->specimen, $position);
     }
 
     public function getKitType(): ?string
