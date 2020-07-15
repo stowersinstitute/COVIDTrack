@@ -159,8 +159,13 @@ abstract class BaseResultsNotificationCommand extends Command
                 return false;
             }
 
-            // Only users assigned a permission on their Edit User page
-            return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE_OLD);
+            // Users with OLD assigned permission TODO: Remove via CVDLS-158
+            if ($u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE_OLD)) {
+                return true;
+            }
+
+            // Users assigned a permission on their Edit User page
+            return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE);
         });
 
         // Create Address objects accepted by Symfony Mailer
