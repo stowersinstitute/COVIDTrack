@@ -35,3 +35,12 @@ body {
     height: 0;
     padding: 0;
 }
+
+.collection-date-widget, .collection-time-widget {
+    text-align:center;
+}
+
+.collection-date-widget .control-label,
+.collection-time-widget .control-label {
+    display:block
+}
