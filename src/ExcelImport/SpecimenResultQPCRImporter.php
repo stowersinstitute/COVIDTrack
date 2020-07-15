@@ -300,7 +300,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             }
 
             $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" currently in Well %s. Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
+                sprintf('Specimen "%s" currently in Well "%s". Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
                 $rowNumber,
                 $this->columnMap['position']
             );
