@@ -3,15 +3,13 @@
 {% block radio_button_group_row %}
     <div class="form-group">
         {{- form_label(form) -}}
-        <div class="input-group">
-            <div class="btn-group-radio btn-group-lg {{ layout }}">
-                {% for title, value in choices %}
-                    <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
-                        <i class="fa fa-fw fa-check"></i>{{ title }}</a>
-                {% endfor %}
-            </div>
-            {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
+        <div class="btn-group-radio btn-group-lg {{ layout }}">
+            {% for title, value in choices %}
+                <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                    <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+            {% endfor %}
         </div>
+        {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
     </div>
 
     <script>
@@ -40,33 +38,31 @@
 {% endblock %}
 
 {% block collection_time_row %}
-    <div class="form-group row">
+    <div class="row row-no-gutters">
         {{- form_label(form) -}}
-        <div class="input-group">
-            <div class="col-xs-6 text-right">
-                <div class="btn-group-radio {{ layout }}">
-                    {# Column 1 #}
-                    {% for title, value in choices %}
-                        {% if 'am' in title %}
-                            <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
-                                <i class="fa fa-fw fa-check"></i>{{ title }}</a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+        <div class="col-xs-6 text-right">
+            <div class="btn-group-radio {{ layout }}">
+                {# Column 1 #}
+                {% for title, value in choices %}
+                    {% if 'am' in title %}
+                        <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                    {% endif %}
+                {% endfor %}
             </div>
-            <div class="col-xs-6">
-                <div class="btn-group-radio {{ layout }}" style="margin-left:1.5em">
-                    {# Column 2 #}
-                    {% for title, value in choices %}
-                        {% if 'pm' in title %}
-                            <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
-                                <i class="fa fa-fw fa-check"></i>{{ title }}</a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
         </div>
+        <div class="col-xs-6 text-left">
+            <div class="btn-group-radio {{ layout }}">
+                {# Column 2 #}
+                {% for title, value in choices %}
+                    {% if 'pm' in title %}
+                        <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {{- form_widget(form, {'attr': {'class': 'btn-radio-group-raw-field'}}) -}}
     </div>
 
     <script>
