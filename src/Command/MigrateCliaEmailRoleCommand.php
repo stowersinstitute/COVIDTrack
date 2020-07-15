@@ -36,6 +36,8 @@ class MigrateCliaEmailRoleCommand extends BaseAppCommand
             $user->removeRole($old);
         }
 
+        $this->em->flush();
+
         return 0;
     }
 
