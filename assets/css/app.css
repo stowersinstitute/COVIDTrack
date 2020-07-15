@@ -44,3 +44,7 @@ body {
 .collection-time-widget .control-label {
     display:block
 }
+
+#tubeContinueButtons {
+    margin-top: 1.5em;
+}
