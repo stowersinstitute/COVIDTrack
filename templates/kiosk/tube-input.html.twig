@@ -215,7 +215,7 @@
                 let addHours = maxFutureTime.getHours()+1; // +1 hour buffer
                 maxFutureTime.setHours(addHours);
 
-                let isSelectedFutureTime = selected.getTime() > maxFutureTime.getTime();
+                let isSelectedFutureTime = selected > maxFutureTime;
                 if (isSelectedFutureTime) {
                     showTubeContinueButtons(false);
                     $("#date-time-error").toggleClass('hidden', false);
