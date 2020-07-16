@@ -573,6 +573,8 @@ class Specimen
     }
 
     /**
+     * Get Barcode of all Well Plates where this Specimen is stored.
+     *
      * @return string[]
      */
     public function getRnaWellPlateBarcodes(): array
@@ -585,7 +587,7 @@ class Specimen
             }
         }
 
-        return $barcodes;
+        return array_unique($barcodes);
     }
 
     /**

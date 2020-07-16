@@ -160,6 +160,32 @@ class SpecimenTest extends TestCase
         $this->assertCount(0, $specimen->getWellsWithoutPositionOnPlate($plate));
     }
 
+    public function testGetRnaWellPlateBarcodes()
+    {
+        // No barcodes at first
+        $specimen = Specimen::buildExample('S100');
+        $this->assertCount(0, $specimen->getRnaWellPlateBarcodes());
+
+        // Add to first plate
+        $plate1 = WellPlate::buildExample('FIRST');
+        $well1 = new SpecimenWell($plate1, $specimen, 'A1');
+        $this->assertCount(1, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+
+        // Add to second plate
+        $plate2 = WellPlate::buildExample('SECOND');
+        $well2 = new SpecimenWell($plate2, $specimen, 'B2');
+        $this->assertCount(2, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
+
+        // Specimen existing in multiple wells only returns 1 copy of barcode
+        $well3 = new SpecimenWell($plate1, $specimen, 'C3');
+        $this->assertCount(2, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
+    }
+
     public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExample('C100');
