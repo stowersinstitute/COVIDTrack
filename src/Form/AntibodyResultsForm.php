@@ -52,7 +52,7 @@ class AntibodyResultsForm extends AbstractType
             ])
             ->add('position', TextType::class, [
                 'label' => 'Well Position',
-                'required' => false,
+                'required' => true,
                 'disabled' => $isEditing,
                 'attr' => [
                     'placeholder' => 'For example A04, G08, H12, etc',
