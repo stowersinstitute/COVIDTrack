@@ -89,12 +89,12 @@ class SpecimenResultQPCRController extends AbstractController
             if (count($existingEmptyWells) > 0) {
                 // Re-use the existing Well without a position
                 $well = array_shift($existingEmptyWells);
-                // And assign it to a position
-                $well->setPositionAlphanumeric($position);
             } else {
                 // Create new
-                $well = new SpecimenWell($wellPlate, $specimen, $position);
+                $well = new SpecimenWell($wellPlate, $specimen);
             }
+
+            $well->setPositionAlphanumeric($position);
 
             $result = new SpecimenResultQPCR($well, $conclusion);
 
