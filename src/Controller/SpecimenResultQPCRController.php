@@ -23,7 +23,7 @@ class SpecimenResultQPCRController extends AbstractController
     /**
      * List all Results
      *
-     * @Route(path="/", methods={"GET"}, name="app_results_qpcr_list")
+     * @Route(path="/", methods={"GET"}, name="results_qpcr_list")
      */
     public function list(Request $request)
     {
@@ -54,7 +54,7 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * - accessionId (string) Specimen.accessionId to create results for
      *
-     * @Route(path="/new", methods={"GET", "POST"}, name="app_results_qpcr_new")
+     * @Route(path="/new", methods={"GET", "POST"}, name="results_qpcr_new")
      */
     public function new(Request $request, EntityManagerInterface $em) : Response
     {
@@ -94,7 +94,7 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('app_results_qpcr_list');
+            return $this->redirectToRoute('results_qpcr_list');
         }
 
         return $this->render('results/qpcr/form.html.twig', [
@@ -110,7 +110,7 @@ class SpecimenResultQPCRController extends AbstractController
      *
      * - accessionId (string) Redirect to this Specimen's page after edit is complete
      *
-     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_qpcr_edit")
+     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="results_qpcr_edit")
      */
     public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
     {
@@ -144,7 +144,7 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('app_results_qpcr_list');
+            return $this->redirectToRoute('results_qpcr_list');
         }
 
         return $this->render('results/qpcr/form.html.twig', [
