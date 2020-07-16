@@ -52,7 +52,7 @@ class QPCRResultsForm extends AbstractType
             ])
             ->add('position', TextType::class, [
                 'label' => 'Well Position',
-                'required' => false,
+                'required' => true,
                 'disabled' => $isEditing,
                 'attr' => [
                     'placeholder' => 'For example A4, G8, H12, etc',
