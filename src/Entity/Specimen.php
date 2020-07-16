@@ -531,6 +531,19 @@ class Specimen
     }
 
     /**
+     * Get SpecimenWell(s) where this Specimen is stored in the well, but its
+     * current position is empty and not yet known.
+     *
+     * @return SpecimenWell[]
+     */
+    public function getWellsWithoutPositionOnPlate(WellPlate $wellPlate): array
+    {
+        return array_filter($this->getWellsOnPlate($wellPlate), function(SpecimenWell $well) {
+            return null === $well->getPositionAlphanumeric();
+        });
+    }
+
+    /**
      * Get all Well Plates where this Specimen is contained.
      *
      * @return WellPlate[]

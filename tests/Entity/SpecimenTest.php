@@ -134,6 +134,32 @@ class SpecimenTest extends TestCase
         $this->assertNull($specimen->getWellAtPosition($plate1, 'G1'));
     }
 
+    public function testGetWellsWithoutPositionOnPlate()
+    {
+        // No empty wells at first
+        $specimen = Specimen::buildExample('S100');
+        $plate = WellPlate::buildExample();
+        $this->assertCount(0, $specimen->getWellsWithoutPositionOnPlate($plate));
+
+        $well1 = new SpecimenWell($plate, $specimen);
+        $this->assertCount(1, $specimen->getWellsWithoutPositionOnPlate($plate));
+        $well2 = new SpecimenWell($plate, $specimen);
+        $this->assertCount(2, $specimen->getWellsWithoutPositionOnPlate($plate));
+
+        // Add positions
+        $well1->setPositionAlphanumeric('A1');
+        $this->assertCount(1, $specimen->getWellsWithoutPositionOnPlate($plate));
+        $well2->setPositionAlphanumeric('A2');
+        $this->assertCount(0, $specimen->getWellsWithoutPositionOnPlate($plate));
+
+        // Add a different Specimen to the plate, and without a position
+        $otherSpecimen = Specimen::buildExample('S101');
+        new SpecimenWell($plate, $otherSpecimen);
+
+        // Verify first Specimen shows no empty wells
+        $this->assertCount(0, $specimen->getWellsWithoutPositionOnPlate($plate));
+    }
+
     public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExample('C100');
