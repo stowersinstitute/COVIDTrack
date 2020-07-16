@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
+use App\Entity\WellPlate;
 use App\Form\AntibodyResultsForm;
 use App\Form\SpecimenResultAntibodyFilterForm;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,16 +75,34 @@ class SpecimenResultAntibodyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $formData = $form->getData();
 
-            $specimen = $data['specimen'];
-            $wellPlate = $data['wellPlate'];
-            $position = $data['position'];
-            $well = new SpecimenWell($wellPlate, $specimen, $position);
-            $well->setWellIdentifier($data['wellIdentifier']);
+            /** @var Specimen $specimen */
+            $specimen = $formData['specimen'];
+            /** @var WellPlate $wellPlate */
+            $wellPlate = $formData['wellPlate'];
+            $position = $formData['position'];
+            $wellIdentifier = $formData['wellIdentifier'];
 
-            $conclusion = $data['conclusion'];
-            $signal = $data['signal'];
+            // Must be on selected Well Plate
+            if (!$specimen->isOnWellPlate($wellPlate)) {
+                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in a Well on Well Plate "%s"', $specimen->getAccessionId(), $wellPlate->getBarcode()));
+            }
+
+            // Well must be at given Position
+            $well = $specimen->getWellAtPosition($wellPlate, $position);
+            if (!$well) {
+                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in Well "%s" on Well Plate "%s"', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $wellPlate->getBarcode()));
+            }
+
+            // Well must already have given Well Identifier
+            if ($wellIdentifier !== $well->getWellIdentifier()) {
+                throw new \InvalidArgumentException(sprintf('Given Well Identifier "%s" does not match Well Identifier "%s" on Well "%s"', $wellIdentifier, $well->getWellIdentifier(), $well->getPositionAlphanumeric()));
+            }
+
+            // Add Result
+            $conclusion = $formData['conclusion'];
+            $signal = $formData['signal'];
             $result = new SpecimenResultAntibody($well, $conclusion, $signal);
 
             $em->persist($result);
