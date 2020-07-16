@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\WellPlate;
 use App\Form\WellPlateForm;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +24,9 @@ class WellPlateController extends AbstractController
     {
         $this->mustHaveViewPermissions();
 
-        $wellPlates = $this->getDoctrine()->getRepository(WellPlate::class)->findAll();
+        $wellPlates = $this->getDoctrine()
+            ->getRepository(WellPlate::class)
+            ->findForListScreen();
 
         return $this->render('well-plate/list.html.twig', [
             'wellPlates' => $wellPlates,
