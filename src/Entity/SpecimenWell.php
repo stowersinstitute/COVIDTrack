@@ -145,7 +145,7 @@ class SpecimenWell
         return $this->wellPlate;
     }
 
-    public function getWellPlateBarcode(): ?string
+    public function getWellPlateBarcode(): string
     {
         return $this->wellPlate->getBarcode();
     }
