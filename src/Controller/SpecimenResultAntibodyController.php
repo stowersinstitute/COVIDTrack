@@ -86,10 +86,6 @@ class SpecimenResultAntibodyController extends AbstractController
     /**
      * Edit a single Result.
      *
-     * Optional query string params:
-     *
-     * - accessionId (string) Redirect to this Specimen's page after edit is complete
-     *
      * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="results_antibody_edit")
      */
     public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
@@ -108,15 +104,9 @@ class SpecimenResultAntibodyController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            // When given Specimen accessionId query string param,
-            // redirect there after edit complete
-            if ($request->query->has('accessionId')) {
-                return $this->redirectToRoute('app_specimen_view', [
-                    'accessionId' => $request->query->get('accessionId'),
-                ]);
-            }
-
-            return $this->redirectToRoute('results_antibody_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('results/antibody/form.html.twig', [
