@@ -2,13 +2,20 @@
 
 {% block page_title %}
     {% if new %}
-        New Viral Result &ndash; {{ specimenAccessionId }}
+        New Viral Result &ndash; {{ specimen.accessionId }}
     {% else %}
-        Edit Viral Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}
+        Edit Viral Result &ndash; {{ specimen.accessionId }} on Plate {{ result.wellPlateBarcode }}
     {% endif %}
 {% endblock %}
 
 {% block body %}
+{% if specimen.wells|length == 0 %}
+    <div class="callout callout-danger">
+        <h4>Cannot Create Result</h4>
+        <p>Specimen is not yet in a Well Position on a Well Plate.</p>
+    </div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-6">
         <div class="box box-primary">

@@ -62,7 +62,9 @@ class SpecimenResultQPCRController extends AbstractController
 
         $data = [];
 
-        $form = $this->createForm(QPCRResultsForm::class, $data);
+        $form = $this->createForm(QPCRResultsForm::class, $data, [
+            'specimen' => $specimen,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -97,7 +99,7 @@ class SpecimenResultQPCRController extends AbstractController
         return $this->render('results/qpcr/form.html.twig', [
             'new' => true,
             'form'=> $form->createView(),
-            'specimenAccessionId' => $specimen->getAccessionId(),
+            'specimen' => $specimen,
         ]);
     }
 
