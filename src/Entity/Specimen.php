@@ -531,7 +531,7 @@ class Specimen
     }
 
     /**
-     * Get SpecimenWell(s) where this Specimen is stored in the well, but there
+     * Get each SpecimenWell where this Specimen is stored in the well, but there
      * is no Viral Result for that Well.
      *
      * @return SpecimenWell[]
@@ -544,7 +544,7 @@ class Specimen
     }
 
     /**
-     * Get SpecimenWell(s) where this Specimen is stored in the well, but there
+     * Get each SpecimenWell where this Specimen is stored in the well, but there
      * is no Antibody Result for that Well.
      *
      * @return SpecimenWell[]
