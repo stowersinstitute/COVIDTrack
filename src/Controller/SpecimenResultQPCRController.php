@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
 use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\QPCRResultsForm;
@@ -74,17 +73,16 @@ class SpecimenResultQPCRController extends AbstractController
             $position = $formData['position'];
             $conclusion = $formData['conclusion'];
 
-            // Check if Specimen already on selected Well Plate, but without a Position
-            $existingEmptyWells = $specimen->getWellsWithoutPositionOnPlate($wellPlate);
-            if (count($existingEmptyWells) > 0) {
-                // Re-use the existing Well without a position
-                $well = array_shift($existingEmptyWells);
-            } else {
-                // Create new
-                $well = new SpecimenWell($wellPlate, $specimen);
+            // Must be on selected Well Plate
+            if (!$specimen->isOnWellPlate($wellPlate)) {
+                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in a Well on Well Plate "%s"', $specimen->getAccessionId(), $wellPlate->getBarcode()));
             }
 
-            $well->setPositionAlphanumeric($position);
+            // Well must be at given Position
+            $well = $specimen->getWellAtPosition($wellPlate, $position);
+            if (!$well) {
+                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in Well "%s" on Well Plate "%s"', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $wellPlate->getBarcode()));
+            }
 
             $result = new SpecimenResultQPCR($well, $conclusion);
 
