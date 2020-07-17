@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
-use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;

@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\SpecimenWell;
-use App\Entity\WellPlate;
 use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\QPCRResultsForm;
 use Doctrine\ORM\EntityManagerInterface;
