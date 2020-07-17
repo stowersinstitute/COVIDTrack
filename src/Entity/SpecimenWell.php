@@ -97,6 +97,11 @@ class SpecimenWell
         $specimen->addWell($this);
     }
 
+    public function __toString()
+    {
+        return $this->getWellPlatePositionDisplayString();
+    }
+
     /**
      * Will generate a fake WellPlate if not given.
      * $position is optional.
