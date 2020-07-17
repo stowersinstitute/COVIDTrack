@@ -59,7 +59,7 @@
                     Viral Results
 
                     {% if userCanEditResults %}
-                    <a href="{{ path('results_qpcr_new', {accessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
+                    <a href="{{ path('results_qpcr_new', {specimenAccessionId: specimen.accessionId}) }}" class="btn btn-success btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-plus"></i> New</a>
                     {% endif %}
                 </h3>
             </div>

@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Viral Result {% else %} Edit Viral Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}{% endif %}
+    {% if new %}
+        New Viral Result &ndash; {{ specimenAccessionId }}
+    {% else %}
+        Edit Viral Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}
+    {% endif %}
 {% endblock %}
 
 {% block body %}
