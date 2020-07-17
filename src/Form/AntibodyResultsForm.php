@@ -24,20 +24,6 @@ class AntibodyResultsForm extends AbstractType
         $isEditing = $options['edit'];
 
         $builder
-            ->add('specimen', EntityType::class, [
-                'label' => 'Specimen Accession ID',
-                'class' => Specimen::class,
-                'placeholder' => '- Select -',
-                'required' => true,
-                'disabled' => $isEditing,
-                // Sort by Accession ID
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('s')
-                        ->where('s.type = :type')
-                        ->setParameter('type', Specimen::TYPE_BLOOD)
-                        ->orderBy('s.accessionId', 'ASC');
-                },
-            ])
             ->add('wellPlate', EntityType::class, [
                 'label' => 'Well Plate Barcode',
                 'class' => WellPlate::class,

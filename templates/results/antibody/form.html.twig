@@ -1,7 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Antibody Result {% else %} Edit Antibody Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}{% endif %}
+    {% if new %}
+        New Antibody Result &ndash; {{ specimenAccessionId }}
+    {% else %}
+        Edit Antibody Result &ndash; {{ specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}
+    {% endif %}
 {% endblock %}
 
 {% block body %}
