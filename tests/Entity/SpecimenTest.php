@@ -180,6 +180,26 @@ class SpecimenTest extends TestCase
         $this->assertCount(1, $specimen->getWellsWithoutViralResult());
     }
 
+    public function testGetWellsWithoutAntibodyResult()
+    {
+        $specimen = Specimen::buildExample('S100');
+        $plate = WellPlate::buildExample();
+        $this->assertCount(0, $specimen->getWellsWithoutAntibodyResult());
+
+        $well1 = new SpecimenWell($plate, $specimen);
+        $this->assertCount(1, $specimen->getWellsWithoutAntibodyResult());
+        $well2 = new SpecimenWell($plate, $specimen, 'A2');
+        $this->assertCount(2, $specimen->getWellsWithoutAntibodyResult());
+        $well3 = new SpecimenWell($plate, $specimen, 'A3');
+        $this->assertCount(3, $specimen->getWellsWithoutAntibodyResult());
+
+        // Add results
+        new SpecimenResultAntibody($well2, SpecimenResultAntibody::CONCLUSION_NEGATIVE, '2');
+        $this->assertCount(2, $specimen->getWellsWithoutAntibodyResult());
+        new SpecimenResultAntibody($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE, '1');
+        $this->assertCount(1, $specimen->getWellsWithoutAntibodyResult());
+    }
+
     public function testGetRnaWellPlateBarcodes()
     {
         // No barcodes at first

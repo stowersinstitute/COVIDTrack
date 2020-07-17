@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
-use App\Entity\SpecimenWell;
-use App\Entity\WellPlate;
 use App\Form\AntibodyResultsForm;
 use App\Form\SpecimenResultAntibodyFilterForm;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,7 +49,7 @@ class SpecimenResultAntibodyController extends AbstractController
     /**
      * Create a single new Result
      *
-     * - accessionId (string) Specimen.accessionId to create results for
+     * - specimenAccessionId (string) Specimen.accessionId to create results for
      *
      * @Route(path="/new/{specimenAccessionId}", methods={"GET", "POST"}, name="app_results_antibody_new")
      */
@@ -61,56 +59,27 @@ class SpecimenResultAntibodyController extends AbstractController
 
         $specimen = $this->mustFindSpecimen($specimenAccessionId);
 
-        $data = [];
-
-        $form = $this->createForm(AntibodyResultsForm::class, $data);
+        $form = $this->createForm(AntibodyResultsForm::class, null, [
+            'specimen' => $specimen,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            /** @var WellPlate $wellPlate */
-            $wellPlate = $formData['wellPlate'];
-            $position = $formData['position'];
-            $wellIdentifier = $formData['wellIdentifier'];
-
-            // Must be on selected Well Plate
-            if (!$specimen->isOnWellPlate($wellPlate)) {
-                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in a Well on Well Plate "%s"', $specimen->getAccessionId(), $wellPlate->getBarcode()));
-            }
-
-            // Well must be at given Position
-            $well = $specimen->getWellAtPosition($wellPlate, $position);
-            if (!$well) {
-                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in Well "%s" on Well Plate "%s"', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $wellPlate->getBarcode()));
-            }
-
-            // Well must already have given Well Identifier
-            if ($wellIdentifier !== $well->getWellIdentifier()) {
-                throw new \InvalidArgumentException(sprintf('Given Well Identifier "%s" does not match Well Identifier "%s" on Well "%s"', $wellIdentifier, $well->getWellIdentifier(), $well->getPositionAlphanumeric()));
-            }
-
-            // Add Result
-            $conclusion = $formData['conclusion'];
-            $signal = $formData['signal'];
-            $result = new SpecimenResultAntibody($well, $conclusion, $signal);
+            /** @var SpecimenResultAntibody $result */
+            $result = $form->getData();
 
             $em->persist($result);
             $em->flush();
 
-            if ($request->query->has('accessionId')) {
-                return $this->redirectToRoute('app_specimen_view', [
-                    'accessionId' => $request->query->get('accessionId'),
-                ]);
-            }
-
-            return $this->redirectToRoute('app_results_antibody_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('results/antibody/form.html.twig', [
             'new' => true,
             'form'=> $form->createView(),
-            'specimenAccessionId' => $specimen->getAccessionId(),
+            'specimen' => $specimen,
         ]);
     }
 
@@ -128,27 +97,15 @@ class SpecimenResultAntibodyController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = $this->findResult($id);
-        $data = [
-            'specimen' => $result->getSpecimen(),
-            'wellPlate' => $result->getWellPlate(),
-            'position' => $result->getWellPosition(),
-            'wellIdentifier' => $result->getWellIdentifier(),
-            'conclusion' => $result->getConclusion(),
-            'signal' => $result->getSignal(),
-        ];
 
-        $form = $this->createForm(AntibodyResultsForm::class, $data, [
-            'edit' => true,
+        $specimen = $result->getSpecimen();
+        $form = $this->createForm(AntibodyResultsForm::class, $result, [
+            'editResult' => $result,
+            'specimen' => $specimen,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            $result->setConclusion($formData['conclusion']);
-            $result->setSignal($formData['signal']);
-            $result->setWellIdentifier($formData['wellIdentifier']);
-
             $em->flush();
 
             // When given Specimen accessionId query string param,
@@ -166,6 +123,7 @@ class SpecimenResultAntibodyController extends AbstractController
             'new' => false,
             'form' => $form->createView(),
             'result' => $result,
+            'specimen' => $specimen,
         ]);
     }
 

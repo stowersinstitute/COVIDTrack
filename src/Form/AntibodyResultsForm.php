@@ -4,14 +4,14 @@ namespace App\Form;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
-use App\Entity\WellPlate;
-use Doctrine\ORM\EntityRepository;
+use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -21,35 +21,19 @@ class AntibodyResultsForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $isEditing = $options['edit'];
+        /** @var Specimen $specimen */
+        $specimen = $options['specimen'];
+        /** @var SpecimenResultAntibody $editResult */
+        $editResult = $options['editResult'];
 
         $builder
-            ->add('wellPlate', EntityType::class, [
-                'label' => 'Well Plate Barcode',
-                'class' => WellPlate::class,
+            ->add('well', EntityType::class, [
+                'label' => 'Wells Without Viral Results',
+                'class' => SpecimenWell::class,
                 'placeholder' => '- Select -',
                 'required' => true,
-                'disabled' => $isEditing,
-                // Sort by Barcode
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->orderBy('p.barcode', 'ASC');
-                },
-            ])
-            ->add('position', TextType::class, [
-                'label' => 'Well Position',
-                'required' => true,
-                'disabled' => $isEditing,
-                'attr' => [
-                    'placeholder' => 'For example A04, G08, H12, etc',
-                ],
-            ])
-            ->add('wellIdentifier', TextType::class, [
-                'label' => 'Well ID',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'For example its Biobank Tube ID',
-                ],
+                'disabled' => (bool)$editResult,
+                'choices' => $editResult ? [$editResult->getWell()] : $specimen->getWellsWithoutAntibodyResult(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
@@ -70,8 +54,22 @@ class AntibodyResultsForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $dataClass = SpecimenResultAntibody::class;
         $resolver->setDefaults([
-            'edit' => false,
+            'data_class' => $dataClass,
+            'empty_data' => function(FormInterface $form) {
+                $well = $form->get('well')->getData();
+                $conclusion = $form->get('conclusion')->getData();
+                $signal = $form->get('signal')->getData();
+
+                return new SpecimenResultAntibody($well, $conclusion, $signal);
+            }
         ]);
+
+        $resolver->setRequired('specimen');
+        $resolver->addAllowedTypes('specimen', Specimen::class);
+
+        $resolver->setDefault('editResult', null);
+        $resolver->addAllowedTypes('editResult', [$dataClass, 'null']);
     }
 }
