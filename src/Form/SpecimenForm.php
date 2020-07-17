@@ -4,8 +4,8 @@ namespace App\Form;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
-use App\Entity\ParticipantGroupRepository;
 use App\Entity\Specimen;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,13 +16,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SpecimenForm extends AbstractType
 {
+    /** @var EntityManagerInterface */
+    private $em;
+
     /**
      * @var SpecimenAccessionIdGenerator
      */
     private $specimenIdGen;
 
-    public function __construct(SpecimenAccessionIdGenerator $specimenIdGen)
+    public function __construct(EntityManagerInterface $em, SpecimenAccessionIdGenerator $specimenIdGen)
     {
+        $this->em = $em;
         $this->specimenIdGen = $specimenIdGen;
     }
 
@@ -33,10 +37,8 @@ class SpecimenForm extends AbstractType
                 'label' => 'Participant Group',
                 'class' => ParticipantGroup::class,
                 'required' => true,
-                'placeholder' => '',
-                'query_builder' => function (ParticipantGroupRepository $repo) {
-                    return $repo->findActive();
-                },
+                'placeholder' => '- Select -',
+                'choices' => $this->em->getRepository(ParticipantGroup::class)->findActive(),
             ])
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
