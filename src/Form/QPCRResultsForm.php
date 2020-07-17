@@ -9,26 +9,27 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QPCRResultsForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $isEditing = $options['edit'];
         /** @var Specimen $specimen */
         $specimen = $options['specimen'];
+        /** @var SpecimenResultQPCR $editResult */
+        $editResult = $options['editResult'];
 
         $builder
             ->add('well', EntityType::class, [
-                'label' => 'Well For Results',
+                'label' => 'Wells Without Viral Results',
                 'class' => SpecimenWell::class,
                 'placeholder' => '- Select -',
                 'required' => true,
-                'disabled' => $isEditing,
-                'choices' => $specimen->getWells(),
+                'disabled' => (bool)$editResult,
+                'choices' => $editResult ? [$editResult->getWell()] : $specimen->getWellsWithoutViralResult(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
@@ -44,11 +45,21 @@ class QPCRResultsForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $dataClass = SpecimenResultQPCR::class;
         $resolver->setDefaults([
-            'edit' => false,
+            'data_class' => $dataClass,
+            'empty_data' => function(FormInterface $form) {
+                $well = $form->get('well')->getData();
+                $conclusion = $form->get('conclusion')->getData();
+
+                return new SpecimenResultQPCR($well, $conclusion);
+            }
         ]);
 
         $resolver->setRequired('specimen');
         $resolver->addAllowedTypes('specimen', Specimen::class);
+
+        $resolver->setDefault('editResult', null);
+        $resolver->addAllowedTypes('editResult', [$dataClass, 'null']);
     }
 }

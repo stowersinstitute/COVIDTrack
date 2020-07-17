@@ -544,6 +544,19 @@ class Specimen
     }
 
     /**
+     * Get SpecimenWell(s) where this Specimen is stored in the well, but there
+     * is no Viral Result for that Well.
+     *
+     * @return SpecimenWell[]
+     */
+    public function getWellsWithoutViralResult(): array
+    {
+        return array_filter($this->getWells(), function(SpecimenWell $well) {
+            return !$well->getResultQPCR();
+        });
+    }
+
+    /**
      * Get all Well Plates where this Specimen is contained.
      *
      * @return WellPlate[]

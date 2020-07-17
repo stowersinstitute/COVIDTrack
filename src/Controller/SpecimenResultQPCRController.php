@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
 use App\Form\SpecimenResultQPCRFilterForm;
 use App\Form\QPCRResultsForm;
@@ -60,33 +61,14 @@ class SpecimenResultQPCRController extends AbstractController
 
         $specimen = $this->mustFindSpecimen($specimenAccessionId);
 
-        $data = [];
-
-        $form = $this->createForm(QPCRResultsForm::class, $data, [
+        $form = $this->createForm(QPCRResultsForm::class, null, [
             'specimen' => $specimen,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            /** @var WellPlate $wellPlate */
-            $wellPlate = $formData['wellPlate'];
-            $position = $formData['position'];
-            $conclusion = $formData['conclusion'];
-
-            // Must be on selected Well Plate
-            if (!$specimen->isOnWellPlate($wellPlate)) {
-                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in a Well on Well Plate "%s"', $specimen->getAccessionId(), $wellPlate->getBarcode()));
-            }
-
-            // Well must be at given Position
-            $well = $specimen->getWellAtPosition($wellPlate, $position);
-            if (!$well) {
-                throw new \InvalidArgumentException(sprintf('Specimen "%s" is not in Well "%s" on Well Plate "%s"', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $wellPlate->getBarcode()));
-            }
-
-            $result = new SpecimenResultQPCR($well, $conclusion);
+            /** @var SpecimenResultQPCR $result */
+            $result = $form->getData();
 
             $em->persist($result);
             $em->flush();
@@ -117,23 +99,15 @@ class SpecimenResultQPCRController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = $this->findResult($id);
-        $data = [
-            'specimen' => $result->getSpecimen(),
-            'wellPlate' => $result->getWellPlate(),
-            'position' => $result->getWellPosition(),
-            'conclusion' => $result->getConclusion(),
-        ];
 
-        $form = $this->createForm(QPCRResultsForm::class, $data, [
-            'edit' => true,
+        $specimen = $result->getSpecimen();
+        $form = $this->createForm(QPCRResultsForm::class, $result, [
+            'editResult' => $result,
+            'specimen' => $specimen,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            $result->setConclusion($formData['conclusion']);
-
             $em->flush();
 
             // When given Specimen accessionId query string param,
@@ -151,6 +125,7 @@ class SpecimenResultQPCRController extends AbstractController
             'new' => false,
             'form' => $form->createView(),
             'result' => $result,
+            'specimen' => $specimen,
         ]);
     }
 
