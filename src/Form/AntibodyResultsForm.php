@@ -71,10 +71,11 @@ class AntibodyResultsForm extends AbstractType
                 'placeholder' => '- Select -',
                 'required' => true,
             ])
-            ->add('signal', ChoiceType::class, [
+            ->add('signal', TextType::class, [
                 'label' => 'Signal',
-                'choices' => SpecimenResultAntibody::getFormSignal(),
-                'placeholder' => '- Select -',
+                'attr' => [
+                    'placeholder' => 'For example 0 or 3',
+                ],
             ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
