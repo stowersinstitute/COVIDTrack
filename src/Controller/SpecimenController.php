@@ -90,7 +90,7 @@ class SpecimenController extends AbstractController
     /**
      * Edit a single Specimen.
      *
-     * @Route("/{accessionId<C[A-Z]{8}>}}/edit", methods={"GET", "POST"})
+     * @Route("/{accessionId<C[A-Z]{8}>}/edit", methods={"GET", "POST"})
      */
     public function edit(string $accessionId, Request $request) : Response
     {
