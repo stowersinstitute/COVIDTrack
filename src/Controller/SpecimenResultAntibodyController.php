@@ -22,7 +22,7 @@ class SpecimenResultAntibodyController extends AbstractController
     /**
      * List all Results
      *
-     * @Route(path="/", methods={"GET"}, name="app_results_antibody_list")
+     * @Route(path="/", methods={"GET"}, name="results_antibody_list")
      */
     public function list(Request $request)
     {
@@ -51,7 +51,7 @@ class SpecimenResultAntibodyController extends AbstractController
      *
      * - specimenAccessionId (string) Specimen.accessionId to create results for
      *
-     * @Route(path="/new/{specimenAccessionId}", methods={"GET", "POST"}, name="app_results_antibody_new")
+     * @Route(path="/new/{specimenAccessionId}", methods={"GET", "POST"}, name="results_antibody_new")
      */
     public function new(string $specimenAccessionId, Request $request, EntityManagerInterface $em) : Response
     {
@@ -90,7 +90,7 @@ class SpecimenResultAntibodyController extends AbstractController
      *
      * - accessionId (string) Redirect to this Specimen's page after edit is complete
      *
-     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_antibody_edit")
+     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="results_antibody_edit")
      */
     public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
     {
@@ -116,7 +116,7 @@ class SpecimenResultAntibodyController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('app_results_antibody_list');
+            return $this->redirectToRoute('results_antibody_list');
         }
 
         return $this->render('results/antibody/form.html.twig', [
