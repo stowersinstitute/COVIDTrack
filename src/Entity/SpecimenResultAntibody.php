@@ -55,7 +55,7 @@ class SpecimenResultAntibody extends SpecimenResult
      * @param string      $conclusion CONCLUSION_* constant
      * @param null|string $signal     SIGNAL_*_NUMBER value, called "Signal"
      */
-    public function __construct(SpecimenWell $well, string $conclusion, ?string $signal)
+    public function __construct(SpecimenWell $well, string $conclusion, ?string $signal = null)
     {
         parent::__construct();
 
@@ -128,40 +128,8 @@ class SpecimenResultAntibody extends SpecimenResult
         return array_combine($validValues, $validValues);
     }
 
-    /**
-     * Check if given value is a valid signal.
-     *
-     * @param mixed $value Explicitly does not use typehint. See code.
-     * @return bool
-     */
-    public static function isValidSignal($value): bool
+    public function setSignal(?string $signal)
     {
-        // NULL is allowed
-        // Explicitly does not use a typehint AND
-        // Explicitly checks NULL to denote between empty and 0
-        if ($value === null) {
-            return true;
-        }
-
-        // Must be integer/string that casts to itself
-        if (!is_int($value) && !is_string($value)) {
-            return false;
-        }
-
-        // Cast to string, since value must be string to be stored
-        $testValue = (string) $value;
-
-        $valid = range(self::SIGNAL_NEGATIVE_NUMBER, self::SIGNAL_STRONG_NUMBER);
-
-        return in_array($testValue, $valid);
-    }
-
-    public function setSignal(string $signal)
-    {
-        if (!self::isValidSignal($signal)) {
-            throw new \InvalidArgumentException('Cannot set invalid signal value for Antibody result');
-        }
-
         $this->signal = $signal;
     }
 
