@@ -532,19 +532,6 @@ class Specimen
 
     /**
      * Get each SpecimenWell where this Specimen is stored in the well, but there
-     * is no Viral Result for that Well.
-     *
-     * @return SpecimenWell[]
-     */
-    public function getWellsWithoutViralResult(): array
-    {
-        return array_filter($this->getWells(), function(SpecimenWell $well) {
-            return !$well->getResultQPCR();
-        });
-    }
-
-    /**
-     * Get each SpecimenWell where this Specimen is stored in the well, but there
      * is no Antibody Result for that Well.
      *
      * @return SpecimenWell[]

@@ -78,6 +78,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     if ($conclusion) {
                         $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
+                        // TODO: Need to add fixtures with results across multiple wells?
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
                         // Add Result to Well
@@ -176,7 +177,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         }
 
         $well = array_shift($wells);
-        if ($well->getResultQPCR()) {
+        if ($well->hasQPCRResults()) {
             throw new \RuntimeException(sprintf('Specimen %s in Well %s on Well Plate %s already has results', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
         }
 
