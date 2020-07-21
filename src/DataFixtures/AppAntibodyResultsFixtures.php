@@ -169,11 +169,6 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
             throw new \RuntimeException(sprintf('Specimen %s is not yet on a Well Plate', $specimen->getAccessionId()));
         }
 
-        $well = array_shift($wells);
-        if ($well->getResultAntibody()) {
-            throw new \RuntimeException(sprintf('Antibody results already present on Specimen %s in Well %s on Well Plate %s', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
-        }
-
-        return $well;
+        return array_shift($wells);
     }
 }
