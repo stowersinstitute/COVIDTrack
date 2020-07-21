@@ -194,12 +194,18 @@
                 }
 
                 // Check if date/time selected is in the future
-                let selected = new Date(dateVal + ' ' + timeVal).getTime();
+                let selected = new Date();
+                let year = parseInt(dateVal.slice(0,4), 10);
+                let month = parseInt(dateVal.slice(5,7), 10) - 1; // -1 because months are 0-indexed
+                let day = parseInt(dateVal.slice(8,10), 10);
+                selected.setFullYear(year, month, day);
+                let hour = parseInt(timeVal.slice(0,2), 10);
+                selected.setHours(hour, 0, 0, 0);
 
-                let maxFutureTime = new Date();
                 // Allow next-highest time window to be selected if it's close.
                 // For example, if they collected at 11:30am and it's 11:45am,
                 // this buffer allows option 12:00pm to be selected, but not 2:00pm.
+                let maxFutureTime = new Date();
                 let addHours = maxFutureTime.getHours()+1; // +1 hour buffer
                 maxFutureTime.setHours(addHours);
 
