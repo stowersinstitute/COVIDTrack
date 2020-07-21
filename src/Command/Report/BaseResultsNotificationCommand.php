@@ -20,9 +20,15 @@ use Symfony\Component\Routing\RouterInterface;
 abstract class BaseResultsNotificationCommand extends Command
 {
     /**
-     * Users who explicitly have this role will be notified.
+     * Old role for Users who explicitly have this role will be notified.
+     * @deprecated Replace with NOTIFY_USERS_WITH_ROLE TODO: CVDLS-158
      */
-    const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
+    const NOTIFY_USERS_WITH_ROLE_OLD = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
+
+    /**
+     * Users who explicitly have this role will be notified about Viral Results.
+     */
+    const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS';
 
     /**
      * Date format for printing results in email
@@ -153,7 +159,12 @@ abstract class BaseResultsNotificationCommand extends Command
                 return false;
             }
 
-            // Only users assigned a permission on their Edit User page
+            // Users with OLD assigned permission TODO: Remove via CVDLS-158
+            if ($u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE_OLD)) {
+                return true;
+            }
+
+            // Users assigned a permission on their Edit User page
             return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE);
         });
 

@@ -26,13 +26,14 @@ class ReportController extends AbstractController
      * List CLIA notifications previously sent that recommend certain
      * Participant Groups should undergo further testing.
      *
-     * @Route(path="/notifications/clia", methods={"GET"}, name="report_notification_clia")
+     * @Route(path="/email-notifications/clia", methods={"GET"}, name="report_notification_clia")
      */
     public function notificationsClia()
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
@@ -44,7 +45,7 @@ class ReportController extends AbstractController
             ->getRepository(CliaRecommendationViralNotification::class)
             ->findMostRecent($limit);
 
-        return $this->render('reports/coordinator-notifications/index.html.twig', [
+        return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'CLIA Recommendation',
             'logs' => $logs,
             'limit' => $limit,
@@ -57,7 +58,7 @@ class ReportController extends AbstractController
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/notifications/clia/check", methods={"POST"}, name="report_notification_clia_check")
+     * @Route(path="/email-notifications/clia/check", methods={"POST"}, name="report_notification_clia_check")
      */
     public function checkCliaNotifications(KernelInterface $kernel)
     {
@@ -65,6 +66,7 @@ class ReportController extends AbstractController
             // User must have one or more of these
             $this->denyAccessUnlessGranted([
                 // Users who receive the notification can check it for themselves
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
                 BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
                 // Users who can edit results
@@ -106,13 +108,14 @@ class ReportController extends AbstractController
     /**
      * List Non-Negative Notifications previously sent.
      *
-     * @Route(path="/notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
+     * @Route(path="/email-notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
      */
     public function notificationsNonNegative()
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
             // Users who receive the notification can check it for themselves
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
 
             // Users who view reports on Groups
@@ -124,7 +127,7 @@ class ReportController extends AbstractController
             ->getRepository(NonNegativeViralNotification::class)
             ->findMostRecent($limit);
 
-        return $this->render('reports/coordinator-notifications/index.html.twig', [
+        return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'Non-Negative',
             'logs' => $logs,
             'limit' => $limit,

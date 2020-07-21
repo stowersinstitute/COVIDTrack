@@ -278,25 +278,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
      */
     private function validateSignal($rawSignal, $rowNumber): bool
     {
-        if ($rawSignal === null) {
-            $this->messages[] = ImportMessage::newError(
-                'Signal cannot be blank',
-                $rowNumber,
-                $this->columnMap['signal']
-            );
-            return false;
-        }
-
-        // Check validity
-        if (!SpecimenResultAntibody::isValidSignal($rawSignal)) {
-            $this->messages[] = ImportMessage::newError(
-                'Signal value not supported',
-                $rowNumber,
-                $this->columnMap['signal']
-            );
-            return false;
-        }
-
+        // No validation
         return true;
     }
 
