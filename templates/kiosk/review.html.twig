@@ -1,6 +1,10 @@
 {% extends 'kiosk/tube-input.html.twig' %}
 
-{% block header_buttons %}{% endblock %}
+{% block header_buttons %}
+    <div class="pull-right" id="buttons-before-tube-entered">
+        {{ _self.renderCancelButton() }}
+    </div>
+{% endblock %}
 
 {% block body_content %}
     <div class="box">
@@ -10,7 +14,7 @@
     <div class="row">
         <div class="col-xs-6 text-right">
             <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-default">
-                <i class="fa fa-fw fa-chevron-left"></i> Go Back
+                <i class="fa fa-fw fa-plus"></i> Add another tube
             </a>
         </div>
         <div class="col-xs-6">
@@ -18,9 +22,6 @@
         </div>
     </div>
 
-    <div class="row col-xs-12 text-center" style="margin-top:2em;">
-        {{ _self.renderCancelButton() }}
-    </div>
 {% endblock %}
 
 {% block scan_help %}

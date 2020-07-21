@@ -81,10 +81,6 @@ class KioskAddTubeForm extends AbstractType
                 'constraints' => [new NotBlank()],
             ])
             ->add('save', SubmitType::class, [
-                'label' => '+ Save and Add Another',
-                'attr' => ['class' => 'btn-lg btn-primary'],
-            ])
-            ->add('review', SubmitType::class, [
                 'label' => 'Save and Continue >',
                 'attr' => ['class' => 'btn-lg btn-success'],
             ])
