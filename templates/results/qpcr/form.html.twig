@@ -1,10 +1,21 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if new %} New Viral Result {% else %} Edit Viral Result &ndash; {{ result.specimenAccessionId }} on Plate {{ result.wellPlateBarcode }}{% endif %}
+    {% if new %}
+        New Viral Result &ndash; {{ specimen.accessionId }}
+    {% else %}
+        Edit Viral Result &ndash; {{ specimen.accessionId }} on Plate {{ result.wellPlateBarcode }}
+    {% endif %}
 {% endblock %}
 
 {% block body %}
+{% if new and specimen.wellsWithoutViralResult|length == 0 %}
+    <div class="callout callout-danger">
+        <h4>Cannot Create Result</h4>
+        <p>Specimen must be in a Well Position on a Well Plate, and that Position must not yet have a Viral Result reported.</p>
+    </div>
+{% endif %}
+
 <div class="row">
     <div class="col-md-6">
         <div class="box box-primary">

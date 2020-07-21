@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
-use App\Entity\SpecimenWell;
 use App\Form\AntibodyResultsForm;
 use App\Form\SpecimenResultAntibodyFilterForm;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +22,7 @@ class SpecimenResultAntibodyController extends AbstractController
     /**
      * List all Results
      *
-     * @Route(path="/", methods={"GET"}, name="app_results_antibody_list")
+     * @Route(path="/", methods={"GET"}, name="results_antibody_list")
      */
     public function list(Request $request)
     {
@@ -50,112 +49,71 @@ class SpecimenResultAntibodyController extends AbstractController
     /**
      * Create a single new Result
      *
-     * Optional query string params:
+     * - specimenAccessionId (string) Specimen.accessionId to create results for
      *
-     * - accessionId (string) Specimen.accessionId to create results for
-     *
-     * @Route(path="/new", methods={"GET", "POST"}, name="app_results_antibody_new")
+     * @Route(path="/new/{specimenAccessionId}", methods={"GET", "POST"}, name="results_antibody_new")
      */
-    public function new(Request $request, EntityManagerInterface $em) : Response
+    public function new(string $specimenAccessionId, Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
-        $data = [
-            'specimen' => null,
-        ];
+        $specimen = $this->mustFindSpecimen($specimenAccessionId);
 
-        // Query string params may indicate desired Specimen
-        if ($request->query->has('accessionId')) {
-            $specimen = $this->mustFindSpecimen($request->query->get('accessionId'));
-            $data['specimen'] = $specimen;
-        }
-
-        $form = $this->createForm(AntibodyResultsForm::class, $data);
+        $form = $this->createForm(AntibodyResultsForm::class, null, [
+            'specimen' => $specimen,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            $specimen = $data['specimen'];
-            $wellPlate = $data['wellPlate'];
-            $position = $data['position'];
-            $well = new SpecimenWell($wellPlate, $specimen, $position);
-            $well->setWellIdentifier($data['wellIdentifier']);
-
-            $conclusion = $data['conclusion'];
-            $signal = $data['signal'];
-            $result = new SpecimenResultAntibody($well, $conclusion, $signal);
+            /** @var SpecimenResultAntibody $result */
+            $result = $form->getData();
 
             $em->persist($result);
             $em->flush();
 
-            if ($request->query->has('accessionId')) {
-                return $this->redirectToRoute('app_specimen_view', [
-                    'accessionId' => $request->query->get('accessionId'),
-                ]);
-            }
-
-            return $this->redirectToRoute('app_results_antibody_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('results/antibody/form.html.twig', [
             'new' => true,
             'form'=> $form->createView(),
+            'specimen' => $specimen,
         ]);
     }
 
     /**
      * Edit a single Result.
      *
-     * Optional query string params:
-     *
-     * - accessionId (string) Redirect to this Specimen's page after edit is complete
-     *
-     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="app_results_antibody_edit")
+     * @Route("/{id<\d+>}/edit", methods={"GET", "POST"}, name="results_antibody_edit")
      */
     public function edit(string $id, Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
         $result = $this->findResult($id);
-        $data = [
-            'specimen' => $result->getSpecimen(),
-            'wellPlate' => $result->getWellPlate(),
-            'position' => $result->getWellPosition(),
-            'wellIdentifier' => $result->getWellIdentifier(),
-            'conclusion' => $result->getConclusion(),
-            'signal' => $result->getSignal(),
-        ];
 
-        $form = $this->createForm(AntibodyResultsForm::class, $data, [
-            'edit' => true,
+        $specimen = $result->getSpecimen();
+        $form = $this->createForm(AntibodyResultsForm::class, $result, [
+            'editResult' => $result,
+            'specimen' => $specimen,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->getData();
-
-            $result->setConclusion($formData['conclusion']);
-            $result->setSignal($formData['signal']);
-            $result->setWellIdentifier($formData['wellIdentifier']);
-
             $em->flush();
 
-            // When given Specimen accessionId query string param,
-            // redirect there after edit complete
-            if ($request->query->has('accessionId')) {
-                return $this->redirectToRoute('app_specimen_view', [
-                    'accessionId' => $request->query->get('accessionId'),
-                ]);
-            }
-
-            return $this->redirectToRoute('app_results_antibody_list');
+            return $this->redirectToRoute('app_specimen_view', [
+                'accessionId' => $specimen->getAccessionId(),
+            ]);
         }
 
         return $this->render('results/antibody/form.html.twig', [
             'new' => false,
             'form' => $form->createView(),
             'result' => $result,
+            'specimen' => $specimen,
         ]);
     }
 

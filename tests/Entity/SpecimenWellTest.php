@@ -9,6 +9,23 @@ use PHPUnit\Framework\TestCase;
 
 class SpecimenWellTest extends TestCase
 {
+    public function testToString()
+    {
+        // Well Plate Barcode contained in string
+        $plateBarcode = 'BC100';
+        $plate = WellPlate::buildExample($plateBarcode);
+        $specimen = Specimen::buildExample('S100');
+        $well = new SpecimenWell($plate, $specimen);
+
+        $this->assertStringContainsString($plateBarcode, (string)$well);
+
+        // Well Position contained in string
+        $position = 'A06';
+        $well->setPositionAlphanumeric($position);
+        $this->assertStringContainsString($position, (string)$well);
+
+    }
+
     public function testCreateSpecimenWellWithoutPosition()
     {
         $plateBarcode = 'BC100';

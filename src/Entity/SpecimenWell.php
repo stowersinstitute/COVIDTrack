@@ -97,6 +97,11 @@ class SpecimenWell
         $specimen->addWell($this);
     }
 
+    public function __toString()
+    {
+        return $this->getWellPlatePositionDisplayString();
+    }
+
     /**
      * Will generate a fake WellPlate if not given.
      * $position is optional.
@@ -140,7 +145,7 @@ class SpecimenWell
         return $this->wellPlate;
     }
 
-    public function getWellPlateBarcode(): ?string
+    public function getWellPlateBarcode(): string
     {
         return $this->wellPlate->getBarcode();
     }

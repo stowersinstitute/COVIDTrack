@@ -5,58 +5,31 @@ namespace App\Form;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
-use App\Entity\WellPlate;
-use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class QPCRResultsForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $isEditing = $options['edit'];
+        /** @var Specimen $specimen */
+        $specimen = $options['specimen'];
+        /** @var SpecimenResultQPCR $editResult */
+        $editResult = $options['editResult'];
 
         $builder
-            ->add('specimen', EntityType::class, [
-                'label' => 'Specimen Accession ID',
-                'class' => Specimen::class,
+            ->add('well', EntityType::class, [
+                'label' => 'Wells Without Viral Results',
+                'class' => SpecimenWell::class,
                 'placeholder' => '- Select -',
                 'required' => true,
-                'disabled' => $isEditing,
-                // Sort by Accession ID
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('s')
-                        ->where('s.type = :type')
-                        ->setParameter('type', Specimen::TYPE_SALIVA)
-                        ->orderBy('s.accessionId', 'ASC');
-                },
-            ])
-            ->add('wellPlate', EntityType::class, [
-                'label' => 'Well Plate Barcode',
-                'class' => WellPlate::class,
-                'placeholder' => '- Select -',
-                'required' => true,
-                'disabled' => $isEditing,
-                // Sort by Barcode
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('p')
-                        ->orderBy('p.barcode', 'ASC');
-                },
-            ])
-            ->add('position', TextType::class, [
-                'label' => 'Well Position',
-                'required' => false,
-                'disabled' => $isEditing,
-                'attr' => [
-                    'placeholder' => 'For example A4, G8, H12, etc',
-                ],
+                'disabled' => (bool)$editResult,
+                'choices' => $editResult ? [$editResult->getWell()] : $specimen->getWellsWithoutViralResult(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
@@ -72,8 +45,21 @@ class QPCRResultsForm extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $dataClass = SpecimenResultQPCR::class;
         $resolver->setDefaults([
-            'edit' => false,
+            'data_class' => $dataClass,
+            'empty_data' => function(FormInterface $form) {
+                $well = $form->get('well')->getData();
+                $conclusion = $form->get('conclusion')->getData();
+
+                return new SpecimenResultQPCR($well, $conclusion);
+            }
         ]);
+
+        $resolver->setRequired('specimen');
+        $resolver->addAllowedTypes('specimen', Specimen::class);
+
+        $resolver->setDefault('editResult', null);
+        $resolver->addAllowedTypes('editResult', [$dataClass, 'null']);
     }
 }

@@ -3,7 +3,7 @@
 {% block page_title %}Import Saved{% endblock %}
 
 {% block body %}
-    <a class="btn btn-primary" href="{{ path('app_results_qpcr_list') }}">Return to Results List</a><br>
+    <a class="btn btn-primary" href="{{ path('results_qpcr_list') }}">Return to Results List</a><br>
     <br>
     {% include 'reports/email-notifications/check-new-results-button.html.twig' with {
         buttonText: "Run results check to Notify Study Coordinator",

@@ -134,6 +134,72 @@ class SpecimenTest extends TestCase
         $this->assertNull($specimen->getWellAtPosition($plate1, 'G1'));
     }
 
+    public function testGetWellsWithoutViralResult()
+    {
+        $specimen = Specimen::buildExample('S100');
+        $plate = WellPlate::buildExample();
+        $this->assertCount(0, $specimen->getWellsWithoutViralResult());
+
+        $well1 = new SpecimenWell($plate, $specimen);
+        $this->assertCount(1, $specimen->getWellsWithoutViralResult());
+        $well2 = new SpecimenWell($plate, $specimen, 'A2');
+        $this->assertCount(2, $specimen->getWellsWithoutViralResult());
+        $well3 = new SpecimenWell($plate, $specimen, 'A3');
+        $this->assertCount(3, $specimen->getWellsWithoutViralResult());
+
+        // Add results
+        new SpecimenResultQPCR($well2, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $this->assertCount(2, $specimen->getWellsWithoutViralResult());
+        new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $this->assertCount(1, $specimen->getWellsWithoutViralResult());
+    }
+
+    public function testGetWellsWithoutAntibodyResult()
+    {
+        $specimen = Specimen::buildExample('S100');
+        $plate = WellPlate::buildExample();
+        $this->assertCount(0, $specimen->getWellsWithoutAntibodyResult());
+
+        $well1 = new SpecimenWell($plate, $specimen);
+        $this->assertCount(1, $specimen->getWellsWithoutAntibodyResult());
+        $well2 = new SpecimenWell($plate, $specimen, 'A2');
+        $this->assertCount(2, $specimen->getWellsWithoutAntibodyResult());
+        $well3 = new SpecimenWell($plate, $specimen, 'A3');
+        $this->assertCount(3, $specimen->getWellsWithoutAntibodyResult());
+
+        // Add results
+        new SpecimenResultAntibody($well2, SpecimenResultAntibody::CONCLUSION_NEGATIVE, '2');
+        $this->assertCount(2, $specimen->getWellsWithoutAntibodyResult());
+        new SpecimenResultAntibody($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE, '1');
+        $this->assertCount(1, $specimen->getWellsWithoutAntibodyResult());
+    }
+
+    public function testGetRnaWellPlateBarcodes()
+    {
+        // No barcodes at first
+        $specimen = Specimen::buildExample('S100');
+        $this->assertCount(0, $specimen->getRnaWellPlateBarcodes());
+
+        // Add to first plate
+        $plate1 = WellPlate::buildExample('FIRST');
+        $well1 = new SpecimenWell($plate1, $specimen, 'A1');
+        $this->assertCount(1, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+
+        // Add to second plate
+        $plate2 = WellPlate::buildExample('SECOND');
+        $well2 = new SpecimenWell($plate2, $specimen, 'B2');
+        $this->assertCount(2, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
+
+        // Specimen existing in multiple wells only returns 1 copy of barcode
+        $well3 = new SpecimenWell($plate1, $specimen, 'C3');
+        $this->assertCount(2, $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
+        $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
+    }
+
     public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExample('C100');
