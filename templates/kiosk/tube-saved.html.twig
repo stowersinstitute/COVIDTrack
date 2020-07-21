@@ -1,0 +1,33 @@
+{% extends 'kiosk/tube-input.html.twig' %}
+
+{% block page_title %}COVIDTrack Kiosk{% endblock %}
+
+{% block header_buttons %}
+    <div class="pull-right" id="buttons-before-tube-entered">
+        {{ _self.renderCancelButton() }}
+    </div>
+{% endblock %}
+
+{% block body_content %}
+    <div class=" text-center">
+        <h2><i class="fa fa-fw fa-check text-green"></i> Tube Saved</h2>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-xs-8 col-xs-offset-2">
+            <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-success btn-lg btn-block btn-extra-padding">
+                <i class="fa fa-fw fa-vial"></i> I have another tube to scan
+            </a>
+
+            <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-primary btn-lg btn-block btn-extra-padding">
+                <i class="fa fa-fw fa-sign-out-alt"></i> Review and complete my drop off
+            </a>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block scan_help %}
+    {# Overridden to not display #}
+{% endblock %}
