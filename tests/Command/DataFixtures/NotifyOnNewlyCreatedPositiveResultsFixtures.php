@@ -134,7 +134,10 @@ class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
             // Result, if available
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
-                $em->persist(new SpecimenResultQPCR($well, $data['resultConclusion']));
+                $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
+                $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
+                $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+                $em->persist($result);
             }
         }
 
