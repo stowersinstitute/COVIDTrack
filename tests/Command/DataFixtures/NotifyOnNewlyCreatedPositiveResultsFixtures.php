@@ -17,7 +17,7 @@ use Doctrine\Common\Persistence\ObjectManager;
  * Creates test data for testing sending email notifications about
  * Participant Groups with results recommending testing.
  */
-class NotifyOnPositiveResultsFixtures extends Fixture
+class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
 {
     /**
      * @var SpecimenAccessionIdGenerator
