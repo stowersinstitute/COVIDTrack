@@ -176,12 +176,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             throw new \RuntimeException(sprintf('Specimen %s is not yet on a Well Plate', $specimen->getAccessionId()));
         }
 
-        $well = array_shift($wells);
-        if ($well->hasQPCRResults()) {
-            throw new \RuntimeException(sprintf('Specimen %s in Well %s on Well Plate %s already has results', $specimen->getAccessionId(), $well->getPositionAlphanumeric(), $well->getWellPlateBarcode()));
-        }
-
-        return $well;
+        return array_shift($wells);
     }
 
     private function getNextPositionForPlate(WellPlate $plate): string
