@@ -142,10 +142,10 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
     private function buildSignalDistribution(): array
     {
         // Approximate hit rate out of 100
-        $strong = 6;
+        $strong = 18;
         $weak = 4;
         $partial = 10;
-        $negative = 72;
+        $negative = 60;
         $awaitingResults = 8;
 
         $possible = array_merge(
