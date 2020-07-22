@@ -117,7 +117,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
             ->getRepository(SpecimenResultQPCR::class)
-            ->findTestingResultNonNegativeCreatedAfter($lastNotificationSent);
+            ->findTestingResultNonNegativeUpdatedAfter($lastNotificationSent);
         if (!$results) {
             return $output;
         }
@@ -135,7 +135,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         $resultsTimestamps = [];
         foreach ($results as $result) {
             // Result timestamp
-            $timestamp = $result->getCreatedAt();
+            $timestamp = $result->getUpdatedAt();
             if (!$timestamp) {
                 continue;
             }

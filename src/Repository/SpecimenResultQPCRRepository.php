@@ -47,15 +47,16 @@ class SpecimenResultQPCRRepository extends EntityRepository
     }
 
     /**
-     * Find Results whose conclusion was reported Non-Negative.
+     * Find Results whose conclusion was reported Non-Negative that were
+     * last updated after given time.
      * This excludes results from Control Participant Groups.
      *
      * @return SpecimenResultQPCR[]
      */
-    public function findTestingResultNonNegativeCreatedAfter(\DateTimeInterface $datetime): array
+    public function findTestingResultNonNegativeUpdatedAfter(\DateTimeInterface $datetime): array
     {
         return $this->createQueryBuilder('r')
-            ->where('r.createdAt >= :since')
+            ->where('r.updatedAt >= :since')
             ->setParameter('since', $datetime, Type::DATETIME)
 
             // Do not include results from "control" groups
