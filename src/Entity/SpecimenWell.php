@@ -341,7 +341,6 @@ class SpecimenWell
 
     public function hasQPCRResults(): bool
     {
-        // TODO: Add tests
         return !$this->resultsQPCR->isEmpty();
     }
 
