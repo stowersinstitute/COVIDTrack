@@ -13,7 +13,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
 {
-    public function testSendsNotificationWithNewlyCreatedResults()
+    public function testSendsNotifications()
     {
         $this->loadFixtures([
             NotifyOnNewlyCreatedPositiveResultsFixtures::class,
@@ -26,10 +26,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         $cmd = new NotifyOnPositiveResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
 
         $cmdTester = new CommandTester($cmd);
-        $cmdTester->execute([
-            '--do-not-send' => null,
-            '--skip-saving' => null,
-        ], [
+        $cmdTester->execute([], [
             'verbosity' => OutputInterface::VERBOSITY_VERBOSE,
         ]);
 
@@ -51,6 +48,20 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         ];
         foreach ($expectedUserRecipients as $userText) {
             $this->assertStringContainsString($userText, $txtOutput);
+        }
+
+        // Running again should not display users in the output because it's not sending email
+        $cmdTester->execute([], [
+            'verbosity' => OutputInterface::VERBOSITY_VERBOSE,
+        ]);
+        $txtOutput = $cmdTester->getDisplay();
+
+        $expectedUserRecipients = [
+            'Mary Smith',
+            'Admin User',
+        ];
+        foreach ($expectedUserRecipients as $userText) {
+            $this->assertStringNotContainsString($userText, $txtOutput);
         }
     }
 
