@@ -61,16 +61,18 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         // Reasonable positive/negative rate
         $possibleResults = $this->buildQPCRResultsDistribution();
 
+        // Add 1 result to many wells
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
             // for this many days worth of testing
             $daysWorthResults = 3;
 
             for ($day=1; $day<=$daysWorthResults; $day++) {
+                // Result for each Group Participant
                 for ($i=1; $i<=$group->getParticipantCount(); $i++) {
                     $specimen = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
 
-                    // Might not have enough fixture Tubes to keep going
+                    // Might not have enough fixture Specimens to keep going
                     if (!$specimen) continue;
 
                     // Set a random conclusion, if we have one
@@ -78,7 +80,6 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     if ($conclusion) {
                         $resultDate = new \DateTimeImmutable(sprintf('-%d days', $day));
 
-                        // TODO: Need to add fixtures with results across multiple wells?
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
                         // Add Result to Well
@@ -92,6 +93,42 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     }
                 }
             }
+        }
+
+        // Must flush so below code knows about results we just created
+        $em->flush();
+
+        // Add a second Viral Result to a few wells
+        $multipleResults = [];
+        foreach ($groups as $group) {
+            for ($i=1; $i<=($group->getParticipantCount()/2); $i++) {
+                $specimen = $this->getRandomSpecimenWithExistingViralResultInGroup($em, $group);
+
+                // This group might not have had any viral results created above
+                if (!$specimen) continue;
+
+                // Set a random conclusion
+                $conclusion = null;
+                do {
+                    $conclusion = $possibleResults[array_rand($possibleResults)];
+                } while ($conclusion === null);
+
+                $resultDate = new \DateTimeImmutable('-1 days');
+
+                $results = $specimen->getQPCRResults(1);
+                $well = array_pop($results)->getWell();
+
+                // Add another Result to this Well
+                $result = new SpecimenResultQPCR($well, $conclusion);
+                $result->setCreatedAt($resultDate);
+
+                $multipleResults[] = $result;
+
+                $em->persist($result);
+            }
+        }
+        if (empty($multipleResults)) {
+            throw new \RuntimeException('Could not load multiple Viral Results');
         }
     }
 
@@ -164,6 +201,44 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         }
 
         $found = array_shift($specimens);
+        $this->specimenIdsWithResults[] = $found->getId();
+
+        return $found;
+    }
+
+    private function getRandomSpecimenWithExistingViralResultInGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
+    {
+        /** @var Specimen[] $specimens */
+        $qb = $em->getRepository(Specimen::class)
+            ->createQueryBuilder('s')
+            ->join('s.wells', 'wells')
+
+            // Saliva Specimen
+            ->andWhere('s.type = :type')
+            ->setParameter('type', Specimen::TYPE_SALIVA)
+
+            // Group
+            ->andWhere('s.participantGroup = :group')
+            ->setParameter('group', $group)
+
+            // Is on a Well Plate
+            ->andWhere('wells.wellPlate IS NOT NULL')
+
+            // Has a Viral Result
+            ->join('wells.resultsQPCR', 'viralResult')
+            ->andWhere('viralResult IS NOT NULL')
+
+            ->setMaxResults(1);
+
+        $specimens = $qb->getQuery()->execute();
+
+        // Might not have Viral Result for this Group
+        if (empty($specimens)) {
+            return null;
+        }
+
+        $found = array_shift($specimens);
+
         $this->specimenIdsWithResults[] = $found->getId();
 
         return $found;
