@@ -4,6 +4,7 @@ namespace App\Tests\Command\Report;
 
 use App\Command\Report\NotifyOnPositiveResultCommand;
 use App\Email\EmailBuilder;
+use App\Entity\SpecimenResultQPCR;
 use App\Tests\BaseDatabaseTestCase;
 use App\Tests\Command\DataFixtures\NotifyOnNewlyCreatedPositiveResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,9 +16,10 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
 {
     public function testSendsNotifications()
     {
-        $this->loadFixtures([
+        $extractor = $this->loadFixtures([
             NotifyOnNewlyCreatedPositiveResultsFixtures::class,
         ]);
+        $referenceRepository = $extractor->getReferenceRepository();
 
         $emailBuilder = $this->buildEmailBuilder();
         $mockMailer = $this->buildMockMailer();
@@ -62,6 +64,33 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         ];
         foreach ($expectedUserRecipients as $userText) {
             $this->assertStringNotContainsString($userText, $txtOutput);
+        }
+
+        // Now update some existing results from another Group
+        // and assert users notified
+        /** @var SpecimenResultQPCR $resultToUpdate */
+        $resultToUpdate = $referenceRepository->getReference('ViralResult.Gray.NoResult');
+        $resultToUpdate->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $this->em->flush();
+
+        // Re-execute command, we expect it to notify about this updated result
+        $cmdTester->execute([], [
+            'verbosity' => OutputInterface::VERBOSITY_VERBOSE,
+        ]);
+        $txtOutput = $cmdTester->getDisplay();
+
+        $groupsExpected = [
+            $resultToUpdate->getSpecimen()->getParticipantGroup()->getTitle(),
+        ];
+        foreach ($groupsExpected as $groupTitle) {
+            $this->assertStringContainsString($groupTitle, $txtOutput);
+        }
+        $expectedUserRecipients = [
+            'Mary Smith',
+            'Admin User',
+        ];
+        foreach ($expectedUserRecipients as $userText) {
+            $this->assertStringContainsString($userText, $txtOutput);
         }
     }
 

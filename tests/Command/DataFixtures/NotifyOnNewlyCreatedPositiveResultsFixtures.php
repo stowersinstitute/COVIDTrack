@@ -134,9 +134,15 @@ class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
             // Result, if available
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
+
                 $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
                 $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
                 $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+
+                if (isset($data['resultReferenceId'])) {
+                    $this->addReference($data['resultReferenceId'], $result);
+                }
+
                 $em->persist($result);
             }
         }
@@ -225,6 +231,15 @@ class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
                 'participantGroup' => 'Control',
                 'wellPlatePosition' => 'A6',
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
+            ],
+            [
+                'accessionId' => 'NotifTube0007',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'participantGroup' => 'Gray',
+                'wellPlatePosition' => 'A7',
+                'resultReferenceId' => 'ViralResult.Gray.NoResult',
+                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
             ],
         ];
     }
