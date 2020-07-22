@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Report on maintained data.
@@ -28,7 +29,7 @@ class ReportController extends AbstractController
      *
      * @Route(path="/email-notifications/clia", methods={"GET"}, name="report_notification_clia")
      */
-    public function notificationsClia()
+    public function notificationsClia(RouterInterface $router)
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
@@ -47,6 +48,7 @@ class ReportController extends AbstractController
 
         return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'CLIA Recommendation',
+            'notificationCheckUrl' => $router->generate('report_notification_clia_check'),
             'logs' => $logs,
             'limit' => $limit,
         ]);
@@ -93,7 +95,7 @@ class ReportController extends AbstractController
         $exitCode = $application->run($input, $output);
 
         $success = true;
-        $message = 'Check for new results complete';
+        $message = 'Check for new results recommending additional CLIA testing complete';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';
@@ -110,7 +112,7 @@ class ReportController extends AbstractController
      *
      * @Route(path="/email-notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
      */
-    public function notificationsNonNegative()
+    public function notificationsNonNegative(RouterInterface $router)
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
@@ -129,8 +131,62 @@ class ReportController extends AbstractController
 
         return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'Non-Negative',
+            'notificationCheckUrl' => $router->generate('report_notification_non_negative_check'),
             'logs' => $logs,
             'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * Run logic that would send the Non-Negative Viral notification if new
+     * results need to be reported.
+     *
+     * Meant to be called from the UI via AJAX.
+     *
+     * @Route(path="/email-notifications/non-negative/check", methods={"POST"}, name="report_notification_non_negative_check")
+     */
+    public function checkNonNegativeNotifications(KernelInterface $kernel)
+    {
+        try {
+            // User must have one or more of these
+            $this->denyAccessUnlessGranted([
+                // Users who receive the notification can check it for themselves
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD,
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
+
+                // Users who can edit results
+                'ROLE_RESULTS_EDIT',
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        // Execute Symfony Command programmatically
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $commandName = 'app:report:notify-on-non-negative-viral-result';
+        $input = new ArrayInput([
+            'command' => $commandName,
+        ]);
+
+        // Output is not used
+        $output = new NullOutput();
+        $exitCode = $application->run($input, $output);
+
+        $success = true;
+        $message = 'Check for new Non-Negative Viral Results complete';
+        if ($exitCode !== 0) {
+            $success = false;
+            $message = 'Error occurred when checking for new results';
+        }
+
+        return $this->json([
+            'success' => $success,
+            'message' => $message,
         ]);
     }
 
