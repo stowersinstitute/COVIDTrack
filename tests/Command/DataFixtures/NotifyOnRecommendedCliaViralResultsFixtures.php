@@ -15,7 +15,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * Creates test data for testing sending email notifications about
- * Participant Groups with results recommending testing.
+ * Participant Groups with Viral Results recommending testing.
  */
 class NotifyOnRecommendedCliaViralResultsFixtures extends Fixture
 {

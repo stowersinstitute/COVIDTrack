@@ -17,7 +17,7 @@ class ScheduledTasks implements ScheduleBuilder
             ->description('Clean up unfinished Excel imports')
             ->dailyAt('03:00');
 
-        $schedule->addCommand('app:report:notify-on-positive-result')
+        $schedule->addCommand('app:report:notify-on-recommended-viral-result')
             ->description('Notify privileged users like Study Coordinator when a new viral result indicates a Participant Group recommended for CLIA testing')
             ->everyFiveMinutes();
 

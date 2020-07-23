@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Router;
  */
 class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotificationCommand
 {
-    protected static $defaultName = 'app:report:notify-on-positive-result';
+    protected static $defaultName = 'app:report:notify-on-recommended-viral-result';
 
     protected function configure()
     {

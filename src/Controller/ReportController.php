@@ -85,7 +85,7 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $commandName = 'app:report:notify-on-positive-result';
+        $commandName = 'app:report:notify-on-recommended-viral-result';
         $input = new ArrayInput([
             'command' => $commandName,
         ]);
