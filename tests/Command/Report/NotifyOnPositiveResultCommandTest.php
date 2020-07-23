@@ -58,11 +58,11 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         ]);
         $txtOutput = $cmdTester->getDisplay();
 
-        $expectedUserRecipients = [
+        $userRecipientsNotFound = [
             'Mary Smith',
             'Admin User',
         ];
-        foreach ($expectedUserRecipients as $userText) {
+        foreach ($userRecipientsNotFound as $userText) {
             $this->assertStringNotContainsString($userText, $txtOutput);
         }
 
