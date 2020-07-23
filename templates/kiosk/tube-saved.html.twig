@@ -9,18 +9,19 @@
 {% endblock %}
 
 {% block body_content %}
-    <div class=" text-center">
-        <h2><i class="fa fa-fw fa-check text-green"></i> Tube Saved</h2>
+    <div class="text-center" style="margin-top: 10rem;">
+        <h2 style="margin-bottom: 1em;"><i class="fa fa-fw fa-vial"></i> Do you have another tube to scan?</h2>
     </div>
 
     <div class="row text-center">
-        <div class="col-xs-8 col-xs-offset-2">
-            <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-success btn-lg btn-block btn-extra-padding">
-                <i class="fa fa-fw fa-vial"></i> I have another tube to scan
+        <div class="col-xs-4 col-xs-offset-2">
+            <a href="{{ path('kiosk_add_tube', {'id':kioskSession.id}) }}" class="btn btn-success btn-lg btn-block">
+                Yes
             </a>
-
-            <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-primary btn-lg btn-block btn-extra-padding">
-                <i class="fa fa-fw fa-sign-out-alt"></i> Review and complete my drop off
+        </div>
+        <div class="col-xs-4">
+            <a href="{{ path('kiosk_review', {'id':kioskSession.id}) }}" class="btn btn-primary btn-lg btn-block">
+                No
             </a>
         </div>
     </div>
