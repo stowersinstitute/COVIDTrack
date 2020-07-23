@@ -17,7 +17,7 @@ use Doctrine\Common\Persistence\ObjectManager;
  * Creates test data for sending email notifications about
  * Participant Groups with Non-Negative Viral results.
  */
-class NotifyOnNonNegativeResultsFixtures extends Fixture
+class NotifyOnNonNegativeViralResultsFixtures extends Fixture
 {
     /**
      * @var SpecimenAccessionIdGenerator

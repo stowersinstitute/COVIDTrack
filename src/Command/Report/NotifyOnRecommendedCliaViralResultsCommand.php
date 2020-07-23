@@ -10,11 +10,12 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies privileged users when a new Positive Result is available.
+ * Notifies privileged users when a new Viral Result recommends members of its
+ * Participant Group undergo addition CLIA testing.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
+class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotificationCommand
 {
     protected static $defaultName = 'app:report:notify-on-positive-result';
 
@@ -24,7 +25,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         parent::configure();
 
         $this
-            ->setDescription('Notifies privileged users when a new Result recommending CLIA testing is available.')
+            ->setDescription('Notifies privileged users when a Viral Result recommends CLIA testing.')
         ;
     }
 

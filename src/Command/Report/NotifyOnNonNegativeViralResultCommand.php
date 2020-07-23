@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Router;
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
+class NotifyOnNonNegativeViralResultCommand extends BaseResultsNotificationCommand
 {
     private $notificationData = [];
 
