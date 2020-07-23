@@ -7,6 +7,8 @@ use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\NonNegativeViralNotification;
 use App\Util\DateUtils;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
@@ -17,6 +19,8 @@ use Symfony\Component\Routing\Router;
  */
 class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
 {
+    private $notificationData = [];
+
     protected static $defaultName = 'app:report:notify-on-non-negative-viral-result';
 
     protected function configure()
@@ -27,6 +31,14 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         $this
             ->setDescription('Notifies privileged users when a new Non-Negative Viral Result is available.')
         ;
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        // Reset local var that tracks calculated results in buildNotificationData()
+        $this->notificationData = [];
+
+        return parent::execute($input, $output);
     }
 
     protected function getSubject(): string
@@ -89,12 +101,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
      */
     private function buildNotificationData(): array
     {
-        // Ensure this method only runs once
-        if (!empty($output)) {
-            return $output;
-        }
-
-        static $output = [
+        $this->notificationData = [
             'groups' => [],
             'timestamps' => [],
         ];
@@ -119,7 +126,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
             ->getRepository(SpecimenResultQPCR::class)
             ->findTestingResultNonNegativeUpdatedAfter($lastNotificationSent);
         if (!$results) {
-            return $output;
+            return $this->notificationData;
         }
 
         $this->outputDebug('Found new non-negative viral results: ' . count($results));
