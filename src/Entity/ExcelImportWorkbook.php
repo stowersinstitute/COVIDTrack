@@ -85,7 +85,7 @@ class ExcelImportWorkbook
         $importWorkbook->setUploadedAt(new \DateTimeImmutable());
 
         foreach ($spreadsheet->getAllSheets() as $sheet) {
-            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle());
+            $importWorksheet = new ExcelImportWorksheet($importWorkbook, $sheet->getTitle(), $sheet);
 
             foreach ($sheet->getRowIterator() as $row) {
                 foreach ($row->getCellIterator() as $cell) {

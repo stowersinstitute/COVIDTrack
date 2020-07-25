@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
  * Represents an excel worksheet associated with a workbook
@@ -49,14 +51,35 @@ class ExcelImportWorksheet
      */
     protected $cells;
 
-    public function __construct(ExcelImportWorkbook $workbook, $title)
+    /**
+     * Original Worksheet object from which this worksheet was created.
+     * May not always be available. For example not available after reloaded
+     * from the database.
+     *
+     * @var Worksheet|null
+     */
+    protected $importedFromWorksheet;
+
+    public function __construct(ExcelImportWorkbook $workbook, $title, Worksheet $importedFromWorksheet = null)
     {
+        $this->importedFromWorksheet = $importedFromWorksheet;
+
         $this->workbook = $workbook;
         $this->workbook->addWorksheet($this);
 
         $this->title = $title;
 
         $this->cells = new ArrayCollection();
+    }
+
+    public function getImportedFromWorksheet(): ?Worksheet
+    {
+        return $this->importedFromWorksheet;
+    }
+
+    public function setImportedFromWorksheet(?Worksheet $worksheet): void
+    {
+        $this->importedFromWorksheet = $worksheet;
     }
 
     public function getNumRows()
@@ -88,6 +111,16 @@ class ExcelImportWorksheet
         if (!$cell) return null;
 
         return $cell->getValue();
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getCellTextValue(int $rowIndex, string $column)
+    {
+        $cell = $this->getCell($rowIndex, $column);
+
+        return $cell->getTextValue();
     }
 
     public function getCell(int $rowIndex, string $column) : ?ExcelImportCell

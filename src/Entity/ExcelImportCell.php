@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 /**
  * A cell within an ExcelImportWorksheet
@@ -49,6 +50,16 @@ class ExcelImportCell
      * @ORM\Column(name="value", type="text", nullable=true)
      */
     protected $value;
+
+    /**
+     * Cell text value displayed in cell.
+     *
+     * @var null|string
+     * @see setValueFromExcelCell
+     *
+     * @ORM\Column(name="text_value", type="text", nullable=true)
+     */
+    protected $textValue;
 
     /**
      * One of:
@@ -100,8 +111,24 @@ class ExcelImportCell
             $storeValue = $storeValue->format(DATE_ATOM);
         }
 
+        // Get text value displayed to user.
+        // Begin as raw value, in case we can't calculate text value
+        $textValue = $cell->getFormattedValue();
+//        $originalSpreadsheet = $this->getWorksheet()->getImportedFromWorksheet();
+//        if ($originalSpreadsheet) {
+//            // Calculate text value based on internal Excel Sheet formatting for this cell.
+//            // String values are returned as-is
+//            // Dates are converted from Excel internal 45678.12345 to a text date
+//            // Numbers are converted from Excel internal number to a string according to cell format
+//            $textValue = NumberFormat::toFormattedString(
+//                $cell->getCalculatedValue(),
+//                $originalSpreadsheet->getParent()->getCellXfByIndex($cell->getXfIndex())->getNumberFormat()->getFormatCode()
+//            );
+//        }
+
         $this->valueType = $internalDataType;
         $this->value = $storeValue;
+        $this->textValue = $textValue;
     }
 
     /**
@@ -142,11 +169,26 @@ class ExcelImportCell
     }
 
     /**
-     * @deprecated You probably want setValueFromExcelCell
+     * @deprecated Not really deprecated. You probably want setValueFromExcelCell()
+     * @internal
      */
     public function setValue($value): void
     {
         $this->value = $value;
+    }
+
+    public function getTextValue(): ?string
+    {
+        return $this->textValue;
+    }
+
+    /**
+     * @deprecated Not really deprecated. You probably want setValueFromExcelCell()
+     * @internal
+     */
+    public function setTextValue(?string $textValue): void
+    {
+        $this->textValue = $textValue;
     }
 
     public function getWorksheet(): ExcelImportWorksheet
