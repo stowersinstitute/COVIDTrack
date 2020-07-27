@@ -113,16 +113,6 @@ class ExcelImportWorksheet
         return $cell->getValue();
     }
 
-    /**
-     * @return null|string
-     */
-    public function getCellTextValue(int $rowIndex, string $column)
-    {
-        $cell = $this->getCell($rowIndex, $column);
-
-        return $cell->getTextValue();
-    }
-
     public function getCell(int $rowIndex, string $column) : ?ExcelImportCell
     {
         foreach ($this->cells as $cell) {
