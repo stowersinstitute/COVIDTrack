@@ -28,12 +28,12 @@ class AntibodyResultsForm extends AbstractType
 
         $builder
             ->add('well', EntityType::class, [
-                'label' => 'Wells Without Viral Results',
+                'label' => 'Wells containing this Specimen',
                 'class' => SpecimenWell::class,
                 'placeholder' => '- Select -',
                 'required' => true,
                 'disabled' => (bool)$editResult,
-                'choices' => $editResult ? [$editResult->getWell()] : $specimen->getWellsWithoutAntibodyResult(),
+                'choices' => $specimen->getWells(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
