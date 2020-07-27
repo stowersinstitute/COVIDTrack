@@ -85,7 +85,7 @@ class ExcelImportCell
     {
         // Typical value is just the string displayed in Excel
         $internalDataType = self::VALUE_TYPE_SCALAR;
-        $storeValue = trim($cell->getFormattedValue());
+        $storeValue = $cell->getFormattedValue();
 
         // Resolve formulas
         // todo: not actually sure what happens when a formula resolves to a date...
