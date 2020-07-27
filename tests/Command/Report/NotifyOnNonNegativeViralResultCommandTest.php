@@ -81,12 +81,15 @@ class NotifyOnNonNegativeViralResultCommandTest extends BaseDatabaseTestCase
         ]);
         $txtOutput = $cmdTester->getDisplay();
 
+        // Verify updated result's Participant Group displays in email
         $groupsExpected = [
             $resultToUpdate->getSpecimen()->getParticipantGroup()->getTitle(),
         ];
         foreach ($groupsExpected as $groupTitle) {
             $this->assertStringContainsString($groupTitle, $txtOutput);
         }
+
+        // Verify updated results sent to proper users
         $expectedUserRecipients = [
             'Mary Smith',
             'Admin User',

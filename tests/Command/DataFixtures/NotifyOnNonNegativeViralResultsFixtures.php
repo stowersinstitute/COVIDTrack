@@ -136,8 +136,8 @@ class NotifyOnNonNegativeViralResultsFixtures extends Fixture
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
 
                 $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
-                $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
-                $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+                $result->setCreatedAt(new \DateTimeImmutable('-4 days 11:00am'));
+                $result->setUpdatedAt(new \DateTimeImmutable('-4 days 11:00am'));
 
                 if (isset($data['resultReferenceId'])) {
                     $this->addReference($data['resultReferenceId'], $result);
