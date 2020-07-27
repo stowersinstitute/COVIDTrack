@@ -10,7 +10,7 @@
         $btn = $(this);
         $btn.addClass('disabled');
 
-        const url = "{{ path('report_notification_clia_check') }}";
+        const url = "{{ notificationCheckUrl }}";
         $.post(url)
             .fail(function(responseObj) {
                 // Error happened, show it

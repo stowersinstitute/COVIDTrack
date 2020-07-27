@@ -9,6 +9,7 @@
     <div class="col-md-12">
         <div class="pull-right">
             {% include 'reports/email-notifications/check-new-results-button.html.twig' with {
+                notificationCheckUrl: notificationCheckUrl,
                 refreshOnComplete: true
             } %}
         </div>

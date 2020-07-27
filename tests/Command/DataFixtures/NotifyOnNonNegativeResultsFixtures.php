@@ -14,10 +14,10 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing sending email notifications about
- * Participant Groups with results recommending testing.
+ * Creates test data for sending email notifications about
+ * Participant Groups with Non-Negative Viral results.
  */
-class NotifyOnPositiveResultsFixtures extends Fixture
+class NotifyOnNonNegativeResultsFixtures extends Fixture
 {
     /**
      * @var SpecimenAccessionIdGenerator
@@ -134,7 +134,16 @@ class NotifyOnPositiveResultsFixtures extends Fixture
             // Result, if available
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
-                $em->persist(new SpecimenResultQPCR($well, $data['resultConclusion']));
+
+                $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
+                $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
+                $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+
+                if (isset($data['resultReferenceId'])) {
+                    $this->addReference($data['resultReferenceId'], $result);
+                }
+
+                $em->persist($result);
             }
         }
 
@@ -222,6 +231,15 @@ class NotifyOnPositiveResultsFixtures extends Fixture
                 'participantGroup' => 'Control',
                 'wellPlatePosition' => 'A6',
                 'resultConclusion' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
+            ],
+            [
+                'accessionId' => 'NotifTube0007',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'participantGroup' => 'Gray',
+                'wellPlatePosition' => 'A7',
+                'resultReferenceId' => 'ViralResult.Gray.NoResult',
+                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
             ],
         ];
     }

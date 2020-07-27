@@ -2,22 +2,22 @@
 
 namespace App\Tests\Command\Report;
 
-use App\Command\Report\NotifyOnPositiveResultCommand;
+use App\Command\Report\NotifyOnNonNegativeResultCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultQPCR;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\Command\DataFixtures\NotifyOnNewlyCreatedPositiveResultsFixtures;
+use App\Tests\Command\DataFixtures\NotifyOnNonNegativeResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
+class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
 {
     public function testSendsNotifications()
     {
         $extractor = $this->loadFixtures([
-            NotifyOnNewlyCreatedPositiveResultsFixtures::class,
+            NotifyOnNonNegativeResultsFixtures::class,
         ]);
         $referenceRepository = $extractor->getReferenceRepository();
 
@@ -25,7 +25,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         $mockMailer = $this->buildMockMailer();
         $mockRouter = $this->buildMockRouter();
 
-        $cmd = new NotifyOnPositiveResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
+        $cmd = new NotifyOnNonNegativeResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
 
         $cmdTester = new CommandTester($cmd);
         $cmdTester->execute([], [
@@ -35,9 +35,10 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         $txtOutput = $cmdTester->getDisplay();
 
         // Groups from NotifyOnNewlyCreatedPositiveResultsFixtures
+        // that have Non-Negative results
         $groupsExpected = [
-            'Orange',
-            'Red',
+            'Yellow',
+            'Purple',
         ];
         foreach ($groupsExpected as $groupTitle) {
             $this->assertStringContainsString($groupTitle, $txtOutput);
@@ -63,6 +64,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
             'Admin User',
         ];
         foreach ($userRecipientsNotFound as $userText) {
+            // Users names should NOT be present!!!
             $this->assertStringNotContainsString($userText, $txtOutput);
         }
 
@@ -70,7 +72,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         // and assert users notified
         /** @var SpecimenResultQPCR $resultToUpdate */
         $resultToUpdate = $referenceRepository->getReference('ViralResult.Gray.NoResult');
-        $resultToUpdate->setConclusion(SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $resultToUpdate->setConclusion(SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE);
         $this->em->flush();
 
         // Re-execute command, we expect it to notify about this updated result

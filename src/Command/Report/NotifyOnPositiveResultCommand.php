@@ -138,7 +138,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
             ->getRepository(SpecimenResultQPCR::class)
-            ->findTestingRecommendedResultCreatedAfter($lastNotificationSent);
+            ->findTestingRecommendedResultUpdatedAfter($lastNotificationSent);
         if (!$results) {
             return $output;
         }
@@ -154,7 +154,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
             $groups[$group->getId()] = $group;
 
             // Result timestamp
-            $timestamp = $result->getCreatedAt();
+            $timestamp = $result->getUpdatedAt();
             if ($timestamp) {
                 $idx = $timestamp->format(self::RESULTS_DATETIME_FORMAT);
                 $resultsTimestamps[$idx] = $timestamp;
