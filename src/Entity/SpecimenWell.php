@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Util\EntityUtils;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
@@ -43,20 +44,20 @@ class SpecimenWell
     private $specimen;
 
     /**
-     * Result of qPCR testing Specimen contained in this well.
+     * Results of qPCR testing Specimen contained in this well.
      *
-     * @var SpecimenResultQPCR|null
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="well")
+     * @var ArrayCollection|SpecimenResultQPCR[]
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultQPCR", mappedBy="well")
      */
-    private $resultQPCR;
+    private $resultsQPCR;
 
     /**
-     * Result of Antibody testing Specimen contained in this well.
+     * Results of Antibody testing Specimen contained in this well.
      *
-     * @var SpecimenResultAntibody|null
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="well")
+     * @var ArrayCollection|SpecimenResultAntibody[]
+     * @ORM\OneToMany(targetEntity="App\Entity\SpecimenResultAntibody", mappedBy="well")
      */
-    private $resultAntibody;
+    private $resultsAntibody;
 
     /**
      * Any identifier that identifies this well. For example, a Biobank Tube ID.
@@ -85,6 +86,9 @@ class SpecimenWell
 
     public function __construct(WellPlate $plate, Specimen $specimen, string $position = null)
     {
+        $this->resultsQPCR = new ArrayCollection();
+        $this->resultsAntibody = new ArrayCollection();
+
         if (!self::isValidPosition($position)) {
             throw new \InvalidArgumentException('Invalid well position');
         }
@@ -297,45 +301,105 @@ class SpecimenWell
         return implode(' / ', $parts);
     }
 
-    /**
-     * @internal Do not call directly. Instead call new SpecimenResultQPCR($specimen);
-     */
-    public function setQPCRResult(?SpecimenResultQPCR $result)
+    public function addResultQPCR(SpecimenResultQPCR $result): void
     {
-        if ($result && $this->resultQPCR) {
-            throw new \InvalidArgumentException('Cannot assign new qPCR result when one already exists');
+        if (!$this->hasResultQPCR($result)) {
+            $this->resultsQPCR->add($result);
         }
-
-        $this->resultQPCR = $result;
 
         if ($this->getSpecimen()) {
             $this->getSpecimen()->updateStatusWhenResultsSet();
         }
     }
 
-    public function getResultQPCR(): ?SpecimenResultQPCR
+    public function removeResultQPCR(SpecimenResultQPCR $result): void
     {
-        return $this->resultQPCR;
+        $removeKey = null;
+
+        foreach ($this->resultsQPCR as $key => $existingResult) {
+            if ($removeKey !== null) continue;
+            if (EntityUtils::isSameEntity($result, $existingResult)) {
+                $removeKey = $key;
+            }
+        }
+
+        if ($removeKey !== null) {
+            $this->resultsQPCR->remove($removeKey);
+        }
+    }
+
+    public function hasResultQPCR(SpecimenResultQPCR $result): bool
+    {
+        foreach ($this->resultsQPCR as $existingResult) {
+            if (EntityUtils::isSameEntity($result, $existingResult)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasResultsQPCR(): bool
+    {
+        return !$this->resultsQPCR->isEmpty();
     }
 
     /**
-     * @internal Do not call directly. Instead call new SpecimenResultAntibody($specimen);
+     * @return SpecimenResultQPCR[]
      */
-    public function setAntibodyResult(?SpecimenResultAntibody $result)
+    public function getResultsQPCR(): array
     {
-        if ($result && $this->resultAntibody) {
-            throw new \InvalidArgumentException('Cannot assign new Antibody result when one already exists');
-        }
+        return $this->resultsQPCR->getValues();
+    }
 
-        $this->resultAntibody = $result;
+    public function addResultAntibody(SpecimenResultAntibody $result): void
+    {
+        if (!$this->hasResultAntibody($result)) {
+            $this->resultsAntibody->add($result);
+        }
 
         if ($this->getSpecimen()) {
             $this->getSpecimen()->updateStatusWhenResultsSet();
         }
     }
 
-    public function getResultAntibody(): ?SpecimenResultAntibody
+    public function removeResultAntibody(SpecimenResultAntibody $result): void
     {
-        return $this->resultAntibody;
+        $removeKey = null;
+
+        foreach ($this->resultsAntibody as $key => $existingResult) {
+            if ($removeKey !== null) continue;
+            if (EntityUtils::isSameEntity($result, $existingResult)) {
+                $removeKey = $key;
+            }
+        }
+
+        if ($removeKey !== null) {
+            $this->resultsAntibody->remove($removeKey);
+        }
+    }
+
+    public function hasResultAntibody(SpecimenResultAntibody $result): bool
+    {
+        foreach ($this->resultsAntibody as $existingResult) {
+            if (EntityUtils::isSameEntity($result, $existingResult)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasResultsAntibody(): bool
+    {
+        return !$this->resultsAntibody->isEmpty();
+    }
+
+    /**
+     * @return SpecimenResultAntibody[]
+     */
+    public function getResultsAntibody(): array
+    {
+        return $this->resultsAntibody->getValues();
     }
 }
