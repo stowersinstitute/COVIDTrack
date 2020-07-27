@@ -7,7 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 /**
  * A cell within an ExcelImportWorksheet
