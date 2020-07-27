@@ -6,6 +6,7 @@ use App\Entity\AntibodyNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultAntibody;
 use App\Util\DateUtils;
+use App\Util\EntityUtils;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
@@ -36,26 +37,19 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
 
     protected function getHtmlEmailBody(): string
     {
-        $recommendations = $this->getNewResults();
-        $groups = $recommendations['groups'];
-        $timestamps = $recommendations['timestamps'];
+        $results = $this->getNewResults();
 
-        $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
-            return sprintf('<li>%s</li>', $g->getTitle());
-        }, $groups);
+        $groupResultsHtmlLines = array_map(function(array $tupleResult) {
+            /** @var ParticipantGroup $group */
+            /** @var \DateTimeInterface $updatedAt */
+            list($group, $updatedAt) = $tupleResult;
 
-        $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
-            return sprintf("<li>%s</li>", $dt->format(self::RESULTS_DATETIME_FORMAT));
-        }, $timestamps);
+            return sprintf('<li>%s @ %s</li>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
+        }, $results);
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
-            <p>New Antibody Results:</p>
-
-            <p>Results published:</p>
-            <ul>
-%s
-            </ul>
+            <p>Latest published results for each Group that exhibit at least a non-negative Antibody result:</p>
 
             <p>Participant Groups:</p>
             <ul>
@@ -66,8 +60,7 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
                 View more details in COVIDTrack:<br>%s
             </p>
         ",
-            implode("\n", $timestampsOutput),
-            implode("\n", $groupsRecTestingOutput),
+            implode("\n", $groupResultsHtmlLines),
             sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
         );
 
@@ -76,10 +69,8 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
 
     protected function getReasonToNotSend(): ?string
     {
-        $recommendations = $this->getNewResults();
-        $groups = $recommendations['groups'];
-
-        if (count($groups) < 1) {
+        $results = $this->getNewResults();
+        if (count($results) < 1) {
             return 'No new Participant Groups to notify about';
         }
 
@@ -93,8 +84,11 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
             return;
         }
 
-        $recommendations = $this->getNewResults();
-        $groups = $recommendations['groups'];
+        $groups = [];
+        foreach ($this->getNewResults() as $resultTuple) {
+            list($group, $timestamp) = $resultTuple;
+            $groups[] = $group;
+        }
 
         $notif = AntibodyNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
@@ -107,18 +101,17 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
      * Usage:
      *
      * $results = $this->getNewResults();
-     * $groups = $results['groups'];
-     * $timestamps = $results['timestamps'];
+     * foreach ($results as $result) {
+     *     list($group, $updatedAt) = $result;
+     * }
      *
-     * $groups === ParticipantGroup[] - Unique list of groups recommended for further testing
-     * $resultsUploadedAt === \DateTimeImmutable[] - Unique list of times found results were uploaded
+     * Each tuple result contains this data:
+     * [0] === ParticipantGroup[] Participant Group with not Negative Antibody result
+     * [1] === \DateTimeImmutable[] $resultsUploadedAt Time when most recent result for group was updated
      */
     private function getNewResults(): array
     {
-        $output = [
-            'groups' => [],
-            'timestamps' => [],
-        ];
+        $output = [];
 
         $lastNotificationSent = $this->em
             ->getRepository(AntibodyNotification::class)
@@ -146,19 +139,12 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
         $this->outputDebug('Found Antibody results: ' . count($results));
 
         // Calculate results
-        // TODO: Can return results as tuple: [$group, $timestamp]?
-        $groups = [];
-        $resultsTimestamps = [];
         foreach ($results as $result) {
-            // Group
             $group = $result->getSpecimen()->getParticipantGroup();
-            $groups[$group->getId()] = $group;
+            $resultUpdatedAt = $result->getUpdatedAt() ?: new \DateTimeImmutable();
 
-            // Result timestamp
-            $timestamp = $result->getUpdatedAt();
-            if ($timestamp) {
-                $resultsTimestamps[$group->getId()] = $timestamp;
-            }
+            // Indexing by ParticipantGroup.id ensures Group only displays once in output
+            $output[$group->getId()] = [$group, $resultUpdatedAt];
         }
 
         // Remove Groups already notified today
@@ -169,15 +155,10 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
                 ->getGroupsNotifiedOnDate($now);
 
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
-                $id = $groupPreviouslyNotified->getId();
-                unset($groups[$id]);
+                unset($output[$groupPreviouslyNotified->getId()]);
             }
         }
 
-        // Remaining are Groups not yet included in this Email Notification today
-        $output['groups'] = array_values($groups);
-        $output['timestamps'] = array_values($resultsTimestamps);
-
-        return $output;
+        return array_values($output);
     }
 }

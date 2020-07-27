@@ -57,7 +57,7 @@ class NotifyOnNonNegativeAntibodyResultsCommandTest extends BaseDatabaseTestCase
             $this->assertStringContainsString($userText, $txtOutput);
         }
 
-        // Running again should not display users in the output because it's not sending email
+        // 3. Running again should not display users in the output because it's not sending email
         $cmdTester->execute([], [
             'verbosity' => OutputInterface::VERBOSITY_VERBOSE,
         ]);
@@ -71,11 +71,19 @@ class NotifyOnNonNegativeAntibodyResultsCommandTest extends BaseDatabaseTestCase
             $this->assertStringNotContainsString($userText, $txtOutput, 'Found recipient when did not expect to');
         }
 
-        // Now update some existing results from another Group
+        // 4. Now update some existing results from another Group
         // and assert users notified
-        /** @var SpecimenResultAntibody $resultToUpdate */
-        $resultToUpdate = $referenceRepository->getReference('AntibodyResult.GroupFive.NoResult');
-        $resultToUpdate->setConclusion(SpecimenResultAntibody::CONCLUSION_POSITIVE);
+        /** @var SpecimenResultAntibody $resultFromNotContactedGroup */
+        $resultFromNotContactedGroup = $referenceRepository->getReference('AntibodyResult.GroupFive.NegativeResult1');
+        $resultFromNotContactedGroup->setConclusion(SpecimenResultAntibody::CONCLUSION_POSITIVE);
+
+        $referenceRepository
+            ->getReference('AntibodyResult.GroupFive.NegativeResult2')
+            ->setConclusion(SpecimenResultAntibody::CONCLUSION_POSITIVE);
+
+        /** @var SpecimenResultAntibody $resultFromContactedGroup */
+        $resultFromContactedGroup = $referenceRepository->getReference('AntibodyResult.GroupOne.NegativeResult');
+        $resultFromContactedGroup->setConclusion(SpecimenResultAntibody::CONCLUSION_POSITIVE);
         $this->em->flush();
 
         // Re-execute command, we expect it to notify about this updated result
@@ -84,13 +92,11 @@ class NotifyOnNonNegativeAntibodyResultsCommandTest extends BaseDatabaseTestCase
         ]);
         $txtOutput = $cmdTester->getDisplay();
 
-        // Verify updated result's Participant Group displays in email
-        $groupsExpected = [
-            $resultToUpdate->getSpecimen()->getParticipantGroup()->getTitle(),
-        ];
-        foreach ($groupsExpected as $groupTitle) {
-            $this->assertStringContainsString($groupTitle, $txtOutput);
-        }
+        // Above code updated 2 results for "GroupFive"
+        // Verify the group only appears once in above results
+        $updatedGroupTitle = $resultFromNotContactedGroup->getSpecimen()->getParticipantGroup()->getTitle();
+        $groupFoundInOutputNumTimes = substr_count($txtOutput, $updatedGroupTitle);
+        $this->assertSame(1, $groupFoundInOutputNumTimes);
 
         // Verify updated results sent to correct users
         $expectedUserRecipients = [
