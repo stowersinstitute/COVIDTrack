@@ -10,7 +10,7 @@
             <th>Conclusion</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
-            <th>Data</th>
+            <th>CT / Amp Score</th>
             <th>Reported At</th>
         </tr>
     </thead>
@@ -39,11 +39,9 @@
             </td>
             <td>{{ result.wellPosition }}</td>
             <td>
-                <ul>
-                    <li>N1: Undetermined / Amp-Score-Here</li>
-                    <li>N2: Undetermined / Amp-Score-Here</li>
-                    <li>RP: 24.9177 / Amp-Score-Here</li>
-                </ul>
+                {% if result.CT1 is not null %}CT1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
+                {% if result.CT2 is not null %}CT2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
+                {% if result.CT3 is not null %}CT3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
             </td>
             <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
         </tr>
