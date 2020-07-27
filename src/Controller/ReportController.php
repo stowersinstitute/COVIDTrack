@@ -46,7 +46,7 @@ class ReportController extends AbstractController
             ->findMostRecent($limit);
 
         return $this->render('reports/email-notifications/index.html.twig', [
-            'notification_type_text' => 'CLIA Recommendation',
+            'notification_type_text' => 'Viral CLIA Recommendation',
             'logs' => $logs,
             'limit' => $limit,
         ]);
@@ -128,7 +128,7 @@ class ReportController extends AbstractController
             ->findMostRecent($limit);
 
         return $this->render('reports/email-notifications/index.html.twig', [
-            'notification_type_text' => 'Non-Negative',
+            'notification_type_text' => 'Viral Non-Negative',
             'logs' => $logs,
             'limit' => $limit,
         ]);
