@@ -3,6 +3,8 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Specimen;
+use App\Entity\SpecimenResultAntibody;
+use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use App\Entity\WellPlate;
 use PHPUnit\Framework\TestCase;
@@ -41,8 +43,9 @@ class SpecimenWellTest extends TestCase
 
         $this->assertSame($specimen, $well->getSpecimen());
 
-        // No result
-        $this->assertNull($well->getResultQPCR());
+        // No results
+        $this->assertFalse($well->hasQPCRResults());
+        $this->assertFalse($well->hasAntibodyResults());
 
         // No well identifier
         $this->assertNull($well->getWellIdentifier());
@@ -99,8 +102,9 @@ class SpecimenWellTest extends TestCase
 
         $this->assertSame($specimen, $well->getSpecimen());
 
-        // No result
-        $this->assertNull($well->getResultQPCR());
+        // No results
+        $this->assertFalse($well->hasQPCRResults());
+        $this->assertFalse($well->hasAntibodyResults());
 
         // No well identifier
         $this->assertNull($well->getWellIdentifier());
@@ -341,5 +345,73 @@ class SpecimenWellTest extends TestCase
             'Below lower bound' => [0],
             'Above upper bound' => [97],
         ];
+    }
+
+    public function testTracksAddingAndRemovingMultipleViralResults()
+    {
+        $plate = WellPlate::buildExample();
+        $specimen = Specimen::buildExample('S100');
+        $well = new SpecimenWell($plate, $specimen, "A4");
+
+        // Default has no Viral Results
+        $this->assertFalse($well->hasQPCRResults());
+
+        // Add 1st result
+        $result1 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $this->assertTrue($well->hasQPCRResults());
+        $this->assertCount(1, $well->getQPCRResults());
+
+        // Adding same result multiple times still has only 1 result
+        $well->addQPCRResult($result1);
+        $this->assertCount(1, $well->getQPCRResults());
+
+        // Add 2nd result
+        $result2 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $this->assertTrue($well->hasQPCRResults());
+        $this->assertCount(2, $well->getQPCRResults());
+
+        // Remove 1st result
+        $well->removeQPCRResult($result1);
+        $this->assertTrue($well->hasQPCRResults());
+        $this->assertCount(1, $well->getQPCRResults());
+
+        // Remove 2nd result
+        $well->removeQPCRResult($result2);
+        $this->assertFalse($well->hasQPCRResults());
+        $this->assertCount(0, $well->getQPCRResults());
+    }
+
+    public function testTracksAddingAndRemovingMultipleAntibodyResults()
+    {
+        $plate = WellPlate::buildExample();
+        $specimen = Specimen::buildExample('S101');
+        $well = new SpecimenWell($plate, $specimen, "A5");
+
+        // Default has no Antibody Results
+        $this->assertFalse($well->hasAntibodyResults());
+
+        // Add 1st result
+        $result1 = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_POSITIVE);
+        $this->assertTrue($well->hasAntibodyResults());
+        $this->assertCount(1, $well->getAntibodyResults());
+
+        // Adding same result multiple times still has only 1 result
+        $well->addAntibodyResult($result1);
+        $this->assertCount(1, $well->getAntibodyResults());
+
+        // Add 2nd result
+        $result2 = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_NEGATIVE);
+        $this->assertTrue($well->hasAntibodyResults());
+        $this->assertCount(2, $well->getAntibodyResults());
+
+        // Remove 1st result
+        $well->removeAntibodyResult($result1);
+        $this->assertTrue($well->hasAntibodyResults());
+        $this->assertCount(1, $well->getAntibodyResults());
+
+        // Remove 2nd result
+        $well->removeAntibodyResult($result2);
+        $this->assertFalse($well->hasAntibodyResults());
+        $this->assertCount(0, $well->getAntibodyResults());
     }
 }

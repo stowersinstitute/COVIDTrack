@@ -20,7 +20,7 @@ class SpecimenResultQPCR extends SpecimenResult
      * Well analyzed to derive this result
      *
      * @var SpecimenWell
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultQPCR", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultsQPCR", fetch="EAGER")
      * @ORM\JoinColumn(name="specimen_well_id", referencedColumnName="id")
      */
     private $well;
@@ -85,7 +85,7 @@ class SpecimenResultQPCR extends SpecimenResult
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
         $this->well = $well;
-        $well->setQPCRResult($this);
+        $well->addQPCRResult($this);
 
         $this->setConclusion($conclusion);
     }

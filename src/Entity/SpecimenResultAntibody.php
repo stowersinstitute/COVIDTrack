@@ -29,7 +29,7 @@ class SpecimenResultAntibody extends SpecimenResult
      * Well analyzed to derive this result
      *
      * @var SpecimenWell
-     * @ORM\OneToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultAntibody", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="App\Entity\SpecimenWell", inversedBy="resultsAntibody", fetch="EAGER")
      * @ORM\JoinColumn(name="specimen_well_id", referencedColumnName="id")
      */
     private $well;
@@ -67,7 +67,7 @@ class SpecimenResultAntibody extends SpecimenResult
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsAntibody
         $this->well = $well;
-        $well->setAntibodyResult($this);
+        $well->addAntibodyResult($this);
 
         $this->setConclusion($conclusion);
         $this->setSignal($signal);
