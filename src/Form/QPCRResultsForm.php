@@ -39,7 +39,7 @@ class QPCRResultsForm extends AbstractType
                 'required' => true,
             ])
             ->add('CT1', TextType::class, [
-                'label' => 'CT1',
+                'label' => 'Ct1',
                 'required' => false,
             ])
             ->add('CT1AmpScore', TextType::class, [
@@ -47,7 +47,7 @@ class QPCRResultsForm extends AbstractType
                 'required' => false,
             ])
             ->add('CT2', TextType::class, [
-                'label' => 'CT2',
+                'label' => 'Ct2',
                 'required' => false,
             ])
             ->add('CT2AmpScore', TextType::class, [
@@ -55,7 +55,7 @@ class QPCRResultsForm extends AbstractType
                 'required' => false,
             ])
             ->add('CT3', TextType::class, [
-                'label' => 'CT3',
+                'label' => 'Ct3',
                 'required' => false,
             ])
             ->add('CT3AmpScore', TextType::class, [

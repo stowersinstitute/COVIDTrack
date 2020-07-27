@@ -35,6 +35,10 @@ class SpecimenResultQPCR extends SpecimenResult
     private $specimen;
 
     /**
+     * Cycle Threshold (Ct) is a qPCR result metric for the number of cycles
+     * required for the fluorescent signal to cross the threshold
+     * (i.e. exceeding the background level).
+     *
      * @var null|string
      * @ORM\Column(name="ct1", type="string", length=255, nullable=true)
      */
@@ -47,6 +51,10 @@ class SpecimenResultQPCR extends SpecimenResult
     private $ct1AmpScore;
 
     /**
+     * Cycle Threshold (Ct) is a qPCR result metric for the number of cycles
+     * required for the fluorescent signal to cross the threshold
+     * (i.e. exceeding the background level).
+     *
      * @var null|string
      * @ORM\Column(name="ct2", type="string", length=255, nullable=true)
      */
@@ -59,6 +67,10 @@ class SpecimenResultQPCR extends SpecimenResult
     private $ct2AmpScore;
 
     /**
+     * Cycle Threshold (Ct) is a qPCR result metric for the number of cycles
+     * required for the fluorescent signal to cross the threshold
+     * (i.e. exceeding the background level).
+     *
      * @var null|string
      * @ORM\Column(name="ct3", type="string", length=255, nullable=true)
      */
