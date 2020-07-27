@@ -67,7 +67,7 @@ class SpecimenResultAntibody extends SpecimenResult
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsAntibody
         $this->well = $well;
-        $well->addAntibodyResult($this);
+        $well->addResultAntibody($this);
 
         $this->setConclusion($conclusion);
         $this->setSignal($signal);

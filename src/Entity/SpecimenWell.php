@@ -301,9 +301,9 @@ class SpecimenWell
         return implode(' / ', $parts);
     }
 
-    public function addQPCRResult(SpecimenResultQPCR $result): void
+    public function addResultQPCR(SpecimenResultQPCR $result): void
     {
-        if (!$this->hasQPCRResult($result)) {
+        if (!$this->hasResultQPCR($result)) {
             $this->resultsQPCR->add($result);
         }
 
@@ -312,7 +312,7 @@ class SpecimenWell
         }
     }
 
-    public function removeQPCRResult(SpecimenResultQPCR $result): void
+    public function removeResultQPCR(SpecimenResultQPCR $result): void
     {
         $removeKey = null;
 
@@ -328,7 +328,7 @@ class SpecimenWell
         }
     }
 
-    public function hasQPCRResult(SpecimenResultQPCR $result): bool
+    public function hasResultQPCR(SpecimenResultQPCR $result): bool
     {
         foreach ($this->resultsQPCR as $existingResult) {
             if (EntityUtils::isSameEntity($result, $existingResult)) {
@@ -339,7 +339,7 @@ class SpecimenWell
         return false;
     }
 
-    public function hasQPCRResults(): bool
+    public function hasResultsQPCR(): bool
     {
         return !$this->resultsQPCR->isEmpty();
     }
@@ -347,14 +347,14 @@ class SpecimenWell
     /**
      * @return SpecimenResultQPCR[]
      */
-    public function getQPCRResults(): array
+    public function getResultsQPCR(): array
     {
         return $this->resultsQPCR->getValues();
     }
 
-    public function addAntibodyResult(SpecimenResultAntibody $result): void
+    public function addResultAntibody(SpecimenResultAntibody $result): void
     {
-        if (!$this->hasAntibodyResult($result)) {
+        if (!$this->hasResultAntibody($result)) {
             $this->resultsAntibody->add($result);
         }
 
@@ -363,7 +363,7 @@ class SpecimenWell
         }
     }
 
-    public function removeAntibodyResult(SpecimenResultAntibody $result): void
+    public function removeResultAntibody(SpecimenResultAntibody $result): void
     {
         $removeKey = null;
 
@@ -379,7 +379,7 @@ class SpecimenWell
         }
     }
 
-    public function hasAntibodyResult(SpecimenResultAntibody $result): bool
+    public function hasResultAntibody(SpecimenResultAntibody $result): bool
     {
         foreach ($this->resultsAntibody as $existingResult) {
             if (EntityUtils::isSameEntity($result, $existingResult)) {
@@ -390,7 +390,7 @@ class SpecimenWell
         return false;
     }
 
-    public function hasAntibodyResults(): bool
+    public function hasResultsAntibody(): bool
     {
         return !$this->resultsAntibody->isEmpty();
     }
@@ -398,7 +398,7 @@ class SpecimenWell
     /**
      * @return SpecimenResultAntibody[]
      */
-    public function getAntibodyResults(): array
+    public function getResultsAntibody(): array
     {
         return $this->resultsAntibody->getValues();
     }

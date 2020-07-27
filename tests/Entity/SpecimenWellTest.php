@@ -44,8 +44,8 @@ class SpecimenWellTest extends TestCase
         $this->assertSame($specimen, $well->getSpecimen());
 
         // No results
-        $this->assertFalse($well->hasQPCRResults());
-        $this->assertFalse($well->hasAntibodyResults());
+        $this->assertFalse($well->hasResultsQPCR());
+        $this->assertFalse($well->hasResultsAntibody());
 
         // No well identifier
         $this->assertNull($well->getWellIdentifier());
@@ -103,8 +103,8 @@ class SpecimenWellTest extends TestCase
         $this->assertSame($specimen, $well->getSpecimen());
 
         // No results
-        $this->assertFalse($well->hasQPCRResults());
-        $this->assertFalse($well->hasAntibodyResults());
+        $this->assertFalse($well->hasResultsQPCR());
+        $this->assertFalse($well->hasResultsAntibody());
 
         // No well identifier
         $this->assertNull($well->getWellIdentifier());
@@ -354,31 +354,31 @@ class SpecimenWellTest extends TestCase
         $well = new SpecimenWell($plate, $specimen, "A4");
 
         // Default has no Viral Results
-        $this->assertFalse($well->hasQPCRResults());
+        $this->assertFalse($well->hasResultsQPCR());
 
         // Add 1st result
         $result1 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
-        $this->assertTrue($well->hasQPCRResults());
-        $this->assertCount(1, $well->getQPCRResults());
+        $this->assertTrue($well->hasResultsQPCR());
+        $this->assertCount(1, $well->getResultsQPCR());
 
         // Adding same result multiple times still has only 1 result
-        $well->addQPCRResult($result1);
-        $this->assertCount(1, $well->getQPCRResults());
+        $well->addResultQPCR($result1);
+        $this->assertCount(1, $well->getResultsQPCR());
 
         // Add 2nd result
         $result2 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
-        $this->assertTrue($well->hasQPCRResults());
-        $this->assertCount(2, $well->getQPCRResults());
+        $this->assertTrue($well->hasResultsQPCR());
+        $this->assertCount(2, $well->getResultsQPCR());
 
         // Remove 1st result
-        $well->removeQPCRResult($result1);
-        $this->assertTrue($well->hasQPCRResults());
-        $this->assertCount(1, $well->getQPCRResults());
+        $well->removeResultQPCR($result1);
+        $this->assertTrue($well->hasResultsQPCR());
+        $this->assertCount(1, $well->getResultsQPCR());
 
         // Remove 2nd result
-        $well->removeQPCRResult($result2);
-        $this->assertFalse($well->hasQPCRResults());
-        $this->assertCount(0, $well->getQPCRResults());
+        $well->removeResultQPCR($result2);
+        $this->assertFalse($well->hasResultsQPCR());
+        $this->assertCount(0, $well->getResultsQPCR());
     }
 
     public function testTracksAddingAndRemovingMultipleAntibodyResults()
@@ -388,30 +388,30 @@ class SpecimenWellTest extends TestCase
         $well = new SpecimenWell($plate, $specimen, "A5");
 
         // Default has no Antibody Results
-        $this->assertFalse($well->hasAntibodyResults());
+        $this->assertFalse($well->hasResultsAntibody());
 
         // Add 1st result
         $result1 = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_POSITIVE);
-        $this->assertTrue($well->hasAntibodyResults());
-        $this->assertCount(1, $well->getAntibodyResults());
+        $this->assertTrue($well->hasResultsAntibody());
+        $this->assertCount(1, $well->getResultsAntibody());
 
         // Adding same result multiple times still has only 1 result
-        $well->addAntibodyResult($result1);
-        $this->assertCount(1, $well->getAntibodyResults());
+        $well->addResultAntibody($result1);
+        $this->assertCount(1, $well->getResultsAntibody());
 
         // Add 2nd result
         $result2 = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_NEGATIVE);
-        $this->assertTrue($well->hasAntibodyResults());
-        $this->assertCount(2, $well->getAntibodyResults());
+        $this->assertTrue($well->hasResultsAntibody());
+        $this->assertCount(2, $well->getResultsAntibody());
 
         // Remove 1st result
-        $well->removeAntibodyResult($result1);
-        $this->assertTrue($well->hasAntibodyResults());
-        $this->assertCount(1, $well->getAntibodyResults());
+        $well->removeResultAntibody($result1);
+        $this->assertTrue($well->hasResultsAntibody());
+        $this->assertCount(1, $well->getResultsAntibody());
 
         // Remove 2nd result
-        $well->removeAntibodyResult($result2);
-        $this->assertFalse($well->hasAntibodyResults());
-        $this->assertCount(0, $well->getAntibodyResults());
+        $well->removeResultAntibody($result2);
+        $this->assertFalse($well->hasResultsAntibody());
+        $this->assertCount(0, $well->getResultsAntibody());
     }
 }

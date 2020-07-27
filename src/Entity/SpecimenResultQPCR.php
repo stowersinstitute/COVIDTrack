@@ -49,7 +49,7 @@ class SpecimenResultQPCR extends SpecimenResult
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
         $this->well = $well;
-        $well->addQPCRResult($this);
+        $well->addResultQPCR($this);
 
         $this->setConclusion($conclusion);
     }
