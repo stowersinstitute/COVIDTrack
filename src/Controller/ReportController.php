@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Command\Report\BaseResultsNotificationCommand;
+use App\Command\Report\NotifyOnAntibodyResultsCommand;
+use App\Command\Report\NotifyOnNonNegativeViralResultCommand;
+use App\Command\Report\NotifyOnRecommendedCliaViralResultsCommand;
 use App\Entity\AntibodyNotification;
 use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
@@ -86,9 +89,8 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $commandName = 'app:report:notify-on-recommended-viral-result';
         $input = new ArrayInput([
-            'command' => $commandName,
+            'command' => NotifyOnRecommendedCliaViralResultsCommand::getDefaultName(),
         ]);
 
         // Output is not used
@@ -169,9 +171,8 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $commandName = 'app:report:notify-on-non-negative-viral-result';
         $input = new ArrayInput([
-            'command' => $commandName,
+            'command' => NotifyOnNonNegativeViralResultCommand::getDefaultName(),
         ]);
 
         // Output is not used
@@ -250,10 +251,8 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        // TODO: Can use NotifyOnNonNegativeAntibodyResultsCommand injected then ->getName() ??
-        $commandName = 'app:report:notify-on-antibody-result';
         $input = new ArrayInput([
-            'command' => $commandName,
+            'command' => NotifyOnAntibodyResultsCommand::getDefaultName(),
         ]);
 
         // Output is not used
