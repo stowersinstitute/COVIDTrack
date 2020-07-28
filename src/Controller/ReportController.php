@@ -108,11 +108,11 @@ class ReportController extends AbstractController
     }
 
     /**
-     * List Non-Negative Notifications previously sent.
+     * List Viral Non-Negative Notifications previously sent.
      *
-     * @Route(path="/email-notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
+     * @Route(path="/email-notifications/viral/non-negative", methods={"GET"}, name="report_notification_viral_non_negative")
      */
-    public function notificationsNonNegative(RouterInterface $router)
+    public function notificationsViralNonNegative(RouterInterface $router)
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
@@ -131,21 +131,21 @@ class ReportController extends AbstractController
 
         return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'Viral Non-Negative',
-            'notificationCheckUrl' => $router->generate('report_notification_non_negative_check'),
+            'notificationCheckUrl' => $router->generate('report_notification_viral_non_negative_check'),
             'logs' => $logs,
             'limit' => $limit,
         ]);
     }
 
     /**
-     * Run logic that would send the Non-Negative Viral notification if new
+     * Run logic that would send the Viral Non-Negative notification if new
      * results need to be reported.
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/email-notifications/non-negative/check", methods={"POST"}, name="report_notification_non_negative_check")
+     * @Route(path="/email-notifications/viral/non-negative/check", methods={"POST"}, name="report_notification_viral_non_negative_check")
      */
-    public function checkNonNegativeNotifications(KernelInterface $kernel)
+    public function checkViralNonNegativeNotifications(KernelInterface $kernel)
     {
         try {
             // User must have one or more of these
