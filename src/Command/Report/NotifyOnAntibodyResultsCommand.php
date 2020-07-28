@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Router;
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationCommand
+class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
 {
     protected static $defaultName = 'app:report:notify-on-antibody-result';
 

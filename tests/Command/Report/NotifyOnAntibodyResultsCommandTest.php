@@ -2,7 +2,7 @@
 
 namespace App\Tests\Command\Report;
 
-use App\Command\Report\NotifyOnNonNegativeAntibodyResultsCommand;
+use App\Command\Report\NotifyOnAntibodyResultsCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-class NotifyOnNonNegativeAntibodyResultsCommandTest extends BaseDatabaseTestCase
+class NotifyOnAntibodyResultsCommandTest extends BaseDatabaseTestCase
 {
     public function testSendsNotifications()
     {
@@ -26,7 +26,7 @@ class NotifyOnNonNegativeAntibodyResultsCommandTest extends BaseDatabaseTestCase
         $mockMailer = $this->buildMockMailer();
         $mockRouter = $this->buildMockRouter();
 
-        $cmd = new NotifyOnNonNegativeAntibodyResultsCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
+        $cmd = new NotifyOnAntibodyResultsCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
 
         $cmdTester = new CommandTester($cmd);
         $cmdTester->execute([], [
