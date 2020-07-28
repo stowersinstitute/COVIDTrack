@@ -5,7 +5,6 @@ namespace App\Tests\Command\Report;
 use App\Command\Report\NotifyOnAntibodyResultsCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultAntibody;
-use App\Entity\SpecimenResultQPCR;
 use App\Tests\BaseDatabaseTestCase;
 use App\Tests\Command\DataFixtures\NotifyOnNonNegativeAntibodyResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;

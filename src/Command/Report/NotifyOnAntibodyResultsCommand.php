@@ -6,7 +6,6 @@ use App\Entity\AntibodyNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultAntibody;
 use App\Util\DateUtils;
-use App\Util\EntityUtils;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
