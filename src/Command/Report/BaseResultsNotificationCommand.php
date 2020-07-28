@@ -27,6 +27,7 @@ abstract class BaseResultsNotificationCommand extends Command
 
     /**
      * Users who explicitly have this role will be notified about Viral Results.
+     * TODO: CVDLS-158 Rename to NOTIFY_USERS_WITH_ROLE_VIRAL
      */
     const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS';
 
