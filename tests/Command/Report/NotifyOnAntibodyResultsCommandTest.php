@@ -6,7 +6,7 @@ use App\Command\Report\NotifyOnAntibodyResultsCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultAntibody;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\Command\DataFixtures\NotifyOnNonNegativeAntibodyResultsFixtures;
+use App\Tests\Command\DataFixtures\NotifyOnAntibodyResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Mailer\MailerInterface;
@@ -17,7 +17,7 @@ class NotifyOnAntibodyResultsCommandTest extends BaseDatabaseTestCase
     public function testSendsNotifications()
     {
         $extractor = $this->loadFixtures([
-            NotifyOnNonNegativeAntibodyResultsFixtures::class,
+            NotifyOnAntibodyResultsFixtures::class,
         ]);
         $referenceRepository = $extractor->getReferenceRepository();
 
@@ -34,7 +34,7 @@ class NotifyOnAntibodyResultsCommandTest extends BaseDatabaseTestCase
 
         $txtOutput = $cmdTester->getDisplay();
 
-        // Groups from NotifyOnNonNegativeAntibodyResultsFixtures
+        // Groups from NotifyOnAntibodyResultsFixtures
         $groupsExpected = [
             'GroupOne',
             'GroupThree',
@@ -47,7 +47,7 @@ class NotifyOnAntibodyResultsCommandTest extends BaseDatabaseTestCase
         // Verify Control Participant Group with a Positive result is not notified
         $this->assertStringNotContainsString('ControlGroup', $txtOutput);
 
-        // Users with notification role from NotifyOnNonNegativeAntibodyResultsFixtures
+        // Users with notification role from NotifyOnAntibodyResultsFixtures
         $expectedUserRecipients = [
             'Jessie Smith',
             'Privileged User',
@@ -107,7 +107,7 @@ class NotifyOnAntibodyResultsCommandTest extends BaseDatabaseTestCase
         }
 
         // Verify previous Participant Groups contacted before are not in the updated email
-        // Groups from NotifyOnNonNegativeAntibodyResultsFixtures with results other than Negative
+        // Groups from NotifyOnAntibodyResultsFixtures with results other than Negative
         $groupsNotExpected = [
             'GroupOne',
             'GroupThree',
