@@ -44,7 +44,7 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
             /** @var \DateTimeInterface $updatedAt */
             list($group, $updatedAt) = $tupleResult;
 
-            return sprintf('<li>%s @ %s</li>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
+            return sprintf('<li>%s – %s</li>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
         }, $results);
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
