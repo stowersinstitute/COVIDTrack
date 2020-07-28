@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Command\Report\BaseResultsNotificationCommand;
+use App\Entity\AntibodyNotification;
 use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
@@ -179,6 +180,88 @@ class ReportController extends AbstractController
 
         $success = true;
         $message = 'Check for new Non-Negative Viral Results complete';
+        if ($exitCode !== 0) {
+            $success = false;
+            $message = 'Error occurred when checking for new results';
+        }
+
+        return $this->json([
+            'success' => $success,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * List Antibody Notifications previously sent.
+     *
+     * @Route(path="/email-notifications/antibody", methods={"GET"}, name="report_notification_antibody")
+     */
+    public function notificationsAntibody(RouterInterface $router)
+    {
+        // User must have one or more of these
+        $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
+
+            // Users who view reports on Groups
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(AntibodyNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/email-notifications/index.html.twig', [
+            'notification_type_text' => 'Antibody',
+            'notificationCheckUrl' => $router->generate('report_notification_antibody_check'),
+            'logs' => $logs,
+            'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * Run logic that would send the Antibody Notification if results need to be
+     * reported.
+     *
+     * Meant to be called from the UI via AJAX.
+     *
+     * @Route(path="/email-notifications/antibody/non-negative/check", methods={"POST"}, name="report_notification_antibody_check")
+     */
+    public function checkAntibodyNotifications(KernelInterface $kernel)
+    {
+        try {
+            // User must have one or more of these
+            $this->denyAccessUnlessGranted([
+                // Users who receive the notification can check it for themselves
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
+
+                // Users who can edit results
+                'ROLE_RESULTS_EDIT',
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        // Execute Symfony Command programmatically
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        // TODO: Can use NotifyOnNonNegativeAntibodyResultsCommand injected then ->getName() ??
+        $commandName = 'app:report:notify-on-antibody-result';
+        $input = new ArrayInput([
+            'command' => $commandName,
+        ]);
+
+        // Output is not used
+        $output = new NullOutput();
+        $exitCode = $application->run($input, $output);
+
+        $success = true;
+        $message = 'Check for new Antibody Results complete';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';

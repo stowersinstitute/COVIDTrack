@@ -35,6 +35,19 @@ class NotifyOnNonNegativeAntibodyResultsCommand extends BaseResultsNotificationC
         return 'New Antibody Results';
     }
 
+    /**
+     * Return list of roles where if user is explicitly assigned at least one,
+     * they should receive the Notification sent by this command.
+     *
+     * @return string[]
+     */
+    protected function getRolesToReceiveNotification(): array
+    {
+        return [
+            self::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
+        ];
+    }
+
     protected function getHtmlEmailBody(): string
     {
         $results = $this->getNewResults();

@@ -34,6 +34,21 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
         return 'New Group Testing Recommendation';
     }
 
+    /**
+     * Return list of roles where if user is explicitly assigned at least one,
+     * they should receive the Notification sent by this command.
+     *
+     * @return string[]
+     */
+    protected function getRolesToReceiveNotification(): array
+    {
+        return [
+            // Users with OLD assigned permission TODO: Remove via CVDLS-158
+            self::NOTIFY_USERS_WITH_ROLE_OLD,
+            self::NOTIFY_USERS_WITH_ROLE,
+        ];
+    }
+
     protected function getHtmlEmailBody(): string
     {
         $recommendations = $this->getNewTestingRecommendations();
