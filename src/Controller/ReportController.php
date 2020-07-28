@@ -227,7 +227,7 @@ class ReportController extends AbstractController
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/email-notifications/antibody/non-negative/check", methods={"POST"}, name="report_notification_antibody_check")
+     * @Route(path="/email-notifications/antibody/check", methods={"POST"}, name="report_notification_antibody_check")
      */
     public function checkAntibodyNotifications(KernelInterface $kernel)
     {
