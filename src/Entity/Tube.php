@@ -460,8 +460,14 @@ class Tube
             return true;
         }
 
-        // Status before Accepted/Rejected
-        return $this->status === self::STATUS_RETURNED;
+        // Blood Tubes
+        if ($this->tubeType === self::TYPE_BLOOD) {
+            // Status before Accepted/Rejected
+            return $this->status === self::STATUS_RETURNED;
+        }
+
+        // Saliva Tubes
+        return in_array($this->status, [self::STATUS_EXTERNAL, self::STATUS_RETURNED]);
     }
 
     /**

@@ -18,6 +18,8 @@ class TubeTest extends TestCase
     {
         $tube = new Tube('TUBE-100');
 
+        $this->assertFalse($tube->willAllowCheckinDecision());
+
         $this->assertFalse($tube->willAllowExternalProcessing());
         $this->assertNull($tube->getExternalProcessingAt());
     }
@@ -109,6 +111,7 @@ class TubeTest extends TestCase
         // Pre-conditions to External Processing
         $this->assertEmpty($tube->getExternalProcessingAt());
         $this->assertSame(Specimen::STATUS_RETURNED, $specimen->getStatus());
+        $this->assertTrue($tube->willAllowCheckinDecision());
 
         $tube->markExternalProcessing();
 
@@ -118,6 +121,45 @@ class TubeTest extends TestCase
 
         // Specimen must also updated to have Status "EXTERNAL"
         $this->assertSame(Specimen::STATUS_EXTERNAL, $specimen->getStatus());
+
+        // Tube still allows an Accepted/Rejected decision
+        $this->assertTrue($tube->willAllowCheckinDecision());
+    }
+
+    public function testBloodAcceptedCheckin()
+    {
+        $tube = new Tube('T123');
+
+        $this->assertFalse($tube->willAllowCheckinDecision());
+
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_BLOOD, new \DateTimeImmutable());
+
+        $this->assertTrue($tube->willAllowCheckinDecision());
+
+        $this->assertNotSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+        $tube->setCheckInDecision(Tube::CHECKED_IN_ACCEPTED);
+        $this->assertSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+    }
+
+    public function testBloodRejectedCheckin()
+    {
+        $tube = new Tube('T123');
+
+        $this->assertFalse($tube->willAllowCheckinDecision());
+
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_BLOOD, new \DateTimeImmutable());
+
+        $this->assertTrue($tube->willAllowCheckinDecision());
+
+        $this->assertNotSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
+        $tube->setCheckInDecision(Tube::CHECKED_IN_REJECTED);
+        $this->assertSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
     }
 
     /**
