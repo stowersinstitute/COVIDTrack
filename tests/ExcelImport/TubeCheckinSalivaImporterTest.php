@@ -21,7 +21,33 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
 
         $checkedInTubes = $importer->process(true);
 
-        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        // Verify rows with missing required data report as user-readable errors
+        $errors = $importer->getErrors();
+        $expectedErrors = [
+            [
+                'rowNumber' => 5,
+            ],
+            [
+                'rowNumber' => 6,
+            ],
+            [
+                'rowNumber' => 10,
+            ],
+        ];
+//        var_dump($errors);exit;
+        $this->assertCount(count($expectedErrors), $errors);
+        foreach ($expectedErrors as $expectedError) {
+            $found = false;
+            foreach ($errors as $error) {
+                if ($error->getRowNumber() === $expectedError['rowNumber']) {
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $this->fail(sprintf('Expected to find error for Row %d but missing', $expectedError['rowNumber']));
+            }
+        }
+
         $this->assertCount(5, $importer->getOutput()['accepted']);
         $this->assertCount(2, $importer->getOutput()['rejected']);
 
