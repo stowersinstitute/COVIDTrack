@@ -14,6 +14,14 @@ use PHPUnit\Framework\TestCase;
 
 class TubeTest extends TestCase
 {
+    public function testDefaultValues()
+    {
+        $tube = new Tube('TUBE-100');
+
+        $this->assertFalse($tube->willAllowExternalProcessing());
+        $this->assertNull($tube->getExternalProcessingAt());
+    }
+
     public function testParticipantDropOffProcess()
     {
         $group = ParticipantGroup::buildExample('GRP-4-TUBES');
@@ -65,6 +73,51 @@ class TubeTest extends TestCase
         $well = $tube->addToWellPlate($plate, 'A05');
 
         $this->assertInstanceOf(SpecimenWell::class, $well);
+    }
+
+    public function testMarkExternalProcessingNotAllowedForBlood()
+    {
+        $tube = new Tube('T123');
+
+        $this->assertFalse($tube->willAllowExternalProcessing());
+
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_BLOOD, new \DateTimeImmutable());
+
+        $this->assertFalse($tube->willAllowExternalProcessing());
+    }
+
+    public function testMarkExternalProcessingAllowedForSaliva()
+    {
+        $tube = new Tube('T123');
+
+        $this->assertFalse($tube->willAllowExternalProcessing());
+
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_SALIVA, new \DateTimeImmutable());
+
+        $this->assertTrue($tube->willAllowExternalProcessing());
+
+        // Dropped-off Tube has a Specimen, we'll assert against it below
+        $specimen = $tube->getSpecimen();
+        $this->assertNotEmpty($specimen);
+
+        // Pre-conditions to External Processing
+        $this->assertEmpty($tube->getExternalProcessingAt());
+        $this->assertSame(Specimen::STATUS_RETURNED, $specimen->getStatus());
+
+        $tube->markExternalProcessing();
+
+        // Post-conditions to External Processing
+        $this->assertSame($tube->getStatus(), Tube::STATUS_EXTERNAL);
+        $this->assertNotEmpty($tube->getExternalProcessingAt());
+
+        // Specimen must also updated to have Status "EXTERNAL"
+        $this->assertSame(Specimen::STATUS_EXTERNAL, $specimen->getStatus());
     }
 
     /**
