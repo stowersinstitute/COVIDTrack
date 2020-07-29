@@ -75,7 +75,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for result in specimen.resultsQPCR %}
+                    {% for result in specimen.qPCRResults %}
                         <tr>
                             {% if userCanEditResults %}
                             <td>
@@ -123,7 +123,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for result in specimen.resultsAntibody %}
+                    {% for result in specimen.antibodyResults %}
                         <tr>
                             {% if userCanEditResults %}
                             <td>
