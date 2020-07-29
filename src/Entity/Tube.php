@@ -594,16 +594,21 @@ class Tube
      * When a Tube has been sent to an external facility for further processing.
      * Such as for performing processes like qPCR.
      */
-    public function markExternalProcessing(): void
+    public function markExternalProcessing(\DateTimeImmutable $processingAt = null): void
     {
         if (!$this->willAllowExternalProcessing()) {
             throw new \RuntimeException('Tube does not allow marking for External Processing');
         }
 
-        $this->externalProcessingAt = new \DateTimeImmutable();
+        $this->setExternalProcessingAt($processingAt ?: new \DateTimeImmutable());
         $this->setStatus(self::STATUS_EXTERNAL);
 
         $this->specimen->setStatus(Specimen::STATUS_EXTERNAL);
+    }
+
+    public function setExternalProcessingAt(?\DateTimeImmutable $at): void
+    {
+        $this->externalProcessingAt = $at;
     }
 
     public function getExternalProcessingAt(): ?\DateTimeImmutable
