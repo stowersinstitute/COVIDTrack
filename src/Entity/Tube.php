@@ -564,6 +564,17 @@ class Tube
     }
 
     /**
+     * When a Participant has returned this Tube with their Specimen inside.
+     */
+    private function markReturned(\DateTimeImmutable $returnedAt = null)
+    {
+        if ($returnedAt === null) $returnedAt = new \DateTimeImmutable();
+
+        $this->setStatus(self::STATUS_RETURNED);
+        $this->setReturnedAt($returnedAt);
+    }
+
+    /**
      * Whether this Tube currently supports being marked for External Processing.
      *
      * @return bool
@@ -598,17 +609,6 @@ class Tube
     public function getExternalProcessingAt(): ?\DateTimeImmutable
     {
         return $this->externalProcessingAt;
-    }
-
-    /**
-     * When a Participant has returned this Tube with their Specimen inside.
-     */
-    private function markReturned(\DateTimeImmutable $returnedAt = null)
-    {
-        if ($returnedAt === null) $returnedAt = new \DateTimeImmutable();
-
-        $this->setStatus(self::STATUS_RETURNED);
-        $this->setReturnedAt($returnedAt);
     }
 
     /**
