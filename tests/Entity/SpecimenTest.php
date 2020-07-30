@@ -348,6 +348,25 @@ class SpecimenTest extends TestCase
         $this->assertSame($specimen->getCliaTestingRecommendedText(), 'Awaiting Results');
     }
 
+    public function testRejectedSpecimensAreNotPendingResults()
+    {
+        $group = ParticipantGroup::buildExample('GRP1');
+        $specimen = new Specimen('S100', $group);
+
+        $this->assertEmpty($specimen->getCliaTestingRecommendation());
+        $this->assertEmpty($specimen->getCliaTestingRecommendedText());
+
+        $specimen->setType(Specimen::TYPE_SALIVA);
+
+        $this->assertSame($specimen->getCliaTestingRecommendation(), Specimen::CLIA_REC_PENDING);
+        $this->assertSame($specimen->getCliaTestingRecommendedText(), 'Awaiting Results');
+
+        $specimen->setStatus(Specimen::STATUS_REJECTED);
+
+        $this->assertNull($specimen->getCliaTestingRecommendation());
+        $this->assertSame($specimen->getCliaTestingRecommendedText(), '');
+    }
+
     /**
      * @param string $accessionId Accession ID to return when calling ->generate() on the mock
      * @return MockObject|SpecimenAccessionIdGenerator
