@@ -39,7 +39,7 @@ class SpecimenResultAntibody extends SpecimenResult
      *
      * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsAntibody")
-     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $specimen;
 
