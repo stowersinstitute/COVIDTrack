@@ -367,6 +367,10 @@ class Specimen
         }
 
         $this->status = $status;
+
+        if ($status === self::STATUS_REJECTED) {
+            $this->recalculateCliaTestingRecommendation();
+        }
     }
 
     /**
@@ -655,6 +659,13 @@ class Specimen
     {
         // Only Saliva specimens support CLIA recommendations
         if ($this->getType() !== self::TYPE_SALIVA) {
+            $this->cliaTestingRecommendation = null;
+            return '';
+        }
+
+        // Rejected Specimens will not end up with any results,
+        // thus will never have a CLIA Recommendation
+        if ($this->getStatus() === self::STATUS_REJECTED) {
             $this->cliaTestingRecommendation = null;
             return '';
         }
