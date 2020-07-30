@@ -30,17 +30,9 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // Overwrite constructor to not require any params
             public function __construct() {}
 
-            // Overwrite generate() to only generate valid values
+            // Overwrite generate() to not be used by this test
             public function generate() {
-                if (empty($counter)) {
-                    static $counter = 0;
-                }
-
-                $counter++;
-
-                // Must match in viral-results-with-ct-amp-score.xlsx
-                // For example: SpecimenQPCRResults1
-                return sprintf("SpecimenQPCRResults%d", $counter);
+                throw new \RuntimeException('Called SpecimenAccessionIdGenerator->generate() when not expected. See SpecimenResultQPCRImporterFixtures::__construct()');
             }
         };
     }
