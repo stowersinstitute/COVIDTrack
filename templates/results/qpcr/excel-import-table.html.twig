@@ -5,6 +5,7 @@
         <th>Conclusion</th>
         <th>Well Plate Barcode</th>
         <th>Well Position</th>
+        <th>Ct / Amp Score</th>
     </tr>
     </thead>
 
@@ -15,6 +16,11 @@
             <td>{{ result.conclusion }}</td>
             <td>{{ result.wellPlateBarcode }}</td>
             <td>{{ result.wellPosition }}</td>
+            <td>
+                Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>
+                Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>
+                Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>
+            </td>
         </tr>
     {% endfor %}
     </tbody>
