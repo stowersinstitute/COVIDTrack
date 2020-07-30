@@ -312,7 +312,7 @@ class SpecimenTest extends TestCase
 
     public function testCreateFromTube()
     {
-        $tube = new Tube('TUBE-100');
+        $bloodTube = new Tube('TUBE-100');
 
         $accessionId = 'SPEC-200';
         $gen = $this->getMockAccessionIdGenerator($accessionId);
@@ -321,15 +321,24 @@ class SpecimenTest extends TestCase
         $group = ParticipantGroup::buildExample('GRP-1');
         $tubeType = Tube::TYPE_BLOOD;
         $collectedAt = new \DateTime('2020-05-20 15:22:44');
-        $tube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
+        $bloodTube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
 
-        $specimen = Specimen::createFromTube($tube, $gen);
+        $bloodSpecimen = Specimen::createFromTube($bloodTube, $gen);
 
-        $this->assertSame($accessionId, $tube->getSpecimen()->getAccessionId());
-        $this->assertSame($group, $tube->getParticipantGroup());
-        $this->assertSame(Specimen::TYPE_BLOOD, $specimen->getType());
-        $this->assertEquals($collectedAt, $specimen->getCollectedAt());
-        $this->assertTrue(EntityUtils::isSameEntity($tube->getParticipantGroup(), $specimen->getParticipantGroup()));
+        $this->assertSame($accessionId, $bloodTube->getSpecimen()->getAccessionId());
+        $this->assertSame($group, $bloodTube->getParticipantGroup());
+        $this->assertSame(Specimen::TYPE_BLOOD, $bloodSpecimen->getType());
+        $this->assertEquals($collectedAt, $bloodSpecimen->getCollectedAt());
+        $this->assertTrue(EntityUtils::isSameEntity($bloodTube->getParticipantGroup(), $bloodSpecimen->getParticipantGroup()));
+
+        $salivaTube = new Tube('TUBE-101');
+        $salivaTubeType = Tube::TYPE_SALIVA;
+        $salivaTube->kioskDropoffComplete($gen, $drop, $group, $salivaTubeType, $collectedAt);
+
+        $salivaSpecimen = Specimen::createFromTube($salivaTube, $gen);
+        $this->assertSame($salivaTube->getAccessionId(), $salivaTube->getSpecimen()->getAccessionId());
+
+
     }
 
     public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()

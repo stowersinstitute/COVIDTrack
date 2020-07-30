@@ -60,7 +60,7 @@ class KioskSessionTest extends TestCase
 
         // First Tube entered
         $tube1 = new Tube('TUBE-100');
-        $tubeType1 = Tube::TYPE_SALIVA;
+        $tubeType1 = Tube::TYPE_BLOOD;
         $collectedAt1 = new \DateTimeImmutable('2020-05-20 4:00pm');
         $sessionTube1 = new KioskSessionTube($session, $tube1, $tubeType1, $collectedAt1);
         $session->addTubeData($sessionTube1);
@@ -101,7 +101,8 @@ class KioskSessionTest extends TestCase
 
         // Second Tube has expected values
         $this->assertInstanceOf(Specimen::class, $tube2->getSpecimen());
-        $this->assertSame($specimenAccessionIds[1], $tube2->getSpecimen()->getAccessionId());
+        // Saliva specimen accession IDs should be the same as the tube accession ID
+        $this->assertSame($tube2->getAccessionId(), $tube2->getSpecimen()->getAccessionId());
         $this->assertSame($group, $tube2->getParticipantGroup());
         $this->assertSame($tubeType2, $tube2->getTubeType());
         $this->assertSame($collectedAt2, $tube2->getCollectedAt());
