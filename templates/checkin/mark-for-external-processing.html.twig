@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block page_title %}External Processing{% endblock %}
+{% block page_title %}<i class="fa fa-fw fa-check text-green"></i> External Processing Saved{% endblock %}
 
 {% block body %}
 
@@ -10,7 +10,7 @@
             <div class="box-body">
                 <p><a href="{{ path('checkin_queue') }}" class="btn btn-primary">&lt; Back to Check-in Queue</a></p>
 
-                <p>Copy/Paste below data into Excel to save.</p>
+                <p>Copy/Paste below data into Excel for your records.</p>
 
                 {% include 'checkin/queue-table.html.twig' with {
                     displayRowCheckboxes: false
