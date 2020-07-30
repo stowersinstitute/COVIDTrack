@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -36,6 +37,30 @@ class QPCRResultsForm extends AbstractType
                 'choices' => SpecimenResultQPCR::getFormConclusions(),
                 'placeholder' => '- Select -',
                 'required' => true,
+            ])
+            ->add('CT1', TextType::class, [
+                'label' => 'Ct1',
+                'required' => false,
+            ])
+            ->add('CT1AmpScore', TextType::class, [
+                'label' => 'Amp Score1',
+                'required' => false,
+            ])
+            ->add('CT2', TextType::class, [
+                'label' => 'Ct2',
+                'required' => false,
+            ])
+            ->add('CT2AmpScore', TextType::class, [
+                'label' => 'Amp Score2',
+                'required' => false,
+            ])
+            ->add('CT3', TextType::class, [
+                'label' => 'Ct3',
+                'required' => false,
+            ])
+            ->add('CT3AmpScore', TextType::class, [
+                'label' => 'Amp Score3',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],

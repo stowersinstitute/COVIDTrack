@@ -584,7 +584,8 @@ class Specimen
     public function willAllowAddingResults(): bool
     {
         $valid = [
-            self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
+            self::STATUS_RETURNED, // Specimen returned at a kiosk, unsure exactly where it is down-stream
+            self::STATUS_ACCEPTED, // Specimen Accepted and checked-in by Sample Collection Team
             self::STATUS_RESULTS,  // Can add more than 1 result
         ];
 

@@ -55,6 +55,12 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             'conclusion' => 'B',
             'position' => 'C',
             'plateBarcode' => 'E',
+            'ct1' => 'H',
+            'ct2' => 'I',
+            'ct3'=> 'J',
+            'ct1AmpScore' => 'K',
+            'ct2AmpScore' => 'L',
+            'ct3AmpScore' => 'M',
         ];
     }
 
@@ -106,16 +112,24 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
             $rawPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['position']);
 
+            $rawCT1 = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct1']);
+            $rawCT1AmpScore = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct1AmpScore']);
+            $rawCT2 = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct2']);
+            $rawCT2AmpScore = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct2AmpScore']);
+            $rawCT3 = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct3']);
+            $rawCT3AmpScore = $this->worksheet->getCellValue($rowNumber, $this->columnMap['ct3AmpScore']);
+
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
             $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
             $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenId, $rowNumber) && $rowOk;
+            // CT and Amp Score values not validated, we accept anything submitted
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            // Specimen already validated
+            // Specimen ID already validated
             $specimen = $this->findSpecimen($rawSpecimenId);
             $plate = $this->findPlate($rawPlateBarcode);
             $well = $specimen->getWellAtPosition($plate, $rawPosition);
@@ -126,6 +140,12 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             // New Result
             $qpcr = new SpecimenResultQPCR($well, $rawConclusion);
+            $qpcr->setCT1($rawCT1);
+            $qpcr->setCT1AmpScore($rawCT1AmpScore);
+            $qpcr->setCT2($rawCT2);
+            $qpcr->setCT2AmpScore($rawCT2AmpScore);
+            $qpcr->setCT3($rawCT3);
+            $qpcr->setCT3AmpScore($rawCT3AmpScore);
 
             $this->getEntityManager()->persist($qpcr);
 
