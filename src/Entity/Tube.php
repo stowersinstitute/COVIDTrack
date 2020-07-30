@@ -29,6 +29,7 @@ class Tube
     const STATUS_CREATED = "CREATED";
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
+    const STATUS_EXTERNAL = "EXTERNAL";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED";
 
@@ -149,14 +150,23 @@ class Tube
     private $checkedInByUsername;
 
     /**
-     * Date and Time when this Specimen was extracted (collected) from the Participant.
-     * For example, when they spit in the tube or did a blood draw.
+     * Date and Time when this Tube's Specimen was extracted (collected) from
+     * the Participant. For example, when they spit in the tube or did a blood draw.
      *
      * @var \DateTimeImmutable
      * @ORM\Column(name="collected_at", type="datetime", nullable=true)
      * @Gedmo\Versioned
      */
     private $collectedAt;
+
+    /**
+     * Date and Time when this Tube was sent for processing at an external location.
+     *
+     * @var \DateTimeImmutable
+     * @ORM\Column(name="external_processing_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
+     */
+    private $externalProcessingAt;
 
     public function __construct(string $accessionId = null)
     {
@@ -450,8 +460,14 @@ class Tube
             return true;
         }
 
-        // Status before Accepted/Rejected
-        return $this->status === self::STATUS_RETURNED;
+        // Blood Tubes
+        if ($this->tubeType === self::TYPE_BLOOD) {
+            // Status before Accepted/Rejected
+            return $this->status === self::STATUS_RETURNED;
+        }
+
+        // Saliva Tubes
+        return in_array($this->status, [self::STATUS_EXTERNAL, self::STATUS_RETURNED]);
     }
 
     /**
@@ -559,6 +575,48 @@ class Tube
     }
 
     /**
+     * Whether this Tube currently supports being marked for External Processing.
+     *
+     * @return bool
+     */
+    public function willAllowExternalProcessing(): bool
+    {
+        // Only certain types of Tubes go through External Processing
+        if ($this->tubeType !== self::TYPE_SALIVA) {
+            return false;
+        }
+
+        // Ensure in correct status before proceeding
+        return $this->status === self::STATUS_RETURNED;
+    }
+
+    /**
+     * When a Tube has been sent to an external facility for further processing.
+     * Such as for performing processes like qPCR.
+     */
+    public function markExternalProcessing(\DateTimeImmutable $processingAt = null): void
+    {
+        if (!$this->willAllowExternalProcessing()) {
+            throw new \RuntimeException('Tube does not allow marking for External Processing');
+        }
+
+        $this->setExternalProcessingAt($processingAt ?: new \DateTimeImmutable());
+        $this->setStatus(self::STATUS_EXTERNAL);
+
+        $this->specimen->setStatus(Specimen::STATUS_EXTERNAL);
+    }
+
+    public function setExternalProcessingAt(?\DateTimeImmutable $at): void
+    {
+        $this->externalProcessingAt = $at;
+    }
+
+    public function getExternalProcessingAt(): ?\DateTimeImmutable
+    {
+        return $this->externalProcessingAt;
+    }
+
+    /**
      * Check-In Technician confirms the Tube and Specimen appear in acceptable
      * condition to perform further research.
      */
@@ -617,6 +675,7 @@ class Tube
             'Created' => self::STATUS_CREATED,
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
+            'External Processing' => self::STATUS_EXTERNAL,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
         ];

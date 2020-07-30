@@ -81,6 +81,9 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // NOTE: Specimen.accessionId generated with known value. See __construct() above
             $tube->kioskDropoffComplete($this->specimenIdGen, $dropOff, $group, $tubeType, $collectedAt);
 
+            // Sent to external facility
+            $tube->markExternalProcessing($data['externalProcessingAt']);
+
             // Tubes/Specimens added to a Well Plate
             $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
         }
@@ -100,6 +103,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0001',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'A1',
             ],
@@ -107,6 +111,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0002',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'C5',
             ],
@@ -114,6 +119,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0003',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'D6',
             ],
@@ -121,6 +127,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0004',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'E7',
             ],

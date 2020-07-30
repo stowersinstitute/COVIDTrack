@@ -25,6 +25,7 @@ class Specimen
 
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
+    const STATUS_EXTERNAL = "EXTERNAL";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
@@ -418,6 +419,7 @@ class Specimen
         return [
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
+            'External Processing' => self::STATUS_EXTERNAL,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
@@ -588,9 +590,9 @@ class Specimen
     public function willAllowAddingResults(): bool
     {
         $valid = [
-            self::STATUS_RETURNED, // Specimen returned at a kiosk, unsure exactly where it is down-stream
-            self::STATUS_ACCEPTED, // Specimen Accepted and checked-in by Sample Collection Team
-            self::STATUS_RESULTS,  // Can add more than 1 result
+            self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
+            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 
         return in_array($this->status, $valid);
