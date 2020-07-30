@@ -586,8 +586,9 @@ class Specimen
     public function willAllowAddingResults(): bool
     {
         $valid = [
-            self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
-            self::STATUS_RESULTS,  // Can add more than 1 result
+            self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
+            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 
         return in_array($this->status, $valid);
