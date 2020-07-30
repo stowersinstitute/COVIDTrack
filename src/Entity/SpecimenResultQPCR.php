@@ -30,7 +30,7 @@ class SpecimenResultQPCR extends SpecimenResult
      *
      * @var Specimen
      * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", inversedBy="resultsQPCR")
-     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $specimen;
 
