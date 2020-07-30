@@ -141,11 +141,16 @@ class Specimen
     /**
      * Create a new Specimen
      *
+     * @param ParticipantGroup $group
+     * @param SpecimenAccessionIdGenerator $gen
+     * @param string|null $accessionId If given, this string will used as the accession ID instead of a generated one.
      * @return Specimen
      */
-    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen): self
+    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
     {
-        $accessionId = $gen->generate();
+        if (!$accessionId) {
+            $accessionId = $gen->generate();
+        }
 
         return new static($accessionId, $group);
     }
@@ -163,8 +168,13 @@ class Specimen
             throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
         }
 
+        $specimenAccessionId = null;
+        if ($tube->getTubeType() === Tube::TYPE_SALIVA) {
+            $specimenAccessionId = $tube->getAccessionId();
+        }
+
         // New Specimen
-        $s = static::createNew($group, $gen);
+        $s = static::createNew($group, $gen, $specimenAccessionId);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
