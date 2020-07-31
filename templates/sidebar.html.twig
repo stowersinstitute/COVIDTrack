@@ -190,13 +190,13 @@ Renders a top-level navigation node in the tree navigation.
                     text: 'Viral CLIA Rec Notifications',
                     iconClass: 'fa-envelope',
                     route: 'report_notification_clia',
-                    mustHaveOneRoleToView: ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
                 },
                 {
                     text: 'Viral Non-Negative Notifs',
                     iconClass: 'fa-envelope',
                     route: 'report_notification_non_negative',
-                    mustHaveOneRoleToView: ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
                 },
                 {
                     text: 'Viral Group Results',
@@ -204,7 +204,7 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_report_group_results',
                     mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW']
                 },
-            ], ['ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'])
+            ], ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Label Printing', 'fa-print', [
