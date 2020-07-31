@@ -123,7 +123,10 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $rowOk = true;
             $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
             $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
-            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenId, $rowNumber) && $rowOk;
+
+            if (!empty($rawPosition)) {
+                $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenId, $rowNumber) && $rowOk;
+            }
             // CT and Amp Score values not validated, we accept anything submitted
 
             // If any field failed validation do not import the row
@@ -131,15 +134,20 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             // Specimen ID already validated
             $specimen = $this->findSpecimen($rawSpecimenId);
-            $plate = $this->findPlate($rawPlateBarcode);
-            $well = $specimen->getWellAtPosition($plate, $rawPosition);
 
             // "updated" if adding a new result when one already exists
             // "created" if adding first result
             $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
 
+            if (!empty($rawPosition)){
+                $plate = $this->findPlate($rawPlateBarcode);
+                $well = $specimen->getWellAtPosition($plate, $rawPosition);
+                $qpcr = SpecimenResultQPCR::createFromWell($well, $rawConclusion);
+            } else {
+                $qpcr = SpecimenResultQPCR::createFromSpecimen($specimen, $rawConclusion);
+            }
+
             // New Result
-            $qpcr = new SpecimenResultQPCR($well, $rawConclusion);
             $qpcr->setCT1($rawCT1);
             $qpcr->setCT1AmpScore($rawCT1AmpScore);
             $qpcr->setCT2($rawCT2);

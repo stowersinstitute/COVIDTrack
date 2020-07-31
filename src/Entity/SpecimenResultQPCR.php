@@ -85,21 +85,38 @@ class SpecimenResultQPCR extends SpecimenResult
     /**
      * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
      */
-    public function __construct(SpecimenWell $well, string $conclusion)
+    public static function createFromWell(SpecimenWell $well, string $conclusion)
     {
-        parent::__construct();
+        $r = new self();
 
         if (!$well->getSpecimen()) {
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
         }
-        $this->specimen = $well->getSpecimen();
-        $this->specimen->addQPCRResult($this);
+        $r->specimen = $well->getSpecimen();
+        $r->specimen->addQPCRResult($r);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
-        $this->well = $well;
-        $well->addResultQPCR($this);
+        $r->well = $well;
+        $well->addResultQPCR($r);
 
-        $this->setConclusion($conclusion);
+        $r->setConclusion($conclusion);
+
+        return $r;
+    }
+
+    /**
+     * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
+     */
+    public static function createFromSpecimen(Specimen $specimen, string $conclusion)
+    {
+        $r = new self();
+
+        $r->specimen = $specimen;
+        $r->specimen->addQPCRResult($r);
+
+        $r->setConclusion($conclusion);
+
+        return $r;
     }
 
     public function getWell(): SpecimenWell
