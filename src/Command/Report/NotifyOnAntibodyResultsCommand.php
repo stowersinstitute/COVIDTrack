@@ -6,6 +6,8 @@ use App\Entity\AntibodyNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultAntibody;
 use App\Util\DateUtils;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
@@ -19,6 +21,11 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
 {
     protected static $defaultName = 'app:report:notify-on-antibody-result';
 
+    /**
+     * Holds local cache of results when run. Reset when invoking execute().
+     */
+    private $notificationData = [];
+
     protected function configure()
     {
         // See parent for CLI options
@@ -27,6 +34,14 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
         $this
             ->setDescription('Notifies privileged users when Antibody Results are available that are not Negative results.')
         ;
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        // Reset local var that tracks calculated results in buildNotificationData()
+        $this->notificationData = [];
+
+        return parent::execute($input, $output);
     }
 
     protected function getSubject(): string
@@ -123,6 +138,10 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
      */
     private function getNewResults(): array
     {
+        if (!empty($this->notificationData)) {
+            return $this->notificationData;
+        }
+
         $output = [];
 
         $lastNotificationSent = $this->em
@@ -171,6 +190,8 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
             }
         }
 
-        return array_values($output);
+        $this->notificationData = array_values($output);
+
+        return $this->notificationData;
     }
 }
