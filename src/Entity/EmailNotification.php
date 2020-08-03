@@ -19,6 +19,7 @@ use Symfony\Component\Mime\Email;
  * @ORM\DiscriminatorMap({
  *     "cliaViral" = "CliaRecommendationViralNotification",
  *     "nonNegativeViral" = "NonNegativeViralNotification",
+ *     "antibody" = "AntibodyNotification",
  * })
  */
 abstract class EmailNotification

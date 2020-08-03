@@ -2,22 +2,22 @@
 
 namespace App\Tests\Command\Report;
 
-use App\Command\Report\NotifyOnPositiveResultCommand;
+use App\Command\Report\NotifyOnRecommendedCliaViralResultsCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultQPCR;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\Command\DataFixtures\NotifyOnNewlyCreatedPositiveResultsFixtures;
+use App\Tests\Command\DataFixtures\NotifyOnRecommendedCliaViralResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
+class NotifyOnRecommendedCliaViralResultsCommandTest extends BaseDatabaseTestCase
 {
     public function testSendsNotifications()
     {
         $extractor = $this->loadFixtures([
-            NotifyOnNewlyCreatedPositiveResultsFixtures::class,
+            NotifyOnRecommendedCliaViralResultsFixtures::class,
         ]);
         $referenceRepository = $extractor->getReferenceRepository();
 
@@ -25,7 +25,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
         $mockMailer = $this->buildMockMailer();
         $mockRouter = $this->buildMockRouter();
 
-        $cmd = new NotifyOnPositiveResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
+        $cmd = new NotifyOnRecommendedCliaViralResultsCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
 
         $cmdTester = new CommandTester($cmd);
         $cmdTester->execute([], [
@@ -34,7 +34,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
 
         $txtOutput = $cmdTester->getDisplay();
 
-        // Groups from NotifyOnNewlyCreatedPositiveResultsFixtures
+        // Groups from NotifyOnRecommendedCliaViralResultsFixtures
         $groupsExpected = [
             'Orange',
             'Red',
@@ -43,7 +43,7 @@ class NotifyOnPositiveResultCommandTest extends BaseDatabaseTestCase
             $this->assertStringContainsString($groupTitle, $txtOutput);
         }
 
-        // Users with notification role from NotifyOnNewlyCreatedPositiveResultsFixtures
+        // Users with notification role from NotifyOnRecommendedCliaViralResultsFixtures
         $expectedUserRecipients = [
             'Mary Smith',
             'Admin User',

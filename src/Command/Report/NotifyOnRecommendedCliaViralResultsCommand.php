@@ -10,13 +10,14 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
 /**
- * Notifies privileged users when a new Positive Result is available.
+ * Notifies privileged users when a new Viral Result recommends members of its
+ * Participant Group undergo addition CLIA testing.
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
+class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotificationCommand
 {
-    protected static $defaultName = 'app:report:notify-on-positive-result';
+    protected static $defaultName = 'app:report:notify-on-recommended-viral-result';
 
     protected function configure()
     {
@@ -24,13 +25,26 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         parent::configure();
 
         $this
-            ->setDescription('Notifies privileged users when a new Result recommending CLIA testing is available.')
+            ->setDescription('Notifies privileged users when a Viral Result recommends CLIA testing.')
         ;
     }
 
     protected function getSubject(): string
     {
         return 'New Group Testing Recommendation';
+    }
+
+    /**
+     * Return list of roles where if user is explicitly assigned at least one,
+     * they should receive the Notification sent by this command.
+     *
+     * @return string[]
+     */
+    protected function getRolesToReceiveNotification(): array
+    {
+        return [
+            self::NOTIFY_USERS_WITH_ROLE,
+        ];
     }
 
     protected function getHtmlEmailBody(): string
@@ -40,7 +54,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         $timestamps = $recommendations['timestamps'];
 
         $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
-            return sprintf('<li>%s</li>', $g->getTitle());
+            return sprintf('<li>%s</li>', htmlentities($g->getTitle()));
         }, $groups);
 
         $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
@@ -67,7 +81,7 @@ class NotifyOnPositiveResultCommand extends BaseResultsNotificationCommand
         ",
             implode("\n", $timestampsOutput),
             implode("\n", $groupsRecTestingOutput),
-            sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
+            sprintf('<a href="%s">%s</a>', htmlentities($url), htmlentities($url))
         );
 
         return $html;

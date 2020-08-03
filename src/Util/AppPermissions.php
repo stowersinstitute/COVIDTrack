@@ -30,6 +30,7 @@ class AppPermissions
 
         // Notifications
         'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS',
+        'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS',
 
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',

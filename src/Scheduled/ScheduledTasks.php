@@ -1,9 +1,11 @@
 <?php
 
-
 namespace App\Scheduled;
 
-
+use App\Command\CleanupExcelImportData;
+use App\Command\Report\NotifyOnAntibodyResultsCommand;
+use App\Command\Report\NotifyOnNonNegativeViralResultCommand;
+use App\Command\Report\NotifyOnRecommendedCliaViralResultsCommand;
 use Zenstruck\ScheduleBundle\Schedule;
 use Zenstruck\ScheduleBundle\Schedule\ScheduleBuilder;
 
@@ -13,17 +15,20 @@ class ScheduledTasks implements ScheduleBuilder
     {
         $schedule->environments('prod');
 
-        $schedule->addCommand('app:cleanup:excel-import-data', '--force')
+        $schedule->addCommand(CleanupExcelImportData::getDefaultName(), '--force')
             ->description('Clean up unfinished Excel imports')
             ->dailyAt('03:00');
 
-        $schedule->addCommand('app:report:notify-on-positive-result')
-            ->description('Notify privileged users like Study Coordinator when a new viral result indicates a Participant Group recommended for CLIA testing')
+        $schedule->addCommand(NotifyOnRecommendedCliaViralResultsCommand::getDefaultName())
+            ->description('Notify privileged users like Study Coordinator when a new Viral result indicates a Participant Group recommended for CLIA testing')
             ->everyFiveMinutes();
 
-        $schedule->addCommand('app:report:notify-on-non-negative-viral-result')
-            ->description('Notify privileged users like Study Coordinator when a new Non-Negative viral result is reported')
+        $schedule->addCommand(NotifyOnNonNegativeViralResultCommand::getDefaultName())
+            ->description('Notify privileged users like Study Coordinator when a new Non-Negative Viral result is reported')
+            ->everyFiveMinutes();
+
+        $schedule->addCommand(NotifyOnAntibodyResultsCommand::getDefaultName())
+            ->description('Notify privileged users like Study Coordinator when Antibody results have been reported')
             ->everyFiveMinutes();
     }
-
 }

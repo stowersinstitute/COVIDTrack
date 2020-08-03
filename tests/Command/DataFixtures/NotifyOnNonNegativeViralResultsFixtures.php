@@ -14,10 +14,10 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Creates test data for testing sending email notifications about
- * Participant Groups with results recommending testing.
+ * Creates test data for sending email notifications about
+ * Participant Groups with Non-Negative Viral results.
  */
-class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
+class NotifyOnNonNegativeViralResultsFixtures extends Fixture
 {
     /**
      * @var SpecimenAccessionIdGenerator
@@ -136,8 +136,8 @@ class NotifyOnNewlyCreatedPositiveResultsFixtures extends Fixture
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
 
                 $result = SpecimenResultQPCR::createFromWell($well, $data['resultConclusion']);
-                $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
-                $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+                $result->setCreatedAt(new \DateTimeImmutable('-4 days 11:00am'));
+                $result->setUpdatedAt(new \DateTimeImmutable('-4 days 11:00am'));
 
                 if (isset($data['resultReferenceId'])) {
                     $this->addReference($data['resultReferenceId'], $result);

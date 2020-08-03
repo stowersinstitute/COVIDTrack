@@ -3,6 +3,10 @@
 namespace App\Controller;
 
 use App\Command\Report\BaseResultsNotificationCommand;
+use App\Command\Report\NotifyOnAntibodyResultsCommand;
+use App\Command\Report\NotifyOnNonNegativeViralResultCommand;
+use App\Command\Report\NotifyOnRecommendedCliaViralResultsCommand;
+use App\Entity\AntibodyNotification;
 use App\Entity\NonNegativeViralNotification;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
@@ -83,9 +87,8 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $commandName = 'app:report:notify-on-positive-result';
         $input = new ArrayInput([
-            'command' => $commandName,
+            'command' => NotifyOnRecommendedCliaViralResultsCommand::getDefaultName(),
         ]);
 
         // Output is not used
@@ -106,11 +109,11 @@ class ReportController extends AbstractController
     }
 
     /**
-     * List Non-Negative Notifications previously sent.
+     * List Viral Non-Negative Notifications previously sent.
      *
-     * @Route(path="/email-notifications/non-negative", methods={"GET"}, name="report_notification_non_negative")
+     * @Route(path="/email-notifications/viral/non-negative", methods={"GET"}, name="report_notification_viral_non_negative")
      */
-    public function notificationsNonNegative(RouterInterface $router)
+    public function notificationsViralNonNegative(RouterInterface $router)
     {
         // User must have one or more of these
         $this->denyAccessUnlessGranted([
@@ -128,21 +131,21 @@ class ReportController extends AbstractController
 
         return $this->render('reports/email-notifications/index.html.twig', [
             'notification_type_text' => 'Viral Non-Negative',
-            'notificationCheckUrl' => $router->generate('report_notification_non_negative_check'),
+            'notificationCheckUrl' => $router->generate('report_notification_viral_non_negative_check'),
             'logs' => $logs,
             'limit' => $limit,
         ]);
     }
 
     /**
-     * Run logic that would send the Non-Negative Viral notification if new
+     * Run logic that would send the Viral Non-Negative notification if new
      * results need to be reported.
      *
      * Meant to be called from the UI via AJAX.
      *
-     * @Route(path="/email-notifications/non-negative/check", methods={"POST"}, name="report_notification_non_negative_check")
+     * @Route(path="/email-notifications/viral/non-negative/check", methods={"POST"}, name="report_notification_viral_non_negative_check")
      */
-    public function checkNonNegativeNotifications(KernelInterface $kernel)
+    public function checkViralNonNegativeNotifications(KernelInterface $kernel)
     {
         try {
             // User must have one or more of these
@@ -164,9 +167,8 @@ class ReportController extends AbstractController
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
-        $commandName = 'app:report:notify-on-non-negative-viral-result';
         $input = new ArrayInput([
-            'command' => $commandName,
+            'command' => NotifyOnNonNegativeViralResultCommand::getDefaultName(),
         ]);
 
         // Output is not used
@@ -175,6 +177,86 @@ class ReportController extends AbstractController
 
         $success = true;
         $message = 'Check for new Non-Negative Viral Results complete';
+        if ($exitCode !== 0) {
+            $success = false;
+            $message = 'Error occurred when checking for new results';
+        }
+
+        return $this->json([
+            'success' => $success,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * List Antibody Notifications previously sent.
+     *
+     * @Route(path="/email-notifications/antibody", methods={"GET"}, name="report_notification_antibody")
+     */
+    public function notificationsAntibody(RouterInterface $router)
+    {
+        // User must have one or more of these
+        $this->denyAccessUnlessGranted([
+            // Users who receive the notification can check it for themselves
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
+
+            // Users who view reports on Groups
+            'ROLE_REPORTS_GROUP_VIEW',
+        ]);
+
+        $limit = 100;
+        $logs = $this->getDoctrine()
+            ->getRepository(AntibodyNotification::class)
+            ->findMostRecent($limit);
+
+        return $this->render('reports/email-notifications/index.html.twig', [
+            'notification_type_text' => 'Antibody',
+            'notificationCheckUrl' => $router->generate('report_notification_antibody_check'),
+            'logs' => $logs,
+            'limit' => $limit,
+        ]);
+    }
+
+    /**
+     * Run logic that would send the Antibody Notification if results need to be
+     * reported.
+     *
+     * Meant to be called from the UI via AJAX.
+     *
+     * @Route(path="/email-notifications/antibody/check", methods={"POST"}, name="report_notification_antibody_check")
+     */
+    public function checkAntibodyNotifications(KernelInterface $kernel)
+    {
+        try {
+            // User must have one or more of these
+            $this->denyAccessUnlessGranted([
+                // Users who receive the notification can check it for themselves
+                BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
+
+                // Users who can edit results
+                'ROLE_RESULTS_EDIT',
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        // Execute Symfony Command programmatically
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput([
+            'command' => NotifyOnAntibodyResultsCommand::getDefaultName(),
+        ]);
+
+        // Output is not used
+        $output = new NullOutput();
+        $exitCode = $application->run($input, $output);
+
+        $success = true;
+        $message = 'Check for new Antibody Results complete';
         if ($exitCode !== 0) {
             $success = false;
             $message = 'Error occurred when checking for new results';

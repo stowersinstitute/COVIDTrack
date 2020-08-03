@@ -21,8 +21,14 @@ abstract class BaseResultsNotificationCommand extends Command
 {
     /**
      * Users who explicitly have this role will be notified about Viral Results.
+     * TODO: CVDLS-158 Rename to NOTIFY_USERS_WITH_ROLE_VIRAL
      */
     const NOTIFY_USERS_WITH_ROLE = 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS';
+
+    /**
+     * Users who explicitly have this role will be notified about Antibody Results.
+     */
+    const NOTIFY_USERS_WITH_ROLE_ANTIBODY = 'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS';
 
     /**
      * Date format for printing results in email
@@ -100,6 +106,13 @@ abstract class BaseResultsNotificationCommand extends Command
 
     abstract protected function getSubject(): string;
     abstract protected function getHtmlEmailBody(): string;
+    /**
+     * Return list of roles where if user is explicitly assigned at least one,
+     * they should receive the Notification sent by this command.
+     *
+     * @return string[]
+     */
+    abstract protected function getRolesToReceiveNotification(): array;
     abstract protected function logSentEmail(Email $email);
 
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -153,8 +166,13 @@ abstract class BaseResultsNotificationCommand extends Command
                 return false;
             }
 
-            // Users assigned a permission on their Edit User page
-            return $u->hasRoleExplicit(self::NOTIFY_USERS_WITH_ROLE);
+            foreach ($this->getRolesToReceiveNotification() as $role) {
+                if ($u->hasRoleExplicit($role)) {
+                    return true;
+                }
+            }
+
+            return false;
         });
 
         // Create Address objects accepted by Symfony Mailer

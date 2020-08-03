@@ -39,6 +39,7 @@ class AppUserFixtures extends Fixture implements FixtureGroupInterface
             'ROLE_PARTICIPANT_GROUP_EDIT',
             'ROLE_PRINT_GROUP_LABELS',
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
         ]);
 
         // Specimen Collection Team

@@ -195,7 +195,7 @@ Renders a top-level navigation node in the tree navigation.
                 {
                     text: 'Viral Non-Negative Notifs',
                     iconClass: 'fa-envelope',
-                    route: 'report_notification_non_negative',
+                    route: 'report_notification_viral_non_negative',
                     mustHaveOneRoleToView: ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
                 },
                 {
@@ -204,7 +204,13 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_report_group_results',
                     mustHaveOneRoleToView: ['ROLE_REPORTS_GROUP_VIEW']
                 },
-            ], ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'])
+                {
+                    text: 'Antibody Notifications',
+                    iconClass: 'fa-envelope',
+                    route: 'report_notification_antibody',
+                    mustHaveOneRoleToView: ['ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'],
+                },
+            ], ['ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS', 'ROLE_REPORTS_GROUP_VIEW'])
         }}
         {{
             _self.treenode('Label Printing', 'fa-print', [
