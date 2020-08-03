@@ -71,21 +71,41 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
             /** @var \DateTimeInterface $updatedAt */
             list($group, $updatedAt) = $tupleResult;
 
-            return sprintf('<li>%s – %s</li>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
+            return sprintf('<tr><td>%s</td><td>%s</td></tr>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
         }, $results);
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
-            <p>Latest published results for each Group that exhibit at least a non-negative Antibody result:</p>
+            <p>One or more members of these Participant Groups had a non-negative or stronger antibody response in recent results:</p>
 
-            <p>Participant Groups:</p>
-            <ul>
+            <table class='results-table'>
+                <thead>
+                    <tr>
+                         <th>Group</th>
+                         <th>Results Published</th>
+                    </tr>
+                </thead>
+                <tbody>
 %s
-            </ul>
+                </tbody>
+            </table>
 
             <p>
                 View more details in COVIDTrack:<br>%s
             </p>
+
+<style>
+.results-table {
+    border:1px solid #333;
+}
+.results-table th {
+    text-align:left;
+}
+.results-table td, .results-table th {
+    padding:0.25em;
+    border-bottom: 1px solid #ccc;
+}
+</style>
         ",
             implode("\n", $groupResultsHtmlLines),
             sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
