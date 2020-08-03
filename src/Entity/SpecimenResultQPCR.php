@@ -85,7 +85,7 @@ class SpecimenResultQPCR extends SpecimenResult
     /**
      * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
      */
-    public static function createFromWell(SpecimenWell $well, string $conclusion)
+    public static function createFromWell(SpecimenWell $well, string $conclusion): self
     {
         $r = new self();
 
@@ -107,7 +107,7 @@ class SpecimenResultQPCR extends SpecimenResult
     /**
      * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
      */
-    public static function createFromSpecimen(Specimen $specimen, string $conclusion)
+    public static function createFromSpecimen(Specimen $specimen, string $conclusion): self
     {
         $r = new self();
 
