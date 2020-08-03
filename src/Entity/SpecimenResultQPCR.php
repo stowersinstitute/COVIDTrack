@@ -92,14 +92,12 @@ class SpecimenResultQPCR extends SpecimenResult
         if (!$well->getSpecimen()) {
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
         }
-        $r->specimen = $well->getSpecimen();
-        $r->specimen->addQPCRResult($r);
+
+        $r = self::createFromSpecimen($well->getSpecimen(), $conclusion);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
         $r->well = $well;
         $well->addResultQPCR($r);
-
-        $r->setConclusion($conclusion);
 
         return $r;
     }
