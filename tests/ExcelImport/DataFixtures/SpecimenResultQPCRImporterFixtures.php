@@ -4,6 +4,7 @@ namespace App\Tests\ExcelImport\DataFixtures;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
+use App\Entity\Specimen;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -73,6 +74,9 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // NOTE: Specimen.accessionId generated with known value. See __construct() above
             $tube->kioskDropoffComplete($this->specimenIdGen, $dropOff, $group, $tubeType, $collectedAt);
 
+            // Some test cases expect Tube's Specimen to have a specific Specimen ID
+            $this->explicitSetSpecimenId($data['specimenAccessionId'], $tube->getSpecimen());
+
             // Sent to external facility
             $tube->markExternalProcessing($data['externalProcessingAt']);
 
@@ -93,6 +97,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
         return [
             [
                 'accessionId' => 'TubeQPCRResults0001',
+                'specimenAccessionId' => 'TubeQPCRResults0001',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
@@ -101,6 +106,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             ],
             [
                 'accessionId' => 'TubeQPCRResults0002',
+                'specimenAccessionId' => 'SpecimenId0002',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
@@ -109,6 +115,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             ],
             [
                 'accessionId' => 'TubeQPCRResults0003',
+                'specimenAccessionId' => 'TubeQPCRResults0003',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
@@ -117,6 +124,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             ],
             [
                 'accessionId' => 'TubeQPCRResults0004',
+                'specimenAccessionId' => 'SpecimenId0004',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
@@ -124,5 +132,16 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'wellPlatePosition' => 'E7',
             ],
         ];
+    }
+
+    /**
+     * Set Specimen.accessionId for a very special purpose for testing.
+     */
+    private function explicitSetSpecimenId(string $specimenAccessionId, Specimen $specimen): void
+    {
+        $ref = new \ReflectionClass($specimen);
+        $prop = $ref->getProperty('accessionId');
+        $prop->setAccessible(true);
+        $prop->setValue($specimen, $specimenAccessionId);
     }
 }
