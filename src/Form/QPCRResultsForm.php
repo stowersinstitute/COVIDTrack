@@ -19,7 +19,7 @@ class QPCRResultsForm extends AbstractType
     /**
      * @var Specimen
      */
-    var $specimen;
+    private $specimen;
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
