@@ -86,7 +86,7 @@ abstract class SpecimenResult
      *
      *     return $this->getWell()->getWellPlate();
      */
-    abstract public function getWellPlate(): WellPlate;
+    abstract public function getWellPlate(): ?WellPlate;
 
     /**
      * Subclass should decide how to return the related Well Position,
@@ -96,7 +96,7 @@ abstract class SpecimenResult
      *
      *     return $this->getWell()->getPositionAlphanumeric();
      */
-    abstract public function getWellPosition(): string;
+    abstract public function getWellPosition(): ?string;
 
     public function __construct()
     {
@@ -158,9 +158,9 @@ abstract class SpecimenResult
         return $this->getSpecimen()->getAccessionId();
     }
 
-    public function getWellPlateBarcode(): string
+    public function getWellPlateBarcode(): ?string
     {
-        return $this->getWellPlate()->getBarcode();
+        return $this->getWellPlate() ? $this->getWellPlate()->getBarcode() : null;
     }
 
     public function setIsFailure(bool $bool): void

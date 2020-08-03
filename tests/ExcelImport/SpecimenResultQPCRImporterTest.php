@@ -115,5 +115,30 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             $CT3AmpScore = $ensureHasCT3AmpScore[$result->getSpecimenAccessionId()];
             $this->assertSame($CT3AmpScore, $result->getCT3AmpScore(), sprintf($result->getSpecimenAccessionId() . ' wrong CT3 Amp Score'));
         }
+
+        // Test that the first two have wells associated and the second two do not
+        $ensureHasWellPlateBarcode = [
+            'TubeQPCRResults0001' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
+            'TubeQPCRResults0002' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
+            'TubeQPCRResults0003' => null,
+            'TubeQPCRResults0004' => null,
+        ];
+
+        foreach ($processedResults as $result) {
+            $wellPlateBarcode = $ensureHasWellPlateBarcode[$result->getSpecimenAccessionId()];
+            $this->assertSame($wellPlateBarcode, $result->getWellPlateBarcode());
+        }
+
+        $ensureHasWell = [
+            'TubeQPCRResults0001' => 'A1',
+            'TubeQPCRResults0002' => 'C5',
+            'TubeQPCRResults0003' => null,
+            'TubeQPCRResults0004' => null,
+        ];
+
+        foreach ($processedResults as $result) {
+            $well = $ensureHasWell[$result->getSpecimenAccessionId()];
+            $this->assertSame($well, $result->getWellPosition());
+        }
     }
 }

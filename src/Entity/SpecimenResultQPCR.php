@@ -129,13 +129,17 @@ class SpecimenResultQPCR extends SpecimenResult
         return $this->specimen;
     }
 
-    public function getWellPlate(): WellPlate
+    public function getWellPlate(): ?WellPlate
     {
-        return $this->well->getWellPlate();
+        return $this->well ? $this->well->getWellPlate() : null;
     }
 
-    public function getWellPosition(): string
+    public function getWellPosition(): ?string
     {
+        if (!$this->well) {
+            return null;
+        }
+
         return $this->well->getPositionAlphanumeric() ?: '';
     }
 
