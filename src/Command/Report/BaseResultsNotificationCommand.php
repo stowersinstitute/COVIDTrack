@@ -20,12 +20,6 @@ use Symfony\Component\Routing\RouterInterface;
 abstract class BaseResultsNotificationCommand extends Command
 {
     /**
-     * Old role for Users who explicitly have this role will be notified.
-     * @deprecated Replace with NOTIFY_USERS_WITH_ROLE TODO: CVDLS-158
-     */
-    const NOTIFY_USERS_WITH_ROLE_OLD = 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING';
-
-    /**
      * Users who explicitly have this role will be notified about Viral Results.
      * TODO: CVDLS-158 Rename to NOTIFY_USERS_WITH_ROLE_VIRAL
      */

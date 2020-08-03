@@ -1,25 +1,11 @@
-{% block body %}
 {% set allowPerTubeDecision = is_granted("ROLE_ADMIN") %}
-
-<dl class="dl-horizontal">
-    <h4>Counts</h4>
-    <table>
-    {% for typeText, count in typeCounts %}
-        <tr>
-            <td style="font-weight:bold;">{{ typeText }}</td>
-            <td style="padding-left:10px; text-align:right;">{{ count }}</td>
-        </tr>
-    {% endfor %}
-        <tr style="border-top:1px solid #eee;">
-            <td style="font-weight:bold;">TOTAL</td>
-            <td style="padding-left:10px; text-align:right;">{{ typeCountsTotal }}</td>
-        </tr>
-    </table>
-</dl>
-
+{% set salivaTubeType = constant('App\\Entity\\Tube::TYPE_SALIVA') %}
 <table class="table table-bordered table-hover table-striped">
     <thead>
         <tr>
+            {% if displayRowCheckboxes %}
+            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            {% endif %}
             {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Accept</th>{% endif %}
             <th>Tube Accession ID</th>
             <th>Type</th>
@@ -32,6 +18,13 @@
     <tbody>
     {% for tube in tubes %}
         <tr class="row-tube-{{ tube.accessionId|e('html_attr') }}">
+            {% if displayRowCheckboxes %}
+            <td>
+                {% if tube.tubeType == salivaTubeType %}
+                <input type="checkbox" class="tube-checkbox" name="tubeAccessionIds[]" value="{{ tube.accessionId|e('html_attr') }}">
+                {% endif %}
+            </td>
+            {% endif %}
             {% if allowPerTubeDecision %}
             <td style="text-align:center;">
                 {# Accept #}
@@ -98,5 +91,3 @@
     $('.reject-one-tube').on('click', onClickHandler("REJECTED"));
 </script>
 {% endif %}
-
-{% endblock %}

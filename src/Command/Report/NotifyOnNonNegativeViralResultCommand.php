@@ -55,8 +55,6 @@ class NotifyOnNonNegativeViralResultCommand extends BaseResultsNotificationComma
     protected function getRolesToReceiveNotification(): array
     {
         return [
-            // Users with OLD assigned permission TODO: Remove via CVDLS-158
-            self::NOTIFY_USERS_WITH_ROLE_OLD,
             self::NOTIFY_USERS_WITH_ROLE,
         ];
     }

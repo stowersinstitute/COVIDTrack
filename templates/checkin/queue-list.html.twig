@@ -1,0 +1,46 @@
+{% block body %}
+{% set allowPerTubeDecision = is_granted("ROLE_ADMIN") %}
+{% set salivaTubeType = constant('App\\Entity\\Tube::TYPE_SALIVA') %}
+
+<form method="POST" id="external-processing-form" action="{{ path('checkin_queue_external_processing') }}">
+<dl class="dl-horizontal">
+    <h4>Counts</h4>
+    <table>
+    {% for typeText, count in typeCounts %}
+        <tr>
+            <td style="font-weight:bold;">{{ typeText }}</td>
+            <td style="padding-left:10px; text-align:right;">{{ count }}</td>
+        </tr>
+    {% endfor %}
+        <tr style="border-top:1px solid #eee;">
+            <td style="font-weight:bold;">TOTAL</td>
+            <td style="padding-left:10px; text-align:right;">{{ typeCountsTotal }}</td>
+        </tr>
+    </table>
+
+    <button type="submit" class="btn btn-primary" style="margin-top:1.5em">Mark Checked For External Processing</button>
+</dl>
+
+{% include 'checkin/queue-table.html.twig' with {
+    displayRowCheckboxes: true
+} %}
+
+</form>
+
+<script>
+    // Check-all checkboxes in table
+    $('#check-all').change(function() {
+        $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    // Ensure user selects at least one checkbox in rows before submit allowed
+    $('#external-processing-form').on('submit', function(e) {
+        let data = $(this).serializeArray();
+        if (data.length < 1) {
+            alert('Use checkboxes to select Tubes to Mark For External Processing');
+            e.preventDefault();
+            return;
+        }
+    });
+</script>
+{% endblock %}

@@ -13,7 +13,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 /**
- * Import Tubes used for Blood collection
+ * Import Tubes used for Saliva collection
  */
 class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -48,6 +48,7 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
     {
         $this->distributedTubes($em);
         $this->returnedTubes($em);
+        $this->externalProcessedTubes($em);
         $this->acceptedTubes($em);
         $this->rejectedTubes($em);
 
@@ -91,19 +92,42 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
+     * Tubes that have been sent for External Processing.
+     */
+    private function externalProcessedTubes(ObjectManager $em)
+    {
+        $numToCreate = 20;
+        for ($i=1; $i<= $numToCreate; $i++) {
+            $T = new Tube();
+
+            $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
+            $this->doKioskDropoff($em, $T, $collectedAt);
+
+            $T->markExternalProcessing(new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
+
+            $em->persist($T);
+        }
+    }
+
+    /**
      * Tubes that have been checked-in by a Tech.
      *
      * These Tubes are ready to have Results made.
      */
     private function acceptedTubes(ObjectManager $em)
     {
-        $numToCreate = 25;
+        $numToCreate = 30;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
             $T = new Tube();
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
+
+            // Send some through External Processing
+            if ($i%5) {
+                $T->markExternalProcessing(new \DateTimeImmutable(sprintf('-%d days 9:30am', $i%7)));
+            }
 
             $T->markAccepted($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
 
@@ -123,13 +147,18 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
      */
     private function rejectedTubes(ObjectManager $em)
     {
-        $numToCreate = 10;
+        $numToCreate = 20;
         $checkedInBy = 'test-checkin-user';
         for ($i=1; $i<= $numToCreate; $i++) {
             $T = new Tube();
 
             $collectedAt = new \DateTimeImmutable(sprintf('-%d days 9:00am', $i%7));
             $this->doKioskDropoff($em, $T, $collectedAt);
+
+            // Send some through External Processing
+            if ($i%5) {
+                $T->markExternalProcessing(new \DateTimeImmutable(sprintf('-%d days 9:30am', $i%7)));
+            }
 
             $T->markRejected($checkedInBy, new \DateTimeImmutable(sprintf('-%d days 10:00am', $i%7)));
 

@@ -77,7 +77,7 @@ class NotifyOnNonNegativeViralResultsFixtures extends Fixture
             $user->setEmail($data['email']);
 
             if ($data['notify'] === true) {
-                $user->addRole(BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD);
+                $user->addRole(BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE);
             }
 
             $em->persist($user);

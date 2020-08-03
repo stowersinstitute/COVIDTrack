@@ -15,7 +15,7 @@ use Doctrine\Common\Persistence\ObjectManager;
  */
 class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFixtureInterface
 {
-    // Must match specimen-viral-results.xlsx
+    // Must match viral-results-with-ct-amp-score.xlsx
     public const PLATE_BARCODE_WITH_RESULTS = 'QPCRResults';
 
     /**
@@ -30,17 +30,9 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // Overwrite constructor to not require any params
             public function __construct() {}
 
-            // Overwrite generate() to only generate valid values
+            // Overwrite generate() to not be used by this test
             public function generate() {
-                if (empty($counter)) {
-                    static $counter = 0;
-                }
-
-                $counter++;
-
-                // Must match in specimen-viral-results.xlsx
-                // For example: SpecimenQPCRResults1
-                return sprintf("SpecimenQPCRResults%d", $counter);
+                throw new \RuntimeException('Called SpecimenAccessionIdGenerator->generate() when not expected. See SpecimenResultQPCRImporterFixtures::__construct()');
             }
         };
     }
@@ -81,9 +73,8 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // NOTE: Specimen.accessionId generated with known value. See __construct() above
             $tube->kioskDropoffComplete($this->specimenIdGen, $dropOff, $group, $tubeType, $collectedAt);
 
-            // Accepted Check-in
-            $checkinUsername = 'test-checkin-user';
-            $tube->markAccepted($checkinUsername);
+            // Sent to external facility
+            $tube->markExternalProcessing($data['externalProcessingAt']);
 
             // Tubes/Specimens added to a Well Plate
             $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
@@ -93,7 +84,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
     }
 
     /**
-     * This data must match what's in specimen-viral-results.xlsx
+     * This data must match what's in viral-results-with-ct-amp-score.xlsx
      */
     public function getTubeData(): array
     {
@@ -104,6 +95,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0001',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'A1',
             ],
@@ -111,57 +103,25 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'accessionId' => 'TubeQPCRResults0002',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A2',
+                'wellPlatePosition' => 'C5',
             ],
             [
                 'accessionId' => 'TubeQPCRResults0003',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A3',
+                'wellPlatePosition' => 'D6',
             ],
             [
                 'accessionId' => 'TubeQPCRResults0004',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A4',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0005',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A5',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0006',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A6',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0007',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A7',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0008',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A8',
-            ],
-            [
-                'accessionId' => 'TubeQPCRResults0009',
-                'tubeType' => Tube::TYPE_SALIVA,
-                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'A9',
+                'wellPlatePosition' => 'E7',
             ],
         ];
     }

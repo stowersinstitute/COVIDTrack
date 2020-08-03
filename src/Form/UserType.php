@@ -85,10 +85,7 @@ class UserType extends AbstractType
         $this->addRoleField($builder, 'ROLE_PRINT_TUBE_LABELS', 'Print: Tube Labels');
         $this->addRoleField($builder, 'ROLE_PRINT_GROUP_LABELS', 'Print: Group Labels');
 
-        // Deprecated
-        $this->addRoleField($builder, 'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', 'Notifications: Group Testing Recommended');
-        // TODO: CVDLS-158 Enable when ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING removed
-//        $this->addRoleField($builder, 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'Notifications: Viral Testing Results');
+        $this->addRoleField($builder, 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS', 'Notifications: Group Testing Recommended');
         $this->addRoleField($builder, 'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS', 'Notifications: Antibody Testing Results');
 
         $builder
