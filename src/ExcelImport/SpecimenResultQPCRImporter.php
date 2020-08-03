@@ -5,6 +5,7 @@ namespace App\ExcelImport;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
@@ -47,6 +48,12 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      * @var SpecimenResultQPCR[]
      */
     private $processedResults = [];
+
+    /**
+     * Local cache for WellPlate lookup
+     * @var array Keys WellPlate.barcode; Values WellPlate
+     */
+    private $platesCache = [];
 
     public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
@@ -147,8 +154,8 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
 
             if (!empty($rawPosition)){
-                $plate = $this->findPlate($rawPlateBarcode);
-                $well = $specimen->getWellAtPosition($plate, $rawPosition);
+                $plate = $this->findWellPlateOrMakeNew($rawPlateBarcode);
+                $well = $this->findWellOrMakeNew($rawPosition, $plate, $specimen);
                 $qpcr = SpecimenResultQPCR::createFromWell($well, $rawConclusion);
             } else {
                 $qpcr = SpecimenResultQPCR::createFromSpecimen($specimen, $rawConclusion);
@@ -305,12 +312,11 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
-            $this->messages[] = ImportMessage::newError(
-                sprintf('Cannot find Well Plate by barcode "%s"', $rawPlateBarcode),
+            $this->messages[$rawPlateBarcode] = ImportMessage::newMessage(
+                sprintf('Cannot find Well Plate by barcode "%s". Plate will be created.', $rawPlateBarcode),
                 $rowNumber,
                 $this->columnMap['plateBarcode']
             );
-            return false;
         }
 
         // Specimen must already be in a Well on this Well Plate
@@ -319,40 +325,75 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             // Error message already added via validateSpecimenLookup
             return false;
         }
-        if (!$specimen->isOnWellPlate($wellPlate)) {
-            $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" not currently on Well Plate "%s"', $rawSpecimenId, $rawPlateBarcode),
-                $rowNumber,
-                $this->columnMap['plateBarcode']
-            );
-            return false;
-        }
 
-        // Get the specific Well at reported Position
-        $well = $specimen->getWellAtPosition($wellPlate, $rawPosition);
-        if (!$well) {
-            // Specimen not at this position on plate in Results file.
+        if($wellPlate) {
+            if (!$specimen->isOnWellPlate($wellPlate)) {
+                $this->messages[] = ImportMessage::newError(
+                    sprintf('Specimen "%s" not currently on Well Plate "%s"', $rawSpecimenId, $rawPlateBarcode),
+                    $rowNumber,
+                    $this->columnMap['plateBarcode']
+                );
+                return false;
+            }
 
-            // Build list of positions to display in error message
-            $wellPositions = [];
-            foreach ($specimen->getWellsOnPlate($wellPlate) as $well) {
-                if ($well->getPositionAlphanumeric()) {
-                    $wellPositions[] = $well->getPositionAlphanumeric();
+            // Get the specific Well at reported Position
+            $well = $specimen->getWellAtPosition($wellPlate, $rawPosition);
+            if (!$well) {
+                // Specimen not at this position on plate in Results file.
+
+                // Build list of positions to display in error message
+                $wellPositions = [];
+                foreach ($specimen->getWellsOnPlate($wellPlate) as $well) {
+                    if ($well->getPositionAlphanumeric()) {
+                        $wellPositions[] = $well->getPositionAlphanumeric();
+                    }
                 }
-            }
-            $prnCurrentPositions = implode(', ', $wellPositions);
-            if (count($wellPositions) === 0) {
-                $prnCurrentPositions = 'but does not have any positions saved';
-            }
+                $prnCurrentPositions = implode(', ', $wellPositions);
+                if (count($wellPositions) === 0) {
+                    $prnCurrentPositions = 'but does not have any positions saved';
+                }
 
-            $this->messages[] = ImportMessage::newError(
-                sprintf('Specimen "%s" currently in Well "%s". Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
-                $rowNumber,
-                $this->columnMap['position']
-            );
-            return false;
+                $this->messages[] = ImportMessage::newError(
+                    sprintf('Specimen "%s" currently in Well "%s". Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
+                    $rowNumber,
+                    $this->columnMap['position']
+                );
+                return false;
+            }
         }
 
         return true;
+    }
+
+    private function findWellPlateOrMakeNew(string $rawWellPlateId): WellPlate
+    {
+        if (isset($this->platesCache[$rawWellPlateId])) {
+            return $this->platesCache[$rawWellPlateId];
+        }
+
+        $plate = $this->em
+            ->getRepository(WellPlate::class)
+            ->findOneByBarcode($rawWellPlateId);
+        if (!$plate) {
+            $plate = new WellPlate($rawWellPlateId);
+            $this->em->persist($plate);
+
+            $this->platesCache[$rawWellPlateId] = $plate;
+        }
+
+        return $plate;
+    }
+
+    private function findWellOrMakeNew(string $rawPosition, WellPlate $plate, Specimen $specimen): SpecimenWell
+    {
+        $well = $specimen->getWellAtPosition($plate, $rawPosition);
+        if ($well) {
+            return $well;
+        }
+
+        $well = new SpecimenWell($plate, $specimen, $rawPosition);
+        $this->em->persist($well);
+
+        return $well;
     }
 }
