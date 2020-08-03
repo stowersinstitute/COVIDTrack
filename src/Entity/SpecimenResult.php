@@ -66,7 +66,7 @@ abstract class SpecimenResult
      * Subclass should define its own annotations for how it maps to SpecimenWell,
      * and return SpecimenWell from it.
      */
-    abstract public function getWell(): SpecimenWell;
+    abstract public function getWell(): ?SpecimenWell;
 
     /**
      * Subclass should decide how to return the related Specimen,

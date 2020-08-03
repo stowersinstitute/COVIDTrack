@@ -117,7 +117,7 @@ class SpecimenResultQPCR extends SpecimenResult
         return $r;
     }
 
-    public function getWell(): SpecimenWell
+    public function getWell(): ?SpecimenWell
     {
         return $this->well;
     }
