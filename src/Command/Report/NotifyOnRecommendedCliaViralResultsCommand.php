@@ -54,7 +54,7 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
         $timestamps = $recommendations['timestamps'];
 
         $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
-            return sprintf('<li>%s</li>', $g->getTitle());
+            return sprintf('<li>%s</li>', htmlentities($g->getTitle()));
         }, $groups);
 
         $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
@@ -81,7 +81,7 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
         ",
             implode("\n", $timestampsOutput),
             implode("\n", $groupsRecTestingOutput),
-            sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
+            sprintf('<a href="%s">%s</a>', htmlentities($url), htmlentities($url))
         );
 
         return $html;

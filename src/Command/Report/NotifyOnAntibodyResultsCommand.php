@@ -71,7 +71,7 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
             /** @var \DateTimeInterface $updatedAt */
             list($group, $updatedAt) = $tupleResult;
 
-            return sprintf('<tr><td>%s</td><td>%s</td></tr>', $group->getTitle(), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
+            return sprintf('<tr><td>%s</td><td>%s</td></tr>', htmlentities($group->getTitle()), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
         }, $results);
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
@@ -108,7 +108,7 @@ class NotifyOnAntibodyResultsCommand extends BaseResultsNotificationCommand
 </style>
         ",
             implode("\n", $groupResultsHtmlLines),
-            sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
+            sprintf('<a href="%s">%s</a>', htmlentities($url), htmlentities($url))
         );
 
         return $html;
