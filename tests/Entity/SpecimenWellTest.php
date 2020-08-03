@@ -357,7 +357,7 @@ class SpecimenWellTest extends TestCase
         $this->assertFalse($well->hasResultsQPCR());
 
         // Add 1st result
-        $result1 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $result1 = SpecimenResultQPCR::createFromWell($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $this->assertTrue($well->hasResultsQPCR());
         $this->assertCount(1, $well->getResultsQPCR());
 
@@ -366,7 +366,7 @@ class SpecimenWellTest extends TestCase
         $this->assertCount(1, $well->getResultsQPCR());
 
         // Add 2nd result
-        $result2 = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $result2 = SpecimenResultQPCR::createFromWell($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $this->assertTrue($well->hasResultsQPCR());
         $this->assertCount(2, $well->getResultsQPCR());
 

@@ -85,24 +85,39 @@ class SpecimenResultQPCR extends SpecimenResult
     /**
      * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
      */
-    public function __construct(SpecimenWell $well, string $conclusion)
+    public static function createFromWell(SpecimenWell $well, string $conclusion): self
     {
-        parent::__construct();
+        $r = new self();
 
         if (!$well->getSpecimen()) {
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
         }
-        $this->specimen = $well->getSpecimen();
-        $this->specimen->addQPCRResult($this);
+
+        $r = self::createFromSpecimen($well->getSpecimen(), $conclusion);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
-        $this->well = $well;
-        $well->addResultQPCR($this);
+        $r->well = $well;
+        $well->addResultQPCR($r);
 
-        $this->setConclusion($conclusion);
+        return $r;
     }
 
-    public function getWell(): SpecimenWell
+    /**
+     * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
+     */
+    public static function createFromSpecimen(Specimen $specimen, string $conclusion): self
+    {
+        $r = new self();
+
+        $r->specimen = $specimen;
+        $r->specimen->addQPCRResult($r);
+
+        $r->setConclusion($conclusion);
+
+        return $r;
+    }
+
+    public function getWell(): ?SpecimenWell
     {
         return $this->well;
     }
@@ -112,13 +127,17 @@ class SpecimenResultQPCR extends SpecimenResult
         return $this->specimen;
     }
 
-    public function getWellPlate(): WellPlate
+    public function getWellPlate(): ?WellPlate
     {
-        return $this->well->getWellPlate();
+        return $this->well ? $this->well->getWellPlate() : null;
     }
 
-    public function getWellPosition(): string
+    public function getWellPosition(): ?string
     {
+        if (!$this->well) {
+            return null;
+        }
+
         return $this->well->getPositionAlphanumeric() ?: '';
     }
 

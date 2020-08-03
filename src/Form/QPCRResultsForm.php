@@ -16,10 +16,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QPCRResultsForm extends AbstractType
 {
+    /**
+     * @var Specimen
+     */
+    private $specimen;
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** @var Specimen $specimen */
-        $specimen = $options['specimen'];
+        $this->specimen = $options['specimen'];
         /** @var SpecimenResultQPCR $editResult */
         $editResult = $options['editResult'];
 
@@ -27,10 +31,10 @@ class QPCRResultsForm extends AbstractType
             ->add('well', EntityType::class, [
                 'label' => 'Wells containing this Specimen',
                 'class' => SpecimenWell::class,
-                'placeholder' => '- Select -',
-                'required' => true,
-                'disabled' => (bool)$editResult,
-                'choices' => $specimen->getWells(),
+                'placeholder' => '- Unknown -',
+                'required' => false,
+                'disabled' => ($editResult && $editResult->getWell()),
+                'choices' => $this->specimen->getWells(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
@@ -77,7 +81,11 @@ class QPCRResultsForm extends AbstractType
                 $well = $form->get('well')->getData();
                 $conclusion = $form->get('conclusion')->getData();
 
-                return new SpecimenResultQPCR($well, $conclusion);
+                if ($well) {
+                    return SpecimenResultQPCR::createFromWell($well, $conclusion);
+                }
+
+                return SpecimenResultQPCR::createFromSpecimen($this->specimen, $conclusion);
             }
         ]);
 

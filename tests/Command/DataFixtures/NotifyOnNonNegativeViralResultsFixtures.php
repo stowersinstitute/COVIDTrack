@@ -135,7 +135,7 @@ class NotifyOnNonNegativeViralResultsFixtures extends Fixture
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
 
-                $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
+                $result = SpecimenResultQPCR::createFromWell($well, $data['resultConclusion']);
                 $result->setCreatedAt(new \DateTimeImmutable('-4 days 11:00am'));
                 $result->setUpdatedAt(new \DateTimeImmutable('-4 days 11:00am'));
 

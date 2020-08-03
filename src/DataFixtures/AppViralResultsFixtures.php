@@ -83,7 +83,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                         $well = $this->getSpecimenWellForFirstResult($specimen);
 
                         // Add Result to Well
-                        $result = new SpecimenResultQPCR($well, $conclusion);
+                        $result = SpecimenResultQPCR::createFromWell($well, $conclusion);
                         $result->setCreatedAt($resultDate);
 
                         // Set Position normally coming from reporting result
@@ -119,7 +119,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                 $well = array_pop($results)->getWell();
 
                 // Add another Result to this Well
-                $result = new SpecimenResultQPCR($well, $conclusion);
+                $result = SpecimenResultQPCR::createFromWell($well, $conclusion);
                 $result->setCreatedAt($resultDate);
 
                 $multipleResults[] = $result;
