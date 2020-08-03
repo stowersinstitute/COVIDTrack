@@ -33,7 +33,7 @@ class QPCRResultsForm extends AbstractType
                 'class' => SpecimenWell::class,
                 'placeholder' => '- Unknown -',
                 'required' => false,
-                'disabled' => (bool)$editResult,
+                'disabled' => ($editResult && $editResult->getWell()),
                 'choices' => $this->specimen->getWells(),
             ])
             ->add('conclusion', ChoiceType::class, [
@@ -83,10 +83,9 @@ class QPCRResultsForm extends AbstractType
 
                 if ($well) {
                     return SpecimenResultQPCR::createFromWell($well, $conclusion);
-                } else {
-                    return SpecimenResultQPCR::createFromSpecimen($this->specimen, $conclusion);
                 }
 
+                return SpecimenResultQPCR::createFromSpecimen($this->specimen, $conclusion);
             }
         ]);
 
