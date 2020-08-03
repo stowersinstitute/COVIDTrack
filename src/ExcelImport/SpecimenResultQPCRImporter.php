@@ -5,8 +5,9 @@ namespace App\ExcelImport;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
-use App\Entity\SpecimenWell;
+use App\Entity\Tube;
 use App\Entity\WellPlate;
+use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManager;
 
 class SpecimenResultQPCRImporter extends BaseExcelImporter
@@ -15,6 +16,11 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      * @var \App\Entity\SpecimenRepository
      */
     private $specimenRepo;
+
+    /**
+     * @var TubeRepository
+     */
+    private $tubeRepo;
 
     /**
      * @var \App\Repository\WellPlateRepository
@@ -46,12 +52,13 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
     {
         $this->setEntityManager($em);
         $this->specimenRepo = $em->getRepository(Specimen::class);
+        $this->tubeRepo = $em->getRepository(Tube::class);
         $this->plateRepo = $em->getRepository(WellPlate::class);
 
         parent::__construct($worksheet);
 
         $this->columnMap = [
-            'specimenId' => 'A',
+            'specimenIdOrTubeId' => 'A',
             'conclusion' => 'B',
             'position' => 'C',
             'plateBarcode' => 'E',
@@ -104,7 +111,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
 
-            $rawSpecimenId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenId']);
+            $rawSpecimenIdOrTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenIdOrTubeId']);
 
             // Case-insensitive so these map directly to entity constants
             $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
@@ -121,11 +128,11 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $this->validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
             $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
 
             if (!empty($rawPosition)) {
-                $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenId, $rowNumber) && $rowOk;
+                $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
             }
             // CT and Amp Score values not validated, we accept anything submitted
 
@@ -133,7 +140,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             if (!$rowOk) continue;
 
             // Specimen ID already validated
-            $specimen = $this->findSpecimen($rawSpecimenId);
+            $specimen = $this->findSpecimen($rawSpecimenIdOrTubeId);
 
             // "updated" if adding a new result when one already exists
             // "created" if adding first result
@@ -207,24 +214,24 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateSpecimenId($rawSpecimenId, $rowNumber) : bool
+    private function validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber) : bool
     {
-        if (!$rawSpecimenId) {
+        if (!$rawSpecimenIdOrTubeId) {
             $this->messages[] = ImportMessage::newError(
                 'Specimen ID cannot be blank',
                 $rowNumber,
-                $this->columnMap['specimenId']
+                $this->columnMap['specimenIdOrTubeId']
             );
             return false;
         }
 
         // Ensure Specimen can be found
-        $specimen = $this->findSpecimen($rawSpecimenId);
+        $specimen = $this->findSpecimen($rawSpecimenIdOrTubeId);
         if (!$specimen) {
             $this->messages[] = ImportMessage::newError(
-                sprintf('Cannot find Specimen by Specimen ID "%s"', $rawSpecimenId),
+                sprintf('Cannot find Specimen by Specimen ID or Tube ID "%s"', $rawSpecimenIdOrTubeId),
                 $rowNumber,
-                $this->columnMap['specimenId']
+                $this->columnMap['specimenIdOrTubeId']
             );
             return false;
         }
@@ -234,7 +241,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $this->messages[] = ImportMessage::newError(
                 'Specimen not in correct status to allow importing results',
                 $rowNumber,
-                $this->columnMap['specimenId']
+                $this->columnMap['specimenIdOrTubeId']
             );
             return false;
         }
@@ -242,20 +249,31 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         return true;
     }
 
-    private function findSpecimen($rawSpecimenId): ?Specimen
+    private function findSpecimen($rawSpecimenIdOrTubeId): ?Specimen
     {
         // Cached?
-        if (isset($this->seenSpecimens[$rawSpecimenId])) {
-            return $this->seenSpecimens[$rawSpecimenId];
+        if (isset($this->seenSpecimens[$rawSpecimenIdOrTubeId])) {
+            return $this->seenSpecimens[$rawSpecimenIdOrTubeId];
         }
 
-        $specimen = $this->specimenRepo->findOneByAccessionId($rawSpecimenId);
+        // First try locating Specimen by Specimen.accessionId
+        $specimen = $this->specimenRepo->findOneByAccessionId($rawSpecimenIdOrTubeId);
+        if (!$specimen) {
+            // Next try using input as Tube ID
+            // Find the Tube's related Specimen
+            $specimenAccessionId = $this->tubeRepo->findSpecimenAccessionIdByTubeAccessionId($rawSpecimenIdOrTubeId);
+            if ($specimenAccessionId) {
+                $specimen = $this->specimenRepo->findOneByAccessionId($specimenAccessionId);
+            }
+        }
+
+        // Final check for found Specimen
         if (!$specimen) {
             return null;
         }
 
         // Cache
-        $this->seenSpecimens[$rawSpecimenId] = $specimen;
+        $this->seenSpecimens[$rawSpecimenIdOrTubeId] = $specimen;
 
         return $specimen;
     }
@@ -298,7 +316,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         // Specimen must already be in a Well on this Well Plate
         $specimen = $this->findSpecimen($rawSpecimenId);
         if (!$specimen) {
-            // Error message already added via validateSpecimenId
+            // Error message already added via validateSpecimenLookup
             return false;
         }
         if (!$specimen->isOnWellPlate($wellPlate)) {

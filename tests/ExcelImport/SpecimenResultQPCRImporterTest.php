@@ -31,9 +31,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasConclusion = [
             'TubeQPCRResults0001' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
-            'TubeQPCRResults0002' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
+            'SpecimenId0002' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
             'TubeQPCRResults0003' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
-            'TubeQPCRResults0004' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
+            'SpecimenId0004' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
         ];
         foreach ($processedResults as $result) {
             $conclusion = $ensureHasConclusion[$result->getSpecimenAccessionId()];
@@ -43,9 +43,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasCT1 = [
             'TubeQPCRResults0001' => 'Undetermined',
-            'TubeQPCRResults0002' => '100',
+            'SpecimenId0002' => '100',
             'TubeQPCRResults0003' => 'Undetermined',
-            'TubeQPCRResults0004' => 'Undetermined',
+            'SpecimenId0004' => 'Undetermined',
         ];
         foreach ($processedResults as $result) {
             $ct1 = $ensureHasCT1[$result->getSpecimenAccessionId()];
@@ -55,9 +55,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasCT1AmpScore = [
             'TubeQPCRResults0001' => '0',
-            'TubeQPCRResults0002' => '1.987654321',
+            'SpecimenId0002' => '1.987654321',
             'TubeQPCRResults0003' => '400',
-            'TubeQPCRResults0004' => '0',
+            'SpecimenId0004' => '0',
         ];
         foreach ($processedResults as $result) {
             $ct1AmpScore = $ensureHasCT1AmpScore[$result->getSpecimenAccessionId()];
@@ -67,9 +67,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasCT2 = [
             'TubeQPCRResults0001' => 'Undetermined',
-            'TubeQPCRResults0002' => 'Undetermined',
+            'SpecimenId0002' => 'Undetermined',
             'TubeQPCRResults0003' => '200',
-            'TubeQPCRResults0004' => '500',
+            'SpecimenId0004' => '500',
         ];
         foreach ($processedResults as $result) {
             $CT2 = $ensureHasCT2[$result->getSpecimenAccessionId()];
@@ -79,9 +79,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasCT2AmpScore = [
             'TubeQPCRResults0001' => '0',
-            'TubeQPCRResults0002' => '300',
+            'SpecimenId0002' => '300',
             'TubeQPCRResults0003' => '0',
-            'TubeQPCRResults0004' => '600',
+            'SpecimenId0004' => '600',
         ];
         foreach ($processedResults as $result) {
             $CT2AmpScore = $ensureHasCT2AmpScore[$result->getSpecimenAccessionId()];
@@ -92,9 +92,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         $ensureHasCT3 = [
 //            'SpecimenQPCRResults1' => '20.4396828318414', Real value exceeds PHP's precision
             'TubeQPCRResults0001' => '20.439682831841',
-            'TubeQPCRResults0002' => '18.893144729853',
+            'SpecimenId0002' => '18.893144729853',
             'TubeQPCRResults0003' => '19.621005213173',
-            'TubeQPCRResults0004' => '21.98765432',
+            'SpecimenId0004' => '21.98765432',
         ];
         foreach ($processedResults as $result) {
             $CT3 = $ensureHasCT3[$result->getSpecimenAccessionId()];
@@ -105,11 +105,11 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         $ensureHasCT3AmpScore = [
 //            'TubeQPCRResults0001' => '2.05910575758501', Real value exceeds PHP's precision
             'TubeQPCRResults0001' => '2.059105757585',
-//            'TubeQPCRResults0002' => '1.73836317116205', Real value exceeds PHP's precision
-            'TubeQPCRResults0002' => '1.738363171162',
+//            'SpecimenId0002' => '1.73836317116205', Real value exceeds PHP's precision
+            'SpecimenId0002' => '1.738363171162',
 //            'TubeQPCRResults0003' => '1.96854084629378', Real value exceeds PHP's precision
             'TubeQPCRResults0003' => '1.9685408462938', // NOTE ROUNDED
-            'TubeQPCRResults0004' => '0',
+            'SpecimenId0004' => '0',
         ];
         foreach ($processedResults as $result) {
             $CT3AmpScore = $ensureHasCT3AmpScore[$result->getSpecimenAccessionId()];
@@ -119,9 +119,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // Test that the first two have wells associated and the second two do not
         $ensureHasWellPlateBarcode = [
             'TubeQPCRResults0001' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
-            'TubeQPCRResults0002' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
+            'SpecimenId0002' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
             'TubeQPCRResults0003' => null,
-            'TubeQPCRResults0004' => null,
+            'SpecimenId0004' => null,
         ];
 
         foreach ($processedResults as $result) {
@@ -131,9 +131,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
 
         $ensureHasWell = [
             'TubeQPCRResults0001' => 'A1',
-            'TubeQPCRResults0002' => 'C5',
+            'SpecimenId0002' => 'C5',
             'TubeQPCRResults0003' => null,
-            'TubeQPCRResults0004' => null,
+            'SpecimenId0004' => null,
         ];
 
         foreach ($processedResults as $result) {
