@@ -21,7 +21,8 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
 
         $checkedInTubes = $importer->process(true);
 
-        // Verify rows with missing required data report as user-readable errors
+        // Verify rows with missing required data report as user-readable errors.
+        // tube-checkin-saliva.xlsx has red cells where errors expected.
         $errors = $importer->getErrors();
         $expectedErrors = [
             [
@@ -31,10 +32,9 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
                 'rowNumber' => 6,
             ],
             [
-                'rowNumber' => 10,
+                'rowNumber' => 11,
             ],
         ];
-//        var_dump($errors);exit;
         $this->assertCount(count($expectedErrors), $errors);
         foreach ($expectedErrors as $expectedError) {
             $found = false;
@@ -48,16 +48,15 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
             }
         }
 
-        $this->assertCount(5, $importer->getOutput()['accepted']);
+        $this->assertCount(4, $importer->getOutput()['accepted']);
         $this->assertCount(2, $importer->getOutput()['rejected']);
 
-        $this->assertSame(7, $importer->getNumImportedItems());
-        $this->assertCount(7, $checkedInTubes);
+        $this->assertSame(6, $importer->getNumImportedItems());
+        $this->assertCount(6, $checkedInTubes);
 
         $ensureHasTubeIds = [
             'TestCheckin0001',
             'TestCheckin0002',
-            'TestCheckin0003',
             'TestCheckin0004',
             'TestCheckin0005',
             'TestCheckin0006',
