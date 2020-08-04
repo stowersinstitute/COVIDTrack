@@ -104,7 +104,7 @@ class SpecimenResultQPCRExcelController extends AbstractController
 
         return $this->render('results/qpcr/excel-import-result.html.twig', [
             'importer' => $importer,
-            'notificationCheckUrl' => $router->generate('report_notification_non_negative_check'),
+            'notificationCheckUrl' => $router->generate('report_notification_clia_check'),
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
         ]);
