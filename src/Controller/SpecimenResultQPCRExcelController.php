@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Import SpecimenResultQPCR with Excel
@@ -81,7 +82,7 @@ class SpecimenResultQPCRExcelController extends AbstractController
     /**
      * @Route("/commit/{importId<\d+>}", methods={"POST"}, name="qpcr_excel_import_commit")
      */
-    public function commit(int $importId, ExcelImporter $excelImporter)
+    public function commit(int $importId, ExcelImporter $excelImporter, RouterInterface $router)
     {
         $this->denyAccessUnlessGranted('ROLE_RESULTS_EDIT');
 
@@ -103,6 +104,7 @@ class SpecimenResultQPCRExcelController extends AbstractController
 
         return $this->render('results/qpcr/excel-import-result.html.twig', [
             'importer' => $importer,
+            'notificationCheckUrl' => $router->generate('report_notification_non_negative_check'),
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
         ]);
