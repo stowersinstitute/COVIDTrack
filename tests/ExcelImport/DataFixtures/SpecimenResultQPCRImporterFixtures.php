@@ -80,8 +80,10 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // Sent to external facility
             $tube->markExternalProcessing($data['externalProcessingAt']);
 
-            // Tubes/Specimens added to a Well Plate
-            $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+            if ($data['wellPlatePosition']) {
+                // Tubes/Specimens added to a Well Plate
+                $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+            }
         }
 
         $em->flush();
@@ -130,6 +132,24 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'E7',
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0005',
+                'specimenAccessionId' => 'TubeQPCRResults0005',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => null,
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0006',
+                'specimenAccessionId' => 'TubeQPCRResults0006',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => null,
             ],
         ];
     }

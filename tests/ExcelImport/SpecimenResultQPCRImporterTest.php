@@ -3,7 +3,9 @@
 namespace App\Tests\ExcelImport;
 
 use App\Entity\ExcelImportWorkbook;
+use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
+use App\Entity\WellPlate;
 use App\ExcelImport\SpecimenResultQPCRImporter;
 use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\SpecimenResultQPCRImporterFixtures;
@@ -19,6 +21,10 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             SpecimenResultQPCRImporterFixtures::class,
         ]);
 
+        // Make sure the unknown plate is not in the DB, since it will be created by the import.
+        $unknownPlate = $this->em->getRepository(WellPlate::class)->findOneByBarcode('UnknownPlate');
+        $this->assertEmpty($unknownPlate, 'Unknown well plate should not be in the database.');
+
         // XLSX file contains both Specimen.accessionId and Tube.accessionId
         // to ensure import can locate Specimen by either
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/viral-results-with-ct-amp-score.xlsx');
@@ -27,8 +33,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         $processedResults = $importer->process(true);
 
         $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
-        $this->assertCount(4, $processedResults); // Count dependent on SpecimenResultQPCRImporterFixtures::getData()
-        $this->assertSame(4, $importer->getNumImportedItems());
+        $this->assertCount(6, $processedResults); // Count dependent on SpecimenResultQPCRImporterFixtures::getData()
+        $this->assertSame(6, $importer->getNumImportedItems());
 
         // Data must match viral-results-with-ct-amp-score.xlsx
         $ensureHasConclusion = [
@@ -36,6 +42,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
             'TubeQPCRResults0003' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
             'SpecimenId0004' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
+            'TubeQPCRResults0005' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
+            'TubeQPCRResults0006' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
         ];
         foreach ($processedResults as $result) {
             $conclusion = $ensureHasConclusion[$result->getSpecimenAccessionId()];
@@ -48,6 +56,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => '100',
             'TubeQPCRResults0003' => 'Undetermined',
             'SpecimenId0004' => 'Undetermined',
+            'TubeQPCRResults0005' => 'Undetermined',
+            'TubeQPCRResults0006' => 'Undetermined',
         ];
         foreach ($processedResults as $result) {
             $ct1 = $ensureHasCT1[$result->getSpecimenAccessionId()];
@@ -60,6 +70,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => '1.987654321',
             'TubeQPCRResults0003' => '400',
             'SpecimenId0004' => '0',
+            'TubeQPCRResults0005' => '400',
+            'TubeQPCRResults0006' => '0',
         ];
         foreach ($processedResults as $result) {
             $ct1AmpScore = $ensureHasCT1AmpScore[$result->getSpecimenAccessionId()];
@@ -72,6 +84,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => 'Undetermined',
             'TubeQPCRResults0003' => '200',
             'SpecimenId0004' => '500',
+            'TubeQPCRResults0005' => '200',
+            'TubeQPCRResults0006' => '500',
         ];
         foreach ($processedResults as $result) {
             $CT2 = $ensureHasCT2[$result->getSpecimenAccessionId()];
@@ -84,6 +98,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => '300',
             'TubeQPCRResults0003' => '0',
             'SpecimenId0004' => '600',
+            'TubeQPCRResults0005' => '0',
+            'TubeQPCRResults0006' => '600',
         ];
         foreach ($processedResults as $result) {
             $CT2AmpScore = $ensureHasCT2AmpScore[$result->getSpecimenAccessionId()];
@@ -97,6 +113,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => '18.893144729853',
             'TubeQPCRResults0003' => '19.621005213173',
             'SpecimenId0004' => '21.98765432',
+            'TubeQPCRResults0005' => '19.621005213173',
+            'TubeQPCRResults0006' => '21.98765432',
         ];
         foreach ($processedResults as $result) {
             $CT3 = $ensureHasCT3[$result->getSpecimenAccessionId()];
@@ -112,6 +130,9 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
 //            'TubeQPCRResults0003' => '1.96854084629378', Real value exceeds PHP's precision
             'TubeQPCRResults0003' => '1.9685408462938', // NOTE ROUNDED
             'SpecimenId0004' => '0',
+//            'TubeQPCRResults0005' => '1.96854084629378', Real value exceeds PHP's precision
+            'TubeQPCRResults0005' => '1.9685408462938', // NOTE ROUNDED
+            'TubeQPCRResults0006' => '0',
         ];
         foreach ($processedResults as $result) {
             $CT3AmpScore = $ensureHasCT3AmpScore[$result->getSpecimenAccessionId()];
@@ -124,6 +145,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => SpecimenResultQPCRImporterFixtures::PLATE_BARCODE_WITH_RESULTS,
             'TubeQPCRResults0003' => null,
             'SpecimenId0004' => null,
+            'TubeQPCRResults0005' => 'UnknownPlate', // This plate didn't exist in the DB, it was created by the import
+            'TubeQPCRResults0006' => 'UnknownPlate', // This plate didn't exist in the DB, it was created by the import
         ];
 
         foreach ($processedResults as $result) {
@@ -136,6 +159,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'SpecimenId0002' => 'C5',
             'TubeQPCRResults0003' => null,
             'SpecimenId0004' => null,
+            'TubeQPCRResults0005' => 'A1', // This well didn't exist in the DB, it was created by the import
+            'TubeQPCRResults0006' => 'A2', // This well didn't exist in the DB, it was created by the import
         ];
 
         foreach ($processedResults as $result) {
