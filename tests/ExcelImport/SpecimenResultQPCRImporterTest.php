@@ -26,7 +26,37 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
 
         $processedResults = $importer->process(true);
 
-        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        // Verify rows with missing required data report as user-readable errors.
+        // viral-results-with-ct-amp-score.xlsx has red cells where errors expected.
+        $errors = $importer->getErrors();
+        $expectedErrors = [
+            [
+                'rowNumber' => 4,
+            ],
+            [
+                'rowNumber' => 8,
+            ],
+            [
+                'rowNumber' => 9,
+            ],
+            [
+                'rowNumber' => 10,
+            ],
+        ];
+        $this->assertCount(count($expectedErrors), $errors);
+        foreach ($expectedErrors as $expectedError) {
+            $found = false;
+            foreach ($errors as $error) {
+                if ($error->getRowNumber() === $expectedError['rowNumber']) {
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $this->fail(sprintf('Expected to find error for data in Row %d but no error found', $expectedError['rowNumber']));
+            }
+        }
+
+        // Verify count of records successfully processed without errors
         $this->assertCount(4, $processedResults); // Count dependent on SpecimenResultQPCRImporterFixtures::getData()
         $this->assertSame(4, $importer->getNumImportedItems());
 

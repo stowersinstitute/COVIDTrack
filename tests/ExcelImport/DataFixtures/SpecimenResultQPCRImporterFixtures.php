@@ -131,6 +131,33 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'participantGroup' => $blueGroup,
                 'wellPlatePosition' => 'E7',
             ],
+            [
+                'accessionId' => 'TubeQPCRResults0005',
+                'specimenAccessionId' => 'SpecimenId0005',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => 'F8',
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0006',
+                'specimenAccessionId' => 'SpecimenId0006',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => 'G9',
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0007',
+                'specimenAccessionId' => 'SpecimenId0007',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => 'H10',
+            ],
         ];
     }
 

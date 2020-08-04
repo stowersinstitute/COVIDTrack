@@ -131,7 +131,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $rowOk = $this->validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
             $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
 
-            if (!empty($rawPosition)) {
+            if (!empty($rawPosition) || !empty($rawPlateBarcode)) {
                 $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
             }
             // CT and Amp Score values not validated, we accept anything submitted
@@ -303,6 +303,27 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
+        // Must provide a Barcode if providing a Well
+        if (null === $rawPlateBarcode && null !== $rawPosition) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Missing Well Plate Barcode to go with Well "%s"', $rawPosition),
+                $rowNumber,
+                $this->columnMap['plateBarcode']
+            );
+            return false;
+        }
+
+        // Must provide a Well if providing a Barcode
+        if (null !== $rawPlateBarcode && null === $rawPosition) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Missing Well to go with Well Plate Barcode "%s"', $rawPlateBarcode),
+                $rowNumber,
+                $this->columnMap['plateBarcode']
+            );
+            return false;
+        }
+
+        // Ensure can find Well Plate by given barcode
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate) {
             $this->messages[] = ImportMessage::newError(
