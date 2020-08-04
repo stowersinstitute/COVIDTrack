@@ -25,6 +25,7 @@ class Specimen
 
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
+    const STATUS_EXTERNAL = "EXTERNAL";
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
@@ -140,11 +141,16 @@ class Specimen
     /**
      * Create a new Specimen
      *
+     * @param ParticipantGroup $group
+     * @param SpecimenAccessionIdGenerator $gen
+     * @param string|null $accessionId If given, this string will used as the accession ID instead of a generated one.
      * @return Specimen
      */
-    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen): self
+    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
     {
-        $accessionId = $gen->generate();
+        if (!$accessionId) {
+            $accessionId = $gen->generate();
+        }
 
         return new static($accessionId, $group);
     }
@@ -162,8 +168,13 @@ class Specimen
             throw new \RuntimeException('Cannot create Specimen from Tube without Tube Participant Group');
         }
 
+        $specimenAccessionId = null;
+        if ($tube->getTubeType() === Tube::TYPE_SALIVA) {
+            $specimenAccessionId = $tube->getAccessionId();
+        }
+
         // New Specimen
-        $s = static::createNew($group, $gen);
+        $s = static::createNew($group, $gen, $specimenAccessionId);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
@@ -367,6 +378,10 @@ class Specimen
         }
 
         $this->status = $status;
+
+        if ($status === self::STATUS_REJECTED) {
+            $this->recalculateCliaTestingRecommendation();
+        }
     }
 
     /**
@@ -414,6 +429,7 @@ class Specimen
         return [
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
+            'External Processing' => self::STATUS_EXTERNAL,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
@@ -584,8 +600,9 @@ class Specimen
     public function willAllowAddingResults(): bool
     {
         $valid = [
-            self::STATUS_ACCEPTED, // Normal case where Specimen in acceptable condition
-            self::STATUS_RESULTS,  // Can add more than 1 result
+            self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
+            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 
         return in_array($this->status, $valid);
@@ -654,6 +671,13 @@ class Specimen
     {
         // Only Saliva specimens support CLIA recommendations
         if ($this->getType() !== self::TYPE_SALIVA) {
+            $this->cliaTestingRecommendation = null;
+            return '';
+        }
+
+        // Rejected Specimens will not end up with any results,
+        // thus will never have a CLIA Recommendation
+        if ($this->getStatus() === self::STATUS_REJECTED) {
             $this->cliaTestingRecommendation = null;
             return '';
         }

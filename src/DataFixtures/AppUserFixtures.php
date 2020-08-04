@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Command\Report\BaseResultsNotificationCommand;
 use App\Entity\AppUser;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -37,7 +38,8 @@ class AppUserFixtures extends Fixture implements FixtureGroupInterface
         $this->buildUser($manager, 'coordinator', [
             'ROLE_PARTICIPANT_GROUP_EDIT',
             'ROLE_PRINT_GROUP_LABELS',
-            'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING',
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
+            BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
         ]);
 
         // Specimen Collection Team

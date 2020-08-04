@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Router;
  *
  * NOTE: This Command runs on a recurring scheduled via App\Scheduled\ScheduledTasks
  */
-class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
+class NotifyOnNonNegativeViralResultCommand extends BaseResultsNotificationCommand
 {
     private $notificationData = [];
 
@@ -46,6 +46,19 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         return 'New Non-Negative Viral Group Results';
     }
 
+    /**
+     * Return list of roles where if user is explicitly assigned at least one,
+     * they should receive the Notification sent by this command.
+     *
+     * @return string[]
+     */
+    protected function getRolesToReceiveNotification(): array
+    {
+        return [
+            self::NOTIFY_USERS_WITH_ROLE,
+        ];
+    }
+
     protected function getHtmlEmailBody(): string
     {
         $recommendations = $this->buildNotificationData();
@@ -53,7 +66,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         $timestamps = $recommendations['timestamps'];
 
         $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
-            return sprintf('<li>%s</li>', $g->getTitle());
+            return sprintf('<li>%s</li>', htmlentities($g->getTitle()));
         }, $groups);
 
         $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
@@ -80,7 +93,7 @@ class NotifyOnNonNegativeResultCommand extends BaseResultsNotificationCommand
         ",
             implode("\n", $timestampsOutput),
             implode("\n", $groupsRecTestingOutput),
-            sprintf('<a href="%s">%s</a>', htmlentities($url), $url)
+            sprintf('<a href="%s">%s</a>', htmlentities($url), htmlentities($url))
         );
 
         return $html;

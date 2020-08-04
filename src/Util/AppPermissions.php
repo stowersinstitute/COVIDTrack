@@ -29,8 +29,8 @@ class AppPermissions
         'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
 
         // Notifications
-        'ROLE_NOTIFY_GROUP_RECOMMENDED_TESTING', // Deprecated
         'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS',
+        'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS',
 
         // Participant Groups
         'ROLE_PARTICIPANT_GROUP_EDIT',

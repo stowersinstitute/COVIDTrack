@@ -2,22 +2,22 @@
 
 namespace App\Tests\Command\Report;
 
-use App\Command\Report\NotifyOnNonNegativeResultCommand;
+use App\Command\Report\NotifyOnNonNegativeViralResultCommand;
 use App\Email\EmailBuilder;
 use App\Entity\SpecimenResultQPCR;
 use App\Tests\BaseDatabaseTestCase;
-use App\Tests\Command\DataFixtures\NotifyOnNonNegativeResultsFixtures;
+use App\Tests\Command\DataFixtures\NotifyOnNonNegativeViralResultsFixtures;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
+class NotifyOnNonNegativeViralResultCommandTest extends BaseDatabaseTestCase
 {
     public function testSendsNotifications()
     {
         $extractor = $this->loadFixtures([
-            NotifyOnNonNegativeResultsFixtures::class,
+            NotifyOnNonNegativeViralResultsFixtures::class,
         ]);
         $referenceRepository = $extractor->getReferenceRepository();
 
@@ -25,7 +25,7 @@ class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
         $mockMailer = $this->buildMockMailer();
         $mockRouter = $this->buildMockRouter();
 
-        $cmd = new NotifyOnNonNegativeResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
+        $cmd = new NotifyOnNonNegativeViralResultCommand($this->em, $emailBuilder, $mockMailer, $mockRouter);
 
         $cmdTester = new CommandTester($cmd);
         $cmdTester->execute([], [
@@ -34,7 +34,7 @@ class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
 
         $txtOutput = $cmdTester->getDisplay();
 
-        // Groups from NotifyOnNewlyCreatedPositiveResultsFixtures
+        // Groups from NotifyOnRecommendedCliaViralResultsFixtures
         // that have Non-Negative results
         $groupsExpected = [
             'Yellow',
@@ -44,7 +44,7 @@ class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
             $this->assertStringContainsString($groupTitle, $txtOutput);
         }
 
-        // Users with notification role from NotifyOnNewlyCreatedPositiveResultsFixtures
+        // Users with notification role from NotifyOnRecommendedCliaViralResultsFixtures
         $expectedUserRecipients = [
             'Mary Smith',
             'Admin User',
@@ -81,12 +81,15 @@ class NotifyOnNonNegativeResultCommandTest extends BaseDatabaseTestCase
         ]);
         $txtOutput = $cmdTester->getDisplay();
 
+        // Verify updated result's Participant Group displays in email
         $groupsExpected = [
             $resultToUpdate->getSpecimen()->getParticipantGroup()->getTitle(),
         ];
         foreach ($groupsExpected as $groupTitle) {
             $this->assertStringContainsString($groupTitle, $txtOutput);
         }
+
+        // Verify updated results sent to proper users
         $expectedUserRecipients = [
             'Mary Smith',
             'Admin User',

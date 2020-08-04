@@ -9,16 +9,21 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QPCRResultsForm extends AbstractType
 {
+    /**
+     * @var Specimen
+     */
+    private $specimen;
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** @var Specimen $specimen */
-        $specimen = $options['specimen'];
+        $this->specimen = $options['specimen'];
         /** @var SpecimenResultQPCR $editResult */
         $editResult = $options['editResult'];
 
@@ -26,16 +31,40 @@ class QPCRResultsForm extends AbstractType
             ->add('well', EntityType::class, [
                 'label' => 'Wells containing this Specimen',
                 'class' => SpecimenWell::class,
-                'placeholder' => '- Select -',
-                'required' => true,
-                'disabled' => (bool)$editResult,
-                'choices' => $specimen->getWells(),
+                'placeholder' => '- Unknown -',
+                'required' => false,
+                'disabled' => ($editResult && $editResult->getWell()),
+                'choices' => $this->specimen->getWells(),
             ])
             ->add('conclusion', ChoiceType::class, [
                 'label' => 'Conclusion',
                 'choices' => SpecimenResultQPCR::getFormConclusions(),
                 'placeholder' => '- Select -',
                 'required' => true,
+            ])
+            ->add('CT1', TextType::class, [
+                'label' => 'Ct1',
+                'required' => false,
+            ])
+            ->add('CT1AmpScore', TextType::class, [
+                'label' => 'Amp Score1',
+                'required' => false,
+            ])
+            ->add('CT2', TextType::class, [
+                'label' => 'Ct2',
+                'required' => false,
+            ])
+            ->add('CT2AmpScore', TextType::class, [
+                'label' => 'Amp Score2',
+                'required' => false,
+            ])
+            ->add('CT3', TextType::class, [
+                'label' => 'Ct3',
+                'required' => false,
+            ])
+            ->add('CT3AmpScore', TextType::class, [
+                'label' => 'Amp Score3',
+                'required' => false,
             ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
@@ -52,7 +81,11 @@ class QPCRResultsForm extends AbstractType
                 $well = $form->get('well')->getData();
                 $conclusion = $form->get('conclusion')->getData();
 
-                return new SpecimenResultQPCR($well, $conclusion);
+                if ($well) {
+                    return SpecimenResultQPCR::createFromWell($well, $conclusion);
+                }
+
+                return SpecimenResultQPCR::createFromSpecimen($this->specimen, $conclusion);
             }
         ]);
 

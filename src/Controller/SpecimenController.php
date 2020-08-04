@@ -8,6 +8,7 @@ use App\Form\SpecimenForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -38,7 +39,7 @@ class SpecimenController extends AbstractController
     /**
      * View a single Specimen.
      *
-     * @Route("/{accessionId<C[A-Z]{8}>}", methods={"GET", "POST"})
+     * @Route("/{accessionId}", methods={"GET", "POST"})
      */
     public function view(string $accessionId)
     {
@@ -90,7 +91,7 @@ class SpecimenController extends AbstractController
     /**
      * Edit a single Specimen.
      *
-     * @Route("/{accessionId<C[A-Z]{8}>}/edit", methods={"GET", "POST"})
+     * @Route("/{accessionId}/edit", methods={"GET", "POST"})
      */
     public function edit(string $accessionId, Request $request) : Response
     {
@@ -124,7 +125,7 @@ class SpecimenController extends AbstractController
             ->findOneByAnyId($id);
 
         if (!$s) {
-            throw new \InvalidArgumentException('Cannot find Specimen');
+            throw new NotFoundHttpException('Cannot find Specimen');
         }
 
         return $s;

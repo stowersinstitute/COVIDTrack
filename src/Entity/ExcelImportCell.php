@@ -85,7 +85,7 @@ class ExcelImportCell
     {
         // Typical value is just the string displayed in Excel
         $internalDataType = self::VALUE_TYPE_SCALAR;
-        $storeValue = trim($cell->getFormattedValue());
+        $storeValue = $cell->getFormattedValue();
 
         // Resolve formulas
         // todo: not actually sure what happens when a formula resolves to a date...
@@ -98,6 +98,16 @@ class ExcelImportCell
             $internalDataType = self::VALUE_TYPE_DATETIME;
             $storeValue = Date::excelToDateTimeObject($cell->getValue());
             $storeValue = $storeValue->format(DATE_ATOM);
+        }
+
+        // Convert any number to its string equivalent
+        if (is_int($storeValue) || is_float(($storeValue))) {
+            $storeValue = (string) $storeValue;
+        }
+
+        // Trim whitespace
+        if (is_string($storeValue)) {
+            $storeValue = trim($storeValue);
         }
 
         $this->valueType = $internalDataType;
@@ -142,7 +152,8 @@ class ExcelImportCell
     }
 
     /**
-     * @deprecated You probably want setValueFromExcelCell
+     * @deprecated Not really deprecated. You probably want setValueFromExcelCell()
+     * @internal
      */
     public function setValue($value): void
     {

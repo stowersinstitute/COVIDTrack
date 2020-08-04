@@ -13,22 +13,16 @@ use Doctrine\ORM\EntityRepository;
 class SpecimenResultAntibodyRepository extends EntityRepository
 {
     /**
-     * Find Results whose conclusion recommends for testing,
-     * and result was created after a certain time. This excludes
-     * results from control group specimen.
+     * Find Results whose conclusion is not Negative and where it was
+     * modified after a certain time. This excludes results from Specimens
+     * associated with Control Participant Groups.
      *
      * @return SpecimenResultAntibody[]
      */
-    public function findTestingRecommendedResultCreatedAfter(\DateTimeInterface $datetime): array
+    public function findAnyResultNotNegativeAfter(\DateTimeInterface $datetime): array
     {
-        throw new \RuntimeException('findTestingRecommendedResultCreatedAfter() Not yet supported');
-        $conclusionRecommendingTesting = [
-            SpecimenResultAntibody::CONCLUSION_RECOMMENDED,
-            SpecimenResultAntibody::CONCLUSION_POSITIVE,
-        ];
-
         return $this->createQueryBuilder('r')
-            ->where('r.createdAt >= :since')
+            ->where('r.updatedAt >= :since')
             ->setParameter('since', $datetime)
 
             // Do not include results from "control" groups
@@ -37,10 +31,11 @@ class SpecimenResultAntibodyRepository extends EntityRepository
             ->join('s.participantGroup', 'g')
             ->andWhere('g.isControl = false')
 
-            ->andWhere('r.conclusion IN (:conclusions)')
-            ->setParameter('conclusions', $conclusionRecommendingTesting)
+            // Any result that is not negative
+            ->andWhere('r.conclusion IS NOT NULL AND r.conclusion != :conclusion')
+            ->setParameter('conclusion', SpecimenResultAntibody::CONCLUSION_NEGATIVE)
 
-            ->orderBy('r.createdAt')
+            ->orderBy('r.updatedAt')
 
             ->getQuery()
             ->execute();

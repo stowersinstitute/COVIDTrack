@@ -17,7 +17,7 @@ use Doctrine\Common\Persistence\ObjectManager;
  * Creates test data for sending email notifications about
  * Participant Groups with Non-Negative Viral results.
  */
-class NotifyOnNonNegativeResultsFixtures extends Fixture
+class NotifyOnNonNegativeViralResultsFixtures extends Fixture
 {
     /**
      * @var SpecimenAccessionIdGenerator
@@ -77,7 +77,7 @@ class NotifyOnNonNegativeResultsFixtures extends Fixture
             $user->setEmail($data['email']);
 
             if ($data['notify'] === true) {
-                $user->addRole(BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_OLD);
+                $user->addRole(BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE);
             }
 
             $em->persist($user);
@@ -135,9 +135,9 @@ class NotifyOnNonNegativeResultsFixtures extends Fixture
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
 
-                $result = new SpecimenResultQPCR($well, $data['resultConclusion']);
-                $result->setCreatedAt(new \DateTimeImmutable('-4 days'));
-                $result->setUpdatedAt(new \DateTimeImmutable('-4 days'));
+                $result = SpecimenResultQPCR::createFromWell($well, $data['resultConclusion']);
+                $result->setCreatedAt(new \DateTimeImmutable('-4 days 11:00am'));
+                $result->setUpdatedAt(new \DateTimeImmutable('-4 days 11:00am'));
 
                 if (isset($data['resultReferenceId'])) {
                     $this->addReference($data['resultReferenceId'], $result);

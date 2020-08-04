@@ -41,7 +41,7 @@ class SpecimenTest extends TestCase
         $position1 = 'B2';
         $well1 = new SpecimenWell($plateABC, $specimen, $position1);
         $conclusion1 = SpecimenResultQPCR::CONCLUSION_NEGATIVE;
-        $result1 = new SpecimenResultQPCR($well1, $conclusion1);
+        $result1 = SpecimenResultQPCR::createFromWell($well1, $conclusion1);
 
         // For now only in 1 Well on 1 Plate
         $this->assertCount(1, $specimen->getWells());
@@ -54,7 +54,7 @@ class SpecimenTest extends TestCase
         $position2 = 'C4';
         $well2 = new SpecimenWell($plateABC, $specimen, $position2);
         $conclusion2 = SpecimenResultQPCR::CONCLUSION_POSITIVE;
-        $result2 = new SpecimenResultQPCR($well2, $conclusion2);
+        $result2 = SpecimenResultQPCR::createFromWell($well2, $conclusion2);
 
         // On 1 Plate and 2 Wells
         $this->assertTrue(EntityUtils::isSameEntity($well2, $specimen->getWells()[1]));
@@ -73,7 +73,7 @@ class SpecimenTest extends TestCase
         $plate = WellPlate::buildExample('ABC');
         $well = new SpecimenWell($plate, $specimen, 'B2');
 
-        $result = new SpecimenResultQPCR($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $result = SpecimenResultQPCR::createFromWell($well, SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         // Specimen and Result now related
         $this->assertCount(1, $specimen->getQPCRResults());
@@ -82,6 +82,17 @@ class SpecimenTest extends TestCase
         $specimen->addQPCRResult($result);
         $specimen->addQPCRResult($result);
 
+        $this->assertCount(1, $specimen->getQPCRResults());
+    }
+
+    public function testQPCRResultCanBeAddedWithoutWell()
+    {
+        $specimen = Specimen::buildExample('C100');
+        $this->assertCount(0, $specimen->getQPCRResults());
+
+        $result = SpecimenResultQPCR::createFromSpecimen($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        $this->assertSame($specimen, $result->getSpecimen());
         $this->assertCount(1, $specimen->getQPCRResults());
     }
 
@@ -170,17 +181,17 @@ class SpecimenTest extends TestCase
 
         // Add first result
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
 
         // Add second result (but it's the most recent created at)
         $well2 = SpecimenWell::buildExample($specimen);
-        $r2 = new SpecimenResultQPCR($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $r2 = SpecimenResultQPCR::createFromWell($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
 
         // Add third result
         $well3 = SpecimenWell::buildExample($specimen);
-        $r3 = new SpecimenResultQPCR($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+        $r3 = SpecimenResultQPCR::createFromWell($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
 
         $this->assertCount(3, $specimen->getQPCRResults());
@@ -193,7 +204,7 @@ class SpecimenTest extends TestCase
         $this->assertNotSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
 
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
 
         $this->assertSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
@@ -205,17 +216,17 @@ class SpecimenTest extends TestCase
 
         // Add first result
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
 
         // Add second result (but it's the most recent created at)
         $well2 = SpecimenWell::buildExample($specimen);
-        $r2 = new SpecimenResultQPCR($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $r2 = SpecimenResultQPCR::createFromWell($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
 
         // Add third result
         $well3 = SpecimenWell::buildExample($specimen);
-        $r3 = new SpecimenResultQPCR($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+        $r3 = SpecimenResultQPCR::createFromWell($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
 
         // Most recent
@@ -234,17 +245,17 @@ class SpecimenTest extends TestCase
         $specimen = Specimen::buildExample('C100');
 
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $r1->setCreatedAt(new \DateTimeImmutable('2020-04-24'));
 
         // R2. This is the latest result
         $well2 = SpecimenWell::buildExample($specimen);
-        $r2 = new SpecimenResultQPCR($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $r2 = SpecimenResultQPCR::createFromWell($well2, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $r2->setCreatedAt(new \DateTimeImmutable('2020-04-25'));
 
         // R3. Adding an earlier result does not override R2
         $well3 = SpecimenWell::buildExample($specimen);
-        $r3 = new SpecimenResultQPCR($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+        $r3 = SpecimenResultQPCR::createFromWell($well3, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $r3->setCreatedAt(new \DateTimeImmutable('2020-04-23'));
 
         $this->assertSame($r2, $specimen->getMostRecentQPCRResult());
@@ -259,27 +270,27 @@ class SpecimenTest extends TestCase
 
         // Add Positive Result
         $well1 = SpecimenWell::buildExample($specimen);
-        $r1 = new SpecimenResultQPCR($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
 
         // Add Negative Result
         $well2 = SpecimenWell::buildExample($specimen);
-        $r2 = new SpecimenResultQPCR($well2, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+        $r2 = SpecimenResultQPCR::createFromWell($well2, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
         $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
 
         // Add Positive Result
         $well3 = SpecimenWell::buildExample($specimen);
-        $r3 = new SpecimenResultQPCR($well3, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $r3 = SpecimenResultQPCR::createFromWell($well3, SpecimenResultQPCR::CONCLUSION_POSITIVE);
         $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
 
         // Add Recommended Result
         $well4 = SpecimenWell::buildExample($specimen);
-        $r4 = new SpecimenResultQPCR($well4, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
+        $r4 = SpecimenResultQPCR::createFromWell($well4, SpecimenResultQPCR::CONCLUSION_RECOMMENDED);
         $this->assertSame('Recommend Diagnostic Testing', $specimen->getCliaTestingRecommendedText());
 
         // Back to Non-Negative Result
         $well5 = SpecimenWell::buildExample($specimen);
-        $r5 = new SpecimenResultQPCR($well5, SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE);
+        $r5 = SpecimenResultQPCR::createFromWell($well5, SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE);
         $this->assertSame('No Recommendation', $specimen->getCliaTestingRecommendedText());
     }
 
@@ -312,7 +323,7 @@ class SpecimenTest extends TestCase
 
     public function testCreateFromTube()
     {
-        $tube = new Tube('TUBE-100');
+        $bloodTube = new Tube('TUBE-100');
 
         $accessionId = 'SPEC-200';
         $gen = $this->getMockAccessionIdGenerator($accessionId);
@@ -321,15 +332,24 @@ class SpecimenTest extends TestCase
         $group = ParticipantGroup::buildExample('GRP-1');
         $tubeType = Tube::TYPE_BLOOD;
         $collectedAt = new \DateTime('2020-05-20 15:22:44');
-        $tube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
+        $bloodTube->kioskDropoffComplete($gen, $drop, $group, $tubeType, $collectedAt);
 
-        $specimen = Specimen::createFromTube($tube, $gen);
+        $bloodSpecimen = Specimen::createFromTube($bloodTube, $gen);
 
-        $this->assertSame($accessionId, $tube->getSpecimen()->getAccessionId());
-        $this->assertSame($group, $tube->getParticipantGroup());
-        $this->assertSame(Specimen::TYPE_BLOOD, $specimen->getType());
-        $this->assertEquals($collectedAt, $specimen->getCollectedAt());
-        $this->assertTrue(EntityUtils::isSameEntity($tube->getParticipantGroup(), $specimen->getParticipantGroup()));
+        $this->assertSame($accessionId, $bloodTube->getSpecimen()->getAccessionId());
+        $this->assertSame($group, $bloodTube->getParticipantGroup());
+        $this->assertSame(Specimen::TYPE_BLOOD, $bloodSpecimen->getType());
+        $this->assertEquals($collectedAt, $bloodSpecimen->getCollectedAt());
+        $this->assertTrue(EntityUtils::isSameEntity($bloodTube->getParticipantGroup(), $bloodSpecimen->getParticipantGroup()));
+
+        $salivaTube = new Tube('TUBE-101');
+        $salivaTubeType = Tube::TYPE_SALIVA;
+        $salivaTube->kioskDropoffComplete($gen, $drop, $group, $salivaTubeType, $collectedAt);
+
+        $salivaSpecimen = Specimen::createFromTube($salivaTube, $gen);
+        $this->assertSame($salivaTube->getAccessionId(), $salivaTube->getSpecimen()->getAccessionId());
+
+
     }
 
     public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()
@@ -346,6 +366,25 @@ class SpecimenTest extends TestCase
 
         $this->assertSame($specimen->getCliaTestingRecommendation(), Specimen::CLIA_REC_PENDING);
         $this->assertSame($specimen->getCliaTestingRecommendedText(), 'Awaiting Results');
+    }
+
+    public function testRejectedSpecimensAreNotPendingResults()
+    {
+        $group = ParticipantGroup::buildExample('GRP1');
+        $specimen = new Specimen('S100', $group);
+
+        $this->assertEmpty($specimen->getCliaTestingRecommendation());
+        $this->assertEmpty($specimen->getCliaTestingRecommendedText());
+
+        $specimen->setType(Specimen::TYPE_SALIVA);
+
+        $this->assertSame($specimen->getCliaTestingRecommendation(), Specimen::CLIA_REC_PENDING);
+        $this->assertSame($specimen->getCliaTestingRecommendedText(), 'Awaiting Results');
+
+        $specimen->setStatus(Specimen::STATUS_REJECTED);
+
+        $this->assertNull($specimen->getCliaTestingRecommendation());
+        $this->assertSame($specimen->getCliaTestingRecommendedText(), '');
     }
 
     /**
