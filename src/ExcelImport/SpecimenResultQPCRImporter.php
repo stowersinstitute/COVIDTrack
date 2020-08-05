@@ -9,6 +9,7 @@ use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use App\Repository\TubeRepository;
+use App\Util\EntityUtils;
 use Doctrine\ORM\EntityManager;
 
 class SpecimenResultQPCRImporter extends BaseExcelImporter
@@ -48,12 +49,6 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      * @var SpecimenResultQPCR[]
      */
     private $processedResults = [];
-
-    /**
-     * Local cache for WellPlate lookup
-     * @var array Keys WellPlate.barcode; Values WellPlate
-     */
-    private $platesCache = [];
 
     /**
      * List of well plate barcodes that already have creation import messages
@@ -162,8 +157,8 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $resultAction = count($specimen->getQPCRResults(1)) === 1 ? 'updated' : 'created';
 
             if (!empty($rawPosition)){
-                $plate = $this->findWellPlateOrMakeNew($rawPlateBarcode);
-                $well = $this->findWellOrMakeNew($rawPosition, $plate, $specimen);
+                $plate = $this->findOrCreatePlate($rawPlateBarcode);
+                $well = $this->findOrCreateWell($rawPosition, $plate, $specimen);
                 $qpcr = SpecimenResultQPCR::createFromWell($well, $rawConclusion);
             } else {
                 $qpcr = SpecimenResultQPCR::createFromSpecimen($specimen, $rawConclusion);
@@ -318,14 +313,14 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
-        $wellPlate = $this->findPlate($rawPlateBarcode);
-        if (!$wellPlate && !in_array($rawPlateBarcode, $this->plateCreateMessages)) {
-            $this->messages[] = ImportMessage::newMessage(
-                sprintf('Cannot find Well Plate by barcode "%s". Plate will be created.', $rawPlateBarcode),
+        // Well Plate required
+        if (empty($rawPlateBarcode)) {
+            $this->messages[] = ImportMessage::newError(
+                'Well Plate Barcode cannot be empty',
                 $rowNumber,
                 $this->columnMap['plateBarcode']
             );
-            $this->plateCreateMessages[] = $rawPlateBarcode;
+            return false;
         }
 
         // Specimen must already be in a Well on this Well Plate
@@ -335,35 +330,15 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             return false;
         }
 
-        if($wellPlate) {
-            if (!$specimen->isOnWellPlate($wellPlate)) {
+        // Well Plate we'll be adding Specimen to
+        $wellPlate = $this->findOrCreatePlate($rawPlateBarcode);
+
+        $well = $wellPlate->getWellAtPosition($rawPosition);
+        if ($well) {
+            $wellSpecimen = $well->getSpecimen();
+            if ($wellSpecimen && !EntityUtils::isSameEntity($specimen, $wellSpecimen)) {
                 $this->messages[] = ImportMessage::newError(
-                    sprintf('Specimen "%s" not currently on Well Plate "%s"', $rawSpecimenId, $rawPlateBarcode),
-                    $rowNumber,
-                    $this->columnMap['plateBarcode']
-                );
-                return false;
-            }
-
-            // Get the specific Well at reported Position
-            $well = $specimen->getWellAtPosition($wellPlate, $rawPosition);
-            if (!$well) {
-                // Specimen not at this position on plate in Results file.
-
-                // Build list of positions to display in error message
-                $wellPositions = [];
-                foreach ($specimen->getWellsOnPlate($wellPlate) as $well) {
-                    if ($well->getPositionAlphanumeric()) {
-                        $wellPositions[] = $well->getPositionAlphanumeric();
-                    }
-                }
-                $prnCurrentPositions = implode(', ', $wellPositions);
-                if (count($wellPositions) === 0) {
-                    $prnCurrentPositions = 'but does not have any positions saved';
-                }
-
-                $this->messages[] = ImportMessage::newError(
-                    sprintf('Specimen "%s" currently in Well "%s". Results file lists Well "%s". These must match.', $rawSpecimenId, $prnCurrentPositions, $rawPosition),
+                    sprintf('Well "%s" already contains Specimen "%s". Uploaded file tried adding result in this Well for Specimen "%s".', $rawPosition, $wellSpecimen->getAccessionId(), $rawSpecimenId),
                     $rowNumber,
                     $this->columnMap['position']
                 );
@@ -374,26 +349,20 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         return true;
     }
 
-    private function findWellPlateOrMakeNew(string $rawWellPlateId): WellPlate
+    private function findOrCreatePlate(string $rawPlateBarcode): WellPlate
     {
-        if (isset($this->platesCache[$rawWellPlateId])) {
-            return $this->platesCache[$rawWellPlateId];
-        }
-
-        $plate = $this->em
-            ->getRepository(WellPlate::class)
-            ->findOneByBarcode($rawWellPlateId);
+        $plate = $this->findPlate($rawPlateBarcode);
         if (!$plate) {
-            $plate = new WellPlate($rawWellPlateId);
+            $plate = new WellPlate($rawPlateBarcode);
             $this->em->persist($plate);
 
-            $this->platesCache[$rawWellPlateId] = $plate;
+            $this->seenPlates[$rawPlateBarcode] = $plate;
         }
 
         return $plate;
     }
 
-    private function findWellOrMakeNew(string $rawPosition, WellPlate $plate, Specimen $specimen): SpecimenWell
+    private function findOrCreateWell(string $rawPosition, WellPlate $plate, Specimen $specimen): SpecimenWell
     {
         $well = $specimen->getWellAtPosition($plate, $rawPosition);
         if ($well) {
