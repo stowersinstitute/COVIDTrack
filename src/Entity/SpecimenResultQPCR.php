@@ -105,6 +105,10 @@ class SpecimenResultQPCR extends SpecimenResult
      */
     public static function createFromSpecimen(Specimen $specimen, string $conclusion): self
     {
+        if (!$specimen->willAllowAddingResults()) {
+            throw new \RuntimeException('Specimen not in Status that allows adding Viral Results');
+        }
+
         $r = new self();
 
         $r->specimen = $specimen;

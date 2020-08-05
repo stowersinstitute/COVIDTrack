@@ -351,6 +351,7 @@ class SpecimenWellTest extends TestCase
     {
         $plate = WellPlate::buildExample();
         $specimen = Specimen::buildExample('S100');
+        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
         $well = new SpecimenWell($plate, $specimen, "A4");
 
         // Default has no Viral Results
@@ -385,6 +386,7 @@ class SpecimenWellTest extends TestCase
     {
         $plate = WellPlate::buildExample();
         $specimen = Specimen::buildExample('S101');
+        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
         $well = new SpecimenWell($plate, $specimen, "A5");
 
         // Default has no Antibody Results
