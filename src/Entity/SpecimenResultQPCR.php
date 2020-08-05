@@ -87,8 +87,6 @@ class SpecimenResultQPCR extends SpecimenResult
      */
     public static function createFromWell(SpecimenWell $well, string $conclusion): self
     {
-        $r = new self();
-
         if (!$well->getSpecimen()) {
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
         }
