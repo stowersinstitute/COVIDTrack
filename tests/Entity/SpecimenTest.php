@@ -29,8 +29,7 @@ class SpecimenTest extends TestCase
 
     public function testSpecimenCanExistMultipleTimesOnSameWellPlate()
     {
-        $specimen = Specimen::buildExample('C100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('C100');
 
         // No results returned when has 0 results
         $this->assertCount(0, $specimen->getWells());
@@ -68,10 +67,8 @@ class SpecimenTest extends TestCase
 
     public function testSameQPCRResultCanOnlyExistOnceOnSpecimen()
     {
-        $specimen = Specimen::buildExample('C100');
+        $specimen = Specimen::buildExampleReadyForResults('C100');
         $this->assertCount(0, $specimen->getQPCRResults());
-
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
 
         $plate = WellPlate::buildExample('ABC');
         $well = new SpecimenWell($plate, $specimen, 'B2');
@@ -90,8 +87,7 @@ class SpecimenTest extends TestCase
 
     public function testQPCRResultCanBeAddedWithoutWell()
     {
-        $specimen = Specimen::buildExample('C100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('C100');
         $this->assertCount(0, $specimen->getQPCRResults());
 
         $result = SpecimenResultQPCR::createFromSpecimen($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
@@ -177,8 +173,7 @@ class SpecimenTest extends TestCase
 
     public function testGetQPCRResultsAfterAddingResults()
     {
-        $specimen = Specimen::buildExample('C100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('C100');
 
         // No results returned when has 0 results
         $results = $specimen->getQPCRResults(1);
@@ -205,10 +200,8 @@ class SpecimenTest extends TestCase
 
     public function testSpecimenStatusUpdatedWhenQPCRResultsAdded()
     {
-        $specimen = Specimen::buildExample('C100');
+        $specimen = Specimen::buildExampleReadyForResults('C100');
         $this->assertNotSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
-
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
 
         $well1 = SpecimenWell::buildExample($specimen);
         $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
@@ -219,8 +212,7 @@ class SpecimenTest extends TestCase
 
     public function testGetQPCRResultsOrderedByDate()
     {
-        $specimen = Specimen::buildExample('C100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('C100');
 
         // Add first result
         $well1 = SpecimenWell::buildExample($specimen);
@@ -250,8 +242,7 @@ class SpecimenTest extends TestCase
 
     public function testGetNewestQPCRResult()
     {
-        $specimen = Specimen::buildExample('C100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('C100');
 
         $well1 = SpecimenWell::buildExample($specimen);
         $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_NEGATIVE);

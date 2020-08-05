@@ -32,8 +32,7 @@ class SpecimenResultAntibodyTest extends TestCase
      */
     public function testSetSignal($signal, ?string $expected)
     {
-        $specimen = Specimen::buildExample('S100');
-        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $specimen = Specimen::buildExampleReadyForResults('S100');
         $well = SpecimenWell::buildExample($specimen);
         $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_NON_NEGATIVE);
 

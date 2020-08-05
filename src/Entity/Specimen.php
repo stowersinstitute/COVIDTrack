@@ -208,6 +208,19 @@ class Specimen
         return new static($accessionId, $group);
     }
 
+    /**
+     * Example Specimen for automated tests. Created in workflow status ready to
+     * add Viral or Antibody Results.
+     */
+    public static function buildExampleReadyForResults(string $accessionId, ?ParticipantGroup $group = null): self
+    {
+        $s = static::buildExample($accessionId, $group);
+
+        $s->setStatus(static::STATUS_EXTERNAL);
+
+        return $s;
+    }
+
     public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null): self
     {
         $specimen = static::buildExample($accessionId, $group);
