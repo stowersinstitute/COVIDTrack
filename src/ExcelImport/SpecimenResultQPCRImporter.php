@@ -50,14 +50,6 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private $processedResults = [];
 
-    /**
-     * List of well plate barcodes that already have creation import messages
-     * so we don't duplicate the same message for all the wells of a plate
-     *
-     * @var string[] Values WellPlate.barcode
-     */
-    private $plateCreateMessages = [];
-
     public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
