@@ -315,6 +315,16 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             return false;
         }
 
+        // Well position required
+        if (empty($rawPosition)) {
+            $this->messages[] = ImportMessage::newError(
+                'Well position cannot be empty',
+                $rowNumber,
+                $this->columnMap['position']
+            );
+            return false;
+        }
+
         // Specimen must already be in a Well on this Well Plate
         $specimen = $this->findSpecimen($rawSpecimenId);
         if (!$specimen) {
