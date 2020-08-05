@@ -67,6 +67,6 @@ security:
         ROLE_WELL_PLATE_EDIT:
             - ROLE_WELL_PLATE_VIEW
         ROLE_NOTIFY_ABOUT_VIRAL_RESULTS:
-            ~
+            - ROLE_REPORTS_GROUP_VIEW
         ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS:
             ~
