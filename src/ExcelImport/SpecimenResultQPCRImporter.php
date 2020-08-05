@@ -320,11 +320,12 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
         if (!$wellPlate && !in_array($rawPlateBarcode, $this->plateCreateMessages)) {
-            $this->messages[$rawPlateBarcode] = ImportMessage::newMessage(
+            $this->messages[] = ImportMessage::newMessage(
                 sprintf('Cannot find Well Plate by barcode "%s". Plate will be created.', $rawPlateBarcode),
                 $rowNumber,
                 $this->columnMap['plateBarcode']
             );
+            $this->plateCreateMessages[] = $rawPlateBarcode;
         }
 
         // Specimen must already be in a Well on this Well Plate
