@@ -21,7 +21,36 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
 
         $processedResults = $importer->process(true);
 
-        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        // Verify rows with missing required data report as user-readable errors.
+        // specimen-antibody-results.xlsx has red cells where errors expected.
+        $errors = $importer->getErrors();
+        $expectedErrors = [
+            [
+                'rowNumber' => 4,
+            ],
+            [
+                'rowNumber' => 8,
+            ],
+            [
+                'rowNumber' => 9,
+            ],
+            [
+                'rowNumber' => 10,
+            ],
+        ];
+        $this->assertCount(count($expectedErrors), $errors);
+        foreach ($expectedErrors as $expectedError) {
+            $found = false;
+            foreach ($errors as $error) {
+                if ($error->getRowNumber() === $expectedError['rowNumber']) {
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $this->fail(sprintf('Expected to find error for data in Row %d but no error found', $expectedError['rowNumber']));
+            }
+        }
+
         $this->assertCount(6, $processedResults); // Count dependent on SpecimenResultAntibodyImporterFixtures::getData()
         $this->assertSame(6, $importer->getNumImportedItems());
 
