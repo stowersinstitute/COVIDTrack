@@ -55,6 +55,14 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
      */
     private $platesCache = [];
 
+    /**
+     * List of well plate barcodes that already have creation import messages
+     * so we don't duplicate the same message for all the wells of a plate
+     *
+     * @var string[] Values WellPlate.barcode
+     */
+    private $plateCreateMessages = [];
+
     public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
     {
         $this->setEntityManager($em);
@@ -311,7 +319,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
     private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, string $rawSpecimenId, int $rowNumber): bool
     {
         $wellPlate = $this->findPlate($rawPlateBarcode);
-        if (!$wellPlate) {
+        if (!$wellPlate && !in_array($rawPlateBarcode, $this->plateCreateMessages)) {
             $this->messages[$rawPlateBarcode] = ImportMessage::newMessage(
                 sprintf('Cannot find Well Plate by barcode "%s". Plate will be created.', $rawPlateBarcode),
                 $rowNumber,
