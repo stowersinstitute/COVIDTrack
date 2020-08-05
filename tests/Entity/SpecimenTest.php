@@ -268,6 +268,11 @@ class SpecimenTest extends TestCase
         // Default when Specimen test results not yet available
         $this->assertSame('Awaiting Results', $specimen->getCliaTestingRecommendedText());
 
+        // Set into status that allows publishing results
+        $this->assertFalse($specimen->willAllowAddingResults());
+        $specimen->setStatus(Specimen::STATUS_EXTERNAL);
+        $this->assertTrue($specimen->willAllowAddingResults());
+
         // Add Positive Result
         $well1 = SpecimenWell::buildExample($specimen);
         $r1 = SpecimenResultQPCR::createFromWell($well1, SpecimenResultQPCR::CONCLUSION_POSITIVE);
