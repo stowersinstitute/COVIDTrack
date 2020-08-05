@@ -412,6 +412,7 @@ class Specimen
             self::STATUS_CREATED,
             self::STATUS_RETURNED,
             self::STATUS_ACCEPTED,
+            self::STATUS_EXTERNAL,
         ];
         if (in_array($this->status, $updateIfInStatus)) {
             $newStatus = self::STATUS_RESULTS;
