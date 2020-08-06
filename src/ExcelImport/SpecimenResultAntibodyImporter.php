@@ -299,7 +299,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
     private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, ?string $rawWellIdentifier, string $rawSpecimenId, int $rowNumber): bool
     {
         // Plate Barcode required
-        if ($rawPlateBarcode === null) {
+        if (empty($rawPlateBarcode)) {
             $this->messages[] = ImportMessage::newError(
                 'Well Plate Barcode cannot be blank',
                 $rowNumber,
@@ -309,21 +309,11 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
         }
 
         // Well Position required
-        if ($rawPosition === null) {
+        if (empty($rawPosition)) {
             $this->messages[] = ImportMessage::newError(
                 'Well Position cannot be blank',
                 $rowNumber,
                 $this->columnMap['wellPosition']
-            );
-            return false;
-        }
-
-        // Well Identifier required
-        if ($rawPosition === null) {
-            $this->messages[] = ImportMessage::newError(
-                'Well Identifier cannot be blank',
-                $rowNumber,
-                $this->columnMap['wellIdentifier']
             );
             return false;
         }
