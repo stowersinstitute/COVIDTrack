@@ -43,6 +43,9 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             [
                 'rowNumber' => 11,
             ],
+            [
+                'rowNumber' => 12,
+            ],
         ];
         $this->assertCount(count($expectedErrors), $errors);
         foreach ($expectedErrors as $expectedError) {
