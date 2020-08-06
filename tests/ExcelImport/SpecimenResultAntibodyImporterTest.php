@@ -26,16 +26,19 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
         $errors = $importer->getErrors();
         $expectedErrors = [
             [
-                'rowNumber' => 4,
+                'rowNumber' => 5,
+            ],
+            [
+                'rowNumber' => 6,
+            ],
+            [
+                'rowNumber' => 7,
             ],
             [
                 'rowNumber' => 8,
             ],
             [
                 'rowNumber' => 9,
-            ],
-            [
-                'rowNumber' => 10,
             ],
         ];
         $this->assertCount(count($expectedErrors), $errors);
@@ -51,17 +54,13 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             }
         }
 
-        $this->assertCount(6, $processedResults); // Count dependent on SpecimenResultAntibodyImporterFixtures::getData()
-        $this->assertSame(6, $importer->getNumImportedItems());
+        $this->assertCount(2, $processedResults); // Count dependent on SpecimenResultAntibodyImporterFixtures::getData()
+        $this->assertSame(2, $importer->getNumImportedItems());
 
         // Data must match specimen-viral-results.xlsx
         $conclusionMap = [
             'SpecimenAntibodyResults1' => SpecimenResultAntibody::CONCLUSION_NEGATIVE,
             'SpecimenAntibodyResults2' => SpecimenResultAntibody::CONCLUSION_POSITIVE,
-            'SpecimenAntibodyResults3' => SpecimenResultAntibody::CONCLUSION_NEGATIVE,
-            'SpecimenAntibodyResults4' => SpecimenResultAntibody::CONCLUSION_NEGATIVE,
-            'SpecimenAntibodyResults5' => SpecimenResultAntibody::CONCLUSION_POSITIVE,
-            'SpecimenAntibodyResults6' => SpecimenResultAntibody::CONCLUSION_NEGATIVE,
         ];
         foreach ($processedResults as $result) {
             $specimenId = $result->getSpecimenAccessionId();
@@ -74,10 +73,6 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
         $biobankTubeMap = [
             'SpecimenAntibodyResults1' => 'G814450900',
             'SpecimenAntibodyResults2' => 'G814450901',
-            'SpecimenAntibodyResults3' => 'G814450902',
-            'SpecimenAntibodyResults4' => 'G814450903',
-            'SpecimenAntibodyResults5' => 'G814450904',
-            'SpecimenAntibodyResults6' => 'G814450905',
         ];
         foreach ($processedResults as $result) {
             $specimenId = $result->getSpecimenAccessionId();
@@ -90,10 +85,6 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
         $biobankBarcodeMap = [
             'SpecimenAntibodyResults1' => 'AntibodyResults1',
             'SpecimenAntibodyResults2' => 'AntibodyResults1',
-            'SpecimenAntibodyResults3' => 'AntibodyResults1',
-            'SpecimenAntibodyResults4' => 'AntibodyResults1',
-            'SpecimenAntibodyResults5' => 'AntibodyResults1',
-            'SpecimenAntibodyResults6' => 'AntibodyResults1',
         ];
         foreach ($processedResults as $result) {
             $specimenId = $result->getSpecimenAccessionId();
@@ -106,10 +97,6 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
         $signalMap = [
             'SpecimenAntibodyResults1' => '0',
             'SpecimenAntibodyResults2' => '3',
-            'SpecimenAntibodyResults3' => '1',
-            'SpecimenAntibodyResults4' => '0',
-            'SpecimenAntibodyResults5' => '3',
-            'SpecimenAntibodyResults6' => '1',
         ];
         foreach ($processedResults as $result) {
             $specimenId = $result->getSpecimenAccessionId();
