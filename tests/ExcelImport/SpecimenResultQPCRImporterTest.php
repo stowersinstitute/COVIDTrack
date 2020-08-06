@@ -65,7 +65,7 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         }
 
         // Verify count of records successfully processed without errors
-        $this->assertCount(6, $processedResults); // Count dependent on SpecimenResultQPCRImporterFixtures::getData()
+        $this->assertCount(6, $processedResults);
         $this->assertSame(6, $importer->getNumImportedItems());
 
         // Data must match viral-results-with-ct-amp-score.xlsx
