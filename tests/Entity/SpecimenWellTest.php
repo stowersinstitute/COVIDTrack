@@ -350,7 +350,7 @@ class SpecimenWellTest extends TestCase
     public function testTracksAddingAndRemovingMultipleViralResults()
     {
         $plate = WellPlate::buildExample();
-        $specimen = Specimen::buildExample('S100');
+        $specimen = Specimen::buildExampleReadyForResults('S100');
         $well = new SpecimenWell($plate, $specimen, "A4");
 
         // Default has no Viral Results
@@ -384,7 +384,7 @@ class SpecimenWellTest extends TestCase
     public function testTracksAddingAndRemovingMultipleAntibodyResults()
     {
         $plate = WellPlate::buildExample();
-        $specimen = Specimen::buildExample('S101');
+        $specimen = Specimen::buildExampleReadyForResults('S101');
         $well = new SpecimenWell($plate, $specimen, "A5");
 
         // Default has no Antibody Results
