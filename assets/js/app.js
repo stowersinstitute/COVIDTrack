@@ -23,4 +23,7 @@ import jsQR from 'jsqr';
 // There is probably a better way to do this by putting the template JS code in a file that gets compiled, but this works for now.
 global.jsQR = jsQR;
 
+import moment from "moment";
+global.moment = moment;
+
 import './scanner'
