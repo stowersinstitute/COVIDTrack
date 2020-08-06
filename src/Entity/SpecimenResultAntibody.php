@@ -59,10 +59,16 @@ class SpecimenResultAntibody extends SpecimenResult
     {
         parent::__construct();
 
-        if (!$well->getSpecimen()) {
+        $specimen = $well->getSpecimen();
+        if (!$specimen) {
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultAntibody');
         }
-        $this->specimen = $well->getSpecimen();
+
+        if (!$specimen->willAllowAddingResults()) {
+            throw new \RuntimeException('Specimen not in Status that allows adding Antibody Results');
+        }
+
+        $this->specimen = $specimen;
         $this->specimen->addAntibodyResult($this);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsAntibody

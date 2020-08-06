@@ -80,8 +80,10 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
             // Sent to external facility
             $tube->markExternalProcessing($data['externalProcessingAt']);
 
-            // Tubes/Specimens added to a Well Plate
-            $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+            if ($data['wellPlatePosition']) {
+                // Tubes/Specimens added to a Well Plate
+                $tube->addToWellPlate($resultsWellPlate, $data['wellPlatePosition']);
+            }
         }
 
         $em->flush();
@@ -129,7 +131,7 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'E7',
+                'wellPlatePosition' => null, // Tests try adding results at C5 to test mismatched Specimen in Well throws error
             ],
             [
                 'accessionId' => 'TubeQPCRResults0005',
@@ -138,25 +140,52 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'F8',
+                'wellPlatePosition' => null,
             ],
             [
                 'accessionId' => 'TubeQPCRResults0006',
-                'specimenAccessionId' => 'SpecimenId0006',
+                'specimenAccessionId' => 'TubeQPCRResults0006',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'G9',
+                'wellPlatePosition' => null,
             ],
             [
                 'accessionId' => 'TubeQPCRResults0007',
-                'specimenAccessionId' => 'SpecimenId0007',
+                'specimenAccessionId' => 'TubeQPCRResults0007',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
                 'participantGroup' => $blueGroup,
-                'wellPlatePosition' => 'H10',
+                'wellPlatePosition' => null,
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0008',
+                'specimenAccessionId' => 'TubeQPCRResults0008',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => null,
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0009',
+                'specimenAccessionId' => 'TubeQPCRResults0009',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => null,
+            ],
+            [
+                'accessionId' => 'TubeQPCRResults0010',
+                'specimenAccessionId' => 'TubeQPCRResults0010',
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'externalProcessingAt' => new \DateTimeImmutable('-1 day 2:00pm'),
+                'participantGroup' => $blueGroup,
+                'wellPlatePosition' => null,
             ],
         ];
     }
