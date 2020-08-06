@@ -158,6 +158,14 @@ class SpecimenResultAntibodyImporterFixtures extends Fixture implements Dependen
                 'wellIdentifier' => 'G814450907',
                 'wellPlatePosition' => 'C07',
             ],
+            [
+                'accessionId' => 'SpecimenAntibodyResults8',
+                'tubeType' => Tube::TYPE_BLOOD,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'participantGroup' => $blueGroup,
+                'wellIdentifier' => 'G814450908',
+                'wellPlatePosition' => 'C08',
+            ],
         ];
     }
 }
