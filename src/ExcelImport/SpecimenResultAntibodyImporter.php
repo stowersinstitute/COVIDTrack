@@ -238,6 +238,15 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
      */
     private function validateWellIdentifier($rawWellIdentifier, $rowNumber) : bool
     {
+        if (!$rawWellIdentifier) {
+            $this->messages[] = ImportMessage::newError(
+                'Well ID cannot be blank',
+                $rowNumber,
+                $this->columnMap['wellIdentifier']
+            );
+            return false;
+        }
+
         // No validation
         return true;
     }
