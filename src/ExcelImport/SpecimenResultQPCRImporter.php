@@ -130,11 +130,11 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
-            $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber);
+            $rowOk = $rowOk && $this->validateConclusion($rawConclusion, $rowNumber);
 
             if (!empty($rawPosition) || !empty($rawPlateBarcode)) {
-                $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenIdOrTubeId, $rowNumber) && $rowOk;
+                $rowOk = $rowOk && $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenIdOrTubeId, $rowNumber);
             }
             // CT and Amp Score values not validated, we accept anything submitted
 

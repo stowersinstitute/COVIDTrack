@@ -106,21 +106,21 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $rowOk = true;
 
             $rawSpecimenId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenId']);
-            $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateSpecimenId($rawSpecimenId, $rowNumber);
 
             $rawWellIdentifier = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellIdentifier']);
-            $rowOk = $this->validateWellIdentifier($rawWellIdentifier, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateWellIdentifier($rawWellIdentifier, $rowNumber);
 
             // Case-insensitive so these map directly to entity constants
             $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
-            $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateConclusion($rawConclusion, $rowNumber);
 
             $rawSignal = $this->worksheet->getCellValue($rowNumber, $this->columnMap['signal']);
-            $rowOk = $this->validateSignal($rawSignal, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateSignal($rawSignal, $rowNumber);
 
             $rawWellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
-            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawWellIdentifier, $rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawWellIdentifier, $rawSpecimenId, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
