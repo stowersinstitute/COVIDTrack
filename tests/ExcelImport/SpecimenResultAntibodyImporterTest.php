@@ -3,7 +3,9 @@
 namespace App\Tests\ExcelImport;
 
 use App\Entity\ExcelImportWorkbook;
+use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
+use App\Entity\WellPlate;
 use App\ExcelImport\SpecimenResultAntibodyImporter;
 use App\Tests\BaseDatabaseTestCase;
 use App\Tests\ExcelImport\DataFixtures\SpecimenResultAntibodyImporterFixtures;
@@ -102,6 +104,17 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             $this->assertSame($expected, $result->getWellPlateBarcode(), $specimenId . ' has wrong Biobank Barcode');
         }
 
+        // Verify use the same WellPlate entity
+        $useSameWellPlate = [
+            ['SpecimenAntibodyResults1', 'SpecimenAntibodyResults2'],
+            ['SpecimenAntibodyResults1', 'SpecimenAntibodyResults7'],
+        ];
+        foreach ($useSameWellPlate as [$specimenId1, $specimenId2]) {
+            $specimen1Plate = $this->findFirstSpecimenWellPlate($specimenId1);
+            $specimen2Plate = $this->findFirstSpecimenWellPlate($specimenId2);
+            $this->assertSame($specimen1Plate, $specimen2Plate);
+        }
+
         // Verify Signal
         $signalMap = [
             'SpecimenAntibodyResults1' => '0',
@@ -114,5 +127,19 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             $expected = $signalMap[$specimenId];
             $this->assertSame($expected, $result->getSignal(), $specimenId . ' has wrong Signal');
         }
+    }
+
+    private function findFirstSpecimenWellPlate($accessionId): WellPlate
+    {
+        $specimen = $this->em
+            ->getRepository(Specimen::class)
+            ->findOneByAccessionId($accessionId);
+        if (!$specimen) {
+            throw new \RuntimeException('Cannot find Specimen by accessionId ' . $accessionId);
+        }
+
+        $plates = $specimen->getWellPlates();
+
+        return array_shift($plates);
     }
 }

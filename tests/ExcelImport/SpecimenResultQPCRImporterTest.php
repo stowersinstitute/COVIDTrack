@@ -3,6 +3,7 @@
 namespace App\Tests\ExcelImport;
 
 use App\Entity\ExcelImportWorkbook;
+use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\WellPlate;
 use App\ExcelImport\SpecimenResultQPCRImporter;
@@ -181,6 +182,22 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             'TubeQPCRResults0010' => 'UnknownPlate', // This plate didn't exist in the DB, it was created by the import
         ];
 
+        // Verify use the same WellPlate entity
+        $useSameWellPlate = [
+            // QPCRResults
+            ['TubeQPCRResults0001', 'SpecimenId0002'],
+            ['TubeQPCRResults0001', 'TubeQPCRResults0003'],
+
+            // UnknownPlate
+            ['SpecimenId0005', 'TubeQPCRResults0006'],
+            ['SpecimenId0005', 'TubeQPCRResults0010'],
+        ];
+        foreach ($useSameWellPlate as [$specimenId1, $specimenId2]) {
+            $specimen1Plate = $this->findFirstSpecimenWellPlate($specimenId1);
+            $specimen2Plate = $this->findFirstSpecimenWellPlate($specimenId2);
+            $this->assertSame($specimen1Plate, $specimen2Plate);
+        }
+
         foreach ($processedResults as $result) {
             $wellPlateBarcode = $ensureHasWellPlateBarcode[$result->getSpecimenAccessionId()];
             $this->assertSame($wellPlateBarcode, $result->getWellPlateBarcode());
@@ -199,5 +216,19 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
             $well = $ensureHasWell[$result->getSpecimenAccessionId()];
             $this->assertSame($well, $result->getWellPosition());
         }
+    }
+
+    private function findFirstSpecimenWellPlate($accessionId): WellPlate
+    {
+        $specimen = $this->em
+            ->getRepository(Specimen::class)
+            ->findOneByAccessionId($accessionId);
+        if (!$specimen) {
+            throw new \RuntimeException('Cannot find Specimen by accessionId ' . $accessionId);
+        }
+
+        $plates = $specimen->getWellPlates();
+
+        return array_shift($plates);
     }
 }
