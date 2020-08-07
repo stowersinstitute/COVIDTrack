@@ -403,7 +403,7 @@ class KioskController extends AbstractController
         /** @var KioskSession $session */
         $session = $this->getDoctrine()->getRepository(KioskSession::class)->find($id);
 
-        if (!$session || $session->getMostRecentScreen() == KioskSession::SCREEN_CANCELED) {
+        if (!$session || $session->isCancelled()) {
             throw new NotFoundHttpException('Kiosk session not found');
         }
 

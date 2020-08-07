@@ -236,6 +236,11 @@ class KioskSession
         $this->setCanceledAt(new \DateTimeImmutable());
     }
 
+    public function isCancelled(): bool
+    {
+        return $this->mostRecentScreen === self::SCREEN_CANCELED;
+    }
+
     public function getDropOff(): ?DropOff
     {
         return $this->dropOff;
