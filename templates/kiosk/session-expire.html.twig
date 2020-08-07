@@ -1,0 +1,73 @@
+<div class="modal fade modal-default" id="timeoutModal" tabindex="-1" role="dialog" aria-labelledby="timoutModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="timoutModalLabel"><i class="fa fa-exclamation-triangle text-yellow"></i> Are You Still There? <i class="fa fa-exclamation-triangle text-yellow"></i></h4>
+            </div>
+            <div class="modal-body">
+                This kiosk session is expiring. If you are still completing your drop off, please click the button below. Information from previous pages will be saved.
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-lg btn-primary" onclick="startTimeoutClock();"><i class="fa fa-fw fa-clock"></i> Continue this drop off (<span id="timeoutCountdown"></span>)</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTimeoutModal() {
+        $('#timeoutModal').modal('show');
+    }
+
+    function hideTimeoutModal() {
+        $('#timeoutModal').modal('hide');
+    }
+
+    let timeoutData = {
+        timeout: 15,
+        timeoutIntervalId: null,
+        warningTime: 10,
+        warningIntervalId: null,
+        expireDate: null,
+    };
+
+    function updateCountdown() {
+        let timeoutLeftDuration = moment.duration(timeoutData.expireDate.diff(moment()));
+        let secondsLeft = Math.round(timeoutLeftDuration.as('seconds'));
+        if (secondsLeft >= 0) {
+            $('#timeoutCountdown').text(secondsLeft);
+
+        }
+        setTimeout(updateCountdown, 1000);
+    }
+
+    function doTimeoutWarning() {
+        showTimeoutModal();
+    }
+
+    function doTimeout() {
+        $.post("{{ path('kiosk_expire', {id: kioskSession.id}) }}")
+            .fail(function(responseObj) {
+                alert('Cannot expire drop off. Please click "COVIDTrack" in the top left to start a new drop off.');
+            })
+            .done(function(response) {
+                // Redirect to another screen
+                window.location = response.redirectToUrl;
+            });
+    }
+
+    function startTimeoutClock() {
+        hideTimeoutModal();
+
+        clearInterval(timeoutData.timeoutIntervalId);
+        clearInterval(timeoutData.warningIntervalId);
+
+        timeoutData.timeoutIntervalId = setInterval(doTimeout, (timeoutData.timeout) * 1000);
+        timeoutData.warningIntervalId = setInterval(doTimeoutWarning, (timeoutData.timeout - timeoutData.warningTime) * 1000);
+        timeoutData.expireDate = moment().add(timeoutData.timeout, 'seconds');
+    }
+
+    startTimeoutClock();
+    updateCountdown();
+
+</script>

@@ -75,21 +75,9 @@
         </div>
     </div>
 
-    <div class="modal fade modal-default" id="timeoutModal" tabindex="-1" role="dialog" aria-labelledby="timoutModalLabel" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title text-center" id="timoutModalLabel"><i class="fa fa-exclamation-triangle text-yellow"></i> Are You Still There? <i class="fa fa-exclamation-triangle text-yellow"></i></h4>
-                </div>
-                <div class="modal-body">
-                    This kiosk session is expiring. If you are still completing your drop off, please click the button below. Information from previous pages will be saved.
-                </div>
-                <div class="modal-footer">
-                    <a href="#" class="btn btn-lg btn-primary" onclick="startTimeoutClock();"><i class="fa fa-fw fa-clock"></i> Continue this drop off (<span id="timeoutCountdown"></span>)</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% if kioskSession is defined %}
+        {% include 'kiosk/session-expire.html.twig' %}
+    {% endif %}
 
     {% block modal %}{% endblock %}
 
@@ -160,57 +148,6 @@
     doHeartbeat();
     // and then every 60 seconds
     setInterval(doHeartbeat, 60 * 1000);
-
-    function showTimeoutModal() {
-        $('#timeoutModal').modal('show');
-    }
-
-    function hideTimeoutModal() {
-        $('#timeoutModal').modal('hide');
-    }
-
-    {% if kioskSession is defined %}
-        let timeoutData = {
-            timeout: 300,
-            timeoutIntervalId: null,
-            warningTime: 10,
-            warningIntervalId: null,
-            expireDate: null,
-        };
-
-        function updateCountdown() {
-            let timeoutLeftDuration = moment.duration(timeoutData.expireDate.diff(moment()));
-            let secondsLeft = Math.round(timeoutLeftDuration.as('seconds'));
-            if (secondsLeft >= 0) {
-                $('#timeoutCountdown').text(secondsLeft);
-            }
-            setTimeout(updateCountdown, 1000);
-        }
-
-        function doTimeoutWarning() {
-            showTimeoutModal();
-        }
-
-        function doTimeout() {
-            console.log("expiring session");
-            window.location = "{{ path('kiosk_expire', {id: kioskSession.id}) }}"
-        }
-
-        function startTimeoutClock() {
-            hideTimeoutModal();
-
-            clearInterval(timeoutData.timeoutIntervalId);
-            clearInterval(timeoutData.warningIntervalId);
-
-            timeoutData.timeoutIntervalId = setInterval(doTimeout, (timeoutData.timeout) * 1000);
-            timeoutData.warningIntervalId = setInterval(doTimeoutWarning, (timeoutData.timeout - timeoutData.warningTime) * 1000);
-            timeoutData.expireDate = moment().add(timeoutData.timeout, 'seconds');
-        }
-
-        startTimeoutClock();
-        updateCountdown();
-
-    {% endif %}
 
     $('form').submit(function() {
         $('#loadingMask').modal('show');

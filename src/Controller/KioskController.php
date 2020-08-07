@@ -353,16 +353,18 @@ class KioskController extends AbstractController
     }
 
     /**
-     * @Route(path="/{id<\d+>}/expire", methods={"GET"}, name="kiosk_expire")
+     * @Route(path="/{id<\d+>}/expire", methods={"POST"}, name="kiosk_expire")
      */
-    public function expire(int $id, Request $request, EntityManagerInterface $em)
+    public function expire(int $id, Request $request, EntityManagerInterface $em, RouterInterface $router)
     {
         $this->mustHavePermissions();
 
         $kiosk = $this->mustFindKiosk($request);
         $kioskSession = $this->mustFindKioskSession($id);
         if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
-            return $this->redirectToRoute('kiosk_index');
+            return new JsonResponse([
+                'redirectToUrl' => $router->generate('kiosk_index'),
+            ]);
         }
 
         // If we have tube data then this session can completed otherwise cancel it.
@@ -374,7 +376,9 @@ class KioskController extends AbstractController
 
         $em->flush();
 
-        return $this->redirectToRoute('kiosk_index');
+        return new JsonResponse([
+            'redirectToUrl' => $router->generate('kiosk_index'),
+        ]);
     }
 
     private function needsToBeProvisioned(Request $request, EntityManagerInterface $em)
