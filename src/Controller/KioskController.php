@@ -374,6 +374,8 @@ class KioskController extends AbstractController
             $kioskSession->cancel();
         }
 
+        $kioskSession->expire();
+
         $em->flush();
 
         return new JsonResponse([
