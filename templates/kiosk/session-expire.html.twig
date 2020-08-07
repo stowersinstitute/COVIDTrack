@@ -4,11 +4,12 @@
             <div class="modal-header">
                 <h4 class="modal-title text-center" id="timoutModalLabel"><i class="fa fa-exclamation-triangle text-yellow"></i> Are You Still There? <i class="fa fa-exclamation-triangle text-yellow"></i></h4>
             </div>
-            <div class="modal-body">
-                This kiosk session is expiring. If you are still completing your drop off, please click the button below. Information from previous pages will be saved.
+            <div class="modal-body" style="background-color:#fff !important;color:#111 !important; text-align:center;">
+                Tap "Continue" for more time.
             </div>
-            <div class="modal-footer">
-                <a href="#" class="btn btn-lg btn-primary" onclick="startTimeoutClock();"><i class="fa fa-fw fa-clock"></i> Continue this drop off (<span id="timeoutCountdown"></span>)</a>
+            <div class="modal-footer" style="background-color:#f6f6f6 !important;">
+                <a href="#" class="btn btn-lg btn-default pull-left" onclick="doTimeout();"><i class="fa fa-fw fa-plus-square"></i> Begin New Session</a>
+                <a href="#" class="btn btn-lg btn-primary" onclick="startTimeoutClock();"><i class="fa fa-fw fa-clock"></i> Continue (<span id="timeoutCountdown"></span>)</a>
             </div>
         </div>
     </div>
@@ -33,10 +34,9 @@
 
     function updateCountdown() {
         let timeoutLeftDuration = moment.duration(timeoutData.expireDate.diff(moment()));
-        let secondsLeft = Math.round(timeoutLeftDuration.as('seconds'));
-        if (secondsLeft >= 0) {
-            $('#timeoutCountdown').text(secondsLeft);
-
+        let timeRemaining = timeoutLeftDuration.minutes() + ':' + timeoutLeftDuration.seconds().toString().padStart(2, '0');
+        if (timeoutLeftDuration.asSeconds() >= 0) {
+            $('#timeoutCountdown').text(timeRemaining);
         }
         setTimeout(updateCountdown, 1000);
     }
