@@ -24,11 +24,11 @@
     }
 
     let timeoutData = {
-        timeout: 300,
-        timeoutIntervalId: null,
-        warningTime: 10,
-        warningIntervalId: null,
-        expireDate: null,
+        timeout: 300, // Total seconds from page load to expiring the session
+        timeoutIntervalId: null, // ID of the expire interval so we can clear it if the user keeps the session alive
+        warningTime: 10, // How much time to show the user the warning modal before expiring the session
+        warningIntervalId: null, // ID of the warning interval so we can clear it if the user keeps the session alive
+        expireDate: null, // The actual date/time the session will expire, used for UI countdown
     };
 
     function updateCountdown() {
