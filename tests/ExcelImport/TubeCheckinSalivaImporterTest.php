@@ -21,17 +21,42 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
 
         $checkedInTubes = $importer->process(true);
 
-        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
-        $this->assertCount(5, $importer->getOutput()['accepted']);
+        // Verify rows with missing required data report as user-readable errors.
+        // tube-checkin-saliva.xlsx has red cells where errors expected.
+        $errors = $importer->getErrors();
+        $expectedErrors = [
+            [
+                'rowNumber' => 5,
+            ],
+            [
+                'rowNumber' => 6,
+            ],
+            [
+                'rowNumber' => 11,
+            ],
+        ];
+        $this->assertCount(count($expectedErrors), $errors);
+        foreach ($expectedErrors as $expectedError) {
+            $found = false;
+            foreach ($errors as $error) {
+                if ($error->getRowNumber() === $expectedError['rowNumber']) {
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $this->fail(sprintf('Expected to find error for Row %d but missing', $expectedError['rowNumber']));
+            }
+        }
+
+        $this->assertCount(4, $importer->getOutput()['accepted']);
         $this->assertCount(2, $importer->getOutput()['rejected']);
 
-        $this->assertSame(7, $importer->getNumImportedItems());
-        $this->assertCount(7, $checkedInTubes);
+        $this->assertSame(6, $importer->getNumImportedItems());
+        $this->assertCount(6, $checkedInTubes);
 
         $ensureHasTubeIds = [
             'TestCheckin0001',
             'TestCheckin0002',
-            'TestCheckin0003',
             'TestCheckin0004',
             'TestCheckin0005',
             'TestCheckin0006',

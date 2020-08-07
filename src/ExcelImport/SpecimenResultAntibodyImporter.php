@@ -106,21 +106,21 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $rowOk = true;
 
             $rawSpecimenId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenId']);
-            $rowOk = $this->validateSpecimenId($rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateSpecimenId($rawSpecimenId, $rowNumber);
 
             $rawWellIdentifier = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellIdentifier']);
-            $rowOk = $this->validateWellIdentifier($rawWellIdentifier, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateWellIdentifier($rawWellIdentifier, $rowNumber);
 
             // Case-insensitive so these map directly to entity constants
             $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
-            $rowOk = $this->validateConclusion($rawConclusion, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateConclusion($rawConclusion, $rowNumber);
 
             $rawSignal = $this->worksheet->getCellValue($rowNumber, $this->columnMap['signal']);
-            $rowOk = $this->validateSignal($rawSignal, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateSignal($rawSignal, $rowNumber);
 
             $rawWellPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellPosition']);
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
-            $rowOk = $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawWellIdentifier, $rawSpecimenId, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validatePlateAndPosition($rawPlateBarcode, $rawWellPosition, $rawWellIdentifier, $rawSpecimenId, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -238,6 +238,15 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
      */
     private function validateWellIdentifier($rawWellIdentifier, $rowNumber) : bool
     {
+        if (!$rawWellIdentifier) {
+            $this->messages[] = ImportMessage::newError(
+                'Well ID cannot be blank',
+                $rowNumber,
+                $this->columnMap['wellIdentifier']
+            );
+            return false;
+        }
+
         // No validation
         return true;
     }
@@ -290,7 +299,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
     private function validatePlateAndPosition(?string $rawPlateBarcode, ?string $rawPosition, ?string $rawWellIdentifier, string $rawSpecimenId, int $rowNumber): bool
     {
         // Plate Barcode required
-        if ($rawPlateBarcode === null) {
+        if (empty($rawPlateBarcode)) {
             $this->messages[] = ImportMessage::newError(
                 'Well Plate Barcode cannot be blank',
                 $rowNumber,
@@ -300,21 +309,11 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
         }
 
         // Well Position required
-        if ($rawPosition === null) {
+        if (empty($rawPosition)) {
             $this->messages[] = ImportMessage::newError(
                 'Well Position cannot be blank',
                 $rowNumber,
                 $this->columnMap['wellPosition']
-            );
-            return false;
-        }
-
-        // Well Identifier required
-        if ($rawPosition === null) {
-            $this->messages[] = ImportMessage::newError(
-                'Well Identifier cannot be blank',
-                $rowNumber,
-                $this->columnMap['wellIdentifier']
             );
             return false;
         }

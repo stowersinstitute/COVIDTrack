@@ -374,7 +374,7 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
-    private function validateUsername(string $rawUsername, $rowNumber): bool
+    private function validateUsername($rawUsername, $rowNumber): bool
     {
         if (!$rawUsername) {
             $this->messages[] = ImportMessage::newError(

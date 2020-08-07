@@ -26,8 +26,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
         $this->columnMap = [
             'externalId' => 'C',
-            'title' => 'J',
             'participantCount' => 'H',
+            'title' => 'J',
         ];
     }
 
