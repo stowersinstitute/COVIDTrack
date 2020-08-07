@@ -49,6 +49,7 @@
         $.post("{{ path('kiosk_expire', {id: kioskSession.id}) }}")
             .fail(function(responseObj) {
                 alert('Cannot expire drop off. Please click "COVIDTrack" in the top left to start a new drop off.');
+                hideTimeoutModal();
             })
             .done(function(response) {
                 // Redirect to another screen
