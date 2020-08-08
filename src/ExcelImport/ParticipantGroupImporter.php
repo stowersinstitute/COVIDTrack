@@ -97,9 +97,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateExternalId($rawExternalId, $rowNumber) && $rowOk;
-            $rowOk = $this->validateTitle($rawTitle, $rowNumber) && $rowOk;
-            $rowOk = $this->validateParticipantCount($rawParticipantCount, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
+            $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
+            $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
