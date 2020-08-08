@@ -35,7 +35,6 @@ class Tube
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
-    const TYPE_SWAB = "SWAB";
 
     const CHECKED_IN_ACCEPTED = "ACCEPTED";
     const CHECKED_IN_REJECTED = "REJECTED";
@@ -346,7 +345,6 @@ class Tube
     {
         return [
             'Blood' => self::TYPE_BLOOD,
-            'Swab' => self::TYPE_SWAB,
             'Saliva' => self::TYPE_SALIVA,
         ];
     }
