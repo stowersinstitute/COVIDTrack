@@ -7,6 +7,9 @@ use App\Entity\ExcelImportWorksheet;
 use App\Entity\ParticipantGroup;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Import Participant Groups using Excel.
+ */
 class ParticipantGroupImporter extends BaseExcelImporter
 {
     /** @var ParticipantGroupAccessionIdGenerator  */
@@ -136,18 +139,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
-
-            $this->processedGroups[] = $group;
-        }
-
-        // Deactivated is everything not in the excel file
-        $toDeactivate = $groupRepo->findActiveNotIn($result['updated']);
-        foreach ($toDeactivate as $group) {
-            // Ensure entities won't be flush()ed if we're not committing
-            if (!$commit) $this->em->detach($group);
-            $result['deactivated'][] = $group;
-
-            $group->setIsActive(false);
 
             $this->processedGroups[] = $group;
         }
