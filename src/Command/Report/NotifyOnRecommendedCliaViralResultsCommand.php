@@ -6,6 +6,8 @@ use App\Entity\ParticipantGroup;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\CliaRecommendationViralNotification;
 use App\Util\DateUtils;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Router;
 
@@ -19,6 +21,11 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
 {
     protected static $defaultName = 'app:report:notify-on-recommended-viral-result';
 
+    /**
+     * Holds local cache of results when run. Reset when invoking execute().
+     */
+    private $notificationData = [];
+
     protected function configure()
     {
         // See parent for CLI options
@@ -27,6 +34,14 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
         $this
             ->setDescription('Notifies privileged users when a Viral Result recommends CLIA testing.')
         ;
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        // Reset local var that tracks calculated results in buildNotificationData()
+        $this->notificationData = [];
+
+        return parent::execute($input, $output);
     }
 
     protected function getSubject(): string
@@ -50,36 +65,48 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
     protected function getHtmlEmailBody(): string
     {
         $recommendations = $this->getNewTestingRecommendations();
-        $groups = $recommendations['groups'];
-        $timestamps = $recommendations['timestamps'];
 
-        $groupsRecTestingOutput = array_map(function(ParticipantGroup $g) {
-            return sprintf('<li>%s</li>', htmlentities($g->getTitle()));
-        }, $groups);
+        $groupsRecTestingOutput = array_map(function(array $tupleResult) {
+            /** @var ParticipantGroup $group */
+            /** @var \DateTimeInterface $updatedAt */
+            list($group, $updatedAt) = $tupleResult;
 
-        $timestampsOutput = array_map(function(\DateTimeImmutable $dt) {
-            return sprintf("<li>%s</li>", $dt->format(self::RESULTS_DATETIME_FORMAT));
-        }, $timestamps);
+            return sprintf('<tr><td>%s</td><td>%s</td></tr>', htmlentities($group->getTitle()), $updatedAt->format(self::RESULTS_DATETIME_FORMAT));
+        }, $recommendations);
 
         $url = $this->router->generate('index', [], Router::ABSOLUTE_URL);
         $html = sprintf("
             <p>Participant Groups have been recommended for diagnostic testing.</p>
 
-            <p>Results published:</p>
-            <ul>
+            <table class='results-table'>
+                <thead>
+                    <tr>
+                         <th>Group</th>
+                         <th>Results Published</th>
+                    </tr>
+                </thead>
+                <tbody>
 %s
-            </ul>
-
-            <p>Participant Groups:</p>
-            <ul>
-%s
-            </ul>
+                </tbody>
+            </table>
 
             <p>
                 View more details in COVIDTrack:<br>%s
             </p>
+
+<style>
+.results-table {
+    border:1px solid #333;
+}
+.results-table th {
+    text-align:left;
+}
+.results-table td, .results-table th {
+    padding:0.25em;
+    border-bottom: 1px solid #ccc;
+}
+</style>
         ",
-            implode("\n", $timestampsOutput),
             implode("\n", $groupsRecTestingOutput),
             sprintf('<a href="%s">%s</a>', htmlentities($url), htmlentities($url))
         );
@@ -90,9 +117,7 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
     protected function getReasonToNotSend(): ?string
     {
         $recommendations = $this->getNewTestingRecommendations();
-        $groups = $recommendations['groups'];
-
-        if (count($groups) < 1) {
+        if (count($recommendations) < 1) {
             return 'No new Participant Groups to notify about';
         }
 
@@ -106,8 +131,11 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
             return;
         }
 
-        $recommendations = $this->getNewTestingRecommendations();
-        $groups = $recommendations['groups'];
+        $groups = [];
+        foreach ($this->getNewTestingRecommendations() as $resultTuple) {
+            list($group, $timestamp) = $resultTuple;
+            $groups[] = $group;
+        }
 
         $notif = CliaRecommendationViralNotification::createFromEmail($email, $groups);
         $this->em->persist($notif);
@@ -115,24 +143,26 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
     }
 
     /**
-     * Get Participant Groups and the timestamp when their recommended result
-     * was uploaded.
+     * Get Participant Groups and the timestamp when their result was reported.
      *
      * Usage:
      *
-     * $rec = $this->getGroupsWithTimestamps();
-     * $groups = $rec['groups'];
-     * $timestamps = $rec['timestamps'];
+     * $results = $this->getNewResults();
+     * foreach ($results as $result) {
+     *     list($group, $updatedAt) = $result;
+     * }
      *
-     * $groups === ParticipantGroup[] - Unique list of groups recommended for further testing
-     * $resultsUploadedAt === \DateTimeImmutable[] - Unique list of times found results were uploaded
+     * Each tuple result contains this data:
+     * [0] === ParticipantGroup[] Participant Group with not recommended result
+     * [1] === \DateTimeImmutable[] $resultsUploadedAt Time when most recent result for group was updated
      */
     private function getNewTestingRecommendations(): array
     {
-        $output = [
-            'groups' => [],
-            'timestamps' => [],
-        ];
+        if (!empty($this->notificationData)) {
+            return $this->notificationData;
+        }
+
+        $output = [];
 
         $lastNotificationSent = $this->em
             ->getRepository(CliaRecommendationViralNotification::class)
@@ -147,7 +177,7 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
             $lastNotificationSent = new \DateTimeImmutable('2020-01-01 00:00:00');
         }
 
-        $this->outputDebug('Searching for new recommended results since ' . $lastNotificationSent->format("Y-m-d H:i:s"));
+        $this->outputDebug('Searching Viral results that recommend diagnostic testing. Either created or updated since ' . $lastNotificationSent->format("Y-m-d H:i:s"));
 
         /** @var SpecimenResultQPCR[] $results */
         $results = $this->em
@@ -157,22 +187,15 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
             return $output;
         }
 
-        $this->outputDebug('Found new recommended results: ' . count($results));
+        $this->outputDebug('Found Viral Results: ' . count($results));
 
-        // Get recommendations for testing
-        $groups = [];
-        $resultsTimestamps = [];
+        // Calculate results
         foreach ($results as $result) {
-            // Group
             $group = $result->getSpecimen()->getParticipantGroup();
-            $groups[$group->getId()] = $group;
+            $resultUpdatedAt = $result->getUpdatedAt() ?: new \DateTimeImmutable();
 
-            // Result timestamp
-            $timestamp = $result->getUpdatedAt();
-            if ($timestamp) {
-                $idx = $timestamp->format(self::RESULTS_DATETIME_FORMAT);
-                $resultsTimestamps[$idx] = $timestamp;
-            }
+            // Indexing by ParticipantGroup.id ensures Group only displays once in output
+            $output[$group->getId()] = [$group, $resultUpdatedAt];
         }
 
         // Remove Groups already notified today
@@ -183,15 +206,12 @@ class NotifyOnRecommendedCliaViralResultsCommand extends BaseResultsNotification
                 ->getGroupsNotifiedOnDate($now);
 
             foreach ($groupsNotifiedToday as $groupPreviouslyNotified) {
-                $id = $groupPreviouslyNotified->getId();
-                unset($groups[$id]);
+                unset($output[$groupPreviouslyNotified->getId()]);
             }
         }
 
-        // Remaining are Groups not yet included in this Email Notification today
-        $output['groups'] = array_values($groups);
-        $output['timestamps'] = array_values($resultsTimestamps);
+        $this->notificationData = array_values($output);
 
-        return $output;
+        return $this->notificationData;
     }
 }
