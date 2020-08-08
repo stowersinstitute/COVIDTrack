@@ -5,6 +5,7 @@ namespace App\ExcelImport;
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\ParticipantGroup;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ParticipantGroupImporter extends BaseExcelImporter
 {
@@ -18,10 +19,11 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     private $processedGroups = [];
 
-    public function __construct(ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
+    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
         parent::__construct($worksheet);
 
+        $this->setEntityManager($em);
         $this->idGenerator = $idGenerator;
 
         $this->columnMap = [
