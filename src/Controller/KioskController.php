@@ -252,7 +252,6 @@ class KioskController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $kioskSession->finish($this->specimenIdGen);
-            $kioskSession->setMostRecentScreen(KioskSession::SCREEN_REVIEW_TUBES);
 
             $em->flush();
 
