@@ -88,3 +88,11 @@ services:
             - '%env(LABEL_PRINTER_TYPE)%'
             - '%kernel.cache_dir%/label-images/'
             - '@router'
+
+    # ServiceNow API Connection
+    App\Api\ServiceNow\HttpClient:
+        arguments:
+            # $options array
+            - url: '%env(SERVICENOW_URL)%'
+              username: '%env(SERVICENOW_USERNAME)%'
+              password: '%env(SERVICENOW_PASSWORD)%'
