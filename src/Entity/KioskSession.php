@@ -20,7 +20,6 @@ class KioskSession
 
     const SCREEN_GROUP_ENTRY = "GROUP_ENTRY";
     const SCREEN_ADD_TUBES = "ADD_TUBES";
-    const SCREEN_REVIEW_TUBES = "REVIEW_TUBES";
     const SCREEN_COMPLETED = "COMPLETED";
     const SCREEN_CANCELED = "CANCELED";
 
