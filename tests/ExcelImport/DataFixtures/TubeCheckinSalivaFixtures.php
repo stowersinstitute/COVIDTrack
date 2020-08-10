@@ -124,7 +124,10 @@ class TubeCheckinSalivaFixtures extends Fixture implements DependentFixtureInter
             ],
             [
                 'accessionId' => 'TestCheckin0008',
-                'returnAtKiosk' => false,
+                'returnAtKiosk' => true,
+                'tubeType' => Tube::TYPE_SALIVA,
+                'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
+                'participantGroup' => $this->getReference('tests.group.blue'),
             ],
             [
                 'accessionId' => 'TestCheckin0009',
