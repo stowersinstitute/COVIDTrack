@@ -31,7 +31,6 @@ class Specimen
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
     const TYPE_BLOOD = "BLOOD";
-    const TYPE_NASAL = "NASAL";
     const TYPE_SALIVA = "SALIVA";
 
     const CLIA_REC_PENDING = "PENDING";
@@ -181,7 +180,6 @@ class Specimen
         $typeMap = [
             Tube::TYPE_BLOOD => Specimen::TYPE_BLOOD,
             Tube::TYPE_SALIVA => Specimen::TYPE_SALIVA,
-            Tube::TYPE_SWAB => Specimen::TYPE_NASAL,
         ];
         $tubeType = $tube->getTubeType();
         if (!isset($typeMap[$tubeType])) {
@@ -339,7 +337,6 @@ class Specimen
     {
         return [
             'Blood' => self::TYPE_BLOOD,
-            'Nasal' => self::TYPE_NASAL,
             'Saliva' => self::TYPE_SALIVA,
         ];
     }

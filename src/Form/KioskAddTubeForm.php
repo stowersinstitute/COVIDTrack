@@ -60,7 +60,6 @@ class KioskAddTubeForm extends AbstractType
             ->add('tubeType', RadioButtonGroupType::class, [
                 'choices' => [
                     'Saliva' => Tube::TYPE_SALIVA,
-                    'Swab' => Tube::TYPE_SWAB,
                     'Blood' => Tube::TYPE_BLOOD,
                 ],
                 'required' => true,
