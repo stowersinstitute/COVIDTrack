@@ -23,7 +23,7 @@ class NewViralResultsRequest extends Request
         $this->results[$result->getId()] = $result;
     }
 
-    public function jsonSerialize()
+    public function getRequestData()
     {
         return array_map(function(SpecimenResultQPCR $r) {
             $publishedAt = $r->getCreatedAt()->setTimezone(new \DateTimeZone('UTC'));

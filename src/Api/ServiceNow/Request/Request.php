@@ -19,5 +19,15 @@ abstract class Request implements \JsonSerializable
      * @return mixed data which can be serialized by <b>json_encode</b>,
      * which is a value of any type other than a resource.
      */
-    abstract public function jsonSerialize();
+    public function jsonSerialize()
+    {
+        return $this->getRequestData();
+    }
+
+    /**
+     * Return data sent as Request payload. Must be compatible with json_encode().
+     *
+     * @return mixed
+     */
+    abstract public function getRequestData();
 }
