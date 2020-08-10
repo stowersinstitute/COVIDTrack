@@ -75,6 +75,10 @@
         </div>
     </div>
 
+    {% if kioskSession is defined %}
+        {% include 'kiosk/session-expire.html.twig' %}
+    {% endif %}
+
     {% block modal %}{% endblock %}
 
     <div class="modal fade" id="loadingMask" tabindex="-1" role="dialog" aria-labelledby="loadingMaskLabel" data-backdrop="static" data-keyboard="false">

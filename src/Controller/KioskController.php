@@ -351,6 +351,37 @@ class KioskController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route(path="/{id<\d+>}/expire", methods={"POST"}, name="kiosk_expire")
+     */
+    public function expire(int $id, Request $request, EntityManagerInterface $em, RouterInterface $router)
+    {
+        $this->mustHavePermissions();
+
+        $kiosk = $this->mustFindKiosk($request);
+        $kioskSession = $this->mustFindKioskSession($id);
+        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
+            return new JsonResponse([
+                'redirectToUrl' => $router->generate('kiosk_index'),
+            ]);
+        }
+
+        // If we have tube data then this session can completed otherwise cancel it.
+        if (count($kioskSession->getTubeData()) > 0) {
+            $kioskSession->finish($this->specimenIdGen);
+        } else {
+            $kioskSession->cancel();
+        }
+
+        $kioskSession->expire();
+
+        $em->flush();
+
+        return new JsonResponse([
+            'redirectToUrl' => $router->generate('kiosk_index'),
+        ]);
+    }
+
     private function needsToBeProvisioned(Request $request, EntityManagerInterface $em)
     {
         // Needs provisioning if there's no ID cookie
@@ -377,7 +408,7 @@ class KioskController extends AbstractController
         /** @var KioskSession $session */
         $session = $this->getDoctrine()->getRepository(KioskSession::class)->find($id);
 
-        if (!$session) {
+        if (!$session || $session->isCancelled()) {
             throw new NotFoundHttpException('Kiosk session not found');
         }
 
