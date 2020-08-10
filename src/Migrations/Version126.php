@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Exception\IrreversibleMigration;
 
-final class Version20200808001133 extends AbstractMigration
+final class Version126 extends AbstractMigration
 {
     public function getDescription() : string
     {
