@@ -29,8 +29,6 @@ class NewViralResultsRequestTest extends TestCase
 
         $json = $request->toJson(\JSON_PRETTY_PRINT);
 
-        echo $json;
-
         // Verify Result createdAt date serialization format:
         // 1. Uses ISO 8601 format
         // 2. Rendered without microseconds (our MySQL database doesn't store them)
