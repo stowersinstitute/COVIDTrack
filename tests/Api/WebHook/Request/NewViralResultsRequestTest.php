@@ -26,6 +26,8 @@ class NewViralResultsRequestTest extends TestCase
         $request->addResult($viral);
 
         $request->addResult($this->buildFakeResult('SPEC-101', SpecimenResultQPCR::CONCLUSION_NEGATIVE, 'A5'));
+        $request->addResult($this->buildFakeResult('SPEC-102', SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE, 'B2'));
+        $request->addResult($this->buildFakeResult('SPEC-103', SpecimenResultQPCR::CONCLUSION_RECOMMENDED, 'C7'));
 
         $json = $request->toJson(\JSON_PRETTY_PRINT);
 
