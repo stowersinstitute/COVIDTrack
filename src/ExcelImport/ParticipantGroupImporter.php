@@ -5,7 +5,11 @@ namespace App\ExcelImport;
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
 use App\Entity\ExcelImportWorksheet;
 use App\Entity\ParticipantGroup;
+use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Import Participant Groups using Excel.
+ */
 class ParticipantGroupImporter extends BaseExcelImporter
 {
     /** @var ParticipantGroupAccessionIdGenerator  */
@@ -18,10 +22,11 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     private $processedGroups = [];
 
-    public function __construct(ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
+    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
         parent::__construct($worksheet);
 
+        $this->setEntityManager($em);
         $this->idGenerator = $idGenerator;
 
         $this->columnMap = [
@@ -95,9 +100,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $this->validateExternalId($rawExternalId, $rowNumber) && $rowOk;
-            $rowOk = $this->validateTitle($rawTitle, $rowNumber) && $rowOk;
-            $rowOk = $this->validateParticipantCount($rawParticipantCount, $rowNumber) && $rowOk;
+            $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
+            $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
+            $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -134,18 +139,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
-
-            $this->processedGroups[] = $group;
-        }
-
-        // Deactivated is everything not in the excel file
-        $toDeactivate = $groupRepo->findActiveNotIn($result['updated']);
-        foreach ($toDeactivate as $group) {
-            // Ensure entities won't be flush()ed if we're not committing
-            if (!$commit) $this->em->detach($group);
-            $result['deactivated'][] = $group;
-
-            $group->setIsActive(false);
 
             $this->processedGroups[] = $group;
         }

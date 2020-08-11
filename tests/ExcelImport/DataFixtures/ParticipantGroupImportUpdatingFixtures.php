@@ -17,6 +17,7 @@ class ParticipantGroupImportUpdatingFixtures extends Fixture
             $group = new ParticipantGroup($data['accessionId'], $data['participantCount']);
             $group->setTitle($data['title']);
             $group->setExternalId($data['externalId']);
+            $group->setIsActive($data['isActive']);
 
             $em->persist($group);
         }
@@ -36,24 +37,42 @@ class ParticipantGroupImportUpdatingFixtures extends Fixture
                 'title' => 'Update Me1',
                 'accessionId' => 'GRP-1',
                 'participantCount' => 1,
+                'isActive' => true,
             ],
             [
                 'externalId' => 'SNUP2',
                 'title' => 'Update Me2',
                 'accessionId' => 'GRP-2',
                 'participantCount' => 2,
+                'isActive' => true,
             ],
             [
                 'externalId' => 'SNUP3',
                 'title' => 'Update Me3',
                 'accessionId' => 'GRP-3',
                 'participantCount' => 3,
+                'isActive' => true,
             ],
             [
                 'externalId' => 'SNUP4',
                 'title' => 'Update Me4',
                 'accessionId' => 'GRP-4',
                 'participantCount' => 4,
+                'isActive' => true,
+            ],
+            [
+                'externalId' => 'AlwaysActiveGroup',
+                'title' => 'Should Always Be Active',
+                'accessionId' => 'GRP-5',
+                'participantCount' => 5,
+                'isActive' => true,
+            ],
+            [
+                'externalId' => 'AlwaysInactiveGroup',
+                'title' => 'Should Always Be Inactive',
+                'accessionId' => 'GRP-6',
+                'participantCount' => 6,
+                'isActive' => false,
             ],
         ];
     }

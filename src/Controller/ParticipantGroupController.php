@@ -321,10 +321,10 @@ class ParticipantGroupController extends AbstractController
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter(
+            $em,
             $importingWorkbook->getFirstWorksheet(),
             $idGenerator
         );
-        $importer->setEntityManager($em);
 
         $importer->process();
 
@@ -354,10 +354,10 @@ class ParticipantGroupController extends AbstractController
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
         $importer = new ParticipantGroupImporter(
+            $em,
             $importingWorkbook->getFirstWorksheet(),
             $idGenerator
         );
-        $importer->setEntityManager($em);
         $importer->process(true);
 
         // Clean up workbook from the database
