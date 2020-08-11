@@ -38,7 +38,6 @@ class NewViralResultsWebHookRequest extends WebHookRequest
                 'group' => [
                     'id' => $group->getId(),
                     'external_id' => $group->getExternalId(),
-                    'accession_id' => $group->getAccessionId(),
                     'title' => $group->getTitle(),
                 ],
             ];
