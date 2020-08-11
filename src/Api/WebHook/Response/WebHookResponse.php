@@ -26,11 +26,17 @@ class WebHookResponse
     public function __construct(ResponseInterface $response, string $requestUrl)
     {
         $this->httpResponse = $response;
+        $this->requestUrl = $requestUrl;
     }
 
     public function getRawResponse(): ResponseInterface
     {
         return $this->httpResponse;
+    }
+
+    public function getRequestUrl(): string
+    {
+        return $this->requestUrl;
     }
 
     public function getStatusCode(): int
