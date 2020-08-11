@@ -42,6 +42,6 @@ class NewViralResultsWebHookRequest extends WebHookRequest
                     'title' => $group->getTitle(),
                 ],
             ];
-        }, $this->results);
+        }, array_values($this->results));
     }
 }
