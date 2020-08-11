@@ -42,7 +42,7 @@ class ViralResultCommand extends BaseAppCommand
         $request = new NewViralResultsWebHookRequest();
 
         try {
-            $response = $this->httpClient->get('/api/now/table/u_covid_test_results?sysparm_limit=20', $request);
+            $response = $this->httpClient->get($request);
         } catch (ClientException $e) {
             $output->writeln('<error>Exception calling WebHook endpoint</error>');
             $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));

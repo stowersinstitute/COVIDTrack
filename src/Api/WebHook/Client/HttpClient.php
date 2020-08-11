@@ -49,46 +49,39 @@ class HttpClient
     /**
      * Submit a GET HTTP request and return its WebHookResponse.
      *
-     * @param string         $uri      URL part after the base URL e.g. "/path/to/something"
-     * @param WebHookRequest $request
-     * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
+     * @param array $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    public function get(string $uri, WebHookRequest $request, array $options = []): WebHookResponse
+    public function get(WebHookRequest $request, array $options = []): WebHookResponse
     {
-        return $this->request($uri, 'GET', $request, $options);
+        return $this->request('GET', $request, $options);
     }
 
     /**
      * Submit a POST HTTP request and return its WebHookResponse.
      *
-     * @param string         $uri      URL part after the base URL e.g. "/path/to/something"
-     * @param WebHookRequest $request
-     * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
+     * @param array $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    public function post(string $uri, WebHookRequest $request, array $options = []): WebHookResponse
+    public function post(WebHookRequest $request, array $options = []): WebHookResponse
     {
-        return $this->request($uri, 'POST', $request, $options);
+        return $this->request('POST', $request, $options);
     }
 
     /**
      * Submit an HTTP request and return its response.
      *
-     * @param string         $uri      URL part after the base URL e.g. "/path/to/something"
      * @param string         $method   GET|POST
      * @param WebHookRequest $request
      * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    protected function request(string $uri, string $method, WebHookRequest $request, array $options = []): WebHookResponse
+    protected function request(string $method, WebHookRequest $request, array $options = []): WebHookResponse
     {
         $this->initConstructorOptions($this->constructorOptions);
 
-        $requestUrl = $this->url . $uri;
-
         $options['body'] = $request->toJson();
 
-        $response = $this->getClient()->request($method, $requestUrl, $options);
+        $response = $this->getClient()->request($method, $this->url, $options);
 
-        return new WebHookResponse($response, $requestUrl);
+        return new WebHookResponse($response, $this->url);
     }
 
     /**
