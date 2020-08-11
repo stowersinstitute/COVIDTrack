@@ -44,7 +44,7 @@ abstract class SpecimenResult
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
 
     /**
      * Whether this analysis result encountered a failure.
@@ -52,7 +52,7 @@ abstract class SpecimenResult
      * @var bool
      * @ORM\Column(name="is_failure", type="boolean")
      */
-    private $isFailure = false;
+    protected $isFailure = false;
 
     /**
      * Conclusion about the Specimen based on analyzing it.
@@ -60,7 +60,7 @@ abstract class SpecimenResult
      * @var string
      * @ORM\Column(name="conclusion", type="string", length=255)
      */
-    private $conclusion;
+    protected $conclusion;
 
     /**
      * Subclass should define its own annotations for how it maps to SpecimenWell,

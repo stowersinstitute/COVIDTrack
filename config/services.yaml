@@ -88,3 +88,11 @@ services:
             - '%env(LABEL_PRINTER_TYPE)%'
             - '%kernel.cache_dir%/label-images/'
             - '@router'
+
+    # WebHook API Connections
+    App\Api\WebHook\Client\ViralResultHttpClient:
+        arguments:
+            # $options array
+            - url: '%env(WEBHOOK_VIRAL_RESULTS_URL)%'
+              username: '%env(WEBHOOK_USERNAME)%'
+              password: '%env(WEBHOOK_PASSWORD)%'
