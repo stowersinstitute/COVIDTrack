@@ -131,7 +131,6 @@ class HttpClient
 
         $options = $resolver->resolve($options);
 
-        // TODO: Store url/username/passwords in password vault
         $this->url = $options['url'];
         $this->username = $options['username'];
         $this->password = $options['password'];
