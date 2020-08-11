@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Api\ServiceNow\Request;
+namespace App\Api\WebHook\Request;
 
 use App\Entity\SpecimenResultQPCR;
 
 /**
- * Report new Viral Results to ServiceNow.
+ * Report new Viral Results to remote server via WebHook.
  */
-class NewViralResultsRequest extends Request
+class NewViralResultsWebHookRequest extends WebHookRequest
 {
     /**
      * @var SpecimenResultQPCR[]

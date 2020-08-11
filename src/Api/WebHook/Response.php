@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Api\ServiceNow;
+namespace App\Api\WebHook;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * Response received from ServiceNow API. Custom public methods to suit COVIDTrack application.
+ * Response received from a WebHook API. Custom public methods to suit COVIDTrack application.
  */
 class Response
 {
     /**
-     * URL where Request was submitted
+     * URL where WebHookRequest was submitted
      *
      * @var string
      */

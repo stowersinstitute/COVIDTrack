@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tests\Api\ServiceNow\Request;
+namespace App\Tests\Api\WebHook\Request;
 
-use App\Api\ServiceNow\Request\NewViralResultsRequest;
+use App\Api\WebHook\Request\NewViralResultsWebHookRequest;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
@@ -21,7 +21,7 @@ class NewViralResultsRequestTest extends TestCase
         $createdAt = new \DateTimeImmutable('2020-06-25 15:45:55.987654', new \DateTimeZone('America/Chicago'));
         $viral->setCreatedAt($createdAt);
 
-        $request = new NewViralResultsRequest();
+        $request = new NewViralResultsWebHookRequest();
         $request->addResult($viral);
 
         $json = $request->toJson(\JSON_PRETTY_PRINT);

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Command\ServiceNow;
+namespace App\Command\WebHook;
 
-use App\Api\ServiceNow\HttpClient;
-use App\Api\ServiceNow\Request\TestConnectionRequest;
+use App\Api\WebHook\HttpClient;
+use App\Api\WebHook\Request\NewViralResultsWebHookRequest;
 use App\Command\BaseAppCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
@@ -11,9 +11,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TestConnectionRemoteCommand extends BaseAppCommand
+/**
+ * Fire web hooks related to Viral Results.
+ */
+class ViralResultCommand extends BaseAppCommand
 {
-    protected static $defaultName = 'app:service-now:test-connection-remote';
+    protected static $defaultName = 'app:webhook:viral-results';
 
     /**
      * @var HttpClient
@@ -30,18 +33,18 @@ class TestConnectionRemoteCommand extends BaseAppCommand
     protected function configure()
     {
         $this
-            ->setDescription('Checks if ServiceNow client wired correctly to send requests')
+            ->setDescription('Publishes Viral Results changes to web hook URL')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $request = new TestConnectionRequest();
+        $request = new NewViralResultsWebHookRequest();
 
         try {
             $response = $this->snClient->get('/api/now/table/u_covid_test_results?sysparm_limit=20', $request);
         } catch (ClientException $e) {
-            $output->writeln('<error>Exception calling ServiceNow endpoint</error>');
+            $output->writeln('<error>Exception calling WebHook endpoint</error>');
             $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));
             $output->writeln('');
             $output->writeln($e->getMessage());

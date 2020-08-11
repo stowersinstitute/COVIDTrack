@@ -89,10 +89,10 @@ services:
             - '%kernel.cache_dir%/label-images/'
             - '@router'
 
-    # ServiceNow API Connection
-    App\Api\ServiceNow\HttpClient:
+    # WebHook API Connection
+    App\Api\WebHook\HttpClient:
         arguments:
             # $options array
-            - url: '%env(SERVICENOW_URL)%'
-              username: '%env(SERVICENOW_USERNAME)%'
-              password: '%env(SERVICENOW_PASSWORD)%'
+            - url: '%env(WEBHOOK_VIRAL_RESULTS_URL)%'
+              username: '%env(WEBHOOK_USERNAME)%'
+              password: '%env(WEBHOOK_PASSWORD)%'

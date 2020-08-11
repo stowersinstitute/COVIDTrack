@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Api\ServiceNow\Request;
+namespace App\Api\WebHook\Request;
 
 /**
- * Base class for any Request sent to ServiceNow API.
+ * Base class for any WebHookRequest sent to a WebHook API.
  */
-abstract class Request implements \JsonSerializable
+abstract class WebHookRequest implements \JsonSerializable
 {
     public function toJson($options = 0, $depth = 512): string
     {
@@ -25,7 +25,7 @@ abstract class Request implements \JsonSerializable
     }
 
     /**
-     * Return data sent as Request payload. Must be compatible with json_encode().
+     * Return data sent as WebHookRequest payload. Must be compatible with json_encode().
      *
      * @return mixed
      */
