@@ -89,8 +89,8 @@ services:
             - '%kernel.cache_dir%/label-images/'
             - '@router'
 
-    # WebHook API Connection
-    App\Api\WebHook\HttpClient:
+    # WebHook API Connections
+    App\Api\WebHook\Client\ViralResultHttpClient:
         arguments:
             # $options array
             - url: '%env(WEBHOOK_VIRAL_RESULTS_URL)%'

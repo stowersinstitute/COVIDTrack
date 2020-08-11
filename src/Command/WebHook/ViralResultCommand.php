@@ -2,7 +2,7 @@
 
 namespace App\Command\WebHook;
 
-use App\Api\WebHook\HttpClient;
+use App\Api\WebHook\Client\ViralResultHttpClient;
 use App\Api\WebHook\Request\NewViralResultsWebHookRequest;
 use App\Command\BaseAppCommand;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,15 +19,15 @@ class ViralResultCommand extends BaseAppCommand
     protected static $defaultName = 'app:webhook:viral-results';
 
     /**
-     * @var HttpClient
+     * @var ViralResultHttpClient
      */
-    private $snClient;
+    private $httpClient;
 
-    public function __construct(EntityManagerInterface $em, HttpClient $snClient)
+    public function __construct(EntityManagerInterface $em, ViralResultHttpClient $httpClient)
     {
         parent::__construct($em);
 
-        $this->snClient = $snClient;
+        $this->httpClient = $httpClient;
     }
 
     protected function configure()
@@ -42,7 +42,7 @@ class ViralResultCommand extends BaseAppCommand
         $request = new NewViralResultsWebHookRequest();
 
         try {
-            $response = $this->snClient->get('/api/now/table/u_covid_test_results?sysparm_limit=20', $request);
+            $response = $this->httpClient->get('/api/now/table/u_covid_test_results?sysparm_limit=20', $request);
         } catch (ClientException $e) {
             $output->writeln('<error>Exception calling WebHook endpoint</error>');
             $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));

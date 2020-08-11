@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\WebHook;
+namespace App\Api\WebHook\Response;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -8,7 +8,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Response received from a WebHook API. Custom public methods to suit COVIDTrack application.
  */
-class Response
+class WebHookResponse
 {
     /**
      * URL where WebHookRequest was submitted

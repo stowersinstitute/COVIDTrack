@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Api\WebHook;
+namespace App\Api\WebHook\Client;
 
 use App\Api\WebHook\Request\WebHookRequest;
+use App\Api\WebHook\Response\WebHookResponse;
 use GuzzleHttp\Client;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -14,18 +15,18 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class HttpClient
 {
     /** @var string */
-    private $url;
+    protected $url;
 
     /** @var string */
-    private $username;
+    protected $username;
 
     /** @var string */
-    private $password;
+    protected $password;
 
     /**
      * @var null|\GuzzleHttp\Client
      */
-    private $client;
+    protected $client;
 
     /**
      * Supported options:
@@ -34,7 +35,7 @@ class HttpClient
      * - username (string)
      * - password (string)
      */
-    private $constructorOptions;
+    protected $constructorOptions;
 
     /**
      * See config/services.yaml for where $options are set based on
@@ -46,25 +47,25 @@ class HttpClient
     }
 
     /**
-     * Submit a GET HTTP request and return its Response.
+     * Submit a GET HTTP request and return its WebHookResponse.
      *
      * @param string         $uri      URL part after the base URL e.g. "/path/to/something"
      * @param WebHookRequest $request
      * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    public function get(string $uri, WebHookRequest $request, array $options = []): Response
+    public function get(string $uri, WebHookRequest $request, array $options = []): WebHookResponse
     {
         return $this->request($uri, 'GET', $request, $options);
     }
 
     /**
-     * Submit a POST HTTP request and return its Response.
+     * Submit a POST HTTP request and return its WebHookResponse.
      *
      * @param string         $uri      URL part after the base URL e.g. "/path/to/something"
      * @param WebHookRequest $request
      * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    public function post(string $uri, WebHookRequest $request, array $options = []): Response
+    public function post(string $uri, WebHookRequest $request, array $options = []): WebHookResponse
     {
         return $this->request($uri, 'POST', $request, $options);
     }
@@ -77,7 +78,7 @@ class HttpClient
      * @param WebHookRequest $request
      * @param array          $options  Request options to apply. See \GuzzleHttp\RequestOptions.
      */
-    private function request(string $uri, string $method, WebHookRequest $request, array $options = []): Response
+    protected function request(string $uri, string $method, WebHookRequest $request, array $options = []): WebHookResponse
     {
         $this->initConstructorOptions($this->constructorOptions);
 
@@ -87,13 +88,13 @@ class HttpClient
 
         $response = $this->getClient()->request($method, $requestUrl, $options);
 
-        return new Response($response, $requestUrl);
+        return new WebHookResponse($response, $requestUrl);
     }
 
     /**
      * Create HTTP client to communicate with a WebHook API.
      */
-    private function getClient(): Client
+    protected function getClient(): Client
     {
         if (!empty($this->client)) return $this->client;
 
@@ -117,7 +118,7 @@ class HttpClient
      * to be injected as a service without causing errors where the environment
      * might not be properly setup for WebHook integration.
      */
-    private function initConstructorOptions(array $options)
+    protected function initConstructorOptions(array $options)
     {
         $resolver = new OptionsResolver();
         $resolver->setRequired([
