@@ -104,9 +104,15 @@ class SpecimenResultAntibodyController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            return $this->redirectToRoute('app_specimen_view', [
-                'accessionId' => $specimen->getAccessionId(),
-            ]);
+            // When given Specimen accessionId query string param,
+            // redirect there after edit complete
+            if ($request->query->has('accessionId')) {
+                return $this->redirectToRoute('app_specimen_view', [
+                    'accessionId' => $specimen->getAccessionId(),
+                ]);
+            }
+
+            return $this->redirectToRoute('results_antibody_list');
         }
 
         return $this->render('results/antibody/form.html.twig', [
