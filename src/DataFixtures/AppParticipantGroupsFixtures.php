@@ -29,6 +29,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 $g->setIsControl($raw['isControl']);
             }
 
+            $g->setEnabledForResultsWebHooks($raw['enabledForResultsWebHooks']);
+
             // group.Red
             $referenceId = 'group.' . $g->getTitle();
             $this->addReference($referenceId, $g);
@@ -53,42 +55,50 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'title' => 'Red',
                 'participantCount' => 3,
                 'accessionId' => 'GRP-722XJW',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Orange',
                 'participantCount' => 5,
                 'accessionId' => 'GRP-ZRGTSS',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Yellow',
                 'participantCount' => 7,
                 'accessionId' => 'GRP-7PRMZC',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Green',
                 'participantCount' => 9,
                 'accessionId' => 'GRP-N9YNSH',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Blue',
                 'participantCount' => 11,
                 'accessionId' => 'GRP-9LT5SY',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Indigo',
                 'participantCount' => 13,
                 'accessionId' => 'GRP-WCKXJT',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'Violet',
                 'participantCount' => 15,
                 'accessionId' => 'GRP-CRYGX9',
+                'enabledForResultsWebHooks' => false,
             ],
             [
                 'title' => 'CONTROL',
                 'participantCount' => 0,
                 'accessionId' => 'GRP-CTRLLL',
                 'isControl' => true,
+                'enabledForResultsWebHooks' => false,
             ],
         ];
     }
