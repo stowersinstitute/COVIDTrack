@@ -66,7 +66,7 @@ abstract class SpecimenResult
      * Last timestamp when this Result was successfully published to the Web Hook
      * for reporting results.
      *
-     * @var \DateTimeImmutable
+     * @var null|\DateTimeImmutable
      * @ORM\Column(name="last_web_hook_success_at", type="datetime_immutable", nullable=true)
      */
     protected $lastWebHookSuccessAt;
@@ -182,12 +182,12 @@ abstract class SpecimenResult
         return $this->isFailure;
     }
 
-    public function getLastWebHookSuccessAt(): \DateTimeImmutable
+    public function getLastWebHookSuccessAt(): ?\DateTimeImmutable
     {
         return $this->lastWebHookSuccessAt;
     }
 
-    public function setLastWebHookSuccessAt(\DateTimeImmutable $at): void
+    public function setLastWebHookSuccessAt(?\DateTimeImmutable $at): void
     {
         $this->lastWebHookSuccessAt = $at;
     }
