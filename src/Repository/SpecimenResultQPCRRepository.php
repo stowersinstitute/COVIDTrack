@@ -84,7 +84,16 @@ class SpecimenResultQPCRRepository extends EntityRepository
     public function findDueForWebHook(): array
     {
         return $this->createQueryBuilder('r')
+            // JOINs to query based on Group
+            ->join('r.specimen', 's')
+            ->join('s.participantGroup', 'g')
+
+            // Only results that haven't been reported
             ->where('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
+
+            // Only groups marked for publishing results to Web Hooks
+            ->andWhere('g.enabledForResultsWebHooks = true')
+
             ->orderBy('r.updatedAt')
             ->getQuery()
             ->execute();

@@ -170,19 +170,20 @@ class ParticipantGroup
             'createdAt' => 'Created At',
             'isActive' => 'Is Active?',
             'isControl' => 'Is Control Group?',
+            'enabledForResultsWebHooks' => 'Publish Results to Web Hooks?',
         ];
 
+        $fnYesNoFromBoolean = function ($bool) {
+            return $bool ? 'Yes' : 'No';
+        };
         /**
          * Keys are array key from $changes
          * Values are callbacks to convert $changes[$key] value
          */
         $valueConverter = [
-            'isActive' => function($isControl) {
-                return $isControl ? 'Yes' : 'No';
-            },
-            'isControl' => function($isControl) {
-                return $isControl ? 'Yes' : 'No';
-            },
+            'isActive' => $fnYesNoFromBoolean,
+            'isControl' => $fnYesNoFromBoolean,
+            'enabledForResultsWebHooks' => $fnYesNoFromBoolean,
         ];
 
         $return = [];
