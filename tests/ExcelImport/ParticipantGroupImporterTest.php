@@ -27,6 +27,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'SN2',
             'SN3',
             'SN4',
+            '09876543210987654321abcdefABCDEF',
         ];
 
         $groups = $importer->process(true);
@@ -37,6 +38,24 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
         // Verify processed list has expected External IDs
         $this->mustContainAllExternalGroupIds($expectedExternalGroupIds, $groups);
+
+        // Verify processed list has expected Web Hook Results status based on Title
+        $titleToExpectedEnabled = [
+            'First' => false,
+            'Second' => false,
+            'Third' => false,
+            'Fourth' => false,
+            '09876543210987654321abcdefABCDEF' => true,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToExpectedEnabled[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToExpectedEnabled[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group %s has wrong Web Hook Enabled status', $title));
+        }
+
     }
 
     public function testProcessUpdatingGroups()

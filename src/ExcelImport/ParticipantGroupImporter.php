@@ -140,6 +140,12 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
 
+            // Group Title imported as 32-character hex assumed to be for an Individual.
+            // Groups representing Individuals should publish results to Web Hooks.
+            // Groups for research study should not publish to Web Hooks.
+            $hooks = ParticipantGroup::titleMatchesIndividualGroupPattern($rawExternalId);
+            $group->setEnabledForResultsWebHooks($hooks);
+
             $this->processedGroups[] = $group;
         }
 

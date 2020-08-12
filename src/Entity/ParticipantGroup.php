@@ -278,6 +278,15 @@ class ParticipantGroup
         return (string) $this->title;
     }
 
+    /**
+     * Whether given Participant Group Title matches convention for a group
+     * title that represents a group reserved for individual testing.
+     */
+    public static function titleMatchesIndividualGroupPattern(string $title): bool
+    {
+        return (bool) preg_match('/[a-f0-9]{32}/i', $title);
+    }
+
     public function setTitle(string $title): void
     {
         $this->title = $title;
