@@ -49,14 +49,47 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
     private function getData(): array
     {
         return [
-            [ 'title' => 'Red',         'participantCount' => 3,    'accessionId' => 'GRP-722XJW' ],
-            [ 'title' => 'Orange',      'participantCount' => 5,    'accessionId' => 'GRP-ZRGTSS' ],
-            [ 'title' => 'Yellow',      'participantCount' => 7,    'accessionId' => 'GRP-7PRMZC' ],
-            [ 'title' => 'Green',       'participantCount' => 9,    'accessionId' => 'GRP-N9YNSH' ],
-            [ 'title' => 'Blue',        'participantCount' => 11,   'accessionId' => 'GRP-9LT5SY' ],
-            [ 'title' => 'Indigo',      'participantCount' => 13,   'accessionId' => 'GRP-WCKXJT' ],
-            [ 'title' => 'Violet',      'participantCount' => 15,   'accessionId' => 'GRP-CRYGX9' ],
-            [ 'title' => 'CONTROL',     'participantCount' => 0,    'accessionId' => 'GRP-CTRLLL', 'isControl' => true, ],
+            [
+                'title' => 'Red',
+                'participantCount' => 3,
+                'accessionId' => 'GRP-722XJW',
+            ],
+            [
+                'title' => 'Orange',
+                'participantCount' => 5,
+                'accessionId' => 'GRP-ZRGTSS',
+            ],
+            [
+                'title' => 'Yellow',
+                'participantCount' => 7,
+                'accessionId' => 'GRP-7PRMZC',
+            ],
+            [
+                'title' => 'Green',
+                'participantCount' => 9,
+                'accessionId' => 'GRP-N9YNSH',
+            ],
+            [
+                'title' => 'Blue',
+                'participantCount' => 11,
+                'accessionId' => 'GRP-9LT5SY',
+            ],
+            [
+                'title' => 'Indigo',
+                'participantCount' => 13,
+                'accessionId' => 'GRP-WCKXJT',
+            ],
+            [
+                'title' => 'Violet',
+                'participantCount' => 15,
+                'accessionId' => 'GRP-CRYGX9',
+            ],
+            [
+                'title' => 'CONTROL',
+                'participantCount' => 0,
+                'accessionId' => 'GRP-CTRLLL',
+                'isControl' => true,
+            ],
         ];
     }
 }
