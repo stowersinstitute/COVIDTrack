@@ -158,7 +158,17 @@ class TubeCheckinBloodController extends AbstractController
 
         // Return data as file download with appended original filename and MIME-type
         $originalMineType = $workbook->getFileMimeType();
-        $conversionFilename = sprintf('%s-%s','specimen-conversion', $workbook->getFilename());
+
+        $originalFileInfo = [
+            'filename' => pathinfo($workbook->getFilename(), PATHINFO_FILENAME),
+            'extension' => pathinfo($workbook->getFilename(), PATHINFO_EXTENSION),
+        ];
+
+        $conversionFilename = sprintf('%s-%s.%s',
+            $originalFileInfo['filename'],
+            'specimen-conversion',
+            $originalFileInfo['extension']
+        );
 
         // Create file download response
         $response = $this->fileDownloadResponseFromText($outputText, $originalMineType, $conversionFilename);
