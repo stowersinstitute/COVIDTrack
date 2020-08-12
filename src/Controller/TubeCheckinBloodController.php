@@ -156,12 +156,22 @@ class TubeCheckinBloodController extends AbstractController
             throw new \RuntimeException('Cannot read path ' . $outputPath);
         }
 
-        // Return data as file download with original filename and MIME-type
+        // Return data as file download with appended original filename and MIME-type
         $originalMineType = $workbook->getFileMimeType();
-        $originalFilename = $workbook->getFilename();
+
+        $originalFileInfo = [
+            'filename' => pathinfo($workbook->getFilename(), PATHINFO_FILENAME),
+            'extension' => pathinfo($workbook->getFilename(), PATHINFO_EXTENSION),
+        ];
+
+        $conversionFilename = sprintf('%s-%s.%s',
+            $originalFileInfo['filename'],
+            'specimen-conversion',
+            $originalFileInfo['extension']
+        );
 
         // Create file download response
-        $response = $this->fileDownloadResponseFromText($outputText, $originalMineType, $originalFilename);
+        $response = $this->fileDownloadResponseFromText($outputText, $originalMineType, $conversionFilename);
 
         // Clean up workbook from the database
         $em = $this->getDoctrine()->getManager();
