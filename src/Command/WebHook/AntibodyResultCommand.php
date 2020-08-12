@@ -5,6 +5,7 @@ namespace App\Command\WebHook;
 use App\Api\WebHook\Client\AntibodyResultHttpClient;
 use App\Api\WebHook\Request\NewAntibodyResultsWebHookRequest;
 use App\Command\BaseAppCommand;
+use App\Entity\SpecimenResultAntibody;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,12 +35,20 @@ class AntibodyResultCommand extends BaseAppCommand
     {
         $this
             ->setDescription('Publishes Antibody Results changes to web hook URL')
+            ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save timestamp when results successfully published')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $request = new NewAntibodyResultsWebHookRequest();
+        $lastCheckedForResults = new \DateTimeImmutable('now');
+        $newResults = $this->findResults();
+        if (count($newResults) < 1) {
+            $this->outputDebug('No results to send');
+            return 0;
+        }
+
+        $request = new NewAntibodyResultsWebHookRequest($newResults);
 
         try {
             $response = $this->httpClient->get($request);
@@ -77,6 +86,30 @@ class AntibodyResultCommand extends BaseAppCommand
         $output->writeln('<comment>Body:</comment>');
         $output->writeln($response->getBody()->getContents());
 
+        // Update success date
+        $save = !$this->input->getOption('skip-saving');
+        if ($save) {
+            foreach ($newResults as $result) {
+                $result->setLastWebHookSuccessAt($lastCheckedForResults);
+            }
+
+            $this->em->flush();
+        }
+
+        $this->outputDebug(sprintf("\nSent %d Antibody Results", count($newResults)));
+
         return 0;
+    }
+
+    /**
+     * Find latest Results to send to Web Hook
+     *
+     * @return SpecimenResultAntibody[]
+     */
+    private function findResults(): array
+    {
+        return $this->em
+            ->getRepository(SpecimenResultAntibody::class)
+            ->findDueForWebHook();
     }
 }

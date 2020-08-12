@@ -76,6 +76,21 @@ class SpecimenResultQPCRRepository extends EntityRepository
     }
 
     /**
+     * Find results that need sent to Viral Results Web Hook.
+     *
+     * @param \DateTimeInterface $since
+     * @return SpecimenResultQPCR[]
+     */
+    public function findDueForWebHook(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
+            ->orderBy('r.updatedAt')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @see SpecimenResultQPCRFilterForm
      * @return SpecimenResultQPCR[]
      */

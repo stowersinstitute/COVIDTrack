@@ -14,6 +14,13 @@ class NewViralResultsWebHookRequest extends WebHookRequest
      */
     private $results = [];
 
+    public function __construct(array $results = [])
+    {
+        foreach ($results as $result) {
+            $this->addResult($result);
+        }
+    }
+
     public function addResult(SpecimenResultQPCR $result): void
     {
         if (!$result->getId()) {

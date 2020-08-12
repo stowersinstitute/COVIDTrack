@@ -42,6 +42,21 @@ class SpecimenResultAntibodyRepository extends EntityRepository
     }
 
     /**
+     * Find results that need sent to Antibody Results Web Hook.
+     *
+     * @param \DateTimeInterface $since
+     * @return SpecimenResultAntibody[]
+     */
+    public function findDueForWebHook(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
+            ->orderBy('r.updatedAt')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @see SpecimenResultAntibodyFilterForm
      * @return SpecimenResultAntibody[]
      */
