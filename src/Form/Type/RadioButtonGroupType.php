@@ -29,7 +29,7 @@ class RadioButtonGroupType extends AbstractType
 
             case 'horizontal':
             default:
-                $view->vars['layout'] = 'btn-group btn-group-justified';
+                $view->vars['layout'] = 'btn-group-justified';
                 break;
         }
     }

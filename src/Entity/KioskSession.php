@@ -20,7 +20,6 @@ class KioskSession
 
     const SCREEN_GROUP_ENTRY = "GROUP_ENTRY";
     const SCREEN_ADD_TUBES = "ADD_TUBES";
-    const SCREEN_REVIEW_TUBES = "REVIEW_TUBES";
     const SCREEN_COMPLETED = "COMPLETED";
     const SCREEN_CANCELED = "CANCELED";
 
@@ -87,6 +86,12 @@ class KioskSession
      */
     private $completedAt;
 
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_expired", type="boolean", nullable=true)
+     */
+    private $isExpired;
+
     public function __construct(Kiosk $kiosk)
     {
         $this->tubeData = new ArrayCollection();
@@ -94,6 +99,7 @@ class KioskSession
         $this->setCreatedAt(new \DateTimeImmutable());
         $this->kiosk = $kiosk;
         $this->mostRecentScreen = self::SCREEN_GROUP_ENTRY;
+        $this->isExpired = false;
     }
 
     public function getId(): ?int
@@ -234,6 +240,21 @@ class KioskSession
 
         $this->setMostRecentScreen(self::SCREEN_CANCELED);
         $this->setCanceledAt(new \DateTimeImmutable());
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->mostRecentScreen === self::SCREEN_CANCELED;
+    }
+
+    public function expire()
+    {
+        $this->isExpired = true;
+    }
+
+    public function isExpired(): bool
+    {
+        return !!$this->isExpired;
     }
 
     public function getDropOff(): ?DropOff

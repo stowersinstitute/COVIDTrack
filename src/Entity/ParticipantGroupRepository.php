@@ -10,6 +10,13 @@ use Doctrine\ORM\QueryBuilder;
  */
 class ParticipantGroupRepository extends EntityRepository
 {
+    public function findOneByExternalId(string $externalId): ?ParticipantGroup
+    {
+        return $this->findOneBy([
+            'externalId' => $externalId,
+        ]);
+    }
+
     /**
      * @return ParticipantGroup[]
      */

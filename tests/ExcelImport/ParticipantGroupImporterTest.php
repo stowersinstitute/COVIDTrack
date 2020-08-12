@@ -18,8 +18,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/participant-group-importer-new.xlsx');
         $idGenerator = $this->buildMockParticipantGroupIdGen();
-        $importer = new ParticipantGroupImporter($workbook->getFirstWorksheet(), $idGenerator);
-        $importer->setEntityManager($this->em);
+        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
 
         // This list should match what's in participant-group-importer.xlsx
         // Order not important
@@ -48,8 +47,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/participant-group-importer-updating.xlsx');
         $idGenerator = $this->buildMockParticipantGroupIdGen();
-        $importer = new ParticipantGroupImporter($workbook->getFirstWorksheet(), $idGenerator);
-        $importer->setEntityManager($this->em);
+        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
 
         // This list should match what's in participant-group-importer.xlsx
         // Order not important
@@ -69,6 +67,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         // Verify processed list has expected External IDs
         $this->mustContainAllExternalGroupIds($expectedExternalGroupIds, $groups);
 
+        // Verify Participant Count updated to what's in Excel file
         $expectedParticipantCounts = [
             'SNUP1' => 10,
             'SNUP2' => 11,
@@ -83,6 +82,14 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             $count = $expectedParticipantCounts[$group->getExternalId()];
             $this->assertSame($count, $group->getParticipantCount());
         }
+
+        // Verify fixture Groups not in update file remain with correct active status
+        $inactiveGroup = $this->findGroupByExternalId('AlwaysInactiveGroup');
+        $this->assertInstanceOf(ParticipantGroup::class, $inactiveGroup);
+        $this->assertFalse($inactiveGroup->isActive());
+        $activeGroup = $this->findGroupByExternalId('AlwaysActiveGroup');
+        $this->assertInstanceOf(ParticipantGroup::class, $activeGroup);
+        $this->assertTrue($activeGroup->isActive());
     }
 
     /**
@@ -124,5 +131,12 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             });
 
         return $mock;
+    }
+
+    private function findGroupByExternalId(string $externalId): ?ParticipantGroup
+    {
+        return $this->em
+            ->getRepository(ParticipantGroup::class)
+            ->findOneByExternalId($externalId);
     }
 }

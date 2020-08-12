@@ -1,0 +1,74 @@
+<div class="modal fade modal-default" id="timeoutModal" tabindex="-1" role="dialog" aria-labelledby="timoutModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="timoutModalLabel"><i class="fa fa-exclamation-triangle text-yellow"></i> Are You Still There? <i class="fa fa-exclamation-triangle text-yellow"></i></h4>
+            </div>
+            <div class="modal-body" style="background-color:#fff !important;color:#111 !important; text-align:center;">
+                Tap "Continue" for more time.
+            </div>
+            <div class="modal-footer" style="background-color:#f6f6f6 !important;">
+                <a href="#" class="btn btn-lg btn-default pull-left" onclick="doTimeout();"><i class="fa fa-fw fa-plus-square"></i> Begin New Session</a>
+                <a href="#" class="btn btn-lg btn-primary" onclick="startTimeoutClock();"><i class="fa fa-fw fa-clock"></i> Continue (<span id="timeoutCountdown"></span>)</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTimeoutModal() {
+        $('#timeoutModal').modal('show');
+    }
+
+    function hideTimeoutModal() {
+        $('#timeoutModal').modal('hide');
+    }
+
+    let timeoutData = {
+        timeout: 300, // Total seconds from page load to expiring the session
+        timeoutIntervalId: null, // ID of the expire interval so we can clear it if the user keeps the session alive
+        warningTime: 240, // How much time to show the user the warning modal before expiring the session
+        warningIntervalId: null, // ID of the warning interval so we can clear it if the user keeps the session alive
+        expireDate: null, // The actual date/time the session will expire, used for UI countdown
+    };
+
+    function updateCountdown() {
+        let timeoutLeftDuration = moment.duration(timeoutData.expireDate.diff(moment()));
+        let timeRemaining = timeoutLeftDuration.minutes() + ':' + timeoutLeftDuration.seconds().toString().padStart(2, '0');
+        if (timeoutLeftDuration.asSeconds() >= 0) {
+            $('#timeoutCountdown').text(timeRemaining);
+        }
+        setTimeout(updateCountdown, 1000);
+    }
+
+    function doTimeoutWarning() {
+        showTimeoutModal();
+    }
+
+    function doTimeout() {
+        $.post("{{ path('kiosk_expire', {id: kioskSession.id}) }}")
+            .fail(function(responseObj) {
+                window.location = "{{ path('kiosk_index') }}";
+                return;
+            })
+            .done(function(response) {
+                // Redirect to another screen
+                window.location = response.redirectToUrl;
+            });
+    }
+
+    function startTimeoutClock() {
+        hideTimeoutModal();
+
+        clearInterval(timeoutData.timeoutIntervalId);
+        clearInterval(timeoutData.warningIntervalId);
+
+        timeoutData.timeoutIntervalId = setInterval(doTimeout, (timeoutData.timeout) * 1000);
+        timeoutData.warningIntervalId = setInterval(doTimeoutWarning, (timeoutData.timeout - timeoutData.warningTime) * 1000);
+        timeoutData.expireDate = moment().add(timeoutData.timeout, 'seconds');
+    }
+
+    startTimeoutClock();
+    updateCountdown();
+
+</script>

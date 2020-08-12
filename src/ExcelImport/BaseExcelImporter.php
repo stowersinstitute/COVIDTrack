@@ -6,7 +6,7 @@ use App\Entity\AppUser;
 use App\Entity\ExcelImportCell;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\ExcelImportWorksheet;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -48,7 +48,7 @@ abstract class BaseExcelImporter
     protected $output;
 
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
     protected $em;
 
@@ -240,12 +240,12 @@ abstract class BaseExcelImporter
         return $this->worksheet->getTitle();
     }
 
-    public function getEntityManager(): ?EntityManager
+    public function getEntityManager(): ?EntityManagerInterface
     {
         return $this->em;
     }
 
-    public function setEntityManager(?EntityManager $em): void
+    public function setEntityManager(?EntityManagerInterface $em): void
     {
         $this->em = $em;
     }
