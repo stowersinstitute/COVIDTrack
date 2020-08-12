@@ -98,6 +98,16 @@ class ParticipantGroup
      */
     private $isControl;
 
+    /**
+     * When true, Viral and Antibody results for Group Participants will be
+     * published to the Results Web Hook.
+     *
+     * @var bool
+     * @ORM\Column(name="enabled_for_results_web_hooks", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $enabledForResultsWebHooks;
+
     public function __construct(string $accessionId, int $participantCount)
     {
         $this->accessionId = $accessionId;
@@ -106,6 +116,7 @@ class ParticipantGroup
         $this->createdAt = new \DateTimeImmutable();
         $this->isActive = true;
         $this->isControl = false;
+        $this->enabledForResultsWebHooks = true;
 
         $this->dropOffWindows = new ArrayCollection();
     }
@@ -343,5 +354,15 @@ class ParticipantGroup
     public function setIsControl(bool $isControl): void
     {
         $this->isControl = $isControl;
+    }
+
+    public function isEnabledForResultsWebHooks(): bool
+    {
+        return $this->enabledForResultsWebHooks;
+    }
+
+    public function setEnabledForResultsWebHooks(bool $enabledForResultsWebHooks): void
+    {
+        $this->enabledForResultsWebHooks = $enabledForResultsWebHooks;
     }
 }
