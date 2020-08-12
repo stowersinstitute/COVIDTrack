@@ -96,3 +96,10 @@ services:
             - url: '%env(WEBHOOK_VIRAL_RESULTS_URL)%'
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
+
+    App\Api\WebHook\Client\AntibodyResultHttpClient:
+        arguments:
+            # $options array
+            - url: '%env(WEBHOOK_ANTIBODY_RESULTS_URL)%'
+              username: '%env(WEBHOOK_USERNAME)%'
+              password: '%env(WEBHOOK_PASSWORD)%'
