@@ -32,8 +32,8 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
         $groups = $importer->process(true);
 
-        $this->assertCount(count($expectedExternalGroupIds), $groups);
         $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        $this->assertCount(count($expectedExternalGroupIds), $groups);
         $this->assertSame(count($expectedExternalGroupIds), $importer->getNumImportedItems());
 
         // Verify processed list has expected External IDs
@@ -55,7 +55,6 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
             $this->assertSame($titleToExpectedEnabled[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group %s has wrong Web Hook Enabled status', $title));
         }
-
     }
 
     public function testProcessUpdatingGroups()
@@ -75,12 +74,13 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'SNUP2',
             'SNUP3',
             'SNUP4',
+            '09876543210987654321abcdefABCDEF',
         ];
 
         $groups = $importer->process(true);
 
-        $this->assertCount(count($expectedExternalGroupIds), $groups);
         $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        $this->assertCount(count($expectedExternalGroupIds), $groups);
         $this->assertSame(count($expectedExternalGroupIds), $importer->getNumImportedItems());
 
         // Verify processed list has expected External IDs
@@ -92,6 +92,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'SNUP2' => 11,
             'SNUP3' => 12,
             'SNUP4' => 13,
+            '09876543210987654321abcdefABCDEF' => 1,
         ];
         foreach ($groups as $group) {
             if (!isset($expectedParticipantCounts[$group->getExternalId()])) {
@@ -109,6 +110,23 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         $activeGroup = $this->findGroupByExternalId('AlwaysActiveGroup');
         $this->assertInstanceOf(ParticipantGroup::class, $activeGroup);
         $this->assertTrue($activeGroup->isActive());
+
+        // Verify processed list has expected Web Hook Results status based on Title
+        $titleToExpectedEnabled = [
+            'Ten' => true,
+            'Eleven' => false,
+            'Twelve' => true,
+            'Thirteen' => false,
+            '09876543210987654321abcdefABCDEF' => false,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToExpectedEnabled[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToExpectedEnabled[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group %s has wrong Web Hook Enabled status', $title));
+        }
     }
 
     /**

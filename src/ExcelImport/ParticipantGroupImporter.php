@@ -33,6 +33,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
             'externalId' => 'C',
             'participantCount' => 'H',
             'title' => 'J',
+            'enableWebHooks' => 'L',
         ];
     }
 
@@ -97,12 +98,14 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rawExternalId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['externalId']);
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
+            $rawEnableWebHooks = $this->worksheet->getCellValue($rowNumber, $this->columnMap['enableWebHooks']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
             $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
             $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
+            $rowOk = $rowOk && $this->validateEnableWebHooks($rawEnableWebHooks, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -139,12 +142,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
-
-            // Group Title imported as 32-character hex assumed to be for an Individual.
-            // Groups representing Individuals should publish results to Web Hooks.
-            // Groups for research study should not publish to Web Hooks.
-            $hooks = ParticipantGroup::titleMatchesIndividualGroupPattern($rawExternalId);
-            $group->setEnabledForResultsWebHooks($hooks);
+            $group->setEnabledForResultsWebHooks((bool)$rawEnableWebHooks);
 
             $this->processedGroups[] = $group;
         }
@@ -225,6 +223,28 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 $this->columnMap['title']
             );
 
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for enabling web hooks for this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateEnableWebHooks($raw, $rowNumber): bool
+    {
+        // Explicit string/int values to allow flexible parsing,
+        // but avoids NULL and truthy strings
+        $acceptedValues = ["1", "0", 1, 0];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Enable Web Hooks flag must be ' . implode(' or ', array_unique($acceptedValues)),
+                $rowNumber,
+                $this->columnMap['enableWebHooks']
+            );
             return false;
         }
 
