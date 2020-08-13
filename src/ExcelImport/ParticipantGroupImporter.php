@@ -178,9 +178,18 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     protected function validateParticipantCount($raw, $rowNumber): bool
     {
-        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT) {
+        if ($raw === null || $raw === '') {
             $this->messages[] = ImportMessage::newError(
-                'Participant count cannot be less than ' . ParticipantGroup::MIN_PARTICIPANT_COUNT,
+                'Participant Count cannot be blank',
+                $rowNumber,
+                $this->columnMap['participantCount']
+            );
+            return false;
+        }
+
+        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT || $raw > ParticipantGroup::MAX_PARTICIPANT_COUNT) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Participant Count must be between %d and %d', ParticipantGroup::MIN_PARTICIPANT_COUNT, ParticipantGroup::MAX_PARTICIPANT_COUNT),
                 $rowNumber,
                 $this->columnMap['participantCount']
             );

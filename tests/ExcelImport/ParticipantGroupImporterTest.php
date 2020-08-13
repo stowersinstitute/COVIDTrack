@@ -20,7 +20,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         $idGenerator = $this->buildMockParticipantGroupIdGen();
         $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
 
-        // This list should match what's in participant-group-importer.xlsx
+        // This list should match what's in XLSX file above.
         // Order not important
         $expectedExternalGroupIds = [
             'SN1',
@@ -32,7 +32,29 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
         $groups = $importer->process(true);
 
-        $this->assertSame([], $importer->getErrors(), 'Import has errors when not expected to have any');
+        // Verify rows with missing required data report as user-readable errors.
+        // XLSX file above has red cells where errors expected.
+        $errors = $importer->getErrors();
+        $expectedErrors = [
+            ['rowNumber' => 8],
+            ['rowNumber' => 9],
+            ['rowNumber' => 10],
+            ['rowNumber' => 11],
+            ['rowNumber' => 12],
+        ];
+        $this->assertCount(count($expectedErrors), $errors);
+        foreach ($expectedErrors as $expectedError) {
+            $found = false;
+            foreach ($errors as $error) {
+                if ($error->getRowNumber() === $expectedError['rowNumber']) {
+                    $found = true;
+                }
+            }
+            if (!$found) {
+                $this->fail(sprintf('Expected to find error for data in Row %d but no error found', $expectedError['rowNumber']));
+            }
+        }
+
         $this->assertCount(count($expectedExternalGroupIds), $groups);
         $this->assertSame(count($expectedExternalGroupIds), $importer->getNumImportedItems());
 
@@ -67,7 +89,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         $idGenerator = $this->buildMockParticipantGroupIdGen();
         $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
 
-        // This list should match what's in participant-group-importer.xlsx
+        // This list should match what's in XLSX file above.
         // Order not important
         $expectedExternalGroupIds = [
             'SNUP1',
