@@ -247,10 +247,10 @@ class ParticipantGroupImporter extends BaseExcelImporter
     {
         // Explicit string/int values to allow flexible parsing,
         // but avoids NULL and truthy strings
-        $acceptedValues = ["1", "0", 1, 0];
+        $acceptedValues = [true, false];
         if (!in_array($raw, $acceptedValues, true)) {
             $this->messages[] = ImportMessage::newError(
-                'Enable Web Hooks flag must be ' . implode(' or ', array_unique($acceptedValues)),
+                'Enable Web Hooks flag must be TRUE or FALSE',
                 $rowNumber,
                 $this->columnMap['enableWebHooks']
             );

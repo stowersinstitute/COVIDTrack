@@ -40,6 +40,12 @@ class ExcelImportWorkbookTest extends TestCase
             'B3' => ['B', 3, new \DateTime('March 14, 2020 5:20:40pm')],
             'B4' => ['B', 4, new \DateTime('March 14, 2020 6:20:40pm')],
             'B5' => ['B', 5, new \DateTime('March 14, 2020 7:20:40pm')],
+
+            // Booleans
+            'C2' => ['C', 2, true],
+            'C3' => ['C', 3, false],
+            'C4' => ['C', 4, false],
+            'C5' => ['C', 5, true],
         ];
     }
 }
