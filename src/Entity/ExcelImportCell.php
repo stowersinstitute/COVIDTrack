@@ -18,6 +18,11 @@ class ExcelImportCell
 {
     const VALUE_TYPE_SCALAR     = 'SCALAR';
     const VALUE_TYPE_DATETIME   = 'DATETIME';
+    const VALUE_TYPE_BOOLEAN    = 'BOOLEAN';
+
+    const VALUE_BOOLEAN_TRUE = 'B_TRUE';
+    const VALUE_BOOLEAN_FALSE = 'B_FALSE';
+    const VALUE_BOOLEAN_NULL = 'B_NULL';
 
     /**
      * @var integer
@@ -110,17 +115,45 @@ class ExcelImportCell
             $storeValue = trim($storeValue);
         }
 
+        // Boolean True
+        if (
+            $cell->getDataType() === "b"
+            && ($cell->getValue() === true || $cell->getValue() === false)
+        ) {
+            $internalDataType = self::VALUE_TYPE_BOOLEAN;
+
+            $storeValue = self::VALUE_BOOLEAN_NULL;
+            if ($cell->getValue() === true) {
+                $storeValue = self::VALUE_BOOLEAN_TRUE;
+            } else if ($cell->getValue() === false) {
+                $storeValue = self::VALUE_BOOLEAN_FALSE;
+            }
+        }
+
         $this->valueType = $internalDataType;
         $this->value = $storeValue;
     }
 
     /**
-     * @return string|\DateTimeImmutable
+     * @return string|\DateTimeImmutable|bool
      */
     public function getValue()
     {
         if ($this->valueType === self::VALUE_TYPE_DATETIME) {
             return \DateTimeImmutable::createFromFormat(DATE_ATOM, $this->value);
+        }
+
+        if ($this->valueType === self::VALUE_TYPE_BOOLEAN) {
+            switch ($this->value) {
+                case self::VALUE_BOOLEAN_TRUE:
+                    return true;
+                case self::VALUE_BOOLEAN_FALSE:
+                    return false;
+                case self::VALUE_BOOLEAN_NULL:
+                    return null;
+            }
+
+            throw new \RuntimeException('Unrecognized BOOLEAN value');
         }
 
         return $this->value;
