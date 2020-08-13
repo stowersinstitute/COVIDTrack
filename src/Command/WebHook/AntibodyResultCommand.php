@@ -5,6 +5,7 @@ namespace App\Command\WebHook;
 use App\Api\WebHook\Client\AntibodyResultHttpClient;
 use App\Api\WebHook\Request\NewAntibodyResultsWebHookRequest;
 use App\Command\BaseAppCommand;
+use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultAntibody;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
@@ -96,7 +97,7 @@ class AntibodyResultCommand extends BaseAppCommand
             $this->em->flush();
         }
 
-        $this->outputDebug(sprintf("\nSent %d Antibody Results", count($newResults)));
+        $this->outputDebugResultsByGroup($newResults);
 
         return 0;
     }
@@ -111,5 +112,43 @@ class AntibodyResultCommand extends BaseAppCommand
         return $this->em
             ->getRepository(SpecimenResultAntibody::class)
             ->findDueForWebHook();
+    }
+
+    /**
+     * Output debug info about results sent for each Participant Group.
+     * Use CLI flag "-v" to print results.
+     *
+     * @param SpecimenResult[] $newResults
+     */
+    private function outputDebugResultsByGroup(array $newResults)
+    {
+        $this->outputDebug('');
+        $this->outputDebug(sprintf("<info>√ Sent %d Results</info>", count($newResults)));
+
+        $byGroup = [];
+        foreach ($newResults as $result) {
+            $group = $result->getSpecimen()->getParticipantGroup();
+
+            if (!isset($byGroup[$group->getTitle()])) {
+                $byGroup[$group->getTitle()] = [];
+            }
+
+            $byGroup[$group->getTitle()][] = $result;
+        }
+
+        // Will display groups alphabetical
+        ksort($byGroup);
+
+        /** @var SpecimenResult[] $groupResults */
+        foreach ($byGroup as $groupResults) {
+            $this->outputDebug('');
+
+            $group = $groupResults[0]->getSpecimen()->getParticipantGroup();
+            $this->outputDebug(sprintf('<comment>%s</comment>', $group->getTitle()));
+
+            foreach ($groupResults as $result) {
+                $this->outputDebug(sprintf('%s %s', $result->getUpdatedAt()->format("Y-m-d H:i:s"), $result->getConclusionText()));
+            }
+        }
     }
 }
