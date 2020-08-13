@@ -154,6 +154,55 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Print group labels
+     *
+     * @Route("/reprint", methods={"GET", "POST"}, name="group_reprint")
+     */
+    public function reprint(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
+        $form = $this->createFormBuilder()
+            ->add('group', EntityType::class, [
+                'class' => ParticipantGroup::class,
+                'label' => 'Group',
+                'required' => true,
+                'placeholder' => '- Select Group -'
+            ])
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('send', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
+            $group = $em->getRepository(ParticipantGroup::class)->find($data['group']);
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($printer);
+            $builder->setGroup($group);
+
+            $zpl->printBuilder($builder, 1);
+        }
+
+        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
      * View a single Group.
      *
      * @Route("/{title}", methods={"GET", "POST"}, name="app_participant_group_view")
