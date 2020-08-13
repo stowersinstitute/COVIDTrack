@@ -100,6 +100,20 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'isControl' => true,
                 'enabledForResultsWebHooks' => false,
             ],
+            [
+                'title' => 'Individual 1',
+                'participantCount' => 1,
+                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654321',
+                'isControl' => false,
+                'enabledForResultsWebHooks' => true,
+            ],
+            [
+                'title' => 'Individual No Web Hooks',
+                'participantCount' => 1,
+                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654323',
+                'isControl' => false,
+                'enabledForResultsWebHooks' => false,
+            ],
         ];
     }
 }
