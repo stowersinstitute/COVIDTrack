@@ -1,20 +1,26 @@
-<div class="box box-warning">
-    <div class="box-header with-border">
-        <h4><i class="fa fa-exclamation-triangle text-yellow"></i> Multiple Worksheets Detected</h4>
-    </div>
-
-    <div class="box-body">
-        <p>Only reading the first Worksheet <code>{{ importer.worksheetTitle }}</code></p>
-        <p>If data appears wrong, move the desired worksheet to the far-left first position in Excel and upload again.</p>
-        <p><a href="javascript:history.go(-1);" class="btn btn-default">Upload Again</a></p>
-    </div>
-</div>
-
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-warning" role="alert" id="multisheet-warning">
     <h4><i class="fa fa-exclamation-triangle text-white"></i> Multiple Worksheets Detected</h4>
 
     <p>Only reading the first Worksheet <code>{{ importer.worksheetTitle }}</code></p>
     <p>If data appears wrong, move the desired worksheet to the far-left first position in Excel and upload again.</p>
 
-    <p><a href="javascript:history.go(-1);" class="btn btn-primary">Upload Again</a></p>
+    <p>
+        <a href="javascript:history.go(-1);" class="btn btn-primary">Upload Again</a>
+        <a href="#" class="btn btn-default" id="dismiss-warning">Dismiss</a>
+    </p>
 </div>
+
+<script>
+    $("#dismiss-warning").click(function(e) {
+        $("#multisheet-warning").hide();
+    });
+</script>
+<style>
+    /* Fix Bootstrap button styling inside AdminLTE alert */
+    #multisheet-warning a {
+        text-decoration: none;
+    }
+    #dismiss-warning {
+        color:#333;
+    }
+</style>
