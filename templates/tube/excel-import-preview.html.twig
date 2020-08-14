@@ -1,0 +1,7 @@
+{% extends 'excel-import/base-excel-import-preview.html.twig' %}
+
+{% block beforeTopConfirmButton %}
+    {% if displayMultiWorksheetWarning %}
+        {% include 'excel-import/multi-worksheet-warning.html.twig' %}
+    {% endif %}
+{% endblock %}

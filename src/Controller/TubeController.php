@@ -140,9 +140,10 @@ class TubeController extends AbstractController
 
         $importer->process();
 
-        return $this->render('excel-import/base-excel-import-preview.html.twig', [
+        return $this->render('tube/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'importPreviewTemplate' => 'tube/excel-import-table.html.twig',
             'importCommitRoute' => 'tube_excel_import_commit',
             'importCommitText' => 'Save Tubes',
