@@ -123,7 +123,6 @@ class TubeCheckinQueueController extends AbstractController
 
         $tubeId = $request->request->get('tubeId');
 
-        // Tube
         /** @var Tube $tube */
         $tube = $this->getDoctrine()
             ->getRepository(Tube::class)
