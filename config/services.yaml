@@ -90,16 +90,9 @@ services:
             - '@router'
 
     # WebHook API Connections
-    App\Api\WebHook\Client\ViralResultHttpClient:
+    App\Api\WebHook\Client\ResultHttpClient:
         arguments:
             # $options array
-            - url: '%env(WEBHOOK_VIRAL_RESULTS_URL)%'
-              username: '%env(WEBHOOK_USERNAME)%'
-              password: '%env(WEBHOOK_PASSWORD)%'
-
-    App\Api\WebHook\Client\AntibodyResultHttpClient:
-        arguments:
-            # $options array
-            - url: '%env(WEBHOOK_ANTIBODY_RESULTS_URL)%'
+            - url: '%env(WEBHOOK_RESULTS_URL)%'
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
