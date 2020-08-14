@@ -6,7 +6,6 @@
             {% if displayRowCheckboxes %}
             <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
             {% endif %}
-            {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Accept</th>{% endif %}
             <th>Tube Accession ID</th>
             <th>Type</th>
             <th>Printed At</th>
@@ -23,14 +22,6 @@
                 {% if tube.tubeType == salivaTubeType %}
                 <input type="checkbox" class="tube-checkbox" name="tubeAccessionIds[]" value="{{ tube.accessionId|e('html_attr') }}">
                 {% endif %}
-            </td>
-            {% endif %}
-            {% if allowPerTubeDecision %}
-            <td style="text-align:center;">
-                {# Accept #}
-                <button type="button" class="accept-one-tube btn btn-success btn-sm" title="Accept" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                </button>
             </td>
             {% endif %}
             <td>{{ tube.accessionId }}</td>
@@ -55,7 +46,7 @@
 <script>
     /**
      * Callback when clicking a button
-     * @param decision {string} Decision constant sent to server: ACCEPTED, REJECTED
+     * @param decision {string} Decision constant sent to server: REJECTED
      * @returns {function}
      */
     let onClickHandler = function(decision) {
@@ -82,12 +73,11 @@
                 alert('Cannot save Tube.');
             })
             .done(function(responseObj) {
-                // Disable clicking Accepted/Rejected buttons again
+                // Disable clicking Rejected button again
                 $('.row-tube-'+tubeId+' button').prop('disabled', true);
             });
         }
     };
-    $('.accept-one-tube').on('click', onClickHandler("ACCEPTED"));
     $('.reject-one-tube').on('click', onClickHandler("REJECTED"));
 </script>
 {% endif %}

@@ -114,7 +114,7 @@ class TubeCheckinQueueController extends AbstractController
      * Required POST params:
      *
      * - tubeId {string} Tube.accessionId
-     * - decision {string} ACCEPTED or REJECTED
+     * - decision {string} REJECTED
      *
      * @Route(path="/decide", methods={"POST"}, name="checkin_decide_tube")
      */
@@ -135,7 +135,6 @@ class TubeCheckinQueueController extends AbstractController
 
         // Decision
         $validDecisions = [
-            TubeCheckinSalivaImporter::STATUS_ACCEPTED,
             TubeCheckinSalivaImporter::STATUS_REJECTED,
         ];
         $decision = $request->request->get('decision');
@@ -144,9 +143,6 @@ class TubeCheckinQueueController extends AbstractController
             return $this->createJsonErrorResponse($msg);
         }
         switch ($decision) {
-            case TubeCheckinSalivaImporter::STATUS_ACCEPTED:
-                $tube->markAccepted($this->getUser()->getUsername());
-                break;
             case TubeCheckinSalivaImporter::STATUS_REJECTED:
                 $tube->markRejected($this->getUser()->getUsername());
                 break;
