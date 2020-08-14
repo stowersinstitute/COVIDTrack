@@ -20,7 +20,10 @@ use Symfony\Component\Routing\RouterInterface;
 class SpecimenResultQPCRExcelController extends AbstractController
 {
     /**
-     * @Route("/start", name="qpcr_excel_import")
+     * Display file upload form. When submitted, parse and save it,
+     * then redirect to next page.
+     *
+     * @Route("/start", methods={"GET", "POST"}, name="qpcr_excel_import")
      */
     public function start(Request $request, ExcelImporter $excelImporter)
     {
@@ -51,7 +54,10 @@ class SpecimenResultQPCRExcelController extends AbstractController
     }
 
     /**
-     * @Route("/preview/{importId<\d+>}", name="qpcr_excel_import_preview")
+     * Display preview of how Viral Results Import code has read uploaded
+     * Excel workbook.
+     *
+     * @Route("/preview/{importId<\d+>}", methods={"GET"}, name="qpcr_excel_import_preview")
      */
     public function preview(int $importId, ExcelImporter $excelImporter)
     {
@@ -80,6 +86,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
     }
 
     /**
+     * Save imported data.
+     *
      * @Route("/commit/{importId<\d+>}", methods={"POST"}, name="qpcr_excel_import_commit")
      */
     public function commit(int $importId, ExcelImporter $excelImporter, RouterInterface $router)
