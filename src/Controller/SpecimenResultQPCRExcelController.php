@@ -77,6 +77,7 @@ class SpecimenResultQPCRExcelController extends AbstractController
         return $this->render('results/qpcr/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
             'importPreviewTemplate' => 'results/qpcr/excel-import-table.html.twig',
