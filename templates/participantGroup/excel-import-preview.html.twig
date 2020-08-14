@@ -7,6 +7,10 @@
 
 {% block beforeTopConfirmButton %}
     {% include 'participantGroup/excel-import-summary-widgets.html.twig' %}
+
+    {% if displayMultiWorksheetWarning %}
+        {% include 'excel-import/multi-worksheet-warning.html.twig' %}
+    {% endif %}
 {% endblock %}
 
 {% block importPreviewSection %}
