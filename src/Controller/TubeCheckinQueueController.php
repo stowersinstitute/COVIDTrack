@@ -109,21 +109,21 @@ class TubeCheckinQueueController extends AbstractController
     }
 
     /**
-     * Decide on check-in status for a single Tube.
+     * Reject a single Tube.
      *
      * Required POST params:
      *
      * - tubeId {string} Tube.accessionId
-     * - decision {string} REJECTED
      *
-     * @Route(path="/decide", methods={"POST"}, name="checkin_decide_tube")
+     * @Route(path="/decide", methods={"POST"}, name="checkin_reject_tube")
      */
     public function decide(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
-        // Tube
         $tubeId = $request->request->get('tubeId');
+
+        // Tube
         /** @var Tube $tube */
         $tube = $this->getDoctrine()
             ->getRepository(Tube::class)
@@ -133,20 +133,7 @@ class TubeCheckinQueueController extends AbstractController
             return $this->createJsonErrorResponse($msg);
         }
 
-        // Decision
-        $validDecisions = [
-            TubeCheckinSalivaImporter::STATUS_REJECTED,
-        ];
-        $decision = $request->request->get('decision');
-        if (!in_array($decision, $validDecisions)) {
-            $msg = 'Invalid "decision" parameter. Must be one of: ' . implode(', ', $validDecisions);
-            return $this->createJsonErrorResponse($msg);
-        }
-        switch ($decision) {
-            case TubeCheckinSalivaImporter::STATUS_REJECTED:
-                $tube->markRejected($this->getUser()->getUsername());
-                break;
-        }
+        $tube->markRejected($this->getUser()->getUsername());
 
         $em = $this->getDoctrine()->getManager();
         $em->persist($tube);
@@ -154,7 +141,6 @@ class TubeCheckinQueueController extends AbstractController
 
         return new JsonResponse([
             'tubeId' => $tubeId,
-            'status' => $decision,
         ]);
     }
 

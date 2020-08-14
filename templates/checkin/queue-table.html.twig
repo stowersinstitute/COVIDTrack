@@ -44,40 +44,31 @@
 
 {% if allowPerTubeDecision %}
 <script>
-    /**
-     * Callback when clicking a button
-     * @param decision {string} Decision constant sent to server: REJECTED
-     * @returns {function}
-     */
-    let onClickHandler = function(decision) {
-        return function() {
-            const $btn = $(this);
-            const tubeId = $btn.data('tube-id');
-            const url = "{{ path('checkin_decide_tube') }}";
+    $('.reject-one-tube').on('click', function() {
+        const $btn = $(this);
+        const tubeId = $btn.data('tube-id');
+        const url = "{{ path('checkin_reject_tube') }}";
 
-            if (!confirm("Mark Tube "+tubeId+" "+decision+"?")) return;
+        if (!confirm("Mark Tube "+tubeId+" Rejected?")) return;
 
-            // Send decision to server
-            $.post(url, {
-                tubeId: tubeId,
-                decision: decision
-            })
-            .fail(function(responseObj) {
-                // Error happened, show it
-                const response = responseObj.responseJSON;
-                const errorMsg = response.errorMsg;
-                if (errorMsg) {
-                    alert(errorMsg);
-                    return;
-                }
-                alert('Cannot save Tube.');
-            })
-            .done(function(responseObj) {
-                // Disable clicking Rejected button again
-                $('.row-tube-'+tubeId+' button').prop('disabled', true);
-            });
-        }
-    };
-    $('.reject-one-tube').on('click', onClickHandler("REJECTED"));
+        // Send decision to server
+        $.post(url, {
+            tubeId: tubeId
+        })
+        .fail(function(responseObj) {
+            // Error happened, show it
+            const response = responseObj.responseJSON;
+            const errorMsg = response.errorMsg;
+            if (errorMsg) {
+                alert(errorMsg);
+                return;
+            }
+            alert('Cannot save Tube Rejection.');
+        })
+        .done(function(responseObj) {
+            // Disable clicking button again
+            $btn.prop('disabled', true);
+        });
+    });
 </script>
 {% endif %}
