@@ -28,6 +28,8 @@ importPreviewSection
     {% endblock %}
 
     {% if importer.hasErrors() %}
+        {% block beforeTopConfirmButton %}{% endblock %}
+
         <div class="callout callout-danger">
             <p>Cannot import {% if importer.filename %}<code>{{ importer.filename }}</code>{% else %}last imported spreadsheet.{% endif %}</p>
             <p>{{ importer.errors|length }} error(s) found</p>
@@ -97,7 +99,7 @@ importPreviewSection
         </div>
         {% endif %}
 
-        {% block beforeTopConfirmButton %}{% endblock %}
+        {{ block('beforeTopConfirmButton') }}
 
         <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>
