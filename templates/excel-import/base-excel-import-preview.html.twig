@@ -5,8 +5,9 @@
 importSourceDescription
     Appears at the top of the page and includes the file and worksheet being read
 
-beforeTopConfirmButton
-    Appears above the first "confirm" button and below the "importSourceDescription" block
+importSummary
+    Appears above the first "confirm" button and below the "importSourceDescription" block.
+    Summarizes the import with badge icons, counts or general warnings.
 
 importPreviewSection
     Contains the outer row used to display the default import preview
@@ -28,7 +29,7 @@ importPreviewSection
     {% endblock %}
 
     {% if importer.hasErrors() %}
-        {% block beforeTopConfirmButton %}{% endblock %}
+        {% block importSummary %}{% endblock %}
 
         <div class="callout callout-danger">
             <p>Cannot import {% if importer.filename %}<code>{{ importer.filename }}</code>{% else %}last imported spreadsheet.{% endif %}</p>
@@ -99,7 +100,7 @@ importPreviewSection
         </div>
         {% endif %}
 
-        {{ block('beforeTopConfirmButton') }}
+        {{ block('importSummary') }}
 
         <form method="post" action="{{ path(importCommitRoute, { importId: importId }) }}" class="margin-bottom">
             <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> {{ importCommitText }}</button>

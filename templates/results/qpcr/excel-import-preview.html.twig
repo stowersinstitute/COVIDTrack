@@ -5,7 +5,7 @@
 {# This normally includes the count, which doesn't apply since we break it into separate tables #}
 {% block importPreviewHeader %}{% endblock %}
 
-{% block beforeTopConfirmButton %}
+{% block importSummary %}
     {% include 'results/qpcr/excel-import-summary-widgets.html.twig' %}
 
     {% if displayMultiWorksheetWarning %}
