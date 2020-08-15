@@ -5,6 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Result of analyzing a Specimen. Subclass and specify unique fields.
@@ -72,6 +73,20 @@ abstract class SpecimenResult
     protected $lastWebHookSuccessAt;
 
     /**
+     * Only certain fields are sent out in Web Hook Request data. If one of
+     * these fields changes the whole Result record should be sent again as
+     * an "update" to the Web Hook.
+     *
+     * Fields monitored are below in the Timestampable() "field" property.
+     *
+     * @see NewResultsWebHookRequest::getRequestData()
+     * @var \DateTimeImmutable
+     * @Gedmo\Timestampable(on="change", field={"id", "conclusion", "createdAt"})
+     * @ORM\Column(name="web_hook_field_changed_at", type="datetime_immutable")
+     */
+    protected $webHookFieldChangedAt;
+
+    /**
      * Subclass should define its own annotations for how it maps to SpecimenWell,
      * and return SpecimenWell from it.
      */
@@ -110,6 +125,7 @@ abstract class SpecimenResult
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->webHookFieldChangedAt = new \DateTimeImmutable();
     }
 
     public function getConclusion(): string
@@ -190,5 +206,10 @@ abstract class SpecimenResult
     public function setLastWebHookSuccessAt(?\DateTimeImmutable $at): void
     {
         $this->lastWebHookSuccessAt = $at;
+    }
+
+    public function getWebHookFieldChangedAt(): \DateTimeImmutable
+    {
+        return $this->webHookFieldChangedAt;
     }
 }
