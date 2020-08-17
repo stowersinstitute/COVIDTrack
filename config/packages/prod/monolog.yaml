@@ -1,5 +1,4 @@
 monolog:
-    channels: ["webhook"]
     handlers:
         main:
             type: fingers_crossed
@@ -16,12 +15,6 @@ monolog:
             type: console
             process_psr_3_messages: false
             channels: ["!event", "!doctrine"]
-        # TODO: CVDLS-183 Change to database logging
-        webhook:
-            level:    debug
-            type:     stream
-            path:     "%kernel.logs_dir%/webhook.log"
-            channels: ["webhook"]
 
         # Uncomment to log deprecations
         #deprecation:
