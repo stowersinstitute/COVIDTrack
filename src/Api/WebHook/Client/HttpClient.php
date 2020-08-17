@@ -4,6 +4,7 @@ namespace App\Api\WebHook\Client;
 
 use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
+use App\Entity\WebHookLog;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -26,6 +27,13 @@ class HttpClient
     protected $password;
 
     /**
+     * Unique identifier for this client session.
+     *
+     * @var string
+     */
+    protected $lifecycleId;
+
+    /**
      * @var null|\GuzzleHttp\Client
      */
     protected $client;
@@ -38,6 +46,13 @@ class HttpClient
      * - password (string)
      */
     protected $constructorOptions;
+
+    /**
+     * Whether constructorOptions have been initialized yet.
+     *
+     * @var bool
+     */
+    protected $constructorOptionsInitialized = false;
 
     /**
      * Logs API interactions.
@@ -133,6 +148,8 @@ class HttpClient
      */
     protected function initConstructorOptions(array $options)
     {
+        if ($this->constructorOptionsInitialized) return;
+
         $resolver = new OptionsResolver();
         $resolver->setRequired([
             'url',
@@ -149,6 +166,12 @@ class HttpClient
         $this->url = $options['url'];
         $this->username = $options['username'];
         $this->password = $options['password'];
+
+        // UNIX time with current microseconds should be almost certainly unique
+        $now = new \DateTimeImmutable();
+        $this->lifecycleId = $now->format('U-u');
+
+        $this->constructorOptionsInitialized = true;
     }
 
     protected function logRequest(string $method, WebHookRequest $request, array $options)
@@ -156,6 +179,7 @@ class HttpClient
         $context = array_merge(
             $options,
             [
+                WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
                 'REQUEST_CLASS' => get_class($request),
                 'HTTP_METHOD' => $method,
                 'URL' => $this->url,
@@ -169,6 +193,7 @@ class HttpClient
     protected function logResponse(WebHookResponse $response)
     {
         $context = [
+            WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
             'RESPONSE_CLASS' => get_class($response),
             'STATUS_CODE' => $response->getStatusCode(),
             'STATUS_REASON' => $response->getReasonPhrase(),
@@ -182,6 +207,7 @@ class HttpClient
     protected function logException(\Exception $e)
     {
         $this->logger->emergency('Exception', [
+            WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
             'EXCEPTION_CODE' => $e->getCode(),
             'EXCEPTION_MESSAGE' => $e->getMessage(),
             'EXCEPTION_TRACE' => $e->getTraceAsString(),

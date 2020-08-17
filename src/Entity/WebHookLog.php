@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class WebHookLog
 {
+    public const CONTEXT_LIFECYCLE_ID_KEY = 'LIFECYCLE_ID';
+
     /**
      * @var int
      * @ORM\Id
@@ -19,6 +21,16 @@ class WebHookLog
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
+
+    /**
+     * ID to allow aligning multiple logs across a single Request / Response
+     * lifecycle. Does not need to be unique in this table, but should be
+     * reasonably unique within a small timeframe.
+     *
+     * @var null|string
+     * @ORM\Column(name="lifecycle_id", type="string", length=17, nullable=true)
+     */
+    private $lifecycleId;
 
     /**
      * @var string
@@ -56,18 +68,22 @@ class WebHookLog
      */
     private $createdAt;
 
-    public function __construct()
+    public function __construct(?string $lifecycleId = null)
     {
+        $this->lifecycleId = $lifecycleId;
         $this->createdAt = new \DateTimeImmutable();
     }
 
     public static function buildFromMonologRecord(array $record): self
     {
-        $log = new static();
+        $context = $record['context'];
+        $lifecycleId = $context[self::CONTEXT_LIFECYCLE_ID_KEY] ?? null;
+
+        $log = new static($lifecycleId);
         $log->setMessage($record['message']);
         $log->setLevel($record['level'], $record['level_name']);
         $log->setExtra($record['extra']);
-        $log->setContext($record['context']);
+        $log->setContext($context);
 
         return $log;
     }
@@ -77,9 +93,14 @@ class WebHookLog
         return $this->id;
     }
 
-    public function setId(int $id): void
+    public function getLifecycleId(): ?string
     {
-        $this->id = $id;
+        return $this->lifecycleId;
+    }
+
+    public function setLifecycleId(?string $id): void
+    {
+        $this->lifecycleId = $id;
     }
 
     public function getMessage(): string
