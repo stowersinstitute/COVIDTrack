@@ -33,6 +33,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
             'externalId' => 'C',
             'participantCount' => 'H',
             'title' => 'J',
+            'enableWebHooks' => 'L',
         ];
     }
 
@@ -97,12 +98,14 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rawExternalId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['externalId']);
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
+            $rawEnableWebHooks = $this->worksheet->getCellValue($rowNumber, $this->columnMap['enableWebHooks']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
             $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
             $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
             $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
+            $rowOk = $rowOk && $this->validateEnableWebHooks($rawEnableWebHooks, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -139,6 +142,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive(true);
+            $group->setEnabledForResultsWebHooks((bool)$rawEnableWebHooks);
 
             $this->processedGroups[] = $group;
         }
@@ -174,9 +178,18 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     protected function validateParticipantCount($raw, $rowNumber): bool
     {
-        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT) {
+        if ($raw === null || $raw === '') {
             $this->messages[] = ImportMessage::newError(
-                'Participant count cannot be less than ' . ParticipantGroup::MIN_PARTICIPANT_COUNT,
+                'Participant Count cannot be blank',
+                $rowNumber,
+                $this->columnMap['participantCount']
+            );
+            return false;
+        }
+
+        if ($raw < ParticipantGroup::MIN_PARTICIPANT_COUNT || $raw > ParticipantGroup::MAX_PARTICIPANT_COUNT) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Participant Count must be between %d and %d', ParticipantGroup::MIN_PARTICIPANT_COUNT, ParticipantGroup::MAX_PARTICIPANT_COUNT),
                 $rowNumber,
                 $this->columnMap['participantCount']
             );
@@ -219,6 +232,28 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 $this->columnMap['title']
             );
 
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for enabling web hooks for this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateEnableWebHooks($raw, $rowNumber): bool
+    {
+        // Explicit string/int values to allow flexible parsing,
+        // but avoids NULL and truthy strings
+        $acceptedValues = [true, false];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Enable Web Hooks flag must be TRUE or FALSE',
+                $rowNumber,
+                $this->columnMap['enableWebHooks']
+            );
             return false;
         }
 

@@ -2,10 +2,12 @@
 
 namespace App\Command\WebHook;
 
-use App\Api\WebHook\Client\AntibodyResultHttpClient;
-use App\Api\WebHook\Request\NewAntibodyResultsWebHookRequest;
+use App\Api\WebHook\Client\ResultHttpClient;
+use App\Api\WebHook\Request\NewResultsWebHookRequest;
 use App\Command\BaseAppCommand;
+use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultAntibody;
+use App\Entity\SpecimenResultQPCR;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,18 +15,18 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Fire web hooks related to Antibody Results.
+ * Fire web hooks related to Results.
  */
-class AntibodyResultCommand extends BaseAppCommand
+class ResultCommand extends BaseAppCommand
 {
-    protected static $defaultName = 'app:webhook:antibody-results';
+    protected static $defaultName = 'app:webhook:results';
 
     /**
-     * @var AntibodyResultHttpClient
+     * @var ResultHttpClient
      */
     private $httpClient;
 
-    public function __construct(EntityManagerInterface $em, AntibodyResultHttpClient $httpClient)
+    public function __construct(EntityManagerInterface $em, ResultHttpClient $httpClient)
     {
         parent::__construct($em);
 
@@ -34,7 +36,7 @@ class AntibodyResultCommand extends BaseAppCommand
     protected function configure()
     {
         $this
-            ->setDescription('Publishes Antibody Results changes to web hook URL')
+            ->setDescription('Publishes Specimen Results changes to web hook URL')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save timestamp when results successfully published')
         ;
     }
@@ -48,7 +50,7 @@ class AntibodyResultCommand extends BaseAppCommand
             return 0;
         }
 
-        $request = new NewAntibodyResultsWebHookRequest($newResults);
+        $request = new NewResultsWebHookRequest($newResults);
 
         try {
             $response = $this->httpClient->get($request);
@@ -96,7 +98,7 @@ class AntibodyResultCommand extends BaseAppCommand
             $this->em->flush();
         }
 
-        $this->outputDebug(sprintf("\nSent %d Antibody Results", count($newResults)));
+        $this->outputDebugResultsByGroup($newResults);
 
         return 0;
     }
@@ -104,12 +106,66 @@ class AntibodyResultCommand extends BaseAppCommand
     /**
      * Find latest Results to send to Web Hook
      *
-     * @return SpecimenResultAntibody[]
+     * @return SpecimenResult[]
      */
     private function findResults(): array
     {
-        return $this->em
+        $antibody = $this->em
             ->getRepository(SpecimenResultAntibody::class)
             ->findDueForWebHook();
+
+        $viral = $this->em
+            ->getRepository(SpecimenResultQPCR::class)
+            ->findDueForWebHook();
+
+        return array_merge($antibody, $viral);
+    }
+
+    /**
+     * Output debug info about results sent for each Participant Group.
+     * Use CLI flag "-v" to print results.
+     *
+     * @param SpecimenResult[] $newResults
+     */
+    private function outputDebugResultsByGroup(array $newResults)
+    {
+        $this->outputDebug('');
+        $this->outputDebug(sprintf("<info>√ Sent %d Results</info>", count($newResults)));
+
+        $byGroup = [];
+        foreach ($newResults as $result) {
+            $group = $result->getSpecimen()->getParticipantGroup();
+
+            if (!isset($byGroup[$group->getTitle()])) {
+                $byGroup[$group->getTitle()] = [];
+            }
+
+            $byGroup[$group->getTitle()][] = $result;
+        }
+
+        // Will display groups alphabetical
+        ksort($byGroup);
+
+        /** @var SpecimenResult[] $groupResults */
+        foreach ($byGroup as $groupResults) {
+            $this->outputDebug('');
+
+            $group = $groupResults[0]->getSpecimen()->getParticipantGroup();
+            $this->outputDebug(sprintf('<comment>Group: %s</comment>', $group->getTitle()));
+
+            foreach ($groupResults as $result) {
+                $resultType = 'UNKNOWN';
+                switch (get_class($result)) {
+                    case SpecimenResultQPCR::class:
+                        $resultType = 'Viral';
+                        break;
+                    case SpecimenResultAntibody::class:
+                        $resultType = 'Antibody';
+                        break;
+                }
+
+                $this->outputDebug(sprintf('%s %s %s', $result->getUpdatedAt()->format("Y-m-d H:i:s"), $resultType, $result->getConclusionText()));
+            }
+        }
     }
 }
