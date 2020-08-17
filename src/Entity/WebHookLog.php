@@ -15,7 +15,7 @@ class WebHookLog
     /**
      * @var int
      * @ORM\Id
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
