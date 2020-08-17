@@ -5,6 +5,8 @@ namespace App\Api\WebHook\Client;
 use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -38,12 +40,20 @@ class HttpClient
     protected $constructorOptions;
 
     /**
+     * Logs API interactions.
+     *
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * See config/services.yaml for where $options are set based on
      * environment variables.
      */
-    public function __construct(array $options)
+    public function __construct(array $options, LoggerInterface $logger = null)
     {
         $this->constructorOptions = $options;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     /**
@@ -77,11 +87,21 @@ class HttpClient
     {
         $this->initConstructorOptions($this->constructorOptions);
 
+        $this->logRequest($method, $request, $options);
+
         $options['body'] = $request->toJson();
 
-        $response = $this->getClient()->request($method, $this->url, $options);
+        try {
+            $clientResponse = $this->getClient()->request($method, $this->url, $options);
+            $response = new WebHookResponse($clientResponse, $this->url);
+        } catch (\Exception $e) {
+            $this->logException($e);
+            throw $e;
+        }
 
-        return new WebHookResponse($response, $this->url);
+        $this->logResponse($response);
+
+        return $response;
     }
 
     /**
@@ -123,10 +143,48 @@ class HttpClient
         $resolver->setAllowedTypes('username', 'string');
         $resolver->setAllowedTypes('password', 'string');
 
+        // TODO: Log config errors like empty URL, empty USERNAME, empty PW
         $options = $resolver->resolve($options);
 
         $this->url = $options['url'];
         $this->username = $options['username'];
         $this->password = $options['password'];
+    }
+
+    protected function logRequest(string $method, WebHookRequest $request, array $options)
+    {
+        $context = array_merge(
+            $options,
+            [
+                'REQUEST_CLASS' => get_class($request),
+                'HTTP_METHOD' => $method,
+                'URL' => $this->url,
+                'BODY' => $request->toJson(),
+            ]
+        );
+
+        $this->logger->debug('Sending Request.', $context);
+    }
+
+    protected function logResponse(WebHookResponse $response)
+    {
+        $context = [
+            'RESPONSE_CLASS' => get_class($response),
+            'STATUS_CODE' => $response->getStatusCode(),
+            'STATUS_REASON' => $response->getReasonPhrase(),
+            'HEADERS' => $response->getHeaders(),
+            'BODY' => $response->getBodyContents(),
+        ];
+
+        $this->logger->debug('Response Received.', $context);
+    }
+
+    protected function logException(\Exception $e)
+    {
+        $this->logger->emergency('Exception', [
+            'EXCEPTION_CODE' => $e->getCode(),
+            'EXCEPTION_MESSAGE' => $e->getMessage(),
+            'EXCEPTION_TRACE' => $e->getTraceAsString(),
+        ]);
     }
 }

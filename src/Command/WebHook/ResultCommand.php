@@ -86,7 +86,7 @@ class ResultCommand extends BaseAppCommand
         $output->writeln('');
 
         $output->writeln('<comment>Body:</comment>');
-        $output->writeln($response->getBody()->getContents());
+        $output->writeln($response->getBodyContents());
 
         // Update success date
         $save = !$this->input->getOption('skip-saving');
