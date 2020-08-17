@@ -154,16 +154,13 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
             $data = $form->getData();
             $groupTitles = $request->request->get('groups', []);
 
             $printGroups = $em->getRepository(ParticipantGroup::class)->findBy(['title' => $groupTitles]);
 
-            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
-
             $builder = new ParticipantGroupBadgeLabelBuilder();
-            $builder->setPrinter($printer);
+            $builder->setPrinter($data['printer']);
 
             foreach ($printGroups as $group) {
                 $copies = empty($data['numToPrint']) ? $group->getParticipantCount() : $data['numToPrint'];

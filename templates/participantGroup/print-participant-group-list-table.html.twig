@@ -12,7 +12,7 @@
         <tr>
             <td>{{ group.title }}</td>
             <td style="width: 10em">
-                <a href="#" onclick="groupPrint('{{ group.title }}');" class="btn btn-primary btn-xs">
+                <a href="#" onclick="groupPrint('{{ group.title|escape('html_attr') }}');" class="btn btn-primary btn-xs">
                     <i class="fa fa-fw fa-id-badge"></i> Print Badge Label
                 </a>
             </td>
