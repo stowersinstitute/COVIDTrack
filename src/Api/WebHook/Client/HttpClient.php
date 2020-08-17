@@ -159,7 +159,7 @@ class HttpClient
                 'REQUEST_CLASS' => get_class($request),
                 'HTTP_METHOD' => $method,
                 'URL' => $this->url,
-                'BODY' => $request->toJson(),
+                'JSON_BODY' => $request->toJson(),
             ]
         );
 
@@ -173,7 +173,7 @@ class HttpClient
             'STATUS_CODE' => $response->getStatusCode(),
             'STATUS_REASON' => $response->getReasonPhrase(),
             'HEADERS' => $response->getHeaders(),
-            'BODY' => $response->getBodyContents(),
+            'JSON_BODY' => $response->getBodyContents(),
         ];
 
         $this->logger->debug('Response Received.', $context);
