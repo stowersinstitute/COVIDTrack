@@ -331,6 +331,7 @@ class ParticipantGroupController extends AbstractController
         return $this->render('participantGroup/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
             'importCommitRoute' => 'group_excel_import_commit',
             'importCommitText' => 'Save Participant Groups',
