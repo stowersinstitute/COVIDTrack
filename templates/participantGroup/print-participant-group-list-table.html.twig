@@ -1,0 +1,52 @@
+{% block body %}
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for group in groups %}
+        <tr>
+            <td>{{ group.title }}</td>
+            <td style="width: 10em">
+                <a href="#" onclick="groupPrint('{{ group.title }}');" class="btn btn-primary btn-xs">
+                    <i class="fa fa-fw fa-id-badge"></i> Print Badge Label
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            {{ form_start(form) }}
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="labelPrintModalLabel">Print Group Labels</h4>
+            </div>
+            <div class="modal-body">
+                {{ form_row(form.printer) }}
+                {{ form_row(form.numToPrint) }}
+                <input type="hidden" name="groups[]" id="groupField">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
+                {{ form_row(form.print) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script type="application/javascript">
+    function groupPrint(group) {
+        $('#groupField').val(group);
+        $('#labelPrintModal').modal('show');
+    }
+</script>
+
+{% endblock %}
