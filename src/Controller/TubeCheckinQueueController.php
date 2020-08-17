@@ -115,9 +115,9 @@ class TubeCheckinQueueController extends AbstractController
      *
      * - tubeId {string} Tube.accessionId
      *
-     * @Route(path="/decide", methods={"POST"}, name="checkin_reject_tube")
+     * @Route(path="/reject", methods={"POST"}, name="checkin_reject_tube")
      */
-    public function decide(Request $request)
+    public function reject(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
