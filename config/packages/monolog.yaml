@@ -1,9 +1,9 @@
 monolog:
     channels: ["webhook"]
     handlers:
-        # TODO: CVDLS-183 Change to database logging
-        webhook:
+        webhook_handler:
             level:    debug
-            type:     stream
-            path:     "%kernel.logs_dir%/webhook.log"
+            type:     service
+            # CONFIG_DUPE_1 below
+            id:       monolog.webhook_handler
             channels: ["webhook"]

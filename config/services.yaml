@@ -97,3 +97,7 @@ services:
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
             - "@monolog.logger.webhook"
+    # CONFIG_DUPE_1 below
+    monolog.webhook_handler:
+        class: App\Api\WebHook\Client\DatabaseLoggerHandler
+        arguments: ["@doctrine.orm.entity_manager"]
