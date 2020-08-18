@@ -3,6 +3,7 @@
     <tr>
         <th>Group Title</th>
         <th># Participants</th>
+        <th>Publish Results to Web Hooks?</th>
     </tr>
     </thead>
 
@@ -11,6 +12,7 @@
         <tr>
             <td>{{ group.title }}</td>
             <td>{{ group.participantCount }}</td>
+            <td>{{ group.isEnabledForResultsWebHooks ? 'Yes' : 'No' }}</td>
         </tr>
     {% endfor %}
     </tbody>
