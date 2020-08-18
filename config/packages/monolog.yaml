@@ -4,6 +4,6 @@ monolog:
         webhook_handler:
             level:    debug
             type:     service
-            # CONFIG_DUPE_1 below
+            # DEPENDS_ON_WEBHOOK_HANDLER_ID below
             id:       monolog.webhook_handler
             channels: ["webhook"]
