@@ -44,9 +44,19 @@ class WebHookResponse
         return $this->httpResponse->getStatusCode();
     }
 
+    public function getReasonPhrase(): string
+    {
+        return $this->httpResponse->getReasonPhrase();
+    }
+
     public function getBody(): StreamInterface
     {
         return $this->httpResponse->getBody();
+    }
+
+    public function getBodyContents(): string
+    {
+        return $this->httpResponse->getBody()->getContents();
     }
 
     /**

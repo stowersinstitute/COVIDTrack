@@ -1,0 +1,8 @@
+monolog:
+    channels: ["webhook"]
+    handlers:
+        webhook_handler:
+            level:    debug
+            type:     service
+            id:       App\Api\WebHook\Client\DatabaseLoggerHandler
+            channels: ["webhook"]
