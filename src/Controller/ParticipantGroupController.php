@@ -50,7 +50,7 @@ class ParticipantGroupController extends AbstractController
         $form = $this->getPrintForm();
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
-            'groups' => $groupRepo->findActive(),
+            'groups' => $groupRepo->findForList(),
             'form' => $form->createView(),
         ]);
     }
