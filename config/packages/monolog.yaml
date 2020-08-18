@@ -4,6 +4,5 @@ monolog:
         webhook_handler:
             level:    debug
             type:     service
-            # DEPENDS_ON_WEBHOOK_HANDLER_ID below
-            id:       monolog.webhook_handler
+            id:       App\Api\WebHook\Client\DatabaseLoggerHandler
             channels: ["webhook"]
