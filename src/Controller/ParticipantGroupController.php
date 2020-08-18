@@ -20,6 +20,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +39,7 @@ class ParticipantGroupController extends AbstractController
      * When POST for printing the request params should be
      *  - `groups` an array of group titles to be printed
      *
-     * @Route(path="/", methods={"GET","POST"}, name="app_participant_group_list")
+     * @Route(path="/", methods={"GET"}, name="app_participant_group_list")
      */
     public function list(Request $request, ZplPrinting $zpl)
     {
@@ -46,39 +47,7 @@ class ParticipantGroupController extends AbstractController
 
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
-        $form = $this->createFormBuilder()
-            ->add('printer', EntityType::class, [
-                'class' => LabelPrinter::class,
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- None -'
-            ])
-            ->add('print', SubmitType::class, [
-                'label' => 'Print Selected Group Labels',
-                'attr' => ['class' => 'btn-primary'],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
-            $data = $form->getData();
-            $groupTitles = $request->request->get('groups', []);
-
-            $printGroups = $groupRepo->findBy(['title' => $groupTitles]);
-
-            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
-
-            $builder = new ParticipantGroupBadgeLabelBuilder();
-            $builder->setPrinter($printer);
-
-            foreach ($printGroups as $group) {
-                $builder->setGroup($group);
-                $zpl->printBuilder($builder, $group->getParticipantCount());
-            }
-        }
+        $form = $this->getPrintForm();
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
             'groups' => $groupRepo->findActive(),
@@ -154,6 +123,56 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Show a list of group names to let the user print new labels
+     *
+     * @Route(path="/print-group-label", methods={"GET"}, name="app_participant_group_print_list")
+     */
+    public function listPrint(Request $request, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
+        $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
+
+        $form = $this->getPrintForm();
+
+        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'groups' => $groupRepo->findActive(),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * Print group labels
+     *
+     * @Route("/print", methods={"POST"}, name="app_participant_group_print")
+     */
+    public function print(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
+        $form = $this->getPrintForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $groupTitles = $request->request->get('groups', []);
+
+            $printGroups = $em->getRepository(ParticipantGroup::class)->findBy(['title' => $groupTitles]);
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($data['printer']);
+
+            foreach ($printGroups as $group) {
+                $copies = empty($data['numToPrint']) ? $group->getParticipantCount() : $data['numToPrint'];
+                $builder->setGroup($group);
+                $zpl->printBuilder($builder, $copies);
+            }
+        }
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
+    /**
      * View a single Group.
      *
      * @Route("/{title}", methods={"GET", "POST"}, name="app_participant_group_view")
@@ -216,62 +235,6 @@ class ParticipantGroupController extends AbstractController
         $em->flush();
 
         return $this->redirectToRoute('app_participant_group_edit', [ 'title' => $group->getTitle() ]);
-    }
-
-    /**
-     * Print group labels
-     *
-     * @Route("/{title}/print", methods={"GET", "POST"}, name="app_participant_group_print")
-     */
-    public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
-    {
-        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
-
-        $group = $this->findGroupByTitle($title);
-
-        $form = $this->createFormBuilder()
-            ->add('printer', EntityType::class, [
-                'class' => LabelPrinter::class,
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- Select -'
-            ])
-            ->add('numToPrint', IntegerType::class, [
-                'label' => 'Number of Labels',
-                'data' => $group->getParticipantCount(),
-                'attr' => [
-                    'min' => 1,
-                    'max' => 2000, // todo: max # per roll? reasonable batch size?
-                ],
-            ])
-            ->add('send', SubmitType::class, [
-                'label' => 'Print',
-                'attr' => ['class' => 'btn-primary'],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
-            $copies = $data['numToPrint'];
-
-            $builder = new ParticipantGroupBadgeLabelBuilder();
-            $builder->setPrinter($printer);
-            $builder->setGroup($group);
-
-            $zpl->printBuilder($builder, $copies);
-
-            return $this->redirectToRoute('app_participant_group_list');
-        }
-
-        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
-            'group' => $group,
-            'form' => $form->createView(),
-        ]);
     }
 
     /**
@@ -432,5 +395,31 @@ class ParticipantGroupController extends AbstractController
         }
 
         return $workbook;
+    }
+
+    private function getPrintForm(): FormInterface
+    {
+        return $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('numToPrint', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => 1,
+                'attr' => [
+                    'min' => 1,
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
+                ],
+            ])
+            ->add('print', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-success'],
+            ])
+            ->setAction($this->generateUrl('app_participant_group_print'))
+            ->getForm();
     }
 }
