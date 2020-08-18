@@ -49,14 +49,12 @@ class WebHookResponse
         return $this->httpResponse->getReasonPhrase();
     }
 
-    public function getBody(): StreamInterface
-    {
-        return $this->httpResponse->getBody();
-    }
-
+    /**
+     * Get Response Body content, such as the JSON payload returned.
+     */
     public function getBodyContents(): string
     {
-        return $this->httpResponse->getBody()->getContents();
+        return (string) $this->httpResponse->getBody();
     }
 
     /**
