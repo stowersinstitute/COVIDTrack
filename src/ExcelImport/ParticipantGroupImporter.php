@@ -245,6 +245,11 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     protected function validateEnableWebHooks($raw, $rowNumber): bool
     {
+        // Blank is OK for now because current Groups export does
+        // not yet contain Column L values for "Enable Web Hooks".
+        // This column will remain blank until added by ServiceNow devs.
+        if ($raw === '') return true;
+
         // Explicit string/int values to allow flexible parsing,
         // but avoids NULL and truthy strings
         $acceptedValues = [true, false];
