@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Tests\Scheduling;
-
 
 use App\Entity\ParticipantGroup;
 use App\Entity\DropOffSchedule;
@@ -19,16 +17,7 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
      */
     public function testTwiceWeekly()
     {
-        $schedule = new DropOffSchedule('Tu Th 8am-5pm');
-
-        $schedule->setDaysOfTheWeek([
-            DropOffSchedule::TUESDAY,
-            DropOffSchedule::THURSDAY,
-        ]);
-        $schedule->setDailyStartTime(new \DateTimeImmutable('09:00:00'));
-        $schedule->setDailyEndTime(new \DateTimeImmutable('11:00:00'));
-        $schedule->setWindowIntervalMinutes(30);
-        $schedule->setNumExpectedDropOffsPerGroup(2);
+        $schedule = $this->buildDropOffSchedule();
 
         // Calculate windows in the schedule
         $calculator = new ScheduleCalculator($schedule);
@@ -53,5 +42,36 @@ class ParticipantGroupRoundRobinSchedulerTest extends TestCase
         foreach ($groups as $group) {
             $this->assertCount($schedule->getNumExpectedDropOffsPerGroup(), $group->getDropOffWindows(), 'Group had an unexpected number of drop-off windows');
         }
+    }
+
+    public function testCannotScheduleInactiveGroups()
+    {
+        $schedule = $this->buildDropOffSchedule();
+        $calculator = new ScheduleCalculator($schedule);
+        $calculator->getWeeklyWindows(); // This adds DropOffWindows to the DropOffSchedule
+
+        $groupInactive = new ParticipantGroup('GRP-2', 6);
+        $groupInactive->setIsActive(false);
+
+        $scheduler = new ParticipantGroupRoundRobinScheduler();
+
+        $this->expectException(\RuntimeException::class);
+        $scheduler->assignByDays([$groupInactive], $schedule);
+    }
+
+    private function buildDropOffSchedule(): DropOffSchedule
+    {
+        $schedule = new DropOffSchedule('Tu Th 8am-5pm');
+
+        $schedule->setDaysOfTheWeek([
+            DropOffSchedule::TUESDAY,
+            DropOffSchedule::THURSDAY,
+        ]);
+        $schedule->setDailyStartTime(new \DateTimeImmutable('09:00:00'));
+        $schedule->setDailyEndTime(new \DateTimeImmutable('11:00:00'));
+        $schedule->setWindowIntervalMinutes(30);
+        $schedule->setNumExpectedDropOffsPerGroup(2);
+
+        return $schedule;
     }
 }
