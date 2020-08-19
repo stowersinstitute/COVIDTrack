@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\tests\Scheduling;
+namespace App\Tests\Scheduling;
 
 
 use App\Entity\ParticipantGroup;
