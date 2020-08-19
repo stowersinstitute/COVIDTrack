@@ -229,6 +229,10 @@ class ParticipantGroup
 
     public function addDropOffWindow(DropOffWindow $dropOffWindow)
     {
+        if (!$this->isActive()) {
+            throw new \RuntimeException('Cannot add DropOffWindow when Group is inactive');
+        }
+
         if ($this->hasDropOffWindow($dropOffWindow)) return;
 
         $this->dropOffWindows->add($dropOffWindow);

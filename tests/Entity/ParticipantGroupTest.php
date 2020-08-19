@@ -53,4 +53,19 @@ class ParticipantGroupTest extends TestCase
         $this->assertFalse($group->isActive());
         $this->assertCount(0, $group->getDropOffWindows());
     }
+
+    public function testCannotAddDropOffWindowsWhenInactive()
+    {
+        $group = new ParticipantGroup('G100', 5);
+
+        $group->setIsActive(false);
+
+        $am6 = new \DateTimeImmutable('2020-06-01 6:00am');
+        $am8 = new \DateTimeImmutable('2020-06-01 8:00am');
+        $window = new DropOffWindow(new DropOffSchedule('First'), $am6, $am8);
+
+        // Exception thrown when trying to add DropOffWindow to inactive group
+        $this->expectException(\RuntimeException::class);
+        $group->addDropOffWindow($window);
+    }
 }
