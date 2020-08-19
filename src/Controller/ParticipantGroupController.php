@@ -204,8 +204,6 @@ class ParticipantGroupController extends AbstractController
         $group = $this->findGroupByTitle($title);
 
         $group->setIsActive(false);
-        // Clean up any drop off windows this group was using
-        $group->clearDropOffWindows();
 
         $em->flush();
 

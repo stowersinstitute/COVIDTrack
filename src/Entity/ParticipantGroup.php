@@ -335,6 +335,11 @@ class ParticipantGroup
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+
+        // Deactivating removes from schedule
+        if ($isActive === false) {
+            $this->clearDropOffWindows();
+        }
     }
 
     public function getExternalId(): ?string
