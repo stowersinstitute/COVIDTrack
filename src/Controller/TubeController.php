@@ -30,7 +30,7 @@ class TubeController extends AbstractController
     /**
      * List all Tubes
      *
-     * @Route(path="/", methods={"GET", "POST"})
+     * @Route(path="/", methods={"GET", "POST"}, name="tube_list")
      */
     public function list(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
     {
