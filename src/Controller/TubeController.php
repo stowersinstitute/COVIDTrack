@@ -16,6 +16,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,7 +33,7 @@ class TubeController extends AbstractController
      *
      * @Route(path="/", methods={"GET", "POST"}, name="tube_list")
      */
-    public function list(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    public function list()
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
@@ -40,54 +41,53 @@ class TubeController extends AbstractController
             ->getRepository(Tube::class)
             ->findBy([], ['createdAt' => 'DESC']);
 
-        $form = $this->createFormBuilder()
-            ->add('printer', EntityType::class, [
-                'class' => LabelPrinter::class,
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- None -'
-            ])
-            ->add('labelType', ChoiceType::class, [
-                'label' => 'Label Type',
-                'choices' => [
-                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
-                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
-                ],
-                'placeholder' => '- Select -',
-                'required' => true,
-            ])
-            ->add('print', SubmitType::class, [
-                'label' => 'Re-Print Selected Tubes',
-                'attr' => ['class' => 'btn-primary'],
-            ])
-            ->getForm();
+        return $this->render('tube/tube-list.html.twig', [
+            'tubes' => $tubes,
+            'form' => $this->getPrintForm()->createView()
+        ]);
+    }
 
+    /**
+     * Print Tube labels.
+     *
+     * Required POST params:
+     *
+     * - tubes (string[]) Tube.accessionId to print
+     *
+     * @Route("/print", methods={"POST"}, name="tube_print")
+     */
+    public function print(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
+
+        $form = $this->getPrintForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $tubesIds = $request->request->get('tubes', []);
+            $formData = $form->getData();
+            $accessionIds = $request->request->get('tubes', []);
 
-            $printTubes = $em->getRepository(Tube::class)->findBy(['accessionId' => $tubesIds]);
+            /** @var LabelPrinter $printer */
+            $printer = $formData['printer'];
 
-            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
-            $builderClass = $data['labelType'];
-
-            $builder = new $builderClass;
+            $builderClass = $formData['labelType'];
+            $builder = new $builderClass; // NOTE: $builderClass validated by Form
             $builder->setPrinter($printer);
+
+            $printTubes = $em->getRepository(Tube::class)
+                ->findBy(['accessionId' => $accessionIds]);
 
             foreach ($printTubes as $tube) {
                 $builder->setTube($tube);
                 $zpl->printBuilder($builder);
             }
+
+            if (count($printTubes) > 0) {
+                $this->addFlash('success', sprintf('Labels sent to printer %s.', $printer->getTitle()));
+            }
         }
 
-
-        return $this->render('tube/tube-list.html.twig', [
-            'tubes' => $tubes,
-            'form' => $form->createView()
-        ]);
+        return $this->redirect($request->headers->get('referer'));
     }
 
     /**
@@ -189,5 +189,32 @@ class TubeController extends AbstractController
         }
 
         return $workbook;
+    }
+
+    private function getPrintForm(): FormInterface
+    {
+        return $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('labelType', ChoiceType::class, [
+                'label' => 'Label Type',
+                'choices' => [
+                    'Saliva: Square 0.75" ' => SpecimenIntakeLabelBuilder::class,
+                    'Blood: MBS Tube 1" x 0.25"' => MBSBloodTubeLabelBuilder::class,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
+            ->add('print', SubmitType::class, [
+                'label' => 'Re-Print Selected Tubes',
+                'attr' => ['class' => 'btn-primary'],
+            ])
+            ->setAction($this->generateUrl('tube_print'))
+            ->getForm();
     }
 }
