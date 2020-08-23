@@ -8,6 +8,7 @@ use App\Entity\Tube;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\TubeImporter;
 use App\Form\GenericExcelImportType;
+use App\Form\TubeFilterForm;
 use App\Label\MBSBloodTubeLabelBuilder;
 use App\Label\SpecimenIntakeLabelBuilder;
 use App\Label\ZplPrinting;
@@ -33,17 +34,26 @@ class TubeController extends AbstractController
      *
      * @Route(path="/", methods={"GET", "POST"}, name="tube_list")
      */
-    public function list()
+    public function list(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
+        // Explicitly use FormFactory to remove form name from GET params for cleaner URL
+        $filterForm = $this->get('form.factory')->createNamed('', TubeFilterForm::class);
+        $filterForm->handleRequest($request);
+        $formData = [];
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            $formData = $filterForm->getData();
+        }
+
         $tubes = $this->getDoctrine()
             ->getRepository(Tube::class)
-            ->findBy([], ['createdAt' => 'DESC']);
+            ->filterByFormData($formData);
 
         return $this->render('tube/tube-list.html.twig', [
             'tubes' => $tubes,
-            'form' => $this->getPrintForm()->createView()
+            'printForm' => $this->getPrintForm()->createView(),
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 
