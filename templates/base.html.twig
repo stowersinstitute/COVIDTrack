@@ -10,7 +10,7 @@
 {% if page_title_var is empty %}
     {% set page_title_parts = ['COVIDTrack'] %}
 {% else %}
-    {% set page_title_parts = ['COVIDTrack', '–', page_title_var|striptags] %}
+    {% set page_title_parts = [page_title_var|striptags, '–', 'COVIDTrack'] %}
 {% endif %}
 {% endapply %}
         <title>{% block title %}{{ page_title_parts|join(' ') }}{% endblock %}</title>
