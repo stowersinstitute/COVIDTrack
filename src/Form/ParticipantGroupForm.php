@@ -31,6 +31,10 @@ class ParticipantGroupForm extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Title',
             ])
+            ->add('accessionId', TextType::class, [
+                'label' => 'Accession ID',
+                'disabled' => true,
+            ])
             ->add('externalId', TextType::class, [
                 'label' => 'External ID',
                 'required' => false,
