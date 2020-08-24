@@ -31,6 +31,10 @@ class ParticipantGroupForm extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Title',
             ])
+            ->add('externalId', TextType::class, [
+                'label' => 'External ID',
+                'required' => false,
+            ])
             ->add('participantCount', IntegerType::class, [
                 'label' => 'Number of Participants',
                 'attr' => [
