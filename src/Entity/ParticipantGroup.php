@@ -45,6 +45,7 @@ class ParticipantGroup
      *
      * @var string|null
      * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $externalId;
 
@@ -166,6 +167,7 @@ class ParticipantGroup
         $keyConverter = [
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
+            'externalId' => 'External ID',
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
