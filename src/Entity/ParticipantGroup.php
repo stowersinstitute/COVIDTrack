@@ -41,8 +41,9 @@ class ParticipantGroup
     private $accessionId;
 
     /**
-     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     * ID sourced from an external system. Used for reconciling group identity.
      *
+     * @var string|null
      * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
      */
     private $externalId;
