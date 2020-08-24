@@ -3,7 +3,17 @@
     <head>
         <meta charset="UTF-8">
         <meta name="google" content="notranslate">
-        <title>{% block title %}COVIDTrack{% endblock %}</title>
+{% apply spaceless %}
+{% set page_title_var %}{% apply spaceless %}
+    {% block page_title %}{% endblock %}
+{% endapply %}{% endset %}
+{% if page_title_var is empty %}
+    {% set page_title_parts = ['COVIDTrack'] %}
+{% else %}
+    {% set page_title_parts = ['COVIDTrack', '–', page_title_var|striptags] %}
+{% endif %}
+{% endapply %}
+        <title>{% block title %}{{ page_title_parts|join(' ') }}{% endblock %}</title>
         <link rel="manifest" href="/manifest.json">
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
         <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
@@ -62,9 +72,7 @@
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
             <section class="content-header">
-                <h1>
-                    {% block page_title %}{% endblock %}
-                </h1>
+                <h1>{{ block('page_title') }}</h1>
             </section>
 
             <!-- Main content -->
