@@ -248,7 +248,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
         // Blank is OK for now because current Groups export does
         // not yet contain Column L values for "Enable Web Hooks".
         // This column will remain blank until added by ServiceNow devs.
-        if ($raw === '') return true;
+        if ($raw === '' || $raw === null) return true;
 
         // Explicit string/int values to allow flexible parsing,
         // but avoids NULL and truthy strings

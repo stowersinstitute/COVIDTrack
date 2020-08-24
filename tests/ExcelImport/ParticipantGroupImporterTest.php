@@ -151,6 +151,51 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         }
     }
 
+    public function testImportAcceptedWithoutWebHookColumn()
+    {
+        $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/participant-group-importer-without-webhook-column.xlsx');
+        $idGenerator = $this->buildMockParticipantGroupIdGen();
+        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
+
+        // This list should match what's in XLSX file above.
+        // Order not important
+        $expectedExternalGroupIds = [
+            'SN100',
+            'SN200',
+            'SN300',
+            'SN400',
+        ];
+
+        $groups = $importer->process(true);
+
+        // Verify rows with missing required data report as user-readable errors.
+        // XLSX file above has red cells where errors expected.
+        $errors = $importer->getErrors();
+        $this->assertCount(0, $errors);
+
+        $this->assertCount(count($expectedExternalGroupIds), $groups);
+        $this->assertSame(count($expectedExternalGroupIds), $importer->getNumImportedItems());
+
+        // Verify processed list has expected External IDs
+        $this->mustContainAllExternalGroupIds($expectedExternalGroupIds, $groups);
+
+        // Verify processed list has expected Web Hook Results status based on Title
+        $titleToExpectedEnabled = [
+            'OneJ' => false,
+            'TwoJ' => false,
+            'ThreeJ' => false,
+            'FourJ' => false,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToExpectedEnabled[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToExpectedEnabled[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group %s has wrong Web Hook Enabled status', $title));
+        }
+    }
+
     /**
      * @param string[] $expectedExternalIds Array of expected ParticipantGroup.externalId[]
      * @param ParticipantGroup[]   $groups
