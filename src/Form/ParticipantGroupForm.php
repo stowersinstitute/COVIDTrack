@@ -40,7 +40,7 @@ class ParticipantGroupForm extends AbstractType
                 'required' => false,
             ])
             ->add('participantCount', IntegerType::class, [
-                'label' => 'Number of Participants',
+                'label' => 'Participants',
                 'attr' => [
                     'min' => ParticipantGroup::MIN_PARTICIPANT_COUNT,
                     'max' => ParticipantGroup::MAX_PARTICIPANT_COUNT,
