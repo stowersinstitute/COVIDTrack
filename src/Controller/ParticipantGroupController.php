@@ -142,7 +142,11 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
-     * Print group labels
+     * Print group labels.
+     *
+     * Required POST params:
+     *
+     * - groups (string[]) ParticipantGroup.title to print
      *
      * @Route("/print", methods={"POST"}, name="app_participant_group_print")
      */
