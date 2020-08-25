@@ -31,8 +31,16 @@ class ParticipantGroupForm extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Title',
             ])
+            ->add('accessionId', TextType::class, [
+                'label' => 'Accession ID',
+                'disabled' => true,
+            ])
+            ->add('externalId', TextType::class, [
+                'label' => 'External ID',
+                'required' => false,
+            ])
             ->add('participantCount', IntegerType::class, [
-                'label' => 'Number of Participants',
+                'label' => 'Participants',
                 'attr' => [
                     'min' => ParticipantGroup::MIN_PARTICIPANT_COUNT,
                     'max' => ParticipantGroup::MAX_PARTICIPANT_COUNT,

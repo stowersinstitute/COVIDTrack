@@ -25,6 +25,10 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             $g = new ParticipantGroup($raw['accessionId'], $raw['participantCount']);
             $g->setTitle($raw['title']);
 
+            if (isset($raw['externalId'])) {
+                $g->setExternalId($raw['externalId']);
+            }
+
             if (isset($raw['isControl'])) {
                 $g->setIsControl($raw['isControl']);
             }
@@ -103,14 +107,16 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             [
                 'title' => 'Individual 1',
                 'participantCount' => 1,
-                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654321',
+                'accessionId' => 'GRP-INDV1',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654321',
                 'isControl' => false,
                 'enabledForResultsWebHooks' => true,
             ],
             [
                 'title' => 'Individual No Web Hooks',
                 'participantCount' => 1,
-                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654323',
+                'accessionId' => 'GRP-INDV2',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654323',
                 'isControl' => false,
                 'enabledForResultsWebHooks' => false,
             ],

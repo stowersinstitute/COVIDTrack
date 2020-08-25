@@ -41,9 +41,11 @@ class ParticipantGroup
     private $accessionId;
 
     /**
-     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     * ID sourced from an external system. Used for reconciling group identity.
      *
+     * @var string|null
      * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $externalId;
 
@@ -165,6 +167,7 @@ class ParticipantGroup
         $keyConverter = [
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
+            'externalId' => 'External ID',
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
