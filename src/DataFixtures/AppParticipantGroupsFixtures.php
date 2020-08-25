@@ -19,8 +19,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
 
     public function load(ObjectManager $em)
     {
-        /** @var ParticipantGroup[] $groups */
-        $groups = [];
+        /** @var ParticipantGroup[] $groupsToSchedule */
+        $groupsToSchedule = [];
         foreach ($this->getData() as $raw) {
             $g = new ParticipantGroup($raw['accessionId'], $raw['participantCount']);
             $g->setTitle($raw['title']);
@@ -33,6 +33,10 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 $g->setIsControl($raw['isControl']);
             }
 
+            if (isset($raw['isActive'])) {
+                $g->setIsActive($raw['isActive']);
+            }
+
             $g->setEnabledForResultsWebHooks($raw['enabledForResultsWebHooks']);
 
             // group.Red
@@ -40,14 +44,17 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             $this->addReference($referenceId, $g);
 
             $em->persist($g);
-            $groups[] = $g;
+
+            if ($g->isActive()) {
+                $groupsToSchedule[] = $g;
+            }
         }
 
         $em->flush();
 
         // Schedule groups into available drop off windows
         $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays($groups, $this->getReference('SiteDropOffSchedule.default'));
+        $scheduler->assignByDays($groupsToSchedule, $this->getReference('SiteDropOffSchedule.default'));
 
         $em->flush();
     }
@@ -103,6 +110,20 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'accessionId' => 'GRP-CTRLLL',
                 'isControl' => true,
                 'enabledForResultsWebHooks' => false,
+            ],
+            [
+                'title' => 'Inactive Research',
+                'participantCount' => 2,
+                'accessionId' => 'GRP-INAC-RES',
+                'isActive' => false,
+                'enabledForResultsWebHooks' => false,
+            ],
+            [
+                'title' => 'Inactive Individual',
+                'participantCount' => 1,
+                'accessionId' => 'GRP-INAC-IND',
+                'isActive' => false,
+                'enabledForResultsWebHooks' => true,
             ],
             [
                 'title' => 'Individual 1',

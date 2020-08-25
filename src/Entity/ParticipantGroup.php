@@ -232,6 +232,10 @@ class ParticipantGroup
 
     public function addDropOffWindow(DropOffWindow $dropOffWindow)
     {
+        if (!$this->isActive()) {
+            throw new \RuntimeException('Cannot add DropOffWindow when Group is inactive');
+        }
+
         if ($this->hasDropOffWindow($dropOffWindow)) return;
 
         $this->dropOffWindows->add($dropOffWindow);
@@ -338,6 +342,11 @@ class ParticipantGroup
     public function setIsActive(bool $isActive): void
     {
         $this->isActive = $isActive;
+
+        // Deactivating removes from schedule
+        if ($isActive === false) {
+            $this->clearDropOffWindows();
+        }
     }
 
     public function getExternalId(): ?string
