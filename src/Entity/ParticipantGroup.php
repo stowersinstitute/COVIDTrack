@@ -218,6 +218,10 @@ class ParticipantGroup
             'isActive' => 'Is Active?',
             'isControl' => 'Is Control Group?',
             'enabledForResultsWebHooks' => 'Publish Results to Web Hooks?',
+            'acceptsSalivaSpecimens' => 'Accepts Saliva?',
+            'acceptsBloodSpecimens' => 'Accepts Blood?',
+            'viralResultsWebHooksEnabled' => 'Publish Viral Results to Web Hooks?',
+            'antibodyResultsWebHooksEnabled' => 'Publish Antibody Results to Web Hooks?',
         ];
 
         $fnYesNoFromBoolean = function ($bool) {
@@ -231,6 +235,10 @@ class ParticipantGroup
             'isActive' => $fnYesNoFromBoolean,
             'isControl' => $fnYesNoFromBoolean,
             'enabledForResultsWebHooks' => $fnYesNoFromBoolean,
+            'acceptsSalivaSpecimens' => $fnYesNoFromBoolean,
+            'acceptsBloodSpecimens' => $fnYesNoFromBoolean,
+            'viralResultsWebHooksEnabled' => $fnYesNoFromBoolean,
+            'antibodyResultsWebHooksEnabled' => $fnYesNoFromBoolean,
         ];
 
         $return = [];
