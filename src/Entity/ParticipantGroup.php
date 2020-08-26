@@ -101,14 +101,53 @@ class ParticipantGroup
     private $isControl;
 
     /**
+     * When true, Saliva Specimens can be dropped-off at Kiosk by Participants
+     * belonging to this Group.
+     *
+     * @var bool
+     * @ORM\Column(name="accepts_saliva_specimens", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $acceptsSalivaSpecimens;
+
+    /**
+     * When true, Blood Specimens can be dropped-off at Kiosk by Participants
+     * belonging to this Group.
+     *
+     * @var bool
+     * @ORM\Column(name="accepts_blood_specimens", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $acceptsBloodSpecimens;
+
+    /**
      * When true, Viral and Antibody results for Group Participants will be
      * published to the Results Web Hook.
      *
+     * @deprecated Field replaced by $viralResultsWebHooksEnabled and $antibodyResultsWebHooksEnabled
      * @var bool
      * @ORM\Column(name="enabled_for_results_web_hooks", type="boolean", options={"default":1})
      * @Gedmo\Versioned
      */
     private $enabledForResultsWebHooks;
+
+    /**
+     * When true, Viral results for Group Participants will be published to the Results Web Hook.
+     *
+     * @var bool
+     * @ORM\Column(name="viral_results_web_hooks_enabled", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $viralResultsWebHooksEnabled;
+
+    /**
+     * When true, Antibody results for Group Participants will be published to the Results Web Hook.
+     *
+     * @var bool
+     * @ORM\Column(name="antibody_results_web_hooks_enabled", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $antibodyResultsWebHooksEnabled;
 
     public function __construct(string $accessionId, int $participantCount)
     {
@@ -118,7 +157,12 @@ class ParticipantGroup
         $this->createdAt = new \DateTimeImmutable();
         $this->isActive = true;
         $this->isControl = false;
+
+        $this->acceptsSalivaSpecimens = true;
+        $this->acceptsBloodSpecimens = true;
         $this->enabledForResultsWebHooks = true;
+        $this->viralResultsWebHooksEnabled = true;
+        $this->antibodyResultsWebHooksEnabled = true;
 
         $this->dropOffWindows = new ArrayCollection();
     }
@@ -369,13 +413,62 @@ class ParticipantGroup
         $this->isControl = $isControl;
     }
 
+    public function acceptsSalivaSpecimens(): bool
+    {
+        return $this->acceptsSalivaSpecimens;
+    }
+
+    public function setAcceptsSalivaSpecimens(bool $flag): void
+    {
+        $this->acceptsSalivaSpecimens = $flag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function acceptsBloodSpecimens(): bool
+    {
+        return $this->acceptsBloodSpecimens;
+    }
+
+    public function setAcceptsBloodSpecimens(bool $flag): void
+    {
+        $this->acceptsBloodSpecimens = $flag;
+    }
+
+    /**
+     * @deprecated
+     */
     public function isEnabledForResultsWebHooks(): bool
     {
         return $this->enabledForResultsWebHooks;
     }
 
+    /**
+     * @deprecated
+     */
     public function setEnabledForResultsWebHooks(bool $enabledForResultsWebHooks): void
     {
         $this->enabledForResultsWebHooks = $enabledForResultsWebHooks;
+    }
+
+    public function viralResultsWebHooksEnabled(): bool
+    {
+        return $this->viralResultsWebHooksEnabled;
+    }
+
+    public function setViralResultsWebHooksEnabled(bool $flag): void
+    {
+        $this->viralResultsWebHooksEnabled = $flag;
+    }
+
+    public function antibodyResultsWebHooksEnabled(): bool
+    {
+        return $this->antibodyResultsWebHooksEnabled;
+    }
+
+    public function setAntibodyResultsWebHooksEnabled(bool $flag): void
+    {
+        $this->antibodyResultsWebHooksEnabled = $flag;
     }
 }
