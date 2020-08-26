@@ -439,9 +439,6 @@ class ParticipantGroup
         $this->acceptsSalivaSpecimens = $flag;
     }
 
-    /**
-     * @return bool
-     */
     public function acceptsBloodSpecimens(): bool
     {
         return $this->acceptsBloodSpecimens;
