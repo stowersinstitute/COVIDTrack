@@ -250,8 +250,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
         // This column will remain blank until added by ServiceNow devs.
         if ($raw === '' || $raw === null) return true;
 
-        // Explicit string/int values to allow flexible parsing,
-        // but avoids NULL and truthy strings
         $acceptedValues = [true, false];
         if (!in_array($raw, $acceptedValues, true)) {
             $this->messages[] = ImportMessage::newError(
