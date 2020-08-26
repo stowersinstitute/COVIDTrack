@@ -135,6 +135,8 @@ class Specimen
         $this->resultsQPCR = new ArrayCollection();
         $this->resultsAntibody = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+
+        $group->addSpecimen($this);
     }
 
     /**

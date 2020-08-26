@@ -356,10 +356,26 @@ class ParticipantGroup
         return $this->specimens->getValues();
     }
 
+    /**
+     * @internal
+     * @deprecated Not actually deprecated, but only call from within Specimen::__construct()
+     */
     public function addSpecimen(Specimen $specimen): void
     {
-        // TODO: Add de-duplicating logic
-        $this->specimens->add($specimen);
+        if (!$this->hasSpecimen($specimen)) {
+            $this->specimens->add($specimen);
+        }
+    }
+
+    private function hasSpecimen(Specimen $specimen): bool
+    {
+        foreach ($this->specimens as $currentSpecimen) {
+            if (EntityUtils::isSameEntity($currentSpecimen, $specimen)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

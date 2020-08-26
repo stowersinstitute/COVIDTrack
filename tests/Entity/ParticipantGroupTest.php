@@ -5,6 +5,7 @@ namespace App\Tests\Entity;
 use App\Entity\DropOffSchedule;
 use App\Entity\DropOffWindow;
 use App\Entity\ParticipantGroup;
+use App\Entity\Specimen;
 use PHPUnit\Framework\TestCase;
 
 class ParticipantGroupTest extends TestCase
@@ -67,5 +68,29 @@ class ParticipantGroupTest extends TestCase
         // Exception thrown when trying to add DropOffWindow to inactive group
         $this->expectException(\RuntimeException::class);
         $group->addDropOffWindow($window);
+    }
+
+    public function testAddingSameSpecimenTwiceNotDuplicated()
+    {
+        $group = new ParticipantGroup('GRP-1', 5);
+        $specimen = new Specimen('SPEC-100', $group);
+
+        // Specimen Group properly set
+        $this->assertSame($group, $specimen->getParticipantGroup());
+
+        // Group has just 1 Specimen, the one we added
+        $groupSpecimens = $group->getSpecimens();
+        $this->assertCount(1, $groupSpecimens);
+
+        $groupSpecimen = array_shift($groupSpecimens);
+        $this->assertSame($specimen, $groupSpecimen);
+
+        // Add a few more times to test duplicate adding
+        $group->addSpecimen($specimen);
+        $group->addSpecimen($specimen);
+        $group->addSpecimen($specimen);
+
+        // Still has only 1
+        $this->assertCount(1, $group->getSpecimens());
     }
 }
