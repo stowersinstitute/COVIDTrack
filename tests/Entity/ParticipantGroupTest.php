@@ -93,4 +93,36 @@ class ParticipantGroupTest extends TestCase
         // Still has only 1
         $this->assertCount(1, $group->getSpecimens());
     }
+
+    public function testToggleSalivaAcceptStatus()
+    {
+        $group = new ParticipantGroup('G123', 5);
+
+        // Default
+        $this->assertTrue($group->acceptsSalivaSpecimens());
+
+        // Disable
+        $group->setAcceptsSalivaSpecimens(false);
+        $this->assertFalse($group->acceptsSalivaSpecimens());
+
+        // Re-enable
+        $group->setAcceptsSalivaSpecimens(true);
+        $this->assertTrue($group->acceptsSalivaSpecimens());
+    }
+
+    public function testToggleBloodAcceptStatus()
+    {
+        $group = new ParticipantGroup('G123', 5);
+
+        // Default
+        $this->assertTrue($group->acceptsBloodSpecimens());
+
+        // Disable
+        $group->setAcceptsBloodSpecimens(false);
+        $this->assertFalse($group->acceptsBloodSpecimens());
+
+        // Re-enable
+        $group->setAcceptsBloodSpecimens(true);
+        $this->assertTrue($group->acceptsBloodSpecimens());
+    }
 }
