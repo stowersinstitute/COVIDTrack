@@ -7,12 +7,11 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-// TODO: Rename class
-final class Version20200826162723 extends AbstractMigration
+final class Version132 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Add Participant Group flags for Accepting Saliva and Blood Specimens, and Sending Web Hook data for Viral and Antibody Results';
     }
 
     public function up(Schema $schema) : void
