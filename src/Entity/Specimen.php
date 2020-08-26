@@ -329,6 +329,21 @@ class Specimen
     {
         $this->ensureValidType($type);
         $this->type = $type;
+
+        // Group might not be accepting Saliva Specimens
+        if ($type === self::TYPE_SALIVA) {
+            if (false === $this->getParticipantGroup()->acceptsSalivaSpecimens()) {
+                throw new \RuntimeException("Specimen's Group not configured to accept Saliva Specimens");
+            }
+        }
+
+        // Group might not be accepting Blood Specimens
+        if ($type === self::TYPE_BLOOD) {
+            if (false === $this->getParticipantGroup()->acceptsBloodSpecimens()) {
+                throw new \RuntimeException("Specimen's Group not configured to accept Blood Specimens");
+            }
+        }
+
         $this->recalculateCliaTestingRecommendation();
     }
 
