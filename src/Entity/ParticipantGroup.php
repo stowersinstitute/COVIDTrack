@@ -121,17 +121,6 @@ class ParticipantGroup
     private $acceptsBloodSpecimens;
 
     /**
-     * When true, Viral and Antibody results for Group Participants will be
-     * published to the Results Web Hook.
-     *
-     * @deprecated Field replaced by $viralResultsWebHooksEnabled and $antibodyResultsWebHooksEnabled
-     * @var bool
-     * @ORM\Column(name="enabled_for_results_web_hooks", type="boolean", options={"default":1})
-     * @Gedmo\Versioned
-     */
-    private $enabledForResultsWebHooks;
-
-    /**
      * When true, Viral results for Group Participants will be published to the Results Web Hook.
      *
      * @var bool
@@ -160,7 +149,6 @@ class ParticipantGroup
 
         $this->acceptsSalivaSpecimens = true;
         $this->acceptsBloodSpecimens = true;
-        $this->enabledForResultsWebHooks = true;
         $this->viralResultsWebHooksEnabled = false;
         $this->antibodyResultsWebHooksEnabled = false;
 
@@ -217,6 +205,7 @@ class ParticipantGroup
             'createdAt' => 'Created At',
             'isActive' => 'Is Active?',
             'isControl' => 'Is Control Group?',
+            // Entity Property removed 2020-08-27 but still exists in Audit Log records
             'enabledForResultsWebHooks' => 'Publish Results to Web Hooks?',
             'acceptsSalivaSpecimens' => 'Accepts Saliva?',
             'acceptsBloodSpecimens' => 'Accepts Blood?',
@@ -234,6 +223,7 @@ class ParticipantGroup
         $valueConverter = [
             'isActive' => $fnYesNoFromBoolean,
             'isControl' => $fnYesNoFromBoolean,
+            // Entity Property removed 2020-08-27 but still exists in Audit Log records
             'enabledForResultsWebHooks' => $fnYesNoFromBoolean,
             'acceptsSalivaSpecimens' => $fnYesNoFromBoolean,
             'acceptsBloodSpecimens' => $fnYesNoFromBoolean,
@@ -455,22 +445,6 @@ class ParticipantGroup
     public function setAcceptsBloodSpecimens(bool $flag): void
     {
         $this->acceptsBloodSpecimens = $flag;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function isEnabledForResultsWebHooks(): bool
-    {
-        return $this->enabledForResultsWebHooks;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function setEnabledForResultsWebHooks(bool $enabledForResultsWebHooks): void
-    {
-        $this->enabledForResultsWebHooks = $enabledForResultsWebHooks;
     }
 
     public function viralResultsWebHooksEnabled(): bool

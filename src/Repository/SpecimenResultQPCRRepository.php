@@ -94,8 +94,8 @@ class SpecimenResultQPCRRepository extends EntityRepository
             // Only Active groups
             ->andWhere('g.isActive = true')
 
-            // Only groups marked for publishing results to Web Hooks
-            ->andWhere('g.enabledForResultsWebHooks = true')
+            // Only groups marked for publishing Viral results to Web Hooks
+            ->andWhere('g.viralResultsWebHooksEnabled = true')
 
             ->orderBy('r.updatedAt')
             ->getQuery()

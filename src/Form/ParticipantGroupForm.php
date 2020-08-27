@@ -53,12 +53,18 @@ class ParticipantGroupForm extends AbstractType
                 'expanded' => true,
                 'required' => true,
             ])
-            ->add('enabledForResultsWebHooks', ChoiceType::class, [
-                'label' => 'Publish Results to Web Hooks?',
-                'choices' => ['Yes' => true, 'No' => false],
-                'expanded' => true,
-                'required' => true,
-            ])
+//            ->add('viralResultsWebHooksEnabled', ChoiceType::class, [
+//                'label' => 'Publish Viral Results to Web Hooks?',
+//                'choices' => ['Yes' => true, 'No' => false],
+//                'expanded' => true,
+//                'required' => true,
+//            ])
+//            ->add('antibodyResultsWebHooksEnabled', ChoiceType::class, [
+//                'label' => 'Publish Antibody Results to Web Hooks?',
+//                'choices' => ['Yes' => true, 'No' => false],
+//                'expanded' => true,
+//                'required' => true,
+//            ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
             ])
