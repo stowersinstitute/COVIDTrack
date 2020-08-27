@@ -135,7 +135,7 @@ class ParticipantGroup
      * When true, Viral results for Group Participants will be published to the Results Web Hook.
      *
      * @var bool
-     * @ORM\Column(name="viral_results_web_hooks_enabled", type="boolean", options={"default":1})
+     * @ORM\Column(name="viral_results_web_hooks_enabled", type="boolean", options={"default":0})
      * @Gedmo\Versioned
      */
     private $viralResultsWebHooksEnabled;
@@ -144,7 +144,7 @@ class ParticipantGroup
      * When true, Antibody results for Group Participants will be published to the Results Web Hook.
      *
      * @var bool
-     * @ORM\Column(name="antibody_results_web_hooks_enabled", type="boolean", options={"default":1})
+     * @ORM\Column(name="antibody_results_web_hooks_enabled", type="boolean", options={"default":0})
      * @Gedmo\Versioned
      */
     private $antibodyResultsWebHooksEnabled;
@@ -161,8 +161,8 @@ class ParticipantGroup
         $this->acceptsSalivaSpecimens = true;
         $this->acceptsBloodSpecimens = true;
         $this->enabledForResultsWebHooks = true;
-        $this->viralResultsWebHooksEnabled = true;
-        $this->antibodyResultsWebHooksEnabled = true;
+        $this->viralResultsWebHooksEnabled = false;
+        $this->antibodyResultsWebHooksEnabled = false;
 
         $this->dropOffWindows = new ArrayCollection();
     }

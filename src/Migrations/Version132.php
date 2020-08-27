@@ -19,7 +19,7 @@ final class Version132 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE participant_groups ADD accepts_saliva_specimens TINYINT(1) DEFAULT \'1\' NOT NULL, ADD accepts_blood_specimens TINYINT(1) DEFAULT \'1\' NOT NULL, ADD viral_results_web_hooks_enabled TINYINT(1) DEFAULT \'1\' NOT NULL, ADD antibody_results_web_hooks_enabled TINYINT(1) DEFAULT \'1\' NOT NULL');
+        $this->addSql('ALTER TABLE participant_groups ADD accepts_saliva_specimens TINYINT(1) DEFAULT \'1\' NOT NULL, ADD accepts_blood_specimens TINYINT(1) DEFAULT \'1\' NOT NULL, ADD viral_results_web_hooks_enabled TINYINT(1) DEFAULT \'0\' NOT NULL, ADD antibody_results_web_hooks_enabled TINYINT(1) DEFAULT \'0\' NOT NULL');
     }
 
     public function down(Schema $schema) : void
