@@ -38,6 +38,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
             }
 
             $g->setEnabledForResultsWebHooks($raw['enabledForResultsWebHooks']);
+            $g->setAcceptsSalivaSpecimens($raw['acceptsSalivaSpecimens']);
+            $g->setAcceptsBloodSpecimens($raw['acceptsBloodSpecimens']);
 
             // group.Red
             $referenceId = 'group.' . $g->getTitle();
@@ -67,42 +69,56 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'participantCount' => 3,
                 'accessionId' => 'GRP-722XJW',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Orange',
                 'participantCount' => 5,
                 'accessionId' => 'GRP-ZRGTSS',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Yellow',
                 'participantCount' => 7,
                 'accessionId' => 'GRP-7PRMZC',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Green',
                 'participantCount' => 9,
                 'accessionId' => 'GRP-N9YNSH',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Blue',
                 'participantCount' => 11,
                 'accessionId' => 'GRP-9LT5SY',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Indigo',
                 'participantCount' => 13,
                 'accessionId' => 'GRP-WCKXJT',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Violet',
                 'participantCount' => 15,
                 'accessionId' => 'GRP-CRYGX9',
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'CONTROL',
@@ -110,6 +126,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'accessionId' => 'GRP-CTRLLL',
                 'isControl' => true,
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Inactive Research',
@@ -117,6 +135,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'accessionId' => 'GRP-INAC-RES',
                 'isActive' => false,
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Inactive Individual',
@@ -124,6 +144,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'accessionId' => 'GRP-INAC-IND',
                 'isActive' => false,
                 'enabledForResultsWebHooks' => true,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Individual 1',
@@ -132,6 +154,8 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'externalId' => 'abcdefghijklmnopqrstuvwxyz654321',
                 'isControl' => false,
                 'enabledForResultsWebHooks' => true,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Individual No Web Hooks',
@@ -140,6 +164,18 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'externalId' => 'abcdefghijklmnopqrstuvwxyz654323',
                 'isControl' => false,
                 'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+            ],
+            [
+                'title' => 'Individual No Specimens Allowed',
+                'participantCount' => 1,
+                'accessionId' => 'GRP-IND-NO-SPEC',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654324',
+                'isControl' => false,
+                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => false,
+                'acceptsSalivaSpecimens' => false,
             ],
         ];
     }

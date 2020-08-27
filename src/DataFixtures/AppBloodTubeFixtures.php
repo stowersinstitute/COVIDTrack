@@ -36,6 +36,8 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
+     * All Groups that allow Blood Specimens
+     *
      * @var ParticipantGroup[]
      */
     private $allGroups;
@@ -138,7 +140,10 @@ class AppBloodTubeFixtures extends Fixture implements DependentFixtureInterface
     private function getRandomGroup(ObjectManager $em): ParticipantGroup
     {
         if (empty($this->allGroups)) {
-            $this->allGroups = $em->getRepository(ParticipantGroup::class)->findAll();
+            $this->allGroups = $em->getRepository(ParticipantGroup::class)->findBy([
+                // Must accept Blood Specimens for use in this fixture class
+                'acceptsBloodSpecimens' => true,
+            ]);
         }
 
         return $this->allGroups[array_rand($this->allGroups)];

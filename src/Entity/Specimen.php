@@ -135,6 +135,8 @@ class Specimen
         $this->resultsQPCR = new ArrayCollection();
         $this->resultsAntibody = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+
+        $group->addSpecimen($this);
     }
 
     /**
@@ -327,6 +329,21 @@ class Specimen
     {
         $this->ensureValidType($type);
         $this->type = $type;
+
+        // Group might not be accepting Saliva Specimens
+        if ($type === self::TYPE_SALIVA) {
+            if (false === $this->getParticipantGroup()->acceptsSalivaSpecimens()) {
+                throw new \RuntimeException("Specimen's Group not configured to accept Saliva Specimens");
+            }
+        }
+
+        // Group might not be accepting Blood Specimens
+        if ($type === self::TYPE_BLOOD) {
+            if (false === $this->getParticipantGroup()->acceptsBloodSpecimens()) {
+                throw new \RuntimeException("Specimen's Group not configured to accept Blood Specimens");
+            }
+        }
+
         $this->recalculateCliaTestingRecommendation();
     }
 
@@ -369,11 +386,6 @@ class Specimen
     public function getParticipantGroup(): ParticipantGroup
     {
         return $this->participantGroup;
-    }
-
-    public function setParticipantGroup(ParticipantGroup $group): void
-    {
-        $this->participantGroup = $group;
     }
 
     public function getStatus(): string

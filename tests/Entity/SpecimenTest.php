@@ -393,6 +393,30 @@ class SpecimenTest extends TestCase
         $this->assertSame($specimen->getCliaTestingRecommendedText(), '');
     }
 
+    public function testExceptionAddingSalivaSpecimenToGroupWhenGroupNotAcceptingSaliva()
+    {
+        $group = new ParticipantGroup('G123', 5);
+        $group->setAcceptsSalivaSpecimens(false);
+        $this->assertFalse($group->acceptsSalivaSpecimens());
+
+        $specimen = new Specimen('SPEC-100', $group);
+
+        $this->expectException(\RuntimeException::class);
+        $specimen->setType(Specimen::TYPE_SALIVA);
+    }
+
+    public function testExceptionAddingBloodSpecimenToGroupWhenGroupNotAcceptingBlood()
+    {
+        $group = new ParticipantGroup('G123', 5);
+        $group->setAcceptsBloodSpecimens(false);
+        $this->assertFalse($group->acceptsBloodSpecimens());
+
+        $specimen = new Specimen('SPEC-100', $group);
+
+        $this->expectException(\RuntimeException::class);
+        $specimen->setType(Specimen::TYPE_BLOOD);
+    }
+
     /**
      * @param string $accessionId Accession ID to return when calling ->generate() on the mock
      * @return MockObject|SpecimenAccessionIdGenerator
