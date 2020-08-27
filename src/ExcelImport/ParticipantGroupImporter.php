@@ -242,7 +242,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
     }
 
     /**
-     * Returns true if $raw is a valid value for enabling web hooks for this group.
+     * Returns true if $raw is a valid value for enabling/disabling this group.
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
