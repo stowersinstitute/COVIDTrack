@@ -240,6 +240,9 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Display file upload form to begin import.
+     * Saves uploaded file when form submitted.
+     *
      * @Route("/excel-import/start", name="group_excel_import")
      */
     public function excelImport(Request $request, ExcelImporter $excelImporter)
@@ -271,6 +274,8 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Displays preview of data read from uploaded file.
+     *
      * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
      */
     public function excelImportPreview(
