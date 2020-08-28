@@ -60,9 +60,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
      * Returns true if there is at least one group associated with $action
      *
      * $action can be:
-     *  - created
-     *  - updated
-     *  - deactivated
+     *  - active
+     *  - inactive
      *
      * See process()
      */
@@ -89,12 +88,10 @@ class ParticipantGroupImporter extends BaseExcelImporter
         $groupRepo = $this->em->getRepository(ParticipantGroup::class);
 
         $result = [
-            'created' => [],
-            'updated' => [],
-            'deactivated' => []
+            'active' => [],
+            'inactive' => [],
         ];
 
-        // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -136,16 +133,12 @@ class ParticipantGroupImporter extends BaseExcelImporter
                     $rawParticipantCount ?? ParticipantGroup::MIN_PARTICIPANT_COUNT
                 );
 
-                $result['created'][] = $group;
                 if ($commit) {
                     $this->em->persist($group);
                 }
             }
             // Existing group
             else {
-                // Note: this does not guarantee any fields are changing, just that it was in the excel file
-                $result['updated'][] = $group;
-
                 // Ensure entities won't be flush()ed if we're not committing
                 if (!$commit) $this->em->detach($group);
             }
@@ -160,6 +153,13 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setAntibodyResultsWebHooksEnabled($rawAntibodyWebHookEnabled);
 
             $this->processedGroups[] = $group;
+
+            // Note: this does not guarantee any fields are changing, just that it was in the excel file
+            if ($group->isActive()) {
+                $result['active'][] = $group;
+            } else {
+                $result['inactive'][] = $group;
+            }
         }
 
         $this->output = $result;
