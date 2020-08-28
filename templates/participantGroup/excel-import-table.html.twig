@@ -3,7 +3,8 @@
     <tr>
         <th>Group Title</th>
         <th># Participants</th>
-        <th>Publish Results to Web Hooks?</th>
+        <th>Publish Viral Results to Web Hooks?</th>
+        <th>Publish Antibody Results to Web Hooks?</th>
     </tr>
     </thead>
 
@@ -12,7 +13,8 @@
         <tr>
             <td>{{ group.title }}</td>
             <td>{{ group.participantCount }}</td>
-            <td>{{ group.isEnabledForResultsWebHooks ? 'Yes' : 'No' }}</td>
+            <td>{{ group.viralResultsWebHooksEnabled ? 'Yes' : 'No' }}</td>
+            <td>{{ group.antibodyResultsWebHooksEnabled ? 'Yes' : 'No' }}</td>
         </tr>
     {% endfor %}
     </tbody>

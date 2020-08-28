@@ -34,7 +34,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             'participantCount' => 'H',
             'title' => 'J',
             'isActive' => 'K',
-            'enableWebHooks' => 'L',
         ];
     }
 
@@ -100,7 +99,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
             $rawIsActive = $this->worksheet->getCellValue($rowNumber, $this->columnMap['isActive']);
-            $rawEnableWebHooks = $this->worksheet->getCellValue($rowNumber, $this->columnMap['enableWebHooks']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
@@ -108,7 +106,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
             $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
             $rowOk = $rowOk && $this->validateIsActive($rawIsActive, $rowNumber);
-            $rowOk = $rowOk && $this->validateEnableWebHooks($rawEnableWebHooks, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -145,7 +142,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive($rawIsActive);
-            $group->setEnabledForResultsWebHooks((bool)$rawEnableWebHooks);
 
             $this->processedGroups[] = $group;
         }
@@ -242,7 +238,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
     }
 
     /**
-     * Returns true if $raw is a valid value for enabling web hooks for this group.
+     * Returns true if $raw is a valid value for enabling/disabling this group.
      *
      * Otherwise, adds an error message to $this->messages and returns false
      */
@@ -254,31 +250,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 'Is Active? flag must be TRUE or FALSE',
                 $rowNumber,
                 $this->columnMap['isActive']
-            );
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Returns true if $raw is a valid value for enabling web hooks for this group.
-     *
-     * Otherwise, adds an error message to $this->messages and returns false
-     */
-    protected function validateEnableWebHooks($raw, $rowNumber): bool
-    {
-        // Blank is OK for now because current Groups export does
-        // not yet contain Column L values for "Enable Web Hooks".
-        // This column will remain blank until added by ServiceNow devs.
-        if ($raw === '' || $raw === null) return true;
-
-        $acceptedValues = [true, false];
-        if (!in_array($raw, $acceptedValues, true)) {
-            $this->messages[] = ImportMessage::newError(
-                'Enable Web Hooks flag must be TRUE or FALSE',
-                $rowNumber,
-                $this->columnMap['enableWebHooks']
             );
             return false;
         }
