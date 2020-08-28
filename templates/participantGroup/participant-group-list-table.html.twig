@@ -30,6 +30,7 @@
             <th>Last Modified</th>
             <th>Active?</th>
             <th>Specimens</th>
+            <th>Results<br>to Web Hooks</th>
         </tr>
     </thead>
     <tbody>
@@ -66,6 +67,14 @@
                 {% endif %}
                 {% if group.acceptsBloodSpecimens %}
                 <span class="badge bg-green" title="Blood specimens allowed">B</span>
+                {% endif %}
+            {% endspaceless %}</td>
+            <td>{% spaceless %}
+                {% if group.viralResultsWebHooksEnabled %}
+                <span class="badge bg-green" title="Viral results enabled to web hooks" style="margin-right:3px">V</span>
+                {% endif %}
+                {% if group.antibodyResultsWebHooksEnabled %}
+                <span class="badge bg-green" title="Antibody results enabled to web hooks">A</span>
                 {% endif %}
             {% endspaceless %}</td>
         </tr>
