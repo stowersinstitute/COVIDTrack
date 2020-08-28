@@ -296,11 +296,12 @@ class ParticipantGroupController extends AbstractController
             $idGenerator
         );
 
-        $importer->process();
+        $processedGroups = $importer->process();
 
         return $this->render('participantGroup/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'processedGroups' => $processedGroups,
             'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
             'importCommitRoute' => 'group_excel_import_commit',
