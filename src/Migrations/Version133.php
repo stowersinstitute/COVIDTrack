@@ -7,12 +7,11 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-// TODO: Rename class before merge
-final class Version20200827163445 extends AbstractMigration
+final class Version133 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Remove field for entity property ParticipantGroup.enabledForResultsWebHooks';
     }
 
     public function up(Schema $schema) : void
