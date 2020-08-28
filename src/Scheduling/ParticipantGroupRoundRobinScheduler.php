@@ -21,6 +21,12 @@ class ParticipantGroupRoundRobinScheduler
      */
     public function assignByDays(array $groups, DropOffSchedule $schedule)
     {
+        foreach ($groups as $group) {
+            if (!$group->isActive()) {
+                throw new \RuntimeException('Participant Group must be active to assign to Drop Off Schedule');
+            }
+        }
+
         $numToAssignPerGroup = $schedule->getNumExpectedDropOffsPerGroup();
 
         $windowsByDay = $schedule->getWindowsByWeekday();

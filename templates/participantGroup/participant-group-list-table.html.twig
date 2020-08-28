@@ -3,10 +3,14 @@
 {% set userCanPrintLabels = is_granted('ROLE_PRINT_GROUP_LABELS') %}
 
 {% if userCanPrintLabels %}
-{{ form_start(form) }}
-{{ form_row(form.printer) }}
-{{ form_row(form.print) }}
+    <div class="margin-bottom">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#labelPrintModal">
+           <i class="fa fa-fw fa-id-badge"></i> Print Selected Group Labels
+        </button>
+    </div>
 {% endif %}
+
+{{ form_start(form) }}
 
 <table class="table table-bordered table-hover">
     <thead>
@@ -24,9 +28,7 @@
             <th>Drop-off Times</th>
             <th>Created</th>
             <th>Last Modified</th>
-            {% if userCanPrintLabels %}
-            <th></th>
-            {% endif %}
+            <th>Active?</th>
         </tr>
     </thead>
     <tbody>
@@ -56,16 +58,33 @@
             </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            {% if userCanPrintLabels %}
-            <td><a href="{{ path('app_participant_group_print', {title: group.title}) }}" class="btn btn-primary btn-xs" style="margin-left:8px;"><i class="fa fa-fw fa-print"></i> Print Badge Labels</a></td>
-            {% endif %}
+            <td>{{ group.isActive ? 'Yes' : 'No' }}</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
 
 {% if userCanPrintLabels %}
-{{ form_end(form) }}
+<div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title text-center" id="labelPrintModalLabel">Print Group Labels</h4>
+            </div>
+            <div class="modal-body">
+                {{ form_row(form.printer) }}
+                {# Don't render the numToPrint field since the backend will print the group count #}
+                {% do form.numToPrint.setRendered() %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
+                {{ form_row(form.print) }}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
 <script type="application/javascript">
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));

@@ -19,31 +19,45 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
 
     public function load(ObjectManager $em)
     {
-        /** @var ParticipantGroup[] $groups */
-        $groups = [];
+        /** @var ParticipantGroup[] $groupsToSchedule */
+        $groupsToSchedule = [];
         foreach ($this->getData() as $raw) {
             $g = new ParticipantGroup($raw['accessionId'], $raw['participantCount']);
             $g->setTitle($raw['title']);
+
+            if (isset($raw['externalId'])) {
+                $g->setExternalId($raw['externalId']);
+            }
 
             if (isset($raw['isControl'])) {
                 $g->setIsControl($raw['isControl']);
             }
 
-            $g->setEnabledForResultsWebHooks($raw['enabledForResultsWebHooks']);
+            if (isset($raw['isActive'])) {
+                $g->setIsActive($raw['isActive']);
+            }
+
+            $g->setAcceptsSalivaSpecimens($raw['acceptsSalivaSpecimens']);
+            $g->setAcceptsBloodSpecimens($raw['acceptsBloodSpecimens']);
+            $g->setViralResultsWebHooksEnabled($raw['viralResultsWebHooksEnabled']);
+            $g->setAntibodyResultsWebHooksEnabled($raw['antibodyResultsWebHooksEnabled']);
 
             // group.Red
             $referenceId = 'group.' . $g->getTitle();
             $this->addReference($referenceId, $g);
 
             $em->persist($g);
-            $groups[] = $g;
+
+            if ($g->isActive()) {
+                $groupsToSchedule[] = $g;
+            }
         }
 
         $em->flush();
 
         // Schedule groups into available drop off windows
         $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays($groups, $this->getReference('SiteDropOffSchedule.default'));
+        $scheduler->assignByDays($groupsToSchedule, $this->getReference('SiteDropOffSchedule.default'));
 
         $em->flush();
     }
@@ -55,64 +69,127 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 'title' => 'Red',
                 'participantCount' => 3,
                 'accessionId' => 'GRP-722XJW',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Orange',
                 'participantCount' => 5,
                 'accessionId' => 'GRP-ZRGTSS',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Yellow',
                 'participantCount' => 7,
                 'accessionId' => 'GRP-7PRMZC',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Green',
                 'participantCount' => 9,
                 'accessionId' => 'GRP-N9YNSH',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Blue',
                 'participantCount' => 11,
                 'accessionId' => 'GRP-9LT5SY',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Indigo',
                 'participantCount' => 13,
                 'accessionId' => 'GRP-WCKXJT',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'Violet',
                 'participantCount' => 15,
                 'accessionId' => 'GRP-CRYGX9',
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
             ],
             [
                 'title' => 'CONTROL',
                 'participantCount' => 0,
                 'accessionId' => 'GRP-CTRLLL',
                 'isControl' => true,
-                'enabledForResultsWebHooks' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
+            ],
+            [
+                'title' => 'Inactive Research',
+                'participantCount' => 2,
+                'accessionId' => 'GRP-INAC-RES',
+                'isActive' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
+            ],
+            [
+                'title' => 'Inactive Individual',
+                'participantCount' => 1,
+                'accessionId' => 'GRP-INAC-IND',
+                'isActive' => false,
+                'viralResultsWebHooksEnabled' => true,
+                'antibodyResultsWebHooksEnabled' => true,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Individual 1',
                 'participantCount' => 1,
-                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654321',
+                'accessionId' => 'GRP-INDV1',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654321',
                 'isControl' => false,
-                'enabledForResultsWebHooks' => true,
+                'viralResultsWebHooksEnabled' => true,
+                'antibodyResultsWebHooksEnabled' => true,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
             ],
             [
                 'title' => 'Individual No Web Hooks',
                 'participantCount' => 1,
-                'accessionId' => 'abcdefghijklmnopqrstuvwxyz654323',
+                'accessionId' => 'GRP-INDV2',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654323',
                 'isControl' => false,
-                'enabledForResultsWebHooks' => false,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
+                'acceptsBloodSpecimens' => true,
+                'acceptsSalivaSpecimens' => true,
+            ],
+            [
+                'title' => 'Individual No Specimens Allowed',
+                'participantCount' => 1,
+                'accessionId' => 'GRP-IND-NO-SPEC',
+                'externalId' => 'abcdefghijklmnopqrstuvwxyz654324',
+                'isControl' => false,
+                'viralResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false,
+                'acceptsBloodSpecimens' => false,
+                'acceptsSalivaSpecimens' => false,
             ],
         ];
     }

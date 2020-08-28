@@ -59,7 +59,7 @@ class ExcelImportWorkbook
 
     /**
      * Worksheets associated with this workbook
-     * @var ExcelImportWorksheet[]
+     * @var ArrayCollection|ExcelImportWorksheet[]
      *
      * @ORM\OneToMany(targetEntity="ExcelImportWorksheet", cascade={"persist", "remove"}, orphanRemoval=true, mappedBy="workbook")
      * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbook_id")
@@ -156,6 +156,14 @@ class ExcelImportWorkbook
         }
 
         return false;
+    }
+
+    /**
+     * @return ExcelImportWorksheet[]
+     */
+    public function getWorksheets(): array
+    {
+        return $this->worksheets->getValues();
     }
 
     public function getUploadedBy(): ?AppUser

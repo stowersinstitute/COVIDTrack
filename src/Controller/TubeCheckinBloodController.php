@@ -102,6 +102,7 @@ class TubeCheckinBloodController extends AbstractController
         return $this->render('checkin/blood/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'rejected' => $output['rejected'] ?? [],
             'accepted' => $output['accepted'] ?? [],
             'importPreviewTemplate' => 'checkin/blood/excel-import-table.html.twig',

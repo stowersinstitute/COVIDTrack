@@ -44,9 +44,17 @@ class WebHookResponse
         return $this->httpResponse->getStatusCode();
     }
 
-    public function getBody(): StreamInterface
+    public function getReasonPhrase(): string
     {
-        return $this->httpResponse->getBody();
+        return $this->httpResponse->getReasonPhrase();
+    }
+
+    /**
+     * Get Response Body content, such as the JSON payload returned.
+     */
+    public function getBodyContents(): string
+    {
+        return (string) $this->httpResponse->getBody();
     }
 
     /**

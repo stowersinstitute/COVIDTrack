@@ -84,14 +84,20 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'group_excel_import',
                     mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'])
+                {
+                    text: 'Reprint Badge Labels',
+                    iconClass: 'fa-id-badge',
+                    route: 'app_participant_group_print_list',
+                    mustHaveOneRoleToView: ['ROLE_PRINT_GROUP_LABELS'],
+                },
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW', 'ROLE_PRINT_GROUP_LABELS'])
         }}
         {{
             _self.treenode('Tubes', 'fa-vial', [
                 {
                     text: 'List',
                     iconClass: 'fa-list',
-                    route: 'app_tube_list'
+                    route: 'tube_list'
                 },
                 {
                     text: 'Print New Labels',

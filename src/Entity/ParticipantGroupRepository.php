@@ -18,6 +18,20 @@ class ParticipantGroupRepository extends EntityRepository
     }
 
     /**
+     * Return list of all groups on Groups > List screen.
+     *
+     * @return ParticipantGroup[]
+     */
+    public function findForList(): array
+    {
+        return $this->getDefaultQueryBuilder('g')
+            ->orderBy('g.isActive', 'DESC')
+            ->addOrderBy('g.title')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @return ParticipantGroup[]
      */
     public function findActive(): array

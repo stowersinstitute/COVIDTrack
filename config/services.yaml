@@ -96,3 +96,4 @@ services:
             - url: '%env(WEBHOOK_RESULTS_URL)%'
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
+            - "@monolog.logger.webhook"

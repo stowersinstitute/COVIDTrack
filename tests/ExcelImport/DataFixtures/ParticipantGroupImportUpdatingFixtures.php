@@ -74,6 +74,20 @@ class ParticipantGroupImportUpdatingFixtures extends Fixture
                 'participantCount' => 6,
                 'isActive' => false,
             ],
+            [
+                'externalId' => 'ToggleToActiveGroup',
+                'title' => 'Made Active By Update',
+                'accessionId' => 'GRP-7',
+                'participantCount' => 7,
+                'isActive' => false, // Update import will change to TRUE
+            ],
+            [
+                'externalId' => 'ToggleToInactiveGroup',
+                'title' => 'Made Inactive By Update',
+                'accessionId' => 'GRP-8',
+                'participantCount' => 8,
+                'isActive' => true, // Update import will change to FALSE
+            ],
         ];
     }
 }
