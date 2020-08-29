@@ -88,7 +88,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function edit(string $title, Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
