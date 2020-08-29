@@ -60,7 +60,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $form = $this->createForm(ParticipantGroupForm::class);
         $form->handleRequest($request);
