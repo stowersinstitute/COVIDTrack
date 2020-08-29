@@ -55,7 +55,7 @@ class AppUserFixtures extends Fixture implements FixtureGroupInterface
         $this->buildUser($manager, 'analysistech', ['ROLE_RESULTS_VIEW', 'ROLE_WELL_PLATE_VIEW']);
 
         // Media Prep
-        $this->buildUser($manager, 'mediaprep', ['ROLE_PRINT_TUBE_LABELS', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW']);
+        $this->buildUser($manager, 'mediaprep', ['ROLE_PRINT_TUBE_LABELS']);
 
         $manager->flush();
     }
