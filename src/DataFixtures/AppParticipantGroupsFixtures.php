@@ -3,20 +3,11 @@
 namespace App\DataFixtures;
 
 use App\Entity\ParticipantGroup;
-use App\Scheduling\ParticipantGroupRoundRobinScheduler;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureInterface
+class AppParticipantGroupsFixtures extends Fixture
 {
-    public function getDependencies()
-    {
-        return [
-            AppDropOffScheduleFixtures::class,
-        ];
-    }
-
     public function load(ObjectManager $em)
     {
         /** @var ParticipantGroup[] $groupsToSchedule */
@@ -52,12 +43,6 @@ class AppParticipantGroupsFixtures extends Fixture implements DependentFixtureIn
                 $groupsToSchedule[] = $g;
             }
         }
-
-        $em->flush();
-
-        // Schedule groups into available drop off windows
-        $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays($groupsToSchedule, $this->getReference('SiteDropOffSchedule.default'));
 
         $em->flush();
     }

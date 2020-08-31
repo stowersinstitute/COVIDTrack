@@ -31,14 +31,6 @@
                     <dt>Accepts Blood?</dt><dd>{{ group.acceptsBloodSpecimens ? 'Yes' : 'No' }}</dd>
                     <dt>Publish Viral Results to Web Hooks?</dt><dd>{{ group.viralResultsWebHooksEnabled ? 'Yes' : 'No' }}</dd>
                     <dt>Publish Antibody Results to Web Hooks?</dt><dd>{{ group.antibodyResultsWebHooksEnabled ? 'Yes' : 'No' }}</dd>
-                    <dt>Drop-off Times</dt>
-                    <dd>
-                        <ul>
-                            {% for window in group.getDropOffWindows() %}
-                                <li>{{ window.getDisplayString() }}</li>
-                            {% endfor %}
-                        </ul>
-                    </dd>
                 </dl>
             </div>
         </div>
