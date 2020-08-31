@@ -387,7 +387,13 @@ class ParticipantGroupController extends AbstractController
      */
     private function increaseExecutionTime($addSeconds = 300)
     {
-        $currMax = max(30, ini_get("max_execution_time"));
+        $currentMaxSeconds = ini_get("max_execution_time");
+        if (0 === $currentMaxSeconds) {
+            // Already at max
+            return;
+        }
+
+        $currMax = max(30, $currentMaxSeconds);
         set_time_limit($currMax + $addSeconds);
     }
 }
