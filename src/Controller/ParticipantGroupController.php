@@ -60,7 +60,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function new(Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $form = $this->createForm(ParticipantGroupForm::class);
         $form->handleRequest($request);
@@ -88,7 +88,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function edit(string $title, Request $request) : Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -191,7 +191,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function deactivate(string $title, EntityManagerInterface $em)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -207,7 +207,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function activate(string $title, EntityManagerInterface $em)
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
