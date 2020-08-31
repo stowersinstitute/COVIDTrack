@@ -8,8 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Exception\IrreversibleMigration;
 
-// TODO: Rename class
-final class Version20200829084200 extends AbstractMigration
+final class Version135 extends AbstractMigration
 {
     public function getDescription() : string
     {
