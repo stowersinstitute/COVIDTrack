@@ -50,21 +50,28 @@ class ParticipantGroupForm extends AbstractType
                 'label' => 'Is Control Group?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'data' => false,
-                'expanded' => true,
                 'required' => true,
             ])
-//            ->add('viralResultsWebHooksEnabled', ChoiceType::class, [
-//                'label' => 'Publish Viral Results to Web Hooks?',
-//                'choices' => ['Yes' => true, 'No' => false],
-//                'expanded' => true,
-//                'required' => true,
-//            ])
-//            ->add('antibodyResultsWebHooksEnabled', ChoiceType::class, [
-//                'label' => 'Publish Antibody Results to Web Hooks?',
-//                'choices' => ['Yes' => true, 'No' => false],
-//                'expanded' => true,
-//                'required' => true,
-//            ])
+            ->add('acceptsSalivaSpecimens', ChoiceType::class, [
+                'label' => 'Accept Saliva?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
+            ->add('acceptsBloodSpecimens', ChoiceType::class, [
+                'label' => 'Accept Blood?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
+            ->add('viralResultsWebHooksEnabled', ChoiceType::class, [
+                'label' => 'Publish Viral Results to Web Hooks?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
+            ->add('antibodyResultsWebHooksEnabled', ChoiceType::class, [
+                'label' => 'Publish Antibody Results to Web Hooks?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
             ])
