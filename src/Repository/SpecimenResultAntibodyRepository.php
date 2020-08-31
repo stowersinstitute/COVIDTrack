@@ -54,14 +54,14 @@ class SpecimenResultAntibodyRepository extends EntityRepository
             ->join('r.specimen', 's')
             ->join('s.participantGroup', 'g')
 
-            // Only results that haven't been reported
-            ->where('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
-
             // Only Active groups
             ->andWhere('g.isActive = true')
 
             // Only groups marked for publishing Antibody results to Web Hooks
             ->andWhere('g.antibodyResultsWebHooksEnabled = true')
+
+            // Only results that haven't been reported
+            ->andWhere('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
 
             ->orderBy('r.updatedAt')
             ->getQuery()
