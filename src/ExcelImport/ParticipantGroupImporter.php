@@ -30,10 +30,14 @@ class ParticipantGroupImporter extends BaseExcelImporter
         $this->idGenerator = $idGenerator;
 
         $this->columnMap = [
-            'externalId' => 'C',
-            'participantCount' => 'H',
-            'title' => 'J',
-            'isActive' => 'K',
+            'title' => 'A',
+            'externalId' => 'B',
+            'participantCount' => 'D',
+            'isActive' => 'E',
+            'acceptSaliva' => 'F',
+            'acceptBlood' => 'G',
+            'viralWebHookEnabled' => 'H',
+            'antibodyWebHookEnabled' => 'I',
         ];
     }
 
@@ -56,9 +60,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
      * Returns true if there is at least one group associated with $action
      *
      * $action can be:
-     *  - created
-     *  - updated
-     *  - deactivated
+     *  - active
+     *  - inactive
      *
      * See process()
      */
@@ -85,12 +88,10 @@ class ParticipantGroupImporter extends BaseExcelImporter
         $groupRepo = $this->em->getRepository(ParticipantGroup::class);
 
         $result = [
-            'created' => [],
-            'updated' => [],
-            'deactivated' => []
+            'active' => [],
+            'inactive' => [],
         ];
 
-        // Created and updated can be figured out from the Excel file
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
             if ($this->rowDataBlank($rowNumber)) continue;
@@ -99,6 +100,10 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rawTitle = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
             $rawParticipantCount = $this->worksheet->getCellValue($rowNumber, $this->columnMap['participantCount']);
             $rawIsActive = $this->worksheet->getCellValue($rowNumber, $this->columnMap['isActive']);
+            $rawAcceptSaliva = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptSaliva']);
+            $rawAcceptBlood = $this->worksheet->getCellValue($rowNumber, $this->columnMap['acceptBlood']);
+            $rawViralWebHookEnabled = $this->worksheet->getCellValue($rowNumber, $this->columnMap['viralWebHookEnabled']);
+            $rawAntibodyWebHookEnabled = $this->worksheet->getCellValue($rowNumber, $this->columnMap['antibodyWebHookEnabled']);
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
@@ -106,6 +111,10 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
             $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
             $rowOk = $rowOk && $this->validateIsActive($rawIsActive, $rowNumber);
+            $rowOk = $rowOk && $this->validateAcceptSaliva($rawAcceptSaliva, $rowNumber);
+            $rowOk = $rowOk && $this->validateAcceptBlood($rawAcceptBlood, $rowNumber);
+            $rowOk = $rowOk && $this->validateViralWebHookEnabled($rawViralWebHookEnabled, $rowNumber);
+            $rowOk = $rowOk && $this->validateAntibodyWebHookEnabled($rawAntibodyWebHookEnabled, $rowNumber);
 
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
@@ -124,16 +133,12 @@ class ParticipantGroupImporter extends BaseExcelImporter
                     $rawParticipantCount ?? ParticipantGroup::MIN_PARTICIPANT_COUNT
                 );
 
-                $result['created'][] = $group;
                 if ($commit) {
                     $this->em->persist($group);
                 }
             }
             // Existing group
             else {
-                // Note: this does not guarantee any fields are changing, just that it was in the excel file
-                $result['updated'][] = $group;
-
                 // Ensure entities won't be flush()ed if we're not committing
                 if (!$commit) $this->em->detach($group);
             }
@@ -142,8 +147,19 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setTitle($rawTitle);
             $group->setParticipantCount($rawParticipantCount);
             $group->setIsActive($rawIsActive);
+            $group->setAcceptsSalivaSpecimens($rawAcceptSaliva);
+            $group->setAcceptsBloodSpecimens($rawAcceptBlood);
+            $group->setViralResultsWebHooksEnabled($rawViralWebHookEnabled);
+            $group->setAntibodyResultsWebHooksEnabled($rawAntibodyWebHookEnabled);
 
             $this->processedGroups[] = $group;
+
+            // Note: this does not guarantee any fields are changing, just that it was in the excel file
+            if ($group->isActive()) {
+                $result['active'][] = $group;
+            } else {
+                $result['inactive'][] = $group;
+            }
         }
 
         $this->output = $result;
@@ -250,6 +266,86 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 'Is Active? flag must be TRUE or FALSE',
                 $rowNumber,
                 $this->columnMap['isActive']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for Accept Saliva flag this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateAcceptSaliva($raw, $rowNumber): bool
+    {
+        $acceptedValues = [true, false];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Accept Saliva? flag must be TRUE or FALSE',
+                $rowNumber,
+                $this->columnMap['acceptSaliva']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for Accept Blood flag this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateAcceptBlood($raw, $rowNumber): bool
+    {
+        $acceptedValues = [true, false];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Accept Blood? flag must be TRUE or FALSE',
+                $rowNumber,
+                $this->columnMap['acceptBlood']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for Viral Web Hook Enabled flag this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateViralWebHookEnabled($raw, $rowNumber): bool
+    {
+        $acceptedValues = [true, false];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Viral Web Hook Enabled? flag must be TRUE or FALSE',
+                $rowNumber,
+                $this->columnMap['viralWebHookEnabled']
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $raw is a valid value for Antibody Web Hook Enabled flag this group.
+     *
+     * Otherwise, adds an error message to $this->messages and returns false
+     */
+    protected function validateAntibodyWebHookEnabled($raw, $rowNumber): bool
+    {
+        $acceptedValues = [true, false];
+        if (!in_array($raw, $acceptedValues, true)) {
+            $this->messages[] = ImportMessage::newError(
+                'Antibody Web Hook Enabled? flag must be TRUE or FALSE',
+                $rowNumber,
+                $this->columnMap['antibodyWebHookEnabled']
             );
             return false;
         }

@@ -26,11 +26,19 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         // XLSX file above has red cells where errors expected.
         $errors = $importer->getErrors();
         $expectedErrors = [
-            ['rowNumber' => 8],
-            ['rowNumber' => 9],
-            ['rowNumber' => 10],
-            ['rowNumber' => 14], // Missing "Is Active?" flag
-            ['rowNumber' => 15], // Invalid "Is Active?" value
+            ['rowNumber' => 8], // External ID missing
+            ['rowNumber' => 9], // Participant Count missing
+            ['rowNumber' => 10], // Title missing
+            ['rowNumber' => 14], // Is Active? missing
+            ['rowNumber' => 15], // Is Active? invalid
+            ['rowNumber' => 17], // Accept Saliva missing
+            ['rowNumber' => 18], // Accept Saliva invalid
+            ['rowNumber' => 19], // Accept Blood flag
+            ['rowNumber' => 20], // Accept Blood invalid
+            ['rowNumber' => 21], // Saliva Web Hook missing
+            ['rowNumber' => 22], // Saliva Web Hook invalid
+            ['rowNumber' => 23], // Blood Web Hook missing
+            ['rowNumber' => 24], // Blood Web Hook invalid
         ];
         $this->assertCount(count($expectedErrors), $errors, 'Found wrong number of expected errors');
         foreach ($expectedErrors as $expectedError) {
@@ -77,22 +85,76 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             $this->assertSame($titleToIsActive[$title], $group->isActive(), sprintf('Group "%s" has wrong Is Active status', $title));
         }
 
-        // TODO: Verify processed list has expected Web Hook Results status based on Title
-        $titleToExpectedEnabled = [
-            'First' => false,
-            'Second' => false,
-            'Third' => false,
-            'Fourth' => false,
-            '09876543210987654321abcdefABCDEF' => true,
+        // Verify processed list has expected "Accept Saliva?" flag, lookup by Title
+        $titleToAcceptSaliva = [
+            'First' => true,
+            'Second' => true,
+            'Third' => true,
+            'Fourth' => true,
+            '09876543210987654321abcdefABCDEF' => false,
             'Fifth' => false,
         ];
         foreach ($groups as $group) {
             $title = $group->getTitle();
-            if (!isset($titleToExpectedEnabled[$title])) {
-//                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            if (!isset($titleToAcceptSaliva[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
             }
 
-//            $this->assertSame($titleToExpectedEnabled[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group "%s" has wrong Web Hook Enabled status', $title));
+            $this->assertSame($titleToAcceptSaliva[$title], $group->acceptsSalivaSpecimens(), sprintf('Group "%s" has wrong Accept Saliva? status', $title));
+        }
+
+        // Verify processed list has expected "Accept Blood?" flag, lookup by Title
+        $titleToAcceptBlood = [
+            'First' => true,
+            'Second' => true,
+            'Third' => true,
+            'Fourth' => false,
+            '09876543210987654321abcdefABCDEF' => false,
+            'Fifth' => true,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToAcceptBlood[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToAcceptBlood[$title], $group->acceptsBloodSpecimens(), sprintf('Group "%s" has wrong Accept Blood? status', $title));
+        }
+
+        // Verify processed list has expected "Viral Web Hooks Enabled?" flag, lookup by Title
+        $titleToViralWebHooksEnabled = [
+            'First' => true,
+            'Second' => true,
+            'Third' => false,
+            'Fourth' => false,
+            '09876543210987654321abcdefABCDEF' => false,
+            'Fifth' => true,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToViralWebHooksEnabled[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToViralWebHooksEnabled[$title], $group->viralResultsWebHooksEnabled(), sprintf('Group "%s" has wrong Viral Web Hooks Enabled? status', $title));
+        }
+
+        // Verify processed list has expected "Antibody Web Hooks Enabled?" flag, lookup by Title
+        $titleToAntibodyWebHooksEnabled = [
+            'First' => true,
+            'Second' => false,
+            'Third' => false,
+            'Fourth' => false,
+            '09876543210987654321abcdefABCDEF' => false,
+            'Fifth' => true,
+        ];
+        foreach ($groups as $group) {
+            $title = $group->getTitle();
+            if (!isset($titleToAntibodyWebHooksEnabled[$title])) {
+                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
+            }
+
+            $this->assertSame($titleToAntibodyWebHooksEnabled[$title], $group->antibodyResultsWebHooksEnabled(), sprintf('Group "%s" has wrong Antibody Web Hooks Enabled? status', $title));
         }
     }
 
@@ -172,25 +234,6 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         $activeGroup = $this->findGroupByExternalId('AlwaysActiveGroup');
         $this->assertInstanceOf(ParticipantGroup::class, $activeGroup);
         $this->assertTrue($activeGroup->isActive());
-
-        // TODO: Verify processed list has expected Web Hook Results status based on Title
-        $titleToExpectedEnabledWebHook = [
-            'Ten' => true,
-            'Eleven' => false,
-            'Twelve' => true,
-            'Thirteen' => false,
-            '09876543210987654321abcdefABCDEF' => false,
-            'ToggleToActiveGroup' => false,
-            'ToggleToInactiveGroup' => false,
-        ];
-        foreach ($groups as $group) {
-            $title = $group->getTitle();
-            if (!isset($titleToExpectedEnabledWebHook[$title])) {
-//                $this->fail(sprintf('Assertion missing case for Group Title "%s"', $title));
-            }
-
-//            $this->assertSame($titleToExpectedEnabledWebHook[$title], $group->isEnabledForResultsWebHooks(), sprintf('Group "%s" has wrong Web Hook Enabled status', $title));
-        }
     }
 
     /**
