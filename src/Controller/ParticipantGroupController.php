@@ -58,7 +58,7 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route(path="/new", methods={"GET", "POST"}, name="app_participant_group_new")
      */
-    public function new(Request $request) : Response
+    public function new(Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
@@ -68,7 +68,6 @@ class ParticipantGroupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $group = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($group);
             $em->flush();
 
@@ -86,7 +85,7 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
      */
-    public function edit(string $title, Request $request) : Response
+    public function edit(string $title, Request $request, EntityManagerInterface $em) : Response
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
@@ -96,7 +95,6 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_view', [
@@ -224,11 +222,10 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport(Request $request, ExcelImporter $excelImporter)
+    public function excelImport(Request $request, ExcelImporter $excelImporter, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(GenericExcelImportType::class);
 
         $form->handleRequest($request);
@@ -260,14 +257,13 @@ class ParticipantGroupController extends AbstractController
     public function excelImportPreview(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         // Import can take a long time with 1000+ rows
         $this->increaseExecutionTime();
-
-        $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
@@ -297,15 +293,13 @@ class ParticipantGroupController extends AbstractController
     public function excelImportCommit(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         // Import can take a long time with 1000+ rows
         $this->increaseExecutionTime();
-
-        $em = $this->getDoctrine()
-            ->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
