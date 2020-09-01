@@ -266,6 +266,12 @@
             function showTubeDetailSelection(show = true) {
                 if (show) {
                     $("#tubeDetailSelection").collapse('show');
+
+                    let initialType = $("#kiosk_add_tube_form_tubeType").attr('value');
+                    if (initialType) {
+                        $("#kiosk_add_tube_form_tubeType").val(initialType).trigger('input');
+                    }
+
                     $("#scanTip").hide();
                     $("#kiosk_add_tube_form_accessionId_button").hide();
                 } else {

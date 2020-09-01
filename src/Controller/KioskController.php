@@ -144,7 +144,10 @@ class KioskController extends AbstractController
             return $this->redirectToRoute('kiosk_index');
         }
 
-        $form = $this->createForm(KioskAddTubeForm::class);
+        $form = $this->createForm(KioskAddTubeForm::class, null, [
+            'participantGroup' => $kioskSession->getParticipantGroup()
+        ]);
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $form->getData();

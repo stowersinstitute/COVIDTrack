@@ -5,7 +5,7 @@
         {{- form_label(form) -}}
         <div class="btn-group-radio btn-group-lg {{ layout }}">
             {% for title, value in choices %}
-                <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
+                <a class="btn btn-primary {{ (data == value) ? 'active' : 'not-active' }}" aria-pressed="{{ (data == value) ? 'true' : 'false' }}" data-toggle="{{ id }}" data-title="{{ value }}">
                     <i class="fa fa-fw fa-check"></i>{{ title }}</a>
             {% endfor %}
         </div>
@@ -27,6 +27,8 @@
         $('#{{ id }}').bind('input', function(e) {
             if($(e.target).val() === '') {
                 $('a[data-toggle="{{ id }}"]').removeClass('active').addClass('not-active');
+            } else {
+                $('a[data-toggle="{{ id }}"]').removeClass('not-active').addClass('active');
             }
         });
     </script>
