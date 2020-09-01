@@ -176,7 +176,7 @@ class ParticipantGroupImporter extends BaseExcelImporter
     {
         if (!$raw) {
             $this->messages[] = ImportMessage::newError(
-                'Sys ID cannot be blank',
+                'External ID cannot be blank',
                 $rowNumber,
                 $this->columnMap['externalId']
             );
