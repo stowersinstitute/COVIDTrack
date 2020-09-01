@@ -2,6 +2,7 @@
     <thead>
     <tr>
         <th>Group Title</th>
+        <th>External Id</th>
         <th># Participants</th>
         <th>Is Active?</th>
         <th>Accepts Saliva?</th>
@@ -15,6 +16,7 @@
     {% for group in groups  %}
         <tr>
             <td>{{ group.title }}</td>
+            <td>{{ group.externalId }}</td>
             <td>{{ group.participantCount }}</td>
             <td>{{ group.isActive ? 'Yes' : 'No' }}</td>
             <td>{{ group.acceptsSalivaSpecimens ? 'Yes' : 'No' }}</td>
