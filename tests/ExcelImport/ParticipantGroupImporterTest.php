@@ -39,6 +39,8 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             ['rowNumber' => 22], // Saliva Web Hook invalid
             ['rowNumber' => 23], // Blood Web Hook missing
             ['rowNumber' => 24], // Blood Web Hook invalid
+            ['rowNumber' => 25], // Title used more than once per file
+            ['rowNumber' => 26], // External ID used more than once per file
         ];
         $this->assertCount(count($expectedErrors), $errors, 'Found wrong number of expected errors');
         foreach ($expectedErrors as $expectedError) {

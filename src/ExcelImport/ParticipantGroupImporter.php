@@ -22,6 +22,20 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     private $processedGroups = [];
 
+    /**
+     * Accumulates Title strings of Groups that have been imported in each upload.
+     *
+     * @var array[] Keys are the ParticipantGroup.title seen, value === true
+     */
+    private $seenTitles = [];
+
+    /**
+     * Accumulates External ID strings of Groups that have been imported in each upload.
+     *
+     * @var array Keys are the ParticipantGroup.externalId seen, value === true
+     */
+    private $seenExternalIds = [];
+
     public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
     {
         parent::__construct($worksheet);
@@ -153,6 +167,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
             $group->setAntibodyResultsWebHooksEnabled($rawAntibodyWebHookEnabled);
 
             $this->processedGroups[] = $group;
+            $this->seenTitles[$rawTitle] = true;
+            $this->seenExternalIds[$rawExternalId] = true;
 
             // Note: this does not guarantee any fields are changing, just that it was in the excel file
             if ($group->isActive()) {
@@ -177,6 +193,16 @@ class ParticipantGroupImporter extends BaseExcelImporter
         if (!$raw) {
             $this->messages[] = ImportMessage::newError(
                 'External ID cannot be blank',
+                $rowNumber,
+                $this->columnMap['externalId']
+            );
+            return false;
+        }
+
+        // Prevent duplicate rows for same Group
+        if (isset($this->seenExternalIds[$raw])) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('External ID "%s" appears multiple times in import. Can only appear once.', htmlentities($raw)),
                 $rowNumber,
                 $this->columnMap['externalId']
             );
@@ -226,6 +252,16 @@ class ParticipantGroupImporter extends BaseExcelImporter
                 'Title cannot be blank',
                 $rowNumber,
                 $this->columnMap['title']
+            );
+            return false;
+        }
+
+        // Prevent duplicate rows for same Group
+        if (isset($this->seenTitles[$raw])) {
+            $this->messages[] = ImportMessage::newError(
+                sprintf('Title "%s" appears multiple times in import. Can only appear once.', htmlentities($raw)),
+                $rowNumber,
+                $this->columnMap['externalId']
             );
             return false;
         }
