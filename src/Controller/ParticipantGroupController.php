@@ -264,6 +264,9 @@ class ParticipantGroupController extends AbstractController
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
+
         $em = $this->getDoctrine()->getManager();
 
         $importingWorkbook = $this->mustFindImport($importId);
@@ -297,6 +300,9 @@ class ParticipantGroupController extends AbstractController
         ParticipantGroupAccessionIdGenerator $idGenerator
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
 
         $em = $this->getDoctrine()
             ->getManager();
@@ -370,5 +376,24 @@ class ParticipantGroupController extends AbstractController
             ])
             ->setAction($this->generateUrl('app_participant_group_print'))
             ->getForm();
+    }
+
+    /**
+     * Increases the allowed execution time for the current PHP script. Call
+     * this method if you know that your controller action will be doing
+     * operations that may be long-lasting
+     *
+     * @param int|number $addSeconds number of seconds to add, defaults to 300 (5 minutes)
+     */
+    private function increaseExecutionTime($addSeconds = 300)
+    {
+        $currentMaxSeconds = ini_get("max_execution_time");
+        if (0 == $currentMaxSeconds) {
+            // Already at max
+            return;
+        }
+
+        $currMax = max(30, $currentMaxSeconds);
+        set_time_limit($currMax + $addSeconds);
     }
 }
