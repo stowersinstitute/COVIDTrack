@@ -226,6 +226,9 @@ class ParticipantGroupController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
+
         $form = $this->createForm(GenericExcelImportType::class);
 
         $form->handleRequest($request);
