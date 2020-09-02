@@ -7,8 +7,7 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-// TODO: Rename class
-final class Version20200902001731 extends AbstractMigration
+final class Version137 extends AbstractMigration
 {
     public function getDescription() : string
     {
