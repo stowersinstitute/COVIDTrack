@@ -54,7 +54,7 @@ class ParticipantGroup
      * so participants don't need to remember a number.
      *
      * @var string
-     * @ORM\Column(name="title", type="string")
+     * @ORM\Column(name="title", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $title;
