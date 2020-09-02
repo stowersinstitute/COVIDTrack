@@ -8,12 +8,14 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
  * @ORM\Table(name="participant_groups")
+ * @UniqueEntity("title", message="Title value is already used by an existing Group.")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
@@ -54,7 +56,7 @@ class ParticipantGroup
      * so participants don't need to remember a number.
      *
      * @var string
-     * @ORM\Column(name="title", type="string", nullable=true)
+     * @ORM\Column(name="title", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $title;

@@ -26,7 +26,6 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
         // XLSX file above has red cells where errors expected.
         $errors = $importer->getErrors();
         $expectedErrors = [
-            ['rowNumber' => 8], // External ID missing
             ['rowNumber' => 9], // Participant Count missing
             ['rowNumber' => 10], // Title missing
             ['rowNumber' => 14], // Is Active? missing
@@ -39,6 +38,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             ['rowNumber' => 22], // Saliva Web Hook invalid
             ['rowNumber' => 23], // Blood Web Hook missing
             ['rowNumber' => 24], // Blood Web Hook invalid
+            ['rowNumber' => 25], // Title used more than once per file
         ];
         $this->assertCount(count($expectedErrors), $errors, 'Found wrong number of expected errors');
         foreach ($expectedErrors as $expectedError) {
@@ -61,6 +61,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'SN3',
             'SN4',
             '09876543210987654321abcdefABCDEF',
+            '', // One record leaves it blank
             'SN5',
         ];
         $this->assertCount(count($expectedExternalGroupIds), $groups);
@@ -74,6 +75,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'Third' => true,
             'Fourth' => true,
             '09876543210987654321abcdefABCDEF' => true,
+            '09876543210987654322abcdefABCDEF' => true,
             'Fifth' => false,
         ];
         foreach ($groups as $group) {
@@ -92,6 +94,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'Third' => true,
             'Fourth' => true,
             '09876543210987654321abcdefABCDEF' => false,
+            '09876543210987654322abcdefABCDEF' => false,
             'Fifth' => false,
         ];
         foreach ($groups as $group) {
@@ -110,6 +113,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'Third' => true,
             'Fourth' => false,
             '09876543210987654321abcdefABCDEF' => false,
+            '09876543210987654322abcdefABCDEF' => false,
             'Fifth' => true,
         ];
         foreach ($groups as $group) {
@@ -128,6 +132,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'Third' => false,
             'Fourth' => false,
             '09876543210987654321abcdefABCDEF' => false,
+            '09876543210987654322abcdefABCDEF' => false,
             'Fifth' => true,
         ];
         foreach ($groups as $group) {
@@ -146,6 +151,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
             'Third' => false,
             'Fourth' => false,
             '09876543210987654321abcdefABCDEF' => false,
+            '09876543210987654322abcdefABCDEF' => true,
             'Fifth' => true,
         ];
         foreach ($groups as $group) {
