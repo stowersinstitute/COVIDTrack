@@ -94,8 +94,9 @@ class SpecimenResultQPCRRepository extends EntityRepository
             // Only groups marked for publishing Viral results to Web Hooks
             ->andWhere('g.viralResultsWebHooksEnabled = true')
 
-            // Only results that haven't been reported
-            ->andWhere('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
+            // Results that haven't been reported
+            // OR updated since last successful web hook success
+            ->andWhere('(r.lastWebHookSuccessAt IS NULL OR r.webHookFieldChangedAt > r.lastWebHookSuccessAt)')
 
             ->orderBy('r.updatedAt')
             ->getQuery()

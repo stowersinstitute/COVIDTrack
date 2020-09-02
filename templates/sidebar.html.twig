@@ -61,12 +61,6 @@ Renders a top-level navigation node in the tree navigation.
         {{
             _self.treenode('Participant Groups', 'fa-users', [
                 {
-                    text: 'Drop-off Schedule',
-                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW'],
-                    iconClass: 'fa-calendar',
-                    route: 'participant_group_scheduling_index'
-                },
-                {
                     text: 'List',
                     mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_VIEW'],
                     iconClass: 'fa-list',
@@ -74,7 +68,7 @@ Renders a top-level navigation node in the tree navigation.
                 },
                 {
                     text: 'New',
-                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
+                    mustHaveOneRoleToView: ['ROLE_PARTICIPANT_GROUP_EDIT'],
                     iconClass: 'fa-plus',
                     route: 'app_participant_group_new'
                 },
@@ -90,7 +84,7 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'app_participant_group_print_list',
                     mustHaveOneRoleToView: ['ROLE_PRINT_GROUP_LABELS'],
                 },
-            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PARTICIPANT_GROUP_SCHEDULE_VIEW', 'ROLE_PRINT_GROUP_LABELS'])
+            ], ['ROLE_PARTICIPANT_GROUP_EDIT', 'ROLE_PARTICIPANT_GROUP_VIEW', 'ROLE_PRINT_GROUP_LABELS'])
         }}
         {{
             _self.treenode('Tubes', 'fa-vial', [
@@ -275,16 +269,6 @@ Renders a top-level navigation node in the tree navigation.
                     route: 'kiosk_admin_new'
                 },
             ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
-        }}
-        {{
-            _self.treenode('Configuration', 'fa-cog', [
-                {
-                    text: 'Drop-off Schedule',
-                    mustHaveOneRoleToView: ['ROLE_ADMIN'],
-                    iconClass: 'fa-calendar-week',
-                    route: 'site_drop_off_schedule_index'
-                },
-            ], ['ROLE_ADMIN'])
         }}
     </ul>
 </section>

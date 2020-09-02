@@ -25,11 +25,10 @@
 
             <th>Title</th>
             <th>Participants</th>
-            <th>Drop-off Times</th>
             <th>Created</th>
             <th>Last Modified</th>
             <th>Active?</th>
-            <th>Specimens</th>
+            <th>Accepted Specimens</th>
             <th>Results<br>to Web Hooks</th>
         </tr>
     </thead>
@@ -52,12 +51,6 @@
                 <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
             <td>{{ group.participantCount }}</td>
-            <td>
-                {% for window in group.getDropOffWindows() %}
-                    {{ window.getDisplayString() }}
-                    {% if not loop.last %}, {% endif %}
-                {% endfor %}
-            </td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.isActive ? 'Yes' : 'No' }}</td>

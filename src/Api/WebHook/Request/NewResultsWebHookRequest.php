@@ -51,6 +51,9 @@ class NewResultsWebHookRequest extends WebHookRequest
 
             $group = $r->getSpecimen()->getParticipantGroup();
 
+            // NOTE: Adding / Removing fields below may require
+            // updating Gedmo\Timestampable() "field" list on property
+            // SpecimenResult.webHookFieldChangedAt
             return [
                 'id' => $r->getId(),
                 'type' => $type,

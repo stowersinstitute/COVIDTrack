@@ -60,8 +60,9 @@ class SpecimenResultAntibodyRepository extends EntityRepository
             // Only groups marked for publishing Antibody results to Web Hooks
             ->andWhere('g.antibodyResultsWebHooksEnabled = true')
 
-            // Only results that haven't been reported
-            ->andWhere('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
+            // Results that haven't been reported
+            // OR updated since last successful web hook success
+            ->andWhere('(r.lastWebHookSuccessAt IS NULL OR r.webHookFieldChangedAt > r.lastWebHookSuccessAt)')
 
             ->orderBy('r.updatedAt')
             ->getQuery()

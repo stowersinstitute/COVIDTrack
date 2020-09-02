@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
-use App\Entity\DropOffSchedule;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\LabelPrinter;
@@ -14,7 +13,6 @@ use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
 use App\Label\ParticipantGroupBadgeLabelBuilder;
 use App\Label\ZplPrinting;
-use App\Scheduling\ParticipantGroupRoundRobinScheduler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,10 +58,9 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route(path="/new", methods={"GET", "POST"}, name="app_participant_group_new")
      */
-    public function new(Request $request) : Response
+    public function new(Request $request, EntityManagerInterface $em) : Response
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $form = $this->createForm(ParticipantGroupForm::class);
         $form->handleRequest($request);
@@ -71,15 +68,7 @@ class ParticipantGroupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $group = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($group);
-            $em->flush();
-
-            $scheduler = new ParticipantGroupRoundRobinScheduler();
-            $scheduler->assignByDays(
-                [$group],
-                $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-            );
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_list');
@@ -96,10 +85,9 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
      */
-    public function edit(string $title, Request $request) : Response
+    public function edit(string $title, Request $request, EntityManagerInterface $em) : Response
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -107,7 +95,6 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_view', [
@@ -202,8 +189,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function deactivate(string $title, EntityManagerInterface $em)
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -219,21 +205,12 @@ class ParticipantGroupController extends AbstractController
      */
     public function activate(string $title, EntityManagerInterface $em)
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
         $group->setIsActive(true);
 
-        $em->flush();
-
-        // Assign to the next available dropoff window
-        $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays(
-            [$group],
-            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-        );
         $em->flush();
 
         return $this->redirectToRoute('app_participant_group_edit', [ 'title' => $group->getTitle() ]);
@@ -245,11 +222,13 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport(Request $request, ExcelImporter $excelImporter)
+    public function excelImport(Request $request, ExcelImporter $excelImporter, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
+
         $form = $this->createForm(GenericExcelImportType::class);
 
         $form->handleRequest($request);
@@ -281,11 +260,13 @@ class ParticipantGroupController extends AbstractController
     public function excelImportPreview(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
@@ -315,12 +296,13 @@ class ParticipantGroupController extends AbstractController
     public function excelImportCommit(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()
-            ->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
@@ -337,48 +319,10 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        // Update group schedules
-        $this->recalculateGroupSchedules();
-
         return $this->render('participantGroup/excel-import-result.html.twig', [
             'importer' => $importer,
         ]);
     }
-
-    private function recalculateGroupSchedules()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $groupRepo = $em->getRepository(ParticipantGroup::class);
-
-        // First, remove any groups that are no longer active
-        $inactive = $groupRepo->findInactive();
-        foreach ($inactive as $group) {
-            $group->clearDropOffWindows();
-        }
-
-        // Must flush at this point so scheduler sees accurate view of the database
-        $em->flush();
-
-        // Assign new groups
-        // NOTE: order by ID asc here so that assignment order matches the order they
-        // appeared in the Excel file
-        $active = $groupRepo->findBy(['isActive' => true], ['id' => 'ASC']);
-        $toAssign = [];
-        foreach ($active as $group) {
-            if (count($group->getDropOffWindows()) > 0) continue;
-            $toAssign[] = $group;
-        }
-
-        $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays(
-            $toAssign,
-            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-        );
-
-        // Commit changes from the scheduler
-        $em->flush();
-    }
-
 
     private function findGroupByTitle($title): ParticipantGroup
     {
@@ -429,5 +373,24 @@ class ParticipantGroupController extends AbstractController
             ])
             ->setAction($this->generateUrl('app_participant_group_print'))
             ->getForm();
+    }
+
+    /**
+     * Increases the allowed execution time for the current PHP script. Call
+     * this method if you know that your controller action will be doing
+     * operations that may be long-lasting
+     *
+     * @param int|number $addSeconds number of seconds to add, defaults to 300 (5 minutes)
+     */
+    private function increaseExecutionTime($addSeconds = 300)
+    {
+        $currentMaxSeconds = ini_get("max_execution_time");
+        if (0 == $currentMaxSeconds) {
+            // Already at max
+            return;
+        }
+
+        $currMax = max(30, $currentMaxSeconds);
+        set_time_limit($currMax + $addSeconds);
     }
 }
