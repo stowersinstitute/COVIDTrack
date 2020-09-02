@@ -96,6 +96,7 @@ class KioskController extends AbstractController
                 'query_builder' => function(ParticipantGroupRepository $repository) {
                     return $repository->createQueryBuilder('g')
                         ->where('g.isActive = true')
+                        ->andWhere('(g.acceptsSalivaSpecimens = true or g.acceptsBloodSpecimens = true)')
                         ->orderBy('g.title', 'ASC')
                     ;
                 },
