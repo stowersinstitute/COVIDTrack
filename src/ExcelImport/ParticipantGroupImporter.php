@@ -114,8 +114,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
 
             // Validation methods return false if a field is invalid (and append to $this->messages)
             $rowOk = true;
-            $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
             $rowOk = $rowOk && $this->validateTitle($rawTitle, $rowNumber);
+            $rowOk = $rowOk && $this->validateExternalId($rawExternalId, $rowNumber);
             $rowOk = $rowOk && $this->validateParticipantCount($rawParticipantCount, $rowNumber);
             $rowOk = $rowOk && $this->validateIsActive($rawIsActive, $rowNumber);
             $rowOk = $rowOk && $this->validateAcceptSaliva($rawAcceptSaliva, $rowNumber);
@@ -126,7 +126,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            $group = $groupRepo->findOneBy(['externalId' => $rawExternalId]);
+            // Group record located by Title
+            $group = $groupRepo->findOneBy(['title' => $rawTitle]);
+
             // New group
             if (!$group) {
                 // Make it clear when previewing that this field is automatic
@@ -182,15 +184,6 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     protected function validateExternalId($raw, $rowNumber): bool
     {
-        if (!$raw) {
-            $this->messages[] = ImportMessage::newError(
-                'External ID cannot be blank',
-                $rowNumber,
-                $this->columnMap['externalId']
-            );
-            return false;
-        }
-
         return true;
     }
 
