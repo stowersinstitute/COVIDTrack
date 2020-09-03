@@ -22,14 +22,20 @@ class ResultCommand extends BaseAppCommand
     protected static $defaultName = 'app:webhook:results';
 
     /**
+     * @var NewResultsWebHookRequest|null
+     */
+    private $request;
+
+    /**
      * @var ResultHttpClient
      */
     private $httpClient;
 
-    public function __construct(EntityManagerInterface $em, ResultHttpClient $httpClient)
+    public function __construct(EntityManagerInterface $em, ResultHttpClient $httpClient, ?NewResultsWebHookRequest $request = null)
     {
         parent::__construct($em);
 
+        $this->request = $request;
         $this->httpClient = $httpClient;
     }
 
@@ -50,10 +56,13 @@ class ResultCommand extends BaseAppCommand
             return 0;
         }
 
-        $request = new NewResultsWebHookRequest($newResults);
+        $request = $this->buildNewRequest($newResults);
+
+        $this->outputDebug('Request Body to be sent:');
+        $this->outputDebug($request->toJson());
 
         try {
-            $response = $this->httpClient->get($request);
+            $response = $this->httpClient->post($request);
         } catch (ClientException $e) {
             $output->writeln('<error>Exception calling WebHook endpoint</error>');
             $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));
@@ -85,7 +94,7 @@ class ResultCommand extends BaseAppCommand
         }
         $output->writeln('');
 
-        $output->writeln('<comment>Body:</comment>');
+        $output->writeln('<comment>Response Body:</comment>');
         $output->writeln($response->getBodyContents());
 
         // Update success date
@@ -167,5 +176,17 @@ class ResultCommand extends BaseAppCommand
                 $this->outputDebug(sprintf('%s %s %s', $result->getUpdatedAt()->format("Y-m-d H:i:s"), $resultType, $result->getConclusionText()));
             }
         }
+    }
+
+    private function buildNewRequest(array $newResults)
+    {
+        if (!$this->request) {
+            $this->request = new NewResultsWebHookRequest();
+        }
+
+        $request = clone $this->request;
+        $request->setResults($newResults);
+
+        return $request;
     }
 }

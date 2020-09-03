@@ -18,6 +18,13 @@ class NewResultsWebHookRequest extends WebHookRequest
 
     public function __construct(array $results = [])
     {
+        $this->setResults($results);
+    }
+
+    public function setResults(array $results): void
+    {
+        $this->results = [];
+
         foreach ($results as $result) {
             $this->addResult($result);
         }
