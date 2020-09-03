@@ -5,7 +5,7 @@ namespace App\Tests\Command\WebHook\DataFixtures;
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
-use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenResultAntibody;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -14,13 +14,13 @@ use Doctrine\Common\Persistence\ObjectManager;
 /**
  * Creates test data for testing sending results to a Web Hook.
  */
-class ResultCommandViralFixtures extends Fixture
+class ResultCommandAntibodyFixtures extends Fixture
 {
-    const EXTID_GROUP_1 = 'GROUP-1';
-    const EXTID_GROUP_2 = 'GROUP-2';
-    const EXTID_GROUP_3 = 'GROUP-3';
-    const EXTID_GROUP_4 = 'GROUP-4';
-    const EXTID_GROUP_5 = 'GROUP-5';
+    const EXTID_GROUP_A = 'GROUP-A';
+    const EXTID_GROUP_B = 'GROUP-B';
+    const EXTID_GROUP_C = 'GROUP-C';
+    const EXTID_GROUP_D = 'GROUP-D';
+    const EXTID_GROUP_E = 'GROUP-E';
 
     /**
      * @var SpecimenAccessionIdGenerator
@@ -109,7 +109,7 @@ class ResultCommandViralFixtures extends Fixture
             if (isset($data['resultConclusion'])) {
                 $well = $tube->getSpecimen()->getWellsOnPlate($wellPlate)[0];
 
-                $result = SpecimenResultQPCR::createFromWell($well, $data['resultConclusion']);
+                $result = new SpecimenResultAntibody($well, $data['resultConclusion']);
                 $result->setCreatedAt(new \DateTimeImmutable('-4 days 9:00am'));
                 $result->setUpdatedAt(new \DateTimeImmutable('-4 days 9:00am'));
 
@@ -128,40 +128,40 @@ class ResultCommandViralFixtures extends Fixture
     {
         return [
             [
-                'title' => 'Active With Hooks Disabled',
-                'externalId' => self::EXTID_GROUP_1,
+                'title' => 'Blood Active With Hooks Disabled',
+                'externalId' => self::EXTID_GROUP_E,
                 'participantCount' => 5,
                 'isActive' => true,
                 'viralResultsWebHooksEnabled' => false,
-                'antibodyResultsWebHooksEnabled' => false,
+                'antibodyResultsWebHooksEnabled' => false, // Don't send
             ],
             [
-                'title' => 'Inactive With Hooks Enabled',
-                'externalId' => self::EXTID_GROUP_2,
+                'title' => 'Blood Inactive With Hooks Enabled',
+                'externalId' => self::EXTID_GROUP_D,
                 'participantCount' => 5,
                 'isActive' => false, // Being inactive prevents sending results
                 'viralResultsWebHooksEnabled' => true,
                 'antibodyResultsWebHooksEnabled' => true,
             ],
             [
-                'title' => 'Hooks Enabled',
-                'externalId' => self::EXTID_GROUP_3,
+                'title' => 'Blood Hooks Enabled',
+                'externalId' => self::EXTID_GROUP_C,
                 'participantCount' => 5,
                 'isActive' => true,
                 'viralResultsWebHooksEnabled' => true,
                 'antibodyResultsWebHooksEnabled' => true,
             ],
             [
-                'title' => 'Hooks Disabled',
-                'externalId' => self::EXTID_GROUP_4,
+                'title' => 'Blood Hooks Disabled',
+                'externalId' => self::EXTID_GROUP_B,
                 'participantCount' => 5,
                 'isActive' => true,
-                'viralResultsWebHooksEnabled' => false,
-                'antibodyResultsWebHooksEnabled' => false,
+                'viralResultsWebHooksEnabled' => false,  // Don't send
+                'antibodyResultsWebHooksEnabled' => false,  // Don't send
             ],
             [
-                'title' => 'Begin With No Completed Results',
-                'externalId' => self::EXTID_GROUP_5,
+                'title' => 'Blood Begin With No Completed Results',
+                'externalId' => self::EXTID_GROUP_A,
                 'participantCount' => 5,
                 'isActive' => true,
                 'viralResultsWebHooksEnabled' => true,
@@ -173,46 +173,47 @@ class ResultCommandViralFixtures extends Fixture
     public function getTubeData(): array
     {
         return [
+            // Blood Tubes, Antibody Results
             [
-                'participantGroupExternalId' => self::EXTID_GROUP_1,
-                'accessionId' => 'ResultTube0001',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'participantGroupExternalId' => self::EXTID_GROUP_E,
+                'accessionId' => 'ResultBloodTube0001',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'wellPlatePosition' => 'A1',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
+                'wellPlatePosition' => 'B1',
+                'resultConclusion' => SpecimenResultAntibody::CONCLUSION_POSITIVE,
             ],
             [
-                'participantGroupExternalId' => self::EXTID_GROUP_2,
-                'accessionId' => 'ResultTube0002',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'participantGroupExternalId' => self::EXTID_GROUP_D,
+                'accessionId' => 'ResultBloodTube0002',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'wellPlatePosition' => 'A2',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NON_NEGATIVE,
+                'wellPlatePosition' => 'B2',
+                'resultConclusion' => SpecimenResultAntibody::CONCLUSION_NON_NEGATIVE,
             ],
             [
-                'participantGroupExternalId' => self::EXTID_GROUP_3,
-                'accessionId' => 'ResultTube0003',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'participantGroupExternalId' => self::EXTID_GROUP_C,
+                'accessionId' => 'ResultBloodTube0003',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'wellPlatePosition' => 'A3',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_RECOMMENDED,
+                'wellPlatePosition' => 'B3',
+                'resultConclusion' => SpecimenResultAntibody::CONCLUSION_POSITIVE,
             ],
             [
-                'participantGroupExternalId' => self::EXTID_GROUP_4,
-                'accessionId' => 'ResultTube0004',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'participantGroupExternalId' => self::EXTID_GROUP_B,
+                'accessionId' => 'ResultBloodTube0004',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'wellPlatePosition' => 'A4',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_POSITIVE,
+                'wellPlatePosition' => 'B4',
+                'resultConclusion' => SpecimenResultAntibody::CONCLUSION_POSITIVE,
             ],
             [
-                'resultReferenceId' => 'ViralResultToUpdate',
-                'participantGroupExternalId' => self::EXTID_GROUP_5,
-                'accessionId' => 'ResultTube0005',
-                'tubeType' => Tube::TYPE_SALIVA,
+                'resultReferenceId' => 'AntibodyResultToUpdate',
+                'participantGroupExternalId' => self::EXTID_GROUP_A,
+                'accessionId' => 'ResultBloodTube0005',
+                'tubeType' => Tube::TYPE_BLOOD,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
-                'wellPlatePosition' => 'A5',
-                'resultConclusion' => SpecimenResultQPCR::CONCLUSION_NEGATIVE,
+                'wellPlatePosition' => 'B5',
+                'resultConclusion' => SpecimenResultAntibody::CONCLUSION_NEGATIVE,
             ],
         ];
     }
