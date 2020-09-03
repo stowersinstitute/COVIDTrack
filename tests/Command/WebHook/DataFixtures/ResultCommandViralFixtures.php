@@ -128,7 +128,7 @@ class ResultCommandViralFixtures extends Fixture
     {
         return [
             [
-                'title' => 'Active With Hooks Disabled',
+                'title' => 'Saliva Active With Hooks Disabled',
                 'externalId' => self::EXTID_GROUP_1,
                 'participantCount' => 5,
                 'isActive' => true,
@@ -136,7 +136,7 @@ class ResultCommandViralFixtures extends Fixture
                 'antibodyResultsWebHooksEnabled' => false,
             ],
             [
-                'title' => 'Inactive With Hooks Enabled',
+                'title' => 'Saliva Inactive With Hooks Enabled',
                 'externalId' => self::EXTID_GROUP_2,
                 'participantCount' => 5,
                 'isActive' => false, // Being inactive prevents sending results
@@ -144,7 +144,7 @@ class ResultCommandViralFixtures extends Fixture
                 'antibodyResultsWebHooksEnabled' => true,
             ],
             [
-                'title' => 'Hooks Enabled',
+                'title' => 'Saliva Hooks Enabled',
                 'externalId' => self::EXTID_GROUP_3,
                 'participantCount' => 5,
                 'isActive' => true,
@@ -152,7 +152,7 @@ class ResultCommandViralFixtures extends Fixture
                 'antibodyResultsWebHooksEnabled' => true,
             ],
             [
-                'title' => 'Hooks Disabled',
+                'title' => 'Saliva Hooks Disabled',
                 'externalId' => self::EXTID_GROUP_4,
                 'participantCount' => 5,
                 'isActive' => true,
@@ -160,7 +160,7 @@ class ResultCommandViralFixtures extends Fixture
                 'antibodyResultsWebHooksEnabled' => false,
             ],
             [
-                'title' => 'Begin With No Completed Results',
+                'title' => 'Saliva Begin With No Completed Results',
                 'externalId' => self::EXTID_GROUP_5,
                 'participantCount' => 5,
                 'isActive' => true,
@@ -175,7 +175,7 @@ class ResultCommandViralFixtures extends Fixture
         return [
             [
                 'participantGroupExternalId' => self::EXTID_GROUP_1,
-                'accessionId' => 'ResultTube0001',
+                'accessionId' => 'ResultSalivaTube0001',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'wellPlatePosition' => 'A1',
@@ -183,7 +183,7 @@ class ResultCommandViralFixtures extends Fixture
             ],
             [
                 'participantGroupExternalId' => self::EXTID_GROUP_2,
-                'accessionId' => 'ResultTube0002',
+                'accessionId' => 'ResultSalivaTube0002',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'wellPlatePosition' => 'A2',
@@ -191,7 +191,7 @@ class ResultCommandViralFixtures extends Fixture
             ],
             [
                 'participantGroupExternalId' => self::EXTID_GROUP_3,
-                'accessionId' => 'ResultTube0003',
+                'accessionId' => 'ResultSalivaTube0003',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'wellPlatePosition' => 'A3',
@@ -199,7 +199,7 @@ class ResultCommandViralFixtures extends Fixture
             ],
             [
                 'participantGroupExternalId' => self::EXTID_GROUP_4,
-                'accessionId' => 'ResultTube0004',
+                'accessionId' => 'ResultSalivaTube0004',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'wellPlatePosition' => 'A4',
@@ -208,7 +208,7 @@ class ResultCommandViralFixtures extends Fixture
             [
                 'resultReferenceId' => 'ViralResultToUpdate',
                 'participantGroupExternalId' => self::EXTID_GROUP_5,
-                'accessionId' => 'ResultTube0005',
+                'accessionId' => 'ResultSalivaTube0005',
                 'tubeType' => Tube::TYPE_SALIVA,
                 'collectedAt' => new \DateTimeImmutable('-1 day 9:45am'),
                 'wellPlatePosition' => 'A5',
