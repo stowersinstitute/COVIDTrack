@@ -39,6 +39,14 @@ class NewResultsWebHookRequest extends WebHookRequest
         $this->results[$result->getId()] = $result;
     }
 
+    /**
+     * @return SpecimenResult[]
+     */
+    public function getResults(): array
+    {
+        return $this->results;
+    }
+
     public function getRequestData()
     {
         return array_map(function(SpecimenResult $r) {
