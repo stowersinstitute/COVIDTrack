@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Logs from Web Hook system.
  *
+ * @see \App\Api\WebHook\Client\WebHookLogHandler for where these entities are created
  * @ORM\Entity
  * @ORM\Table(name="web_hook_logs")
  */
