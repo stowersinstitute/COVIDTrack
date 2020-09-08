@@ -153,7 +153,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
                 $well = $this->findOrCreateWell($rawPosition, $plate, $specimen);
                 $qpcr = SpecimenResultQPCR::createFromWell($well, $rawConclusion);
             } else {
-                $qpcr = SpecimenResultQPCR::createFromSpecimen($specimen, $rawConclusion);
+                $qpcr = new SpecimenResultQPCR($specimen, $rawConclusion);
             }
 
             // New Result

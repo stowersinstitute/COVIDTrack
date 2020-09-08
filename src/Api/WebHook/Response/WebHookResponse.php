@@ -2,8 +2,8 @@
 
 namespace App\Api\WebHook\Response;
 
+use App\Entity\SpecimenResult;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 
 /**
  * Response received from a WebHook API. Custom public methods to suit COVIDTrack application.
@@ -44,6 +44,23 @@ class WebHookResponse
         return $this->httpResponse->getStatusCode();
     }
 
+    /**
+     * Get timestamp when Response was returned, as indicated by Response metadata.
+     *
+     * @return \DateTimeImmutable
+     * @throws \Exception When cannot parse a timestamp value from the Response
+     */
+    public function getTimestamp(): \DateTimeImmutable
+    {
+        $dateHeaders = $this->httpResponse->getHeader('Date');
+
+        // Header values are always an array. Even when only 1 value.
+        // See ResponseInterface->getHeader()
+        $utcDateString = array_shift($dateHeaders);
+
+        return new \DateTimeImmutable($utcDateString);
+    }
+
     public function getReasonPhrase(): string
     {
         return $this->httpResponse->getReasonPhrase();
@@ -58,10 +75,48 @@ class WebHookResponse
     }
 
     /**
-     * @return string[]
+     * Returns all headers. Looks like below example, which can represent
+     * multiple values for each header. Don't blame me this is the PSR-7 way:
+     *
+     *     [
+     *         'Date' => [
+     *             'Mon, 07 Sep 2020 16:07:50 GMT',
+     *         ],
+     *         'Example-Multiple-Header' => [
+     *             'Value1',
+     *             'Value2',
+     *             'Value3',
+     *         ],
+     *     ]
+     *
+     *
+     * @return string[][]
      */
     public function getHeaders(): array
     {
         return $this->httpResponse->getHeaders();
+    }
+
+    /**
+     * Update SpecimenResult records based on data in the Web Hook HTTP Response.
+     *
+     * @param SpecimenResult[] $resultsSentInRequest
+     */
+    public function updateResultWebHookStatus(array $resultsSentInRequest): void
+    {
+        try {
+            // Server Date from Response
+            $timestamp = $this->getTimestamp();
+        } catch (\Exception $e) {
+            // Fall back to current PHP time.
+            // A developer should probably update the Response parsing logic
+            // to extract the Date.
+            $timestamp = new \DateTimeImmutable();
+        }
+
+        // Assume all results positively reported
+        foreach ($resultsSentInRequest as $result) {
+            $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+        }
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Tests\Command\WebHook;
 
-use App\Api\WebHook\Client\ResultHttpClient;
-use App\Api\WebHook\Response\WebHookResponse;
+use App\Api\WebHook\Client\ServiceNowHttpClient;
+use App\Api\WebHook\Response\ServiceNowWebHookResponse;
 use App\Command\WebHook\ResultCommand;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
@@ -67,9 +67,6 @@ class ResultCommandTest extends BaseDatabaseTestCase
         foreach ($externalIdsNotExpected as $externalId) {
             $this->assertStringNotContainsString($externalId, $txtOutput);
         }
-
-        // Wait, so below Result update can occur after lastWebHookSuccessAt
-        sleep(1);
 
         // Now update some existing results from another Group
         // and assert users notified
@@ -155,9 +152,6 @@ class ResultCommandTest extends BaseDatabaseTestCase
             $this->assertStringNotContainsString($externalId, $txtOutput);
         }
 
-        // Wait, so below Result update can occur after lastWebHookSuccessAt
-        sleep(1);
-
         // Now update some existing results from another Group
         // and assert users notified
         /** @var SpecimenResultAntibody $resultToUpdate */
@@ -190,16 +184,32 @@ class ResultCommandTest extends BaseDatabaseTestCase
     }
 
     /**
-     * @return \PHPUnit\Framework\MockObject\MockObject|ResultHttpClient
+     * @param string $pathToResponseBodyJson Local file path to .json file to be used as Response
+     * @return \PHPUnit\Framework\MockObject\MockObject|ServiceNowHttpClient
      */
-    private function buildMockHttpClient()
+    private function buildMockHttpClient(/*string $pathToResponseBodyJson*/)
     {
-        $httpClient = $this->createMock(ResultHttpClient::class);
+//        $responseBodyJson = file_get_contents($pathToResponseBodyJson);
+//        if (false === $responseBodyJson) {
+//            throw new \RuntimeException('Cannot load mock JSON Response Body at path: ' . $pathToResponseBodyJson);
+//        }
+
+        $httpClient = $this->createMock(ServiceNowHttpClient::class);
 
         // Wire to return mock successful response
-        $response = $this->createMock(WebHookResponse::class);
+        $response = $this->getMockBuilder(ServiceNowWebHookResponse::class)
+            ->disableOriginalConstructor()
+            // Don't mock these methods
+            ->setMethodsExcept([
+                'updateResultWebHookStatus', // So update status logic runs
+            ])
+            ->getMock();
         $response->method("getStatusCode")->willReturn(200);
-        $response->method("getHeaders")->willReturn([]);
+        $response->method("getHeaders")->willReturn([
+            'Date' => [
+                'Mon, 07 Sep 2020 16:07:50 GMT',
+            ],
+        ]);
         $response->method("getBodyContents")->willReturn("");
 
         $httpClient->method("post")->willReturn($response);

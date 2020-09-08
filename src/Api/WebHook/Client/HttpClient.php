@@ -6,6 +6,7 @@ use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
 use App\Entity\WebHookLog;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -102,18 +103,21 @@ class HttpClient
     {
         $this->initConstructorOptions($this->constructorOptions);
 
+        // Request data logged to entity WebHookLog
         $this->logRequest($method, $request, $options);
 
         $options['body'] = $request->toJson();
 
         try {
+            // Actually send the Request
             $clientResponse = $this->getClient()->request($method, $this->url, $options);
-            $response = new WebHookResponse($clientResponse, $this->url);
+            $response = $this->buildWebHookResponse($clientResponse);
         } catch (\Exception $e) {
             $this->logException($e);
             throw $e;
         }
 
+        // Response data logged to entity WebHookLog
         $this->logResponse($response);
 
         return $response;
@@ -190,6 +194,9 @@ class HttpClient
         $this->logger->debug('Sending Request.', $context);
     }
 
+    /**
+     * Write Response data to logger, which writes a database entity WebHookLog
+     */
     protected function logResponse(WebHookResponse $response)
     {
         $context = [
@@ -212,5 +219,13 @@ class HttpClient
             'EXCEPTION_MESSAGE' => $e->getMessage(),
             'EXCEPTION_TRACE' => $e->getTraceAsString(),
         ]);
+    }
+
+    /**
+     * Build Response
+     */
+    protected function buildWebHookResponse(ResponseInterface $clientResponse): WebHookResponse
+    {
+        return new WebHookResponse($clientResponse, $this->url);
     }
 }

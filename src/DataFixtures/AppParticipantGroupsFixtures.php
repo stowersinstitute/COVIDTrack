@@ -147,7 +147,7 @@ class AppParticipantGroupsFixtures extends Fixture
                 'title' => 'Individual 1',
                 'participantCount' => 1,
                 'accessionId' => 'GRP-INDV1',
-                'externalId' => '007c9d7d1b16189009a0dd3bdc4bcbc4', // Real ID from stowersdev.service-now.com, but has "Report" flags === false
+                'externalId' => '936c5d7d1b16189009a0dd3bdc4bcbae', // Real ID from stowersdev.service-now.com, but has "Report" flags === false
                 'isControl' => false,
                 'viralResultsWebHooksEnabled' => true,
                 'antibodyResultsWebHooksEnabled' => true,
@@ -158,7 +158,7 @@ class AppParticipantGroupsFixtures extends Fixture
                 'title' => 'Individual No Web Hooks',
                 'participantCount' => 1,
                 'accessionId' => 'GRP-INDV2',
-                'externalId' => '030c71ea1b26105009a0dd3bdc4bcbc2', // Real ID from stowersdev.service-now.com
+                'externalId' => '1c7cdd7d1b16189009a0dd3bdc4bcb23', // Real ID from stowersdev.service-now.com
                 'isControl' => false,
                 'viralResultsWebHooksEnabled' => false,
                 'antibodyResultsWebHooksEnabled' => false,
@@ -169,7 +169,7 @@ class AppParticipantGroupsFixtures extends Fixture
                 'title' => 'Individual No Specimens Allowed',
                 'participantCount' => 1,
                 'accessionId' => 'GRP-IND-NO-SPEC',
-                'externalId' => '117c11bd1b16189009a0dd3bdc4bcb87', // Real ID from stowersdev.service-now.com
+                'externalId' => '9bd1fa8a1b52989009a0dd3bdc4bcb26', // Real ID from stowersdev.service-now.com
                 'isControl' => false,
                 'viralResultsWebHooksEnabled' => false,
                 'antibodyResultsWebHooksEnabled' => false,

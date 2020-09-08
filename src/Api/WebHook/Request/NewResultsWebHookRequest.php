@@ -7,7 +7,7 @@ use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
 
 /**
- * Report new Specimen Results to remote server via WebHook.
+ * Report new Specimen Results to remote server via Web Hook.
  */
 class NewResultsWebHookRequest extends WebHookRequest
 {
@@ -47,8 +47,14 @@ class NewResultsWebHookRequest extends WebHookRequest
         return $this->results;
     }
 
+    /**
+     * Return data sent as WebHookRequest payload. Must be compatible with json_encode().
+     *
+     * @return mixed
+     */
     public function getRequestData()
     {
+        // Convert each Specimen Result to an array of data sent to the API
         return array_map(function(SpecimenResult $r) {
             switch (get_class($r)) {
                 case SpecimenResultAntibody::class:
@@ -66,13 +72,13 @@ class NewResultsWebHookRequest extends WebHookRequest
 
             $group = $r->getSpecimen()->getParticipantGroup();
 
-            // NOTE: Adding / Removing fields below may require
-            // updating Gedmo\Timestampable() "field" list on property
-            // SpecimenResult.webHookFieldChangedAt
+            // NOTE: Adding fields below will require code that also sets
+            // SpecimenResult.webHookStatus = SpecimenResult::WEBHOOK_STATUS_PENDING
+            // when that field on the entity changes. See SpecimenResult->setConclusion()
             return [
                 'id' => $r->getId(),
                 'type' => $type,
-                'conclusion' => $r->getConclusion(),
+                'result' => $r->getConclusion(),
                 'published_at' => $publishedAt->format($iso8601),
                 'group' => [
                     'id' => $group->getId(),

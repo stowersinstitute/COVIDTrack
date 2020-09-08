@@ -7,6 +7,11 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Logs from Web Hook system.
  *
+ * Logged to database because Web Hook system handles sensitive Results data.
+ * That data appears in the log file. Keeping in database allows same data
+ * privacy as all database data, instead of writing to disk which could be
+ * read if file permissions are mis-configured.
+ *
  * @see \App\Api\WebHook\Client\WebHookLogHandler for where these entities are created
  * @ORM\Entity
  * @ORM\Table(name="web_hook_logs")

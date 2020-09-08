@@ -1,0 +1,143 @@
+{
+  "result": {
+    "status": "COMPLETE WITH ERRORS",
+    "rows": [
+      {
+        "status": "IGNORED",
+        "message": "Could not find participant",
+        "data": {
+          "id": 1180,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-03T20:12:22Z",
+          "group": {
+            "id": 116,
+            "external_id": "030c71ea1b26105009a0dd3bdc4bcbc2",
+            "title": "Individual No Web Hooks"
+          }
+        }
+      },
+      {
+        "status": "IGNORED",
+        "message": "Could not find participant",
+        "data": {
+          "id": 1181,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-02T20:12:22Z",
+          "group": {
+            "id": 116,
+            "external_id": "030c71ea1b26105009a0dd3bdc4bcbc2",
+            "title": "Individual No Web Hooks"
+          }
+        }
+      },
+      {
+        "status": "IGNORED",
+        "message": "Could not find participant",
+        "data": {
+          "id": 1182,
+          "type": "ANTIBODY",
+          "conclusion": "POSITIVE",
+          "published_at": "2020-09-01T20:12:22Z",
+          "group": {
+            "id": 116,
+            "external_id": "030c71ea1b26105009a0dd3bdc4bcbc2",
+            "title": "Individual No Web Hooks"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 1177,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-03T20:12:22Z",
+          "group": {
+            "id": 115,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 1178,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-02T20:12:22Z",
+          "group": {
+            "id": 115,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 1179,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-01T20:12:22Z",
+          "group": {
+            "id": 115,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 1098,
+          "type": "VIRAL",
+          "conclusion": "POSITIVE",
+          "published_at": "2020-09-03T20:12:19Z",
+          "group": {
+            "id": 115,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "IGNORED",
+        "message": "Could not find participant",
+        "data": {
+          "id": 1099,
+          "type": "VIRAL",
+          "conclusion": "NON-NEGATIVE",
+          "published_at": "2020-09-03T20:12:19Z",
+          "group": {
+            "id": 116,
+            "external_id": "030c71ea1b26105009a0dd3bdc4bcbc2",
+            "title": "Individual No Web Hooks"
+          }
+        }
+      },
+      {
+        "status": "IGNORED",
+        "message": "Could not find participant",
+        "data": {
+          "id": 1100,
+          "type": "VIRAL",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-02T20:12:19Z",
+          "group": {
+            "id": 116,
+            "external_id": "030c71ea1b26105009a0dd3bdc4bcbc2",
+            "title": "Individual No Web Hooks"
+          }
+        }
+      }
+    ],
+    "message": "Encountered errors with 1 or more rows"
+  }
+}
