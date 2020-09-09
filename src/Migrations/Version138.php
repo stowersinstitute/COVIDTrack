@@ -8,8 +8,7 @@ use App\Entity\SpecimenResult;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-// TODO: Rename class
-final class Version20200905204529 extends AbstractMigration
+final class Version138 extends AbstractMigration
 {
     public function getDescription() : string
     {
