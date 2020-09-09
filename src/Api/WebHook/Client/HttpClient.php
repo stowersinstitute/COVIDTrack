@@ -249,15 +249,15 @@ class HttpClient
             'EXCEPTION_CODE' => $e->getCode(),
             'EXCEPTION_MESSAGE' => $e->getMessage(),
             'EXCEPTION_TRACE' => $e->getTraceAsString(),
-            'REQUEST_URI' => $request->getUri(),
+            'REQUEST_URI' => (string)$request->getUri(),
             'REQUEST_METHOD' => $request->getMethod(),
-            'REQUEST_BODY' => $request->getBody(),
+            'REQUEST_BODY' => (string)$request->getBody(),
         ];
 
         if ($response) {
             $context['RESPONSE_STATUS_CODE'] = $response->getStatusCode();
             $context['RESPONSE_STATUS_REASON'] = $response->getReasonPhrase();
-            $context['RESPONSE_BODY'] = $response->getBody();
+            $context['RESPONSE_BODY'] = (string)$response->getBody();
         }
 
         $this->logger->emergency('Exception during Request or Response', $context);
