@@ -79,21 +79,6 @@ abstract class SpecimenResult
     protected $conclusion;
 
     /**
-     * Only certain fields are sent out in Web Hook Request data. If one of
-     * these fields changes the whole Result record should be sent again as
-     * an "update" to the Web Hook.
-     *
-     * Fields monitored are below in the Timestampable() "field" property.
-     *
-     * @see NewResultsWebHookRequest::getRequestData()
-     * @var \DateTimeImmutable
-     * @Gedmo\Timestampable(on="change", field={"id", "conclusion", "createdAt"})
-     * @ORM\Column(name="web_hook_field_changed_at", type="datetime_immutable")
-     * @deprecated
-     */
-    protected $webHookFieldChangedAt;
-
-    /**
      * Status of this record being sent through Web Hook system.
      * Acceptable values are self::WEBHOOK_STATUS_* constants.
      *
@@ -157,7 +142,6 @@ abstract class SpecimenResult
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
-        $this->webHookFieldChangedAt = new \DateTimeImmutable();
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
@@ -234,14 +218,6 @@ abstract class SpecimenResult
     public function isFailure(): bool
     {
         return $this->isFailure;
-    }
-
-    /**
-     * @deprecated Will be removed in favor of explicitly setting webHookStatus when fields change
-     */
-    public function getWebHookFieldChangedAt(): \DateTimeImmutable
-    {
-        return $this->webHookFieldChangedAt;
     }
 
     /**
