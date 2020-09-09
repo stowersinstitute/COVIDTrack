@@ -29,6 +29,15 @@ class WebHookResponse
         $this->requestUrl = $requestUrl;
     }
 
+    /**
+     * Whether the API request was completed successfully. This means the
+     * request was received and parsed correctly by the web hook URL.
+     */
+    public function isRequestSuccessful(): bool
+    {
+        return $this->getStatusCode() === 200;
+    }
+
     public function getRawResponse(): ResponseInterface
     {
         return $this->httpResponse;
@@ -114,9 +123,11 @@ class WebHookResponse
             $timestamp = new \DateTimeImmutable();
         }
 
-        // Assume all results positively reported
-        foreach ($resultsSentInRequest as $result) {
-            $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+        // Assume all results positively reported if request was successful
+        if ($this->isRequestSuccessful()) {
+            foreach ($resultsSentInRequest as $result) {
+                $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+            }
         }
     }
 }

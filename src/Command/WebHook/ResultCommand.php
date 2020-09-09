@@ -11,6 +11,7 @@ use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -90,13 +91,26 @@ class ResultCommand extends BaseAppCommand
         // Send Request to Web Hook API
         try {
             $response = $this->httpClient->post($request);
-        } catch (ClientException $e) {
+        } catch (ClientException | ServerException $e) {
+            // Known Exception type where we have the Request and Response
             $output->writeln('<error>Exception calling Web Hook endpoint</error>');
-            $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));
+            $output->writeln('Request Body:');
+            $output->writeln($e->getRequest()->getBody() . "\n");
+
+            $exceptionResponse = $e->getResponse();
+            if ($exceptionResponse) {
+                $output->writeln(sprintf('Response Code: %d %s', $exceptionResponse->getStatusCode(), $exceptionResponse->getReasonPhrase()));
+                $output->writeln('Response Body:');
+                $output->writeln($exceptionResponse->getBody() . "\n");
+            }
+
+            $output->writeln('Exception Class: ' . get_class($e));
             $output->writeln('Exception Message: ' . $e->getMessage());
             return 1;
         } catch (\Exception $e) {
+            // Not sure what Exception occurred, dump some generic info
             $output->writeln('Unknown Exception: ' . $e->getMessage());
+            $output->writeln('Exception Class: ' . get_class($e));
             return 1;
         }
 

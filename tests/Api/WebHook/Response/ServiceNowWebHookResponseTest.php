@@ -3,6 +3,11 @@
 namespace App\Tests\Api\WebHook\Response;
 
 use App\Api\WebHook\Response\ServiceNowWebHookResponse;
+use App\Entity\Specimen;
+use App\Entity\SpecimenResult;
+use App\Entity\SpecimenResultAntibody;
+use App\Entity\SpecimenResultQPCR;
+use App\Entity\SpecimenWell;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -26,7 +31,8 @@ class ServiceNowWebHookResponseTest extends TestCase
         $httpResponse = $this->buildMockHttpResponse(200, $mockBody);
         $response = new ServiceNowWebHookResponse($httpResponse, '/does/not/matter');
 
-        $this->assertFalse($response->isCompletedWithoutErrors());
+        $this->assertTrue($response->isRequestSuccessful());
+        $this->assertSame(200, $response->getStatusCode());
 
         $this->assertCount(5, $response->getUnsuccessfulRows());
         $this->assertCount(4, $response->getSuccessfulRows());
@@ -39,7 +45,8 @@ class ServiceNowWebHookResponseTest extends TestCase
         $httpResponse = $this->buildMockHttpResponse(200, $mockBody);
         $response = new ServiceNowWebHookResponse($httpResponse, '/does/not/matter');
 
-        $this->assertTrue($response->isCompletedWithoutErrors());
+        $this->assertTrue($response->isRequestSuccessful());
+        $this->assertSame(200, $response->getStatusCode());
 
         $this->assertCount(0, $response->getUnsuccessfulRows());
         $this->assertCount(3, $response->getSuccessfulRows());
@@ -47,16 +54,62 @@ class ServiceNowWebHookResponseTest extends TestCase
 
     public function testMalformedRequest()
     {
-        $this->markTestIncomplete('Need example of failing Response body');
-
-        $mockBody = file_get_contents('');
+        $mockBody = file_get_contents(__DIR__ . '/responses/malformed-request.json');
 
         $httpResponse = $this->buildMockHttpResponse(500, $mockBody);
         $response = new ServiceNowWebHookResponse($httpResponse, '/does/not/matter');
 
-        // Do the rows show errors?
-//        $this->assertTrue($response->hasUnsuccessfulRows());
-//        $this->assertCount(1, $response->getUnsuccessfulRows());
+        $this->assertFalse($response->isRequestSuccessful());
+        $this->assertSame(500, $response->getStatusCode());
+
+        // No rows in response
+        $this->assertCount(0, $response->getUnsuccessfulRows());
+        $this->assertCount(0, $response->getSuccessfulRows());
+
+        // Verify records are still queued so they are tried to send again
+        /** @var SpecimenResult[] $results */
+        $results = [
+            new SpecimenResultQPCR(Specimen::buildExampleReadyForResults('S100'), SpecimenResult::CONCLUSION_POSITIVE),
+            new SpecimenResultAntibody(SpecimenWell::buildExample(Specimen::buildExampleReadyForResults('S101')), SpecimenResult::CONCLUSION_NEGATIVE),
+        ];
+        foreach($results as $result) {
+            $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
+        }
+
+        $response->updateResultWebHookStatus($results);
+
+        foreach($results as $result) {
+            $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
+        }
+    }
+
+    public function testResultsUsedInMalformedRequestRemainQueuedForWebHooks()
+    {
+        $mockBody = file_get_contents(__DIR__ . '/responses/malformed-request.json');
+
+        $httpResponse = $this->buildMockHttpResponse(500, $mockBody);
+        $response = new ServiceNowWebHookResponse($httpResponse, '/does/not/matter');
+
+        $this->assertFalse($response->isRequestSuccessful());
+
+        /** @var SpecimenResult[] $results */
+        $results = [
+            new SpecimenResultQPCR(Specimen::buildExampleReadyForResults('S100'), SpecimenResult::CONCLUSION_POSITIVE),
+            new SpecimenResultAntibody(SpecimenWell::buildExample(Specimen::buildExampleReadyForResults('S101')), SpecimenResult::CONCLUSION_NEGATIVE),
+        ];
+
+        // Verify records are queued
+        foreach ($results as $result) {
+            $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
+        }
+
+        // Try running through web hook status update
+        $response->updateResultWebHookStatus($results);
+
+        // Verify records are still queued so they are sent next web hook attempt
+        foreach ($results as $result) {
+            $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
+        }
     }
 
     /**

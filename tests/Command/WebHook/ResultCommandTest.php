@@ -184,16 +184,10 @@ class ResultCommandTest extends BaseDatabaseTestCase
     }
 
     /**
-     * @param string $pathToResponseBodyJson Local file path to .json file to be used as Response
      * @return \PHPUnit\Framework\MockObject\MockObject|ServiceNowHttpClient
      */
-    private function buildMockHttpClient(/*string $pathToResponseBodyJson*/)
+    private function buildMockHttpClient(int $statusCode = 200)
     {
-//        $responseBodyJson = file_get_contents($pathToResponseBodyJson);
-//        if (false === $responseBodyJson) {
-//            throw new \RuntimeException('Cannot load mock JSON Response Body at path: ' . $pathToResponseBodyJson);
-//        }
-
         $httpClient = $this->createMock(ServiceNowHttpClient::class);
 
         // Wire to return mock successful response
@@ -204,7 +198,8 @@ class ResultCommandTest extends BaseDatabaseTestCase
                 'updateResultWebHookStatus', // So update status logic runs
             ])
             ->getMock();
-        $response->method("getStatusCode")->willReturn(200);
+        $response->method("getStatusCode")->willReturn($statusCode);
+        $response->method("isRequestSuccessful")->willReturn($statusCode === 200);
         $response->method("getHeaders")->willReturn([
             'Date' => [
                 'Mon, 07 Sep 2020 16:07:50 GMT',

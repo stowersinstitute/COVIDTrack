@@ -6,7 +6,10 @@ use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
 use App\Entity\WebHookLog;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -114,11 +117,17 @@ class HttpClient
             // Actually send the Request
             $clientResponse = $this->getClient()->request($method, $this->url, $options);
             $response = $this->buildWebHookResponse($clientResponse);
+        } catch (ClientException | ServerException $e) {
+            // Exception within HTTP Request or Response lifecycle
+            $request = $e->getRequest();
+            $response = $e->getResponse();
+            $this->logRequestResponseException($e, $request, $response);
+            throw $e;
         } catch (\Exception $e) {
-            $this->logException($e);
+            // Not sure what Exception occurred, dump some generic info
+            $this->logUnknownException($e);
             throw $e;
         }
-
         // Response data logged to entity WebHookLog
         $this->logResponse($response);
 
@@ -185,6 +194,11 @@ class HttpClient
      */
     protected function logRequest(string $method, WebHookRequest $request, array $options)
     {
+        $jsonBody = $options[RequestOptions::BODY] ?? '(Unknown)';
+
+        // Don't log Request body twice
+        unset($options[RequestOptions::BODY]);
+
         $context = array_merge(
             // See \Guzzle\RequestOptions
             $options,
@@ -196,11 +210,11 @@ class HttpClient
                 '_REQUEST_CLASS' => get_class($request),
                 '_HTTP_METHOD' => $method,
                 '_URL' => $this->url,
-                '_JSON_BODY' => $options[RequestOptions::BODY], // See \Guzzle\RequestOptions
+                '_JSON_BODY' => $jsonBody,
             ]
         );
 
-        $this->logger->debug('Sending Request.', $context);
+        $this->logger->debug('Sending Request', $context);
     }
 
     /**
@@ -219,13 +233,46 @@ class HttpClient
             '_JSON_BODY' => $response->getBodyContents(),
         ];
 
-        $this->logger->debug('Response Received.', $context);
+        $this->logger->debug('Response Received', $context);
     }
 
-    protected function logException(\Exception $e)
+    /**
+     * Log details about when an Exception is thrown in the Request / Response
+     * lifecycle. Depending when this was thrown the Response may be available.
+     * See log record for more info.
+     */
+    protected function logRequestResponseException(\Exception $e, RequestInterface $request, ?ResponseInterface $response)
     {
-        $this->logger->emergency('Exception', [
+        $context = [
             WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
+            'EXCEPTION_CLASS' => get_class($e),
+            'EXCEPTION_CODE' => $e->getCode(),
+            'EXCEPTION_MESSAGE' => $e->getMessage(),
+            'EXCEPTION_TRACE' => $e->getTraceAsString(),
+            'REQUEST_URI' => $request->getUri(),
+            'REQUEST_METHOD' => $request->getMethod(),
+            'REQUEST_BODY' => $request->getBody(),
+        ];
+
+        if ($response) {
+            $context['RESPONSE_STATUS_CODE'] = $response->getStatusCode();
+            $context['RESPONSE_STATUS_REASON'] = $response->getReasonPhrase();
+            $context['RESPONSE_BODY'] = $response->getBody();
+        }
+
+        $this->logger->emergency('Exception during Request or Response', $context);
+    }
+
+    /**
+     * Log details about when an Exception of unknown type occurred. We don't
+     * know anything special about it so unable to unpack other details.
+     * See log for more info.
+     */
+    protected function logUnknownException(\Exception $e)
+    {
+        $this->logger->emergency('Unknown Exception', [
+            WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
+            'EXCEPTION_CLASS' => get_class($e),
             'EXCEPTION_CODE' => $e->getCode(),
             'EXCEPTION_MESSAGE' => $e->getMessage(),
             'EXCEPTION_TRACE' => $e->getTraceAsString(),

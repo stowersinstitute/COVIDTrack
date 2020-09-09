@@ -9,11 +9,34 @@ use App\Entity\SpecimenResult;
  */
 class ServiceNowWebHookResponse extends WebHookResponse
 {
+    /**
+     * Response "status" returned when all submitted rows were successfully received
+     * without any errors. Check method $this->getSuccessfulRows().
+     */
     const STATUS_COMPLETE = "COMPLETE";
+
+    /**
+     * Response "status" returned when one or more rows was not successfully received.
+     * Check method $this->getUnsuccessfulRows().
+     */
     const STATUS_COMPLETE_WITH_ERRORS = "COMPLETE WITH ERRORS";
+
+    /**
+     * Response "status" returned when the server cannot parse the Request
+     * or encounters an error.
+     */
     const STATUS_ERROR = "ERROR";
 
+    /**
+     * Row "status" returned when row was successfully received without errors.
+     * Rows with this status will return via method $this->getSuccessfulRows().
+     */
     const ROW_STATUS_SUCCESS = "SUCCESS";
+
+    /**
+     * Row "status" returned when row could not be received due to an error.
+     * Rows with this status will return via method $this->getUnsuccessfulRows().
+     */
     const ROW_STATUS_IGNORED = "IGNORED";
 
     /**
@@ -23,13 +46,29 @@ class ServiceNowWebHookResponse extends WebHookResponse
      */
     private $bodyAsJson;
 
-    public function isCompletedWithoutErrors(): bool
+    /**
+     * Whether the API request was completed successfully. This means the
+     * request was received and parsed correctly by the web hook URL.
+     *
+     * However this does not mean all rows were successfully received.
+     * Individual rows may have issues. Check method $this->getUnsuccessfulRows().
+     */
+    public function isRequestSuccessful(): bool
     {
         $decoded = $this->getBodyAsDecodedJson();
 
-        return $decoded['result']['status'] === self::STATUS_COMPLETE;
+        $successful = [
+            self::STATUS_COMPLETE,
+            self::STATUS_COMPLETE_WITH_ERRORS,
+        ];
+
+        return in_array($decoded['result']['status'], $successful);
     }
 
+    /**
+     * Get text describing the overall request status and whether it was
+     * received or not.
+     */
     public function getResultMessage(): string
     {
         $decoded = $this->getBodyAsDecodedJson();
@@ -53,7 +92,8 @@ class ServiceNowWebHookResponse extends WebHookResponse
     {
         $decoded = $this->getBodyAsDecodedJson();
 
-        return $decoded['result']['rows'];
+        // "rows" not present in malformed request response
+        return $decoded['result']['rows'] ?? [];
     }
 
     /**
@@ -168,10 +208,13 @@ class ServiceNowWebHookResponse extends WebHookResponse
             $result->setWebHookError($timestamp, $row['message']);
         }
 
-        // Any remaining results not in Response but originally submitted are
-        // assumed to be positively reported.
-        foreach ($resultsById as $result) {
-            $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+        // If Request was successful in general (and not an error / Exception)
+        // assume any remaining results not explicitly present in Response
+        // are positively reported.
+        if ($this->isRequestSuccessful()) {
+            foreach ($resultsById as $result) {
+                $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+            }
         }
     }
 }
