@@ -114,9 +114,9 @@ abstract class SpecimenResult
      * Timestamp when SpecimenResult last attempted published through Web Hook system.
      *
      * @var null|\DateTimeImmutable
-     * @ORM\Column(name="web_hook_updated_at", type="datetime_immutable", nullable=true)
+     * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
      */
-    protected $webHookUpdatedAt;
+    protected $webHookLastTriedPublishingAt;
 
     /**
      * Subclass should define its own annotations for how it maps to SpecimenWell,
@@ -174,18 +174,10 @@ abstract class SpecimenResult
 
         // Mark this record as needing to be sent to Web Hooks when Conclusion has changed
         if ($this->conclusion !== $conclusion) {
-            $this->queueForSendingToWebHook();
+            $this->setWebHookQueued('Field published to web hooks changed');
         }
 
         $this->conclusion = $conclusion;
-    }
-
-    /**
-     * Mark this record as needing published to the Web Hook system next time it runs.
-     */
-    protected function queueForSendingToWebHook(): void
-    {
-        $this->webHookStatus = self::WEBHOOK_STATUS_QUEUED;
     }
 
     public static function isValidConclusion(string $conclusion): bool
@@ -255,13 +247,22 @@ abstract class SpecimenResult
     /**
      * @param string                  $status       SpecimenResult::WEBHOOK_STATUS_* constant.
      * @param string|null             $message
-     * @param \DateTimeImmutable|null $updatedAt
      */
-    protected function setWebHookStatus(string $status, string $message = '', ?\DateTimeImmutable $updatedAt = null): void
+    protected function setWebHookStatus(string $status, string $message = ''): void
     {
+        $validStatuses = [
+            self::WEBHOOK_STATUS_PENDING,
+            self::WEBHOOK_STATUS_QUEUED,
+            self::WEBHOOK_STATUS_SUCCESS,
+            self::WEBHOOK_STATUS_ERROR,
+            self::WEBHOOK_STATUS_NEVER_SEND,
+        ];
+        if (!in_array($status, $validStatuses)) {
+            throw new \InvalidArgumentException('Invalid Web Hook Status');
+        }
+
         $this->webHookStatus = $status;
         $this->webHookStatusMessage = $message;
-        $this->webHookUpdatedAt = $updatedAt ?? new \DateTimeImmutable();
     }
 
     /**
@@ -274,38 +275,40 @@ abstract class SpecimenResult
     }
 
     /**
-     * @param \DateTimeImmutable|null $successReceivedAt Timestamp when success received from Web Hook.
-     * @param string                  $message
+     * @param \DateTimeImmutable $successReceivedAt Timestamp when successfully sent to Web Hook.
+     * @param string             $message
      */
-    public function setWebHookSuccess(?\DateTimeImmutable $successReceivedAt = null, string $message = '')
+    public function setWebHookSuccess(\DateTimeImmutable $successReceivedAt, string $message = '')
     {
         $this->webHookStatus = self::WEBHOOK_STATUS_SUCCESS;
         $this->webHookStatusMessage = $message;
-        $this->webHookUpdatedAt = $successReceivedAt ?? new \DateTimeImmutable();
+        $this->setWebHookLastTriedPublishingAt($successReceivedAt);
     }
 
     /**
      * Mark result as having experienced an error when sending to Web Hooks.
      *
-     * @param \DateTimeImmutable|null $errorReceivedAt Timestamp when error received from Web Hook.
+     * @param \DateTimeImmutable $errorReceivedAt Timestamp when experienced error sending to Web Hook.
      */
-    public function setWebHookError(?\DateTimeImmutable $errorReceivedAt = null, string $message = '')
+    public function setWebHookError(\DateTimeImmutable $errorReceivedAt, string $message = '')
     {
         $this->webHookStatus = self::WEBHOOK_STATUS_ERROR;
         $this->webHookStatusMessage = $message;
-        $this->webHookUpdatedAt = $errorReceivedAt ?? new \DateTimeImmutable();
+        $this->setWebHookLastTriedPublishingAt($errorReceivedAt);
     }
 
     /**
      * Mark result to never be sent to Web Hooks.
      */
-    public function setWebHookNeverSend(?\DateTimeImmutable $updatedAt = null, string $message = '')
+    public function setWebHookNeverSend(string $message = '')
     {
         $this->webHookStatus = self::WEBHOOK_STATUS_NEVER_SEND;
         $this->webHookStatusMessage = $message;
-        $this->webHookUpdatedAt = $updatedAt ?? new \DateTimeImmutable();
     }
 
+    /**
+     * @return string|null SpecimenResult::WEBHOOK_STATUS_* constant
+     */
     public function getWebHookStatus(): ?string
     {
         return $this->webHookStatus;
@@ -316,8 +319,13 @@ abstract class SpecimenResult
         return $this->webHookStatusMessage;
     }
 
-    public function getWebHookUpdatedAt(): ?\DateTimeImmutable
+    public function setWebHookLastTriedPublishingAt(?\DateTimeImmutable $timestamp): void
     {
-        return $this->webHookUpdatedAt;
+        $this->webHookLastTriedPublishingAt = $timestamp;
+    }
+
+    public function getWebHookLastTriedPublishingAt(): ?\DateTimeImmutable
+    {
+        return $this->webHookLastTriedPublishingAt;
     }
 }

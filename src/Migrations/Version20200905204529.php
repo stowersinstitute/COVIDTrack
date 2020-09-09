@@ -21,7 +21,7 @@ final class Version20200905204529 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         // Add new fields for tracking Web Hook system
-        $this->addSql('ALTER TABLE specimen_results ADD web_hook_status VARCHAR(255) DEFAULT NULL, ADD web_hook_status_message LONGTEXT DEFAULT NULL, ADD web_hook_updated_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE specimen_results ADD web_hook_status VARCHAR(255) DEFAULT NULL, ADD web_hook_status_message LONGTEXT DEFAULT NULL, ADD web_hook_last_tried_publishing_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
 
         // All results in prod are for research study and are currently not going to Web Hooks
         $this->addSql('
@@ -41,6 +41,6 @@ final class Version20200905204529 extends AbstractMigration
 
         $this->addSql('ALTER TABLE specimen_results ADD last_web_hook_success_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
 
-        $this->addSql('ALTER TABLE specimen_results DROP web_hook_status, DROP web_hook_status_message, DROP web_hook_updated_at');
+        $this->addSql('ALTER TABLE specimen_results DROP web_hook_status, DROP web_hook_status_message, DROP web_hook_last_tried_publishing_at');
     }
 }
