@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class WebHookLog
 {
-    public const CONTEXT_LIFECYCLE_ID_KEY = 'LIFECYCLE_ID';
+    public const CONTEXT_LIFECYCLE_ID_KEY = '_LIFECYCLE_ID';
 
     /**
      * @var int

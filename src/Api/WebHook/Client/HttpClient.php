@@ -6,6 +6,7 @@ use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
 use App\Entity\WebHookLog;
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -103,10 +104,11 @@ class HttpClient
     {
         $this->initConstructorOptions($this->constructorOptions);
 
+        // This is where the JSON is actually set to be the Request Body
+        $options[RequestOptions::BODY] = $request->toJson();
+
         // Request data logged to entity WebHookLog
         $this->logRequest($method, $request, $options);
-
-        $options['body'] = $request->toJson();
 
         try {
             // Actually send the Request
@@ -178,16 +180,23 @@ class HttpClient
         $this->constructorOptionsInitialized = true;
     }
 
+    /**
+     * @param array $options Keys are from \Guzzle\RequestOptions
+     */
     protected function logRequest(string $method, WebHookRequest $request, array $options)
     {
         $context = array_merge(
+            // See \Guzzle\RequestOptions
             $options,
+
+            // These array keys are just private identifiers for easier viewing in log.
+            // Prefixed with "_" so they don't conflict with \Guzzle\RequestOptions
             [
                 WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
-                'REQUEST_CLASS' => get_class($request),
-                'HTTP_METHOD' => $method,
-                'URL' => $this->url,
-                'JSON_BODY' => $request->toJson(),
+                '_REQUEST_CLASS' => get_class($request),
+                '_HTTP_METHOD' => $method,
+                '_URL' => $this->url,
+                '_JSON_BODY' => $options[RequestOptions::BODY], // See \Guzzle\RequestOptions
             ]
         );
 
@@ -199,13 +208,15 @@ class HttpClient
      */
     protected function logResponse(WebHookResponse $response)
     {
+        // These array keys are just private identifiers for easier viewing in log.
+        // Prefixed with "_" so they don't conflict with \Guzzle\RequestOptions
         $context = [
             WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
-            'RESPONSE_CLASS' => get_class($response),
-            'STATUS_CODE' => $response->getStatusCode(),
-            'STATUS_REASON' => $response->getReasonPhrase(),
-            'HEADERS' => $response->getHeaders(),
-            'JSON_BODY' => $response->getBodyContents(),
+            '_RESPONSE_CLASS' => get_class($response),
+            '_STATUS_CODE' => $response->getStatusCode(),
+            '_STATUS_REASON' => $response->getReasonPhrase(),
+            '_HEADERS' => $response->getHeaders(),
+            '_JSON_BODY' => $response->getBodyContents(),
         ];
 
         $this->logger->debug('Response Received.', $context);
