@@ -90,7 +90,7 @@ class SpecimenTest extends TestCase
         $specimen = Specimen::buildExampleReadyForResults('C100');
         $this->assertCount(0, $specimen->getQPCRResults());
 
-        $result = SpecimenResultQPCR::createFromSpecimen($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         $this->assertSame($specimen, $result->getSpecimen());
         $this->assertCount(1, $specimen->getQPCRResults());

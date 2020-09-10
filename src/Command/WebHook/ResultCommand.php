@@ -2,7 +2,8 @@
 
 namespace App\Command\WebHook;
 
-use App\Api\WebHook\Client\ResultHttpClient;
+use App\Api\WebHook\Client\HttpClient;
+use App\Api\WebHook\Client\ServiceNowHttpClient;
 use App\Api\WebHook\Request\NewResultsWebHookRequest;
 use App\Command\BaseAppCommand;
 use App\Entity\SpecimenResult;
@@ -10,26 +11,48 @@ use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenResultQPCR;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Fire web hooks related to Results.
+ *
+ * Usage to see next results available:
+ *
+ *     $ bin/console app:webhook:results -v --dry-run
+ *
+ * Usage send web hook:
+ *
+ *     $ bin/console app:webhook:results -v
+ *
  */
 class ResultCommand extends BaseAppCommand
 {
     protected static $defaultName = 'app:webhook:results';
 
     /**
-     * @var ResultHttpClient
+     * Prototype Request object. Internally cloned for each executed request.
+     *
+     * @var NewResultsWebHookRequest|null
+     */
+    private $request;
+
+    /**
+     * @var ServiceNowHttpClient
      */
     private $httpClient;
 
-    public function __construct(EntityManagerInterface $em, ResultHttpClient $httpClient)
+    /**
+     * @param HttpClient $httpClient Compatible with HttpClient or any subclass like ServiceNowHttpClient
+     * @param NewResultsWebHookRequest|null $request Prototype Request object. Only inject for testing purposes.
+     */
+    public function __construct(EntityManagerInterface $em, HttpClient $httpClient, ?NewResultsWebHookRequest $request = null)
     {
         parent::__construct($em);
 
+        $this->request = $request;
         $this->httpClient = $httpClient;
     }
 
@@ -37,31 +60,57 @@ class ResultCommand extends BaseAppCommand
     {
         $this
             ->setDescription('Publishes Specimen Results changes to web hook URL')
+            ->addOption('dry-run', null, InputOption::VALUE_NONE, 'When given, the Web Hook API URL will not be contacted')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save timestamp when results successfully published')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $lastCheckedForResults = new \DateTimeImmutable('now');
+        // These are the Specimen Results to be sent to Web Hooks
         $newResults = $this->findResults();
+
         if (count($newResults) < 1) {
             $this->outputDebug('No results to send');
             return 0;
         }
 
-        $request = new NewResultsWebHookRequest($newResults);
+        $this->outputDebugResultsByGroup($newResults);
 
+        $request = $this->buildWebHookRequest($newResults);
+
+        $this->outputDebug('<comment>Pending Request Body:</comment>');
+        $this->outputDebug($request->toJson());
+        $this->outputDebug('');
+
+        // Abort now if setting CLI option --dry-run
+        if ($this->input->getOption('dry-run')) {
+            return 0;
+        }
+
+        // Send Request to Web Hook API
         try {
-            $response = $this->httpClient->get($request);
-        } catch (ClientException $e) {
-            $output->writeln('<error>Exception calling WebHook endpoint</error>');
-            $output->writeln(sprintf('Status Code: %d %s', $e->getResponse()->getStatusCode(), $e->getResponse()->getReasonPhrase()));
-            $output->writeln('');
-            $output->writeln($e->getMessage());
+            $response = $this->httpClient->post($request);
+        } catch (ClientException | ServerException $e) {
+            // Known Exception type where we have the Request and Response
+            $output->writeln('<error>Exception calling Web Hook endpoint</error>');
+            $output->writeln('Request Body:');
+            $output->writeln($e->getRequest()->getBody() . "\n");
+
+            $exceptionResponse = $e->getResponse();
+            if ($exceptionResponse) {
+                $output->writeln(sprintf('Response Code: %d %s', $exceptionResponse->getStatusCode(), $exceptionResponse->getReasonPhrase()));
+                $output->writeln('Response Body:');
+                $output->writeln($exceptionResponse->getBody() . "\n");
+            }
+
+            $output->writeln('Exception Class: ' . get_class($e));
+            $output->writeln('Exception Message: ' . $e->getMessage());
             return 1;
         } catch (\Exception $e) {
+            // Not sure what Exception occurred, dump some generic info
             $output->writeln('Unknown Exception: ' . $e->getMessage());
+            $output->writeln('Exception Class: ' . get_class($e));
             return 1;
         }
 
@@ -69,36 +118,40 @@ class ResultCommand extends BaseAppCommand
             $output->writeln('Authentication failure. Check credential constants in file .env.local');
             return 1;
         }
-        $output->writeln('<info>√ Authentication success</info>');
+        $this->outputDebug('<info>√ Authentication success</info>');
 
-        if (200 !== $response->getStatusCode()) {
-            $output->writeln('Cannot connect to test endpoint');
+        if (500 === $response->getStatusCode()) {
+            $output->writeln('500 Response from Web Hook endpoint');
             return 1;
         }
 
-        $output->writeln('<info>√ Connection success</info>');
-        $output->writeln('');
-
-        $output->writeln('<comment>Headers:</comment>');
-        foreach ($response->getHeaders() as $name => $values) {
-            $output->writeln($name . ": " . implode(", ", $values));
+        if (200 !== $response->getStatusCode()) {
+            $output->writeln(sprintf('Unhandled HTTP Response Code %d from Web Hook endpoint', $response->getStatusCode()));
+            return 1;
         }
-        $output->writeln('');
 
-        $output->writeln('<comment>Body:</comment>');
-        $output->writeln($response->getBodyContents());
+        $this->outputDebug("<info>√ Response Success</info>\n");
 
-        // Update success date
+        $this->outputDebug('<comment>Response Headers:</comment>');
+        foreach ($response->getHeaders() as $name => $values) {
+            $this->outputDebug($name . ": " . implode(", ", $values));
+        }
+        $this->outputDebug('');
+
+        $this->outputDebug('<comment>Response Body:</comment>');
+        $this->outputDebug($response->getBodyContents());
+        $this->outputDebug('');
+
+        // Update SpecimenResult with data from Response
         $save = !$this->input->getOption('skip-saving');
         if ($save) {
-            foreach ($newResults as $result) {
-                $result->setLastWebHookSuccessAt($lastCheckedForResults);
-            }
+            $this->outputDebug("<comment>Updating Results Web Hook Status...</comment>\n");
+            $response->updateResultWebHookStatus($newResults);
 
             $this->em->flush();
         }
 
-        $this->outputDebugResultsByGroup($newResults);
+        $this->outputDebug("<comment>Done!</comment>\n");
 
         return 0;
     }
@@ -129,43 +182,40 @@ class ResultCommand extends BaseAppCommand
      */
     private function outputDebugResultsByGroup(array $newResults)
     {
-        $this->outputDebug('');
-        $this->outputDebug(sprintf("<info>√ Sent %d Results</info>", count($newResults)));
-
-        $byGroup = [];
+        $this->outputDebug('<comment>Queued Results:</comment>');
         foreach ($newResults as $result) {
-            $group = $result->getSpecimen()->getParticipantGroup();
+            $groupId = $result->getSpecimen()->getParticipantGroup()->getExternalId();
+            $reportedAt = $result->getUpdatedAt()->format('Y-m-d H:i:s');
+            $conclusion = $result->getConclusionText();
 
-            if (!isset($byGroup[$group->getTitle()])) {
-                $byGroup[$group->getTitle()] = [];
+            switch (get_class($result)) {
+                case SpecimenResultAntibody::class:
+                    $resultType = 'Antibody';
+                    break;
+                case SpecimenResultQPCR::class:
+                    $resultType = 'Viral';
+                    break;
             }
 
-            $byGroup[$group->getTitle()][] = $result;
+            $this->outputDebug(sprintf('* %s %s %s %s', $groupId, $reportedAt, $resultType, $conclusion));
+        }
+        $this->outputDebug("");
+    }
+
+    /**
+     * Build Request object to send results to Web Hook API.
+     *
+     * @param SpecimenResult[] $newResults
+     */
+    private function buildWebHookRequest(array $newResults): NewResultsWebHookRequest
+    {
+        if (!$this->request) {
+            $this->request = new NewResultsWebHookRequest();
         }
 
-        // Will display groups alphabetical
-        ksort($byGroup);
+        $request = clone $this->request;
+        $request->setResults($newResults);
 
-        /** @var SpecimenResult[] $groupResults */
-        foreach ($byGroup as $groupResults) {
-            $this->outputDebug('');
-
-            $group = $groupResults[0]->getSpecimen()->getParticipantGroup();
-            $this->outputDebug(sprintf('<comment>Group: %s</comment>', $group->getTitle()));
-
-            foreach ($groupResults as $result) {
-                $resultType = 'UNKNOWN';
-                switch (get_class($result)) {
-                    case SpecimenResultQPCR::class:
-                        $resultType = 'Viral';
-                        break;
-                    case SpecimenResultAntibody::class:
-                        $resultType = 'Antibody';
-                        break;
-                }
-
-                $this->outputDebug(sprintf('%s %s %s', $result->getUpdatedAt()->format("Y-m-d H:i:s"), $resultType, $result->getConclusionText()));
-            }
-        }
+        return $request;
     }
 }

@@ -6,6 +6,11 @@ use App\Api\WebHook\Request\WebHookRequest;
 use App\Api\WebHook\Response\WebHookResponse;
 use App\Entity\WebHookLog;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -102,18 +107,28 @@ class HttpClient
     {
         $this->initConstructorOptions($this->constructorOptions);
 
+        // This is where the JSON is actually set to be the Request Body
+        $options[RequestOptions::BODY] = $request->toJson();
+
+        // Request data logged to entity WebHookLog
         $this->logRequest($method, $request, $options);
 
-        $options['body'] = $request->toJson();
-
         try {
+            // Actually send the Request
             $clientResponse = $this->getClient()->request($method, $this->url, $options);
-            $response = new WebHookResponse($clientResponse, $this->url);
+            $response = $this->buildWebHookResponse($clientResponse);
+        } catch (ClientException | ServerException $e) {
+            // Exception within HTTP Request or Response lifecycle
+            $request = $e->getRequest();
+            $response = $e->getResponse();
+            $this->logRequestResponseException($e, $request, $response);
+            throw $e;
         } catch (\Exception $e) {
-            $this->logException($e);
+            // Not sure what Exception occurred, dump some generic info
+            $this->logUnknownException($e);
             throw $e;
         }
-
+        // Response data logged to entity WebHookLog
         $this->logResponse($response);
 
         return $response;
@@ -174,43 +189,101 @@ class HttpClient
         $this->constructorOptionsInitialized = true;
     }
 
+    /**
+     * @param array $options Keys are from \Guzzle\RequestOptions
+     */
     protected function logRequest(string $method, WebHookRequest $request, array $options)
     {
+        $jsonBody = $options[RequestOptions::BODY] ?? '(Unknown)';
+
+        // Don't log Request body twice
+        unset($options[RequestOptions::BODY]);
+
         $context = array_merge(
+            // See \Guzzle\RequestOptions
             $options,
+
+            // These array keys are just private identifiers for easier viewing in log.
+            // Prefixed with "_" so they don't conflict with \Guzzle\RequestOptions
             [
                 WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
-                'REQUEST_CLASS' => get_class($request),
-                'HTTP_METHOD' => $method,
-                'URL' => $this->url,
-                'JSON_BODY' => $request->toJson(),
+                '_REQUEST_CLASS' => get_class($request),
+                '_HTTP_METHOD' => $method,
+                '_URL' => $this->url,
+                '_JSON_BODY' => $jsonBody,
             ]
         );
 
-        $this->logger->debug('Sending Request.', $context);
+        $this->logger->debug('Sending Request', $context);
     }
 
+    /**
+     * Write Response data to logger, which writes a database entity WebHookLog
+     */
     protected function logResponse(WebHookResponse $response)
+    {
+        // These array keys are just private identifiers for easier viewing in log.
+        // Prefixed with "_" so they don't conflict with \Guzzle\RequestOptions
+        $context = [
+            WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
+            '_RESPONSE_CLASS' => get_class($response),
+            '_STATUS_CODE' => $response->getStatusCode(),
+            '_STATUS_REASON' => $response->getReasonPhrase(),
+            '_HEADERS' => $response->getHeaders(),
+            '_JSON_BODY' => $response->getBodyContents(),
+        ];
+
+        $this->logger->debug('Response Received', $context);
+    }
+
+    /**
+     * Log details about when an Exception is thrown in the Request / Response
+     * lifecycle. Depending when this was thrown the Response may be available.
+     * See log record for more info.
+     */
+    protected function logRequestResponseException(\Exception $e, RequestInterface $request, ?ResponseInterface $response)
     {
         $context = [
             WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
-            'RESPONSE_CLASS' => get_class($response),
-            'STATUS_CODE' => $response->getStatusCode(),
-            'STATUS_REASON' => $response->getReasonPhrase(),
-            'HEADERS' => $response->getHeaders(),
-            'JSON_BODY' => $response->getBodyContents(),
+            'EXCEPTION_CLASS' => get_class($e),
+            'EXCEPTION_CODE' => $e->getCode(),
+            'EXCEPTION_MESSAGE' => $e->getMessage(),
+            'EXCEPTION_TRACE' => $e->getTraceAsString(),
+            'REQUEST_URI' => (string)$request->getUri(),
+            'REQUEST_METHOD' => $request->getMethod(),
+            'REQUEST_BODY' => (string)$request->getBody(),
         ];
 
-        $this->logger->debug('Response Received.', $context);
+        if ($response) {
+            $context['RESPONSE_STATUS_CODE'] = $response->getStatusCode();
+            $context['RESPONSE_STATUS_REASON'] = $response->getReasonPhrase();
+            $context['RESPONSE_BODY'] = (string)$response->getBody();
+        }
+
+        $this->logger->emergency('Exception during Request or Response', $context);
     }
 
-    protected function logException(\Exception $e)
+    /**
+     * Log details about when an Exception of unknown type occurred. We don't
+     * know anything special about it so unable to unpack other details.
+     * See log for more info.
+     */
+    protected function logUnknownException(\Exception $e)
     {
-        $this->logger->emergency('Exception', [
+        $this->logger->emergency('Unknown Exception', [
             WebHookLog::CONTEXT_LIFECYCLE_ID_KEY => $this->lifecycleId,
+            'EXCEPTION_CLASS' => get_class($e),
             'EXCEPTION_CODE' => $e->getCode(),
             'EXCEPTION_MESSAGE' => $e->getMessage(),
             'EXCEPTION_TRACE' => $e->getTraceAsString(),
         ]);
+    }
+
+    /**
+     * Build Response
+     */
+    protected function buildWebHookResponse(ResponseInterface $clientResponse): WebHookResponse
+    {
+        return new WebHookResponse($clientResponse, $this->url);
     }
 }

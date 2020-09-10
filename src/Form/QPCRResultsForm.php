@@ -85,7 +85,7 @@ class QPCRResultsForm extends AbstractType
                     return SpecimenResultQPCR::createFromWell($well, $conclusion);
                 }
 
-                return SpecimenResultQPCR::createFromSpecimen($this->specimen, $conclusion);
+                return new SpecimenResultQPCR($this->specimen, $conclusion);
             }
         ]);
 

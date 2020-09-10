@@ -7,9 +7,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Handler\AbstractProcessingHandler;
 
 /**
- * Writes Monolog records to a database.
+ * Writes Monolog records to a database when logs written to the specified channel.
+ *
+ * Codebase currently uses the "webhook" Monolog channel to log data for webhooks.
+ * WebHookLogHandler is the logic to write those log messages.
  */
-class DatabaseLoggerHandler extends AbstractProcessingHandler
+class WebHookLogHandler extends AbstractProcessingHandler
 {
     /** @var EntityManagerInterface */
     private $em;

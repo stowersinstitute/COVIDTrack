@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Specimen;
+use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
 use PHPUnit\Framework\TestCase;
@@ -39,5 +40,16 @@ class SpecimenResultAntibodyTest extends TestCase
         $result->setSignal($signal);
 
         $this->assertSame($expected, $result->getSignal());
+    }
+
+    public function testDefaultWebHookStatus()
+    {
+        $specimen = Specimen::buildExampleReadyForResults('S100');
+        $well = SpecimenWell::buildExample($specimen);
+
+        // Result given a Conclusion, so at time of writing, record has all data supplied to Web Hook
+        $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_NON_NEGATIVE);
+
+        $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
     }
 }

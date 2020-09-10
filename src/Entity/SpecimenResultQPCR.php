@@ -83,6 +83,23 @@ class SpecimenResultQPCR extends SpecimenResult
     private $ct3AmpScore;
 
     /**
+     * @param string $conclusion SpecimenResult::CONCLUSION_* constant
+     */
+    public function __construct(Specimen $specimen, string $conclusion)
+    {
+        parent::__construct();
+
+        if (!$specimen->willAllowAddingResults()) {
+            throw new \RuntimeException('Specimen not in Status that allows adding Viral Results');
+        }
+
+        $this->specimen = $specimen;
+        $this->specimen->addQPCRResult($this);
+
+        $this->setConclusion($conclusion);
+    }
+
+    /**
      * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
      */
     public static function createFromWell(SpecimenWell $well, string $conclusion): self
@@ -91,30 +108,11 @@ class SpecimenResultQPCR extends SpecimenResult
             throw new \InvalidArgumentException('SpecimenWell must have a Specimen to associate SpecimenResultQPCR');
         }
 
-        $r = self::createFromSpecimen($well->getSpecimen(), $conclusion);
+        $r = new self($well->getSpecimen(), $conclusion);
 
         // Setup relationship between SpecimenWell <==> SpecimenResultsQPCR
         $r->well = $well;
         $well->addResultQPCR($r);
-
-        return $r;
-    }
-
-    /**
-     * @param string       $conclusion SpecimenResultQPCR::CONCLUSION_* constant
-     */
-    public static function createFromSpecimen(Specimen $specimen, string $conclusion): self
-    {
-        if (!$specimen->willAllowAddingResults()) {
-            throw new \RuntimeException('Specimen not in Status that allows adding Viral Results');
-        }
-
-        $r = new self();
-
-        $r->specimen = $specimen;
-        $r->specimen->addQPCRResult($r);
-
-        $r->setConclusion($conclusion);
 
         return $r;
     }

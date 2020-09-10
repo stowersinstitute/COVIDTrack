@@ -90,10 +90,16 @@ services:
             - '@router'
 
     # WebHook API Connections
-    App\Api\WebHook\Client\ResultHttpClient:
+    App\Api\WebHook\Client\ServiceNowHttpClient:
         arguments:
             # $options array
             - url: '%env(WEBHOOK_RESULTS_URL)%'
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
             - "@monolog.logger.webhook"
+
+    # Results Command reports to ServiceNow
+    App\Command\WebHook\ResultCommand:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '@App\Api\WebHook\Client\ServiceNowHttpClient'
