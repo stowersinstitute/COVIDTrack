@@ -77,6 +77,16 @@ class HttpClient
     }
 
     /**
+     * Get URL where requests will be sent.
+     */
+    public function getUrl(): string
+    {
+        $this->initConstructorOptions($this->constructorOptions);
+
+        return $this->url;
+    }
+
+    /**
      * Submit a GET HTTP request and return its WebHookResponse.
      *
      * @param array $options  Request options to apply. See \GuzzleHttp\RequestOptions.

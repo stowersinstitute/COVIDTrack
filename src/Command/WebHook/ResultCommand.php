@@ -83,6 +83,8 @@ class ResultCommand extends BaseAppCommand
         $this->outputDebug($request->toJson());
         $this->outputDebug('');
 
+        $this->outputDebug(sprintf("<comment>Request URL:</comment> %s\n", $this->httpClient->getUrl()));
+
         // Abort now if setting CLI option --dry-run
         if ($this->input->getOption('dry-run')) {
             return 0;
