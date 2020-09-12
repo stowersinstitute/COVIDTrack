@@ -27,6 +27,9 @@ class ParticipantGroupForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        /** @var ParticipantGroup|null $group */
+        $group = $builder->getData();
+
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Title',
@@ -56,21 +59,33 @@ class ParticipantGroupForm extends AbstractType
                 'label' => 'Accept Saliva?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'required' => true,
+                // Disable when inactive, Enable when active
+                'disabled' => $group ? !$group->isActive() : false,
+                'help' => ($group && $group->isActive()) ? null : 'Activate This Group to edit this field',
             ])
             ->add('acceptsBloodSpecimens', ChoiceType::class, [
                 'label' => 'Accept Blood?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'required' => true,
+                // Disable when inactive, Enable when active
+                'disabled' => $group ? !$group->isActive() : false,
+                'help' => ($group && $group->isActive()) ? null : 'Activate This Group to edit this field',
             ])
             ->add('viralResultsWebHooksEnabled', ChoiceType::class, [
                 'label' => 'Publish Viral Results to Web Hooks?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'required' => true,
+                // Disable when inactive, Enable when active
+                'disabled' => $group ? !$group->isActive() : false,
+                'help' => ($group && $group->isActive()) ? null : 'Activate This Group to edit this field',
             ])
             ->add('antibodyResultsWebHooksEnabled', ChoiceType::class, [
                 'label' => 'Publish Antibody Results to Web Hooks?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'required' => true,
+                // Disable when inactive, Enable when active
+                'disabled' => $group ? !$group->isActive() : false,
+                'help' => ($group && $group->isActive()) ? null : 'Activate This Group to edit this field',
             ])
             ->add('save', SubmitType::class, [
                 'attr' => ['class' => 'btn-primary'],
