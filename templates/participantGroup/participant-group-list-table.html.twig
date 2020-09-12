@@ -2,6 +2,10 @@
 {% set userCanEditGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanPrintLabels = is_granted('ROLE_PRINT_GROUP_LABELS') %}
 
+{% macro tableBadge(appearActive, text, title='') %}
+    <span class="badge {{ appearActive ? 'bg-green' : 'bg-gray' }}" title="{{ title }}" style="margin-right:3px">{{ text }}</span>
+{% endmacro %}
+
 {% if userCanPrintLabels %}
     <div class="margin-bottom">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#labelPrintModal">
@@ -53,21 +57,42 @@
             <td>{{ group.participantCount }}</td>
             <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
             <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ group.isActive ? 'Yes' : 'No' }}</td>
+            <td>{% spaceless %}
+                {% set activeText = group.isActive ? 'Yes' : 'No' %}
+                {{ _self.tableBadge(group.isActive, activeText) }}
+            {% endspaceless %}</td>
             <td>{% spaceless %}
                 {% if group.acceptsSalivaSpecimens %}
-                <span class="badge bg-green" title="Saliva specimens allowed" style="margin-right:3px">S</span>
+                    {% set salivaTitle = 'Saliva specimens allowed' %}
+                    {% if not group.isActive %}
+                        {% set salivaTitle = 'Saliva specimens marked Yes, but Group inactive, so will not be accepted' %}
+                    {% endif %}
+                    {{ _self.tableBadge(group.isActive, 'S', salivaTitle) }}
                 {% endif %}
+
                 {% if group.acceptsBloodSpecimens %}
-                <span class="badge bg-green" title="Blood specimens allowed">B</span>
+                    {% set bloodTitle = 'Blood specimens allowed' %}
+                    {% if not group.isActive %}
+                        {% set bloodTitle = 'Blood specimens marked Yes, but Group inactive, so will not be accepted' %}
+                    {% endif %}
+                    {{ _self.tableBadge(group.isActive, 'B', bloodTitle) }}
                 {% endif %}
             {% endspaceless %}</td>
             <td>{% spaceless %}
                 {% if group.viralResultsWebHooksEnabled %}
-                <span class="badge bg-green" title="Viral results enabled to web hooks" style="margin-right:3px">V</span>
+                    {% set viralWebHookTitle = 'Viral Results will be sent to web hooks' %}
+                    {% if not group.isActive %}
+                        {% set viralWebHookTitle = 'Viral Results to web hooks marked Yes, but Group inactive, so will not be sent' %}
+                    {% endif %}
+                    {{ _self.tableBadge(group.isActive, 'V', viralWebHookTitle) }}
                 {% endif %}
+
                 {% if group.antibodyResultsWebHooksEnabled %}
-                <span class="badge bg-green" title="Antibody results enabled to web hooks">A</span>
+                    {% set antibodyWebHookTitle = 'Antibody Results will be sent to web hooks' %}
+                    {% if not group.isActive %}
+                        {% set antibodyWebHookTitle = 'Antibody Results to web hooks marked Yes, but Group inactive, so will not be sent' %}
+                    {% endif %}
+                    {{ _self.tableBadge(group.isActive, 'A', antibodyWebHookTitle) }}
                 {% endif %}
             {% endspaceless %}</td>
         </tr>
