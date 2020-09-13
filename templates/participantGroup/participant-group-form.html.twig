@@ -27,14 +27,14 @@
                 </div>
                 <div class="box-body">
                         {% if group.isActive %}
-                            <form method="post" action="{{ path('app_participant_group_deactivate', { title: group.title }) }}" onsubmit="return confirm('Deactivate Group?');">
+                            <form method="post" action="{{ path('app_participant_group_deactivate', { title: group.title }) }}" onsubmit='return confirm("Group Participants will no longer be able to use a Kiosk.\nGroup Results will no longer be sent to Web Hooks.\nContinue?");'>
                                 <input type="hidden" name="title" value="{{ group.title }}">
-                                <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Deactivate</button>
+                                <button type="submit" class="btn btn-danger"> Deactivate This Group</button>
                             </form>
                         {% else %}
-                            <form method="post" action="{{ path('app_participant_group_activate', { title: group.title }) }}" onsubmit="return confirm('Activate Group?');">
+                            <form method="post" action="{{ path('app_participant_group_activate', { title: group.title }) }}" onsubmit="return confirm('Activate This Group?');">
                                 <input type="hidden" name="title" value="{{ group.title }}">
-                                <button type="submit" class="btn btn-success"><i class="fa fa-trash-restore"></i> Activate</button>
+                                <button type="submit" class="btn btn-success"> Activate This Group</button>
                             </form>
                         {% endif %}
                 </div>

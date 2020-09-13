@@ -185,6 +185,10 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Deactivate a single Participant Group. Participants will no longer be
+     * able to drop-off Specimens in this Group. Results will no longer be
+     * sent to web hooks.
+     *
      * @Route("/{title}/deactivate", methods={"POST"}, name="app_participant_group_deactivate")
      */
     public function deactivate(string $title, EntityManagerInterface $em)
@@ -201,6 +205,8 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Activate a single Participant Group.
+     *
      * @Route("/{title}/activate", methods={"POST"}, name="app_participant_group_activate")
      */
     public function activate(string $title, EntityManagerInterface $em)
