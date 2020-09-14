@@ -71,6 +71,7 @@ class TubeCheckinSalivaController extends AbstractController
         return $this->render('checkin/saliva/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'rejected' => $output['rejected'] ?? [],
             'accepted' => $output['accepted'] ?? [],
             'importPreviewTemplate' => 'checkin/saliva/excel-import-table.html.twig',

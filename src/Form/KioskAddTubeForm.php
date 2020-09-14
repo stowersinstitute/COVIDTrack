@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\ParticipantGroup;
 use App\Entity\Tube;
 use App\Form\Type\CollectionTimeType;
 use App\Form\Type\RadioButtonGroupType;
@@ -18,11 +19,21 @@ class KioskAddTubeForm extends AbstractType
     {
         parent::configureOptions($resolver);
 
-        $resolver->setDefault('numDaysInPastForCollectionDate', 3);
+        $resolver->setDefaults([
+            'numDaysInPastForCollectionDate' => 3,
+            'participantGroup' => null,
+        ]);
+
+        $resolver->setAllowedTypes('participantGroup', ParticipantGroup::class);
+
+        $resolver->setRequired('participantGroup');
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        /** @var ParticipantGroup $group */
+        $group = $options['participantGroup'];
+
         $days = [];
         foreach (range($options['numDaysInPastForCollectionDate'], 0) as $daysAgo) {
             $date = new \DateTime(sprintf('-%d days', $daysAgo));
@@ -51,6 +62,14 @@ class KioskAddTubeForm extends AbstractType
             $times[$userReadableText] = $formSubmitValue;
         }
 
+        $allowedDropOffTypeChoices = [];
+        if ($group->acceptsSalivaSpecimens()) {
+            $allowedDropOffTypeChoices['Saliva'] = Tube::TYPE_SALIVA;
+        }
+        if($group->acceptsBloodSpecimens()) {
+            $allowedDropOffTypeChoices['Blood'] = Tube::TYPE_BLOOD;
+        }
+
         $builder
             ->add('accessionId', TextLookupType::class, [
                 'label' => 'Tube Label ID',
@@ -58,12 +77,10 @@ class KioskAddTubeForm extends AbstractType
                 'button_text' => 'Lookup',
             ])
             ->add('tubeType', RadioButtonGroupType::class, [
-                'choices' => [
-                    'Saliva' => Tube::TYPE_SALIVA,
-                    'Blood' => Tube::TYPE_BLOOD,
-                ],
+                'choices' => $allowedDropOffTypeChoices,
                 'required' => true,
                 'constraints' => [new NotBlank()],
+                'data' => count($allowedDropOffTypeChoices) == 1 ? reset($allowedDropOffTypeChoices) : null,
             ])
             ->add('collectedAtDate', RadioButtonGroupType::class, [
                 'choices' => $days,

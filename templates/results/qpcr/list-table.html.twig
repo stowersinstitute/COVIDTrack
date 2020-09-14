@@ -1,5 +1,6 @@
 {% block body %}
 {% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
+{% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 <table class="table table-bordered table-hover">
@@ -7,6 +8,7 @@
         <tr>
             {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
             <th>Specimen</th>
+            {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
             <th>Conclusion</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
@@ -29,6 +31,9 @@
                     {{ result.specimen.accessionId }}
                 {% endif %}
             </td>
+            {% if userCanViewGroups %}
+                <td><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></td>
+            {% endif %}
             <td>{{ result.conclusionText }}</td>
             <td>
                 {% if userCanViewWellPlates %}

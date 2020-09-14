@@ -1,0 +1,53 @@
+{
+  "result": {
+    "status": "COMPLETE",
+    "rows": [
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 365,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-07T15:34:58Z",
+          "group": {
+            "id": 37,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 366,
+          "type": "ANTIBODY",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-06T15:34:58Z",
+          "group": {
+            "id": 37,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      },
+      {
+        "status": "SUCCESS",
+        "message": "Imported row successfully",
+        "data": {
+          "id": 285,
+          "type": "VIRAL",
+          "conclusion": "NEGATIVE",
+          "published_at": "2020-09-07T15:34:56Z",
+          "group": {
+            "id": 37,
+            "external_id": "007c9d7d1b16189009a0dd3bdc4bcbc4",
+            "title": "Individual 1"
+          }
+        }
+      }
+    ],
+    "message": "Encountered errors with 1 or more rows"
+  }
+}

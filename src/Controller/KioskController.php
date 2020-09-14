@@ -96,6 +96,7 @@ class KioskController extends AbstractController
                 'query_builder' => function(ParticipantGroupRepository $repository) {
                     return $repository->createQueryBuilder('g')
                         ->where('g.isActive = true')
+                        ->andWhere('(g.acceptsSalivaSpecimens = true or g.acceptsBloodSpecimens = true)')
                         ->orderBy('g.title', 'ASC')
                     ;
                 },
@@ -144,7 +145,10 @@ class KioskController extends AbstractController
             return $this->redirectToRoute('kiosk_index');
         }
 
-        $form = $this->createForm(KioskAddTubeForm::class);
+        $form = $this->createForm(KioskAddTubeForm::class, null, [
+            'participantGroup' => $kioskSession->getParticipantGroup()
+        ]);
+
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $formData = $form->getData();

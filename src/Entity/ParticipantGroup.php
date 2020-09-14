@@ -8,12 +8,14 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Traits\SoftDeleteableEntity;
 use App\Traits\TimestampableEntity;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Population of Participants being studied.
  *
  * @ORM\Entity(repositoryClass="App\Entity\ParticipantGroupRepository")
  * @ORM\Table(name="participant_groups")
+ * @UniqueEntity("title", message="Title value is already used by an existing Group.")
  * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 class ParticipantGroup
@@ -41,9 +43,11 @@ class ParticipantGroup
     private $accessionId;
 
     /**
-     * @var string|null ID for syncing with exports from an outside system such as an air-gapped database
+     * ID sourced from an external system. Used for reconciling group identity.
      *
+     * @var string|null
      * @ORM\Column(name="external_id", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $externalId;
 
@@ -52,7 +56,7 @@ class ParticipantGroup
      * so participants don't need to remember a number.
      *
      * @var string
-     * @ORM\Column(name="title", type="string", nullable=true)
+     * @ORM\Column(name="title", type="string", unique=true)
      * @Gedmo\Versioned
      */
     private $title;
@@ -76,13 +80,6 @@ class ParticipantGroup
     private $specimens;
 
     /**
-     * @var DropOffWindow[]
-     *
-     * @ORM\ManyToMany(targetEntity="DropOffWindow", mappedBy="participantGroups")
-     */
-    private $dropOffWindows;
-
-    /**
      * @var boolean If true, the system expects specimens for this group
      *
      * @ORM\Column(name="is_active", type="boolean", nullable=true)
@@ -99,14 +96,42 @@ class ParticipantGroup
     private $isControl;
 
     /**
-     * When true, Viral and Antibody results for Group Participants will be
-     * published to the Results Web Hook.
+     * When true, Saliva Specimens can be dropped-off at Kiosk by Participants
+     * belonging to this Group.
      *
      * @var bool
-     * @ORM\Column(name="enabled_for_results_web_hooks", type="boolean", options={"default":1})
+     * @ORM\Column(name="accepts_saliva_specimens", type="boolean", options={"default":1})
      * @Gedmo\Versioned
      */
-    private $enabledForResultsWebHooks;
+    private $acceptsSalivaSpecimens;
+
+    /**
+     * When true, Blood Specimens can be dropped-off at Kiosk by Participants
+     * belonging to this Group.
+     *
+     * @var bool
+     * @ORM\Column(name="accepts_blood_specimens", type="boolean", options={"default":1})
+     * @Gedmo\Versioned
+     */
+    private $acceptsBloodSpecimens;
+
+    /**
+     * When true, Viral results for Group Participants will be published to the Results Web Hook.
+     *
+     * @var bool
+     * @ORM\Column(name="viral_results_web_hooks_enabled", type="boolean", options={"default":0})
+     * @Gedmo\Versioned
+     */
+    private $viralResultsWebHooksEnabled;
+
+    /**
+     * When true, Antibody results for Group Participants will be published to the Results Web Hook.
+     *
+     * @var bool
+     * @ORM\Column(name="antibody_results_web_hooks_enabled", type="boolean", options={"default":0})
+     * @Gedmo\Versioned
+     */
+    private $antibodyResultsWebHooksEnabled;
 
     public function __construct(string $accessionId, int $participantCount)
     {
@@ -116,9 +141,11 @@ class ParticipantGroup
         $this->createdAt = new \DateTimeImmutable();
         $this->isActive = true;
         $this->isControl = false;
-        $this->enabledForResultsWebHooks = true;
 
-        $this->dropOffWindows = new ArrayCollection();
+        $this->acceptsSalivaSpecimens = true;
+        $this->acceptsBloodSpecimens = true;
+        $this->viralResultsWebHooksEnabled = false;
+        $this->antibodyResultsWebHooksEnabled = false;
     }
 
     /**
@@ -165,12 +192,18 @@ class ParticipantGroup
         $keyConverter = [
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
+            'externalId' => 'External ID',
             'title' => 'Title',
             'participantCount' => 'Participants',
             'createdAt' => 'Created At',
             'isActive' => 'Is Active?',
             'isControl' => 'Is Control Group?',
+            // Entity Property removed 2020-08-27 but still exists in Audit Log records
             'enabledForResultsWebHooks' => 'Publish Results to Web Hooks?',
+            'acceptsSalivaSpecimens' => 'Accepts Saliva?',
+            'acceptsBloodSpecimens' => 'Accepts Blood?',
+            'viralResultsWebHooksEnabled' => 'Publish Viral Results to Web Hooks?',
+            'antibodyResultsWebHooksEnabled' => 'Publish Antibody Results to Web Hooks?',
         ];
 
         $fnYesNoFromBoolean = function ($bool) {
@@ -183,7 +216,12 @@ class ParticipantGroup
         $valueConverter = [
             'isActive' => $fnYesNoFromBoolean,
             'isControl' => $fnYesNoFromBoolean,
+            // Entity Property removed 2020-08-27 but still exists in Audit Log records
             'enabledForResultsWebHooks' => $fnYesNoFromBoolean,
+            'acceptsSalivaSpecimens' => $fnYesNoFromBoolean,
+            'acceptsBloodSpecimens' => $fnYesNoFromBoolean,
+            'viralResultsWebHooksEnabled' => $fnYesNoFromBoolean,
+            'antibodyResultsWebHooksEnabled' => $fnYesNoFromBoolean,
         ];
 
         $return = [];
@@ -200,67 +238,6 @@ class ParticipantGroup
         }
 
         return $return;
-    }
-
-    public function getDropOffWindowDebugString()
-    {
-        $strings = [];
-        foreach ($this->dropOffWindows as $window) {
-            $strings[] = sprintf(
-                '[%s %s-%s]',
-                $window->getStartsAt()->format('D'),
-                $window->getStartsAt()->format('H:i'),
-                $window->getEndsAt()->format('H:i')
-            );
-        }
-
-        if (!$strings) return '-- None --';
-
-        return join(' ', $strings);
-    }
-
-    /**
-     * @return DropOffWindow[]
-     */
-    public function getDropOffWindows() : array
-    {
-        return $this->dropOffWindows->getValues();
-    }
-
-    public function addDropOffWindow(DropOffWindow $dropOffWindow)
-    {
-        if ($this->hasDropOffWindow($dropOffWindow)) return;
-
-        $this->dropOffWindows->add($dropOffWindow);
-        $dropOffWindow->addParticipantGroup($this);
-    }
-
-    public function hasDropOffWindow(DropOffWindow $dropOffWindow)
-    {
-        foreach ($this->dropOffWindows as $window) {
-            if (EntityUtils::isSameEntity($window, $dropOffWindow)) return true;
-        }
-
-        return false;
-    }
-
-    public function removeDropOffWindow(DropOffWindow $window)
-    {
-        if (!$this->hasDropOffWindow($window)) return;
-
-        foreach ($this->dropOffWindows as $currWindow) {
-            if (EntityUtils::isSameEntity($currWindow, $window)) {
-                $this->dropOffWindows->removeElement($currWindow);
-                $currWindow->removeParticipantGroup($this);
-            }
-        }
-    }
-
-    public function clearDropOffWindows()
-    {
-        foreach ($this->dropOffWindows as $window) {
-            $this->removeDropOffWindow($window);
-        }
     }
 
     public function getId(): ?int
@@ -305,10 +282,26 @@ class ParticipantGroup
         return $this->specimens->getValues();
     }
 
+    /**
+     * @internal
+     * @deprecated Not actually deprecated, but only call from within Specimen::__construct()
+     */
     public function addSpecimen(Specimen $specimen): void
     {
-        // TODO: Add de-duplicating logic
-        $this->specimens->add($specimen);
+        if (!$this->hasSpecimen($specimen)) {
+            $this->specimens->add($specimen);
+        }
+    }
+
+    private function hasSpecimen(Specimen $specimen): bool
+    {
+        foreach ($this->specimens as $currentSpecimen) {
+            if (EntityUtils::isSameEntity($currentSpecimen, $specimen)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -357,13 +350,43 @@ class ParticipantGroup
         $this->isControl = $isControl;
     }
 
-    public function isEnabledForResultsWebHooks(): bool
+    public function acceptsSalivaSpecimens(): bool
     {
-        return $this->enabledForResultsWebHooks;
+        return $this->acceptsSalivaSpecimens;
     }
 
-    public function setEnabledForResultsWebHooks(bool $enabledForResultsWebHooks): void
+    public function setAcceptsSalivaSpecimens(bool $flag): void
     {
-        $this->enabledForResultsWebHooks = $enabledForResultsWebHooks;
+        $this->acceptsSalivaSpecimens = $flag;
+    }
+
+    public function acceptsBloodSpecimens(): bool
+    {
+        return $this->acceptsBloodSpecimens;
+    }
+
+    public function setAcceptsBloodSpecimens(bool $flag): void
+    {
+        $this->acceptsBloodSpecimens = $flag;
+    }
+
+    public function viralResultsWebHooksEnabled(): bool
+    {
+        return $this->viralResultsWebHooksEnabled;
+    }
+
+    public function setViralResultsWebHooksEnabled(bool $flag): void
+    {
+        $this->viralResultsWebHooksEnabled = $flag;
+    }
+
+    public function antibodyResultsWebHooksEnabled(): bool
+    {
+        return $this->antibodyResultsWebHooksEnabled;
+    }
+
+    public function setAntibodyResultsWebHooksEnabled(bool $flag): void
+    {
+        $this->antibodyResultsWebHooksEnabled = $flag;
     }
 }

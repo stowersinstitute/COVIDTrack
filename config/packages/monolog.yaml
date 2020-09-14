@@ -1,0 +1,9 @@
+monolog:
+    channels: ["webhook"]
+    handlers:
+        # Any logs written to the "webhook" Monolog channel will be processed by the below class
+        webhook_handler:
+            level:    debug
+            type:     service
+            id:       App\Api\WebHook\Client\WebHookLogHandler
+            channels: ["webhook"]

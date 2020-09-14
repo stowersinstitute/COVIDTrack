@@ -70,6 +70,7 @@ class SpecimenResultAntibodyExcelController extends AbstractController
         return $this->render('results/antibody/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'createdResults' => $output['created'] ?? [],
             'updatedResults' => $output['updated'] ?? [],
             'importPreviewTemplate' => 'results/antibody/excel-import-table.html.twig',

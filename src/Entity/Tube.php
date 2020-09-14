@@ -667,7 +667,7 @@ class Tube
     /**
      * @return string[]
      */
-    private static function getValidStatuses(): array
+    public static function getValidStatuses(): array
     {
         return [
             'Created' => self::STATUS_CREATED,

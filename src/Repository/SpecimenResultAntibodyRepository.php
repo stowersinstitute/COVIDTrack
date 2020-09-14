@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultAntibody;
 use App\Form\SpecimenResultAntibodyFilterForm;
 use App\Util\DateUtils;
@@ -54,14 +55,15 @@ class SpecimenResultAntibodyRepository extends EntityRepository
             ->join('r.specimen', 's')
             ->join('s.participantGroup', 'g')
 
-            // Only results that haven't been reported
-            ->where('(r.lastWebHookSuccessAt IS NULL OR r.createdAt > r.lastWebHookSuccessAt)')
-
             // Only Active groups
             ->andWhere('g.isActive = true')
 
-            // Only groups marked for publishing results to Web Hooks
-            ->andWhere('g.enabledForResultsWebHooks = true')
+            // Only groups marked for publishing Antibody results to Web Hooks
+            ->andWhere('g.antibodyResultsWebHooksEnabled = true')
+
+            // Results queued to be sent
+            ->andWhere('(r.webHookStatus = :webHookStatus)')
+            ->setParameter('webHookStatus', SpecimenResult::WEBHOOK_STATUS_QUEUED)
 
             ->orderBy('r.updatedAt')
             ->getQuery()

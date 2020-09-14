@@ -210,9 +210,6 @@
             "config/packages/sensio_framework_extra.yaml"
         ]
     },
-    "simshaun/recurr": {
-        "version": "v4.0.2"
-    },
     "stof/doctrine-extensions-bundle": {
         "version": "1.2",
         "recipe": {

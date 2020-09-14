@@ -31,8 +31,16 @@ class ParticipantGroupForm extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Title',
             ])
+            ->add('accessionId', TextType::class, [
+                'label' => 'Accession ID',
+                'disabled' => true,
+            ])
+            ->add('externalId', TextType::class, [
+                'label' => 'External ID',
+                'required' => false,
+            ])
             ->add('participantCount', IntegerType::class, [
-                'label' => 'Number of Participants',
+                'label' => 'Participants',
                 'attr' => [
                     'min' => ParticipantGroup::MIN_PARTICIPANT_COUNT,
                     'max' => ParticipantGroup::MAX_PARTICIPANT_COUNT,
@@ -42,13 +50,26 @@ class ParticipantGroupForm extends AbstractType
                 'label' => 'Is Control Group?',
                 'choices' => ['Yes' => true, 'No' => false],
                 'data' => false,
-                'expanded' => true,
                 'required' => true,
             ])
-            ->add('enabledForResultsWebHooks', ChoiceType::class, [
-                'label' => 'Publish Results to Web Hooks?',
+            ->add('acceptsSalivaSpecimens', ChoiceType::class, [
+                'label' => 'Accept Saliva?',
                 'choices' => ['Yes' => true, 'No' => false],
-                'expanded' => true,
+                'required' => true,
+            ])
+            ->add('acceptsBloodSpecimens', ChoiceType::class, [
+                'label' => 'Accept Blood?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
+            ->add('viralResultsWebHooksEnabled', ChoiceType::class, [
+                'label' => 'Publish Viral Results to Web Hooks?',
+                'choices' => ['Yes' => true, 'No' => false],
+                'required' => true,
+            ])
+            ->add('antibodyResultsWebHooksEnabled', ChoiceType::class, [
+                'label' => 'Publish Antibody Results to Web Hooks?',
+                'choices' => ['Yes' => true, 'No' => false],
                 'required' => true,
             ])
             ->add('save', SubmitType::class, [

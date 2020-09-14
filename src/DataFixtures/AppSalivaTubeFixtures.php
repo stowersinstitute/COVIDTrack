@@ -28,6 +28,8 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
     }
 
     /**
+     * All Groups that allow Saliva Specimens
+     *
      * @var ParticipantGroup[]
      */
     private $allGroups;
@@ -172,7 +174,10 @@ class AppSalivaTubeFixtures extends Fixture implements DependentFixtureInterface
     private function getRandomGroup(ObjectManager $em): ParticipantGroup
     {
         if (empty($this->allGroups)) {
-            $this->allGroups = $em->getRepository(ParticipantGroup::class)->findAll();
+            $this->allGroups = $em->getRepository(ParticipantGroup::class)->findBy([
+                // Must accept Saliva Specimens for use in this fixture class
+                'acceptsSalivaSpecimens' => true,
+            ]);
         }
 
         return $this->allGroups[array_rand($this->allGroups)];

@@ -7,4 +7,4 @@ services:
     # Auto-register fixtures for "test" environment.
     # Any fixture in a directory "DataFixtures" will be available.
     App\Tests\:
-        resource: '../../../tests/*/DataFixtures/*'
+        resource: '../../../tests/**/DataFixtures/*'

@@ -64,4 +64,24 @@ class TubeRepository extends EntityRepository
 
         return $record['specimenId'];
     }
+
+    /**
+     * Filter list of Tubes to display.
+     *
+     * @see TubeFilterForm
+     * @return Tube[]
+     */
+    public function filterByFormData(array $data): array
+    {
+        $qb = $this->createQueryBuilder('t');
+
+        if (isset($data['status'])) {
+            $qb->andWhere('t.status = :f_status');
+            $qb->setParameter('f_status', $data['status']);
+        }
+
+        $qb->addOrderBy('t.createdAt', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
 }

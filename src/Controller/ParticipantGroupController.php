@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\AccessionId\ParticipantGroupAccessionIdGenerator;
-use App\Entity\DropOffSchedule;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\LabelPrinter;
@@ -14,12 +13,12 @@ use App\Form\GenericExcelImportType;
 use App\Form\ParticipantGroupForm;
 use App\Label\ParticipantGroupBadgeLabelBuilder;
 use App\Label\ZplPrinting;
-use App\Scheduling\ParticipantGroupRoundRobinScheduler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,7 +37,7 @@ class ParticipantGroupController extends AbstractController
      * When POST for printing the request params should be
      *  - `groups` an array of group titles to be printed
      *
-     * @Route(path="/", methods={"GET","POST"}, name="app_participant_group_list")
+     * @Route(path="/", methods={"GET"}, name="app_participant_group_list")
      */
     public function list(Request $request, ZplPrinting $zpl)
     {
@@ -46,42 +45,10 @@ class ParticipantGroupController extends AbstractController
 
         $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
 
-        $form = $this->createFormBuilder()
-            ->add('printer', EntityType::class, [
-                'class' => LabelPrinter::class,
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- None -'
-            ])
-            ->add('print', SubmitType::class, [
-                'label' => 'Print Selected Group Labels',
-                'attr' => ['class' => 'btn-primary'],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
-            $data = $form->getData();
-            $groupTitles = $request->request->get('groups', []);
-
-            $printGroups = $groupRepo->findBy(['title' => $groupTitles]);
-
-            $printer = $this->getDoctrine()->getRepository(LabelPrinter::class)->find($data['printer']);
-
-            $builder = new ParticipantGroupBadgeLabelBuilder();
-            $builder->setPrinter($printer);
-
-            foreach ($printGroups as $group) {
-                $builder->setGroup($group);
-                $zpl->printBuilder($builder, $group->getParticipantCount());
-            }
-        }
+        $form = $this->getPrintForm();
 
         return $this->render('participantGroup/participant-group-list.html.twig', [
-            'groups' => $groupRepo->findActive(),
+            'groups' => $groupRepo->findForList(),
             'form' => $form->createView(),
         ]);
     }
@@ -91,10 +58,9 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route(path="/new", methods={"GET", "POST"}, name="app_participant_group_new")
      */
-    public function new(Request $request) : Response
+    public function new(Request $request, EntityManagerInterface $em) : Response
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $form = $this->createForm(ParticipantGroupForm::class);
         $form->handleRequest($request);
@@ -102,15 +68,7 @@ class ParticipantGroupController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $group = $form->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($group);
-            $em->flush();
-
-            $scheduler = new ParticipantGroupRoundRobinScheduler();
-            $scheduler->assignByDays(
-                [$group],
-                $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-            );
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_list');
@@ -127,10 +85,9 @@ class ParticipantGroupController extends AbstractController
      *
      * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
      */
-    public function edit(string $title, Request $request) : Response
+    public function edit(string $title, Request $request, EntityManagerInterface $em) : Response
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -138,7 +95,6 @@ class ParticipantGroupController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->flush();
 
             return $this->redirectToRoute('app_participant_group_view', [
@@ -151,6 +107,60 @@ class ParticipantGroupController extends AbstractController
             'form' => $form->createView(),
             'group' => $group,
         ]);
+    }
+
+    /**
+     * Show a list of group names to let the user print new labels
+     *
+     * @Route(path="/print-group-label", methods={"GET"}, name="app_participant_group_print_list")
+     */
+    public function listPrint(Request $request, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
+        $groupRepo = $this->getDoctrine()->getRepository(ParticipantGroup::class);
+
+        $form = $this->getPrintForm();
+
+        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
+            'groups' => $groupRepo->findActive(),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * Print group labels.
+     *
+     * Required POST params:
+     *
+     * - groups (string[]) ParticipantGroup.title to print
+     *
+     * @Route("/print", methods={"POST"}, name="app_participant_group_print")
+     */
+    public function print(Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
+
+        $form = $this->getPrintForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $groupTitles = $request->request->get('groups', []);
+
+            $printGroups = $em->getRepository(ParticipantGroup::class)->findBy(['title' => $groupTitles]);
+
+            $builder = new ParticipantGroupBadgeLabelBuilder();
+            $builder->setPrinter($data['printer']);
+
+            foreach ($printGroups as $group) {
+                $copies = empty($data['numToPrint']) ? $group->getParticipantCount() : $data['numToPrint'];
+                $builder->setGroup($group);
+                $zpl->printBuilder($builder, $copies);
+            }
+        }
+
+        return $this->redirect($request->headers->get('referer'));
     }
 
     /**
@@ -179,14 +189,11 @@ class ParticipantGroupController extends AbstractController
      */
     public function deactivate(string $title, EntityManagerInterface $em)
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
         $group->setIsActive(false);
-        // Clean up any drop off windows this group was using
-        $group->clearDropOffWindows();
 
         $em->flush();
 
@@ -198,8 +205,7 @@ class ParticipantGroupController extends AbstractController
      */
     public function activate(string $title, EntityManagerInterface $em)
     {
-        // Requires admin privileges because this can impact assigned drop-off windows
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
         $group = $this->findGroupByTitle($title);
 
@@ -207,81 +213,22 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        // Assign to the next available dropoff window
-        $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays(
-            [$group],
-            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-        );
-        $em->flush();
-
         return $this->redirectToRoute('app_participant_group_edit', [ 'title' => $group->getTitle() ]);
     }
 
     /**
-     * Print group labels
+     * Display file upload form to begin import.
+     * Saves uploaded file when form submitted.
      *
-     * @Route("/{title}/print", methods={"GET", "POST"}, name="app_participant_group_print")
-     */
-    public function print(string $title, Request $request, EntityManagerInterface $em, ZplPrinting $zpl)
-    {
-        $this->denyAccessUnlessGranted('ROLE_PRINT_GROUP_LABELS');
-
-        $group = $this->findGroupByTitle($title);
-
-        $form = $this->createFormBuilder()
-            ->add('printer', EntityType::class, [
-                'class' => LabelPrinter::class,
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- Select -'
-            ])
-            ->add('numToPrint', IntegerType::class, [
-                'label' => 'Number of Labels',
-                'data' => $group->getParticipantCount(),
-                'attr' => [
-                    'min' => 1,
-                    'max' => 2000, // todo: max # per roll? reasonable batch size?
-                ],
-            ])
-            ->add('send', SubmitType::class, [
-                'label' => 'Print',
-                'attr' => ['class' => 'btn-primary'],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            $printer = $em->getRepository(LabelPrinter::class)->find($data['printer']);
-            $copies = $data['numToPrint'];
-
-            $builder = new ParticipantGroupBadgeLabelBuilder();
-            $builder->setPrinter($printer);
-            $builder->setGroup($group);
-
-            $zpl->printBuilder($builder, $copies);
-
-            return $this->redirectToRoute('app_participant_group_list');
-        }
-
-        return $this->render('participantGroup/print-participant-group-labels.html.twig', [
-            'group' => $group,
-            'form' => $form->createView(),
-        ]);
-    }
-
-    /**
      * @Route("/excel-import/start", name="group_excel_import")
      */
-    public function excelImport(Request $request, ExcelImporter $excelImporter)
+    public function excelImport(Request $request, ExcelImporter $excelImporter, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
+
         $form = $this->createForm(GenericExcelImportType::class);
 
         $form->handleRequest($request);
@@ -306,16 +253,20 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Displays preview of data read from uploaded file.
+     *
      * @Route("/excel-import/preview/{importId<\d+>}", name="group_excel_import_preview")
      */
     public function excelImportPreview(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
@@ -326,11 +277,13 @@ class ParticipantGroupController extends AbstractController
             $idGenerator
         );
 
-        $importer->process();
+        $processedGroups = $importer->process();
 
         return $this->render('participantGroup/excel-import-preview.html.twig', [
             'importId' => $importId,
             'importer' => $importer,
+            'processedGroups' => $processedGroups,
+            'displayMultiWorksheetWarning' => count($importingWorkbook->getWorksheets()) > 1,
             'importPreviewTemplate' => 'participantGroup/excel-import-table.html.twig',
             'importCommitRoute' => 'group_excel_import_commit',
             'importCommitText' => 'Save Participant Groups',
@@ -343,12 +296,13 @@ class ParticipantGroupController extends AbstractController
     public function excelImportCommit(
         int $importId,
         ExcelImporter $excelImporter,
-        ParticipantGroupAccessionIdGenerator $idGenerator
+        ParticipantGroupAccessionIdGenerator $idGenerator,
+        EntityManagerInterface $em
     ) {
         $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
 
-        $em = $this->getDoctrine()
-            ->getManager();
+        // Import can take a long time with 1000+ rows
+        $this->increaseExecutionTime();
 
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
@@ -365,48 +319,10 @@ class ParticipantGroupController extends AbstractController
 
         $em->flush();
 
-        // Update group schedules
-        $this->recalculateGroupSchedules();
-
         return $this->render('participantGroup/excel-import-result.html.twig', [
             'importer' => $importer,
         ]);
     }
-
-    private function recalculateGroupSchedules()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $groupRepo = $em->getRepository(ParticipantGroup::class);
-
-        // First, remove any groups that are no longer active
-        $inactive = $groupRepo->findInactive();
-        foreach ($inactive as $group) {
-            $group->clearDropOffWindows();
-        }
-
-        // Must flush at this point so scheduler sees accurate view of the database
-        $em->flush();
-
-        // Assign new groups
-        // NOTE: order by ID asc here so that assignment order matches the order they
-        // appeared in the Excel file
-        $active = $groupRepo->findBy(['isActive' => true], ['id' => 'ASC']);
-        $toAssign = [];
-        foreach ($active as $group) {
-            if (count($group->getDropOffWindows()) > 0) continue;
-            $toAssign[] = $group;
-        }
-
-        $scheduler = new ParticipantGroupRoundRobinScheduler();
-        $scheduler->assignByDays(
-            $toAssign,
-            $em->getRepository(DropOffSchedule::class)->findDefaultSchedule()
-        );
-
-        // Commit changes from the scheduler
-        $em->flush();
-    }
-
 
     private function findGroupByTitle($title): ParticipantGroup
     {
@@ -431,5 +347,50 @@ class ParticipantGroupController extends AbstractController
         }
 
         return $workbook;
+    }
+
+    private function getPrintForm(): FormInterface
+    {
+        return $this->createFormBuilder()
+            ->add('printer', EntityType::class, [
+                'class' => LabelPrinter::class,
+                'choice_name' => 'title',
+                'required' => true,
+                'empty_data' => "",
+                'placeholder' => '- Select -'
+            ])
+            ->add('numToPrint', IntegerType::class, [
+                'label' => 'Number of Labels',
+                'data' => 1,
+                'attr' => [
+                    'min' => 1,
+                    'max' => 2000, // todo: max # per roll? reasonable batch size?
+                ],
+            ])
+            ->add('print', SubmitType::class, [
+                'label' => 'Print',
+                'attr' => ['class' => 'btn-success'],
+            ])
+            ->setAction($this->generateUrl('app_participant_group_print'))
+            ->getForm();
+    }
+
+    /**
+     * Increases the allowed execution time for the current PHP script. Call
+     * this method if you know that your controller action will be doing
+     * operations that may be long-lasting
+     *
+     * @param int|number $addSeconds number of seconds to add, defaults to 300 (5 minutes)
+     */
+    private function increaseExecutionTime($addSeconds = 300)
+    {
+        $currentMaxSeconds = ini_get("max_execution_time");
+        if (0 == $currentMaxSeconds) {
+            // Already at max
+            return;
+        }
+
+        $currMax = max(30, $currentMaxSeconds);
+        set_time_limit($currMax + $addSeconds);
     }
 }

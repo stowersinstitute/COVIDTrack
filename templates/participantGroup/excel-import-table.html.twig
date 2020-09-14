@@ -2,7 +2,13 @@
     <thead>
     <tr>
         <th>Group Title</th>
+        <th>External Id</th>
         <th># Participants</th>
+        <th>Is Active?</th>
+        <th>Accepts Saliva?</th>
+        <th>Accepts Blood?</th>
+        <th>Publish Viral Results to Web Hooks?</th>
+        <th>Publish Antibody Results to Web Hooks?</th>
     </tr>
     </thead>
 
@@ -10,7 +16,13 @@
     {% for group in groups  %}
         <tr>
             <td>{{ group.title }}</td>
+            <td>{{ group.externalId }}</td>
             <td>{{ group.participantCount }}</td>
+            <td>{{ group.isActive ? 'Yes' : 'No' }}</td>
+            <td>{{ group.acceptsSalivaSpecimens ? 'Yes' : 'No' }}</td>
+            <td>{{ group.acceptsBloodSpecimens ? 'Yes' : 'No' }}</td>
+            <td>{{ group.viralResultsWebHooksEnabled ? 'Yes' : 'No' }}</td>
+            <td>{{ group.antibodyResultsWebHooksEnabled ? 'Yes' : 'No' }}</td>
         </tr>
     {% endfor %}
     </tbody>

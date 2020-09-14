@@ -90,7 +90,7 @@ class SpecimenTest extends TestCase
         $specimen = Specimen::buildExampleReadyForResults('C100');
         $this->assertCount(0, $specimen->getQPCRResults());
 
-        $result = SpecimenResultQPCR::createFromSpecimen($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
 
         $this->assertSame($specimen, $result->getSpecimen());
         $this->assertCount(1, $specimen->getQPCRResults());
@@ -391,6 +391,30 @@ class SpecimenTest extends TestCase
 
         $this->assertNull($specimen->getCliaTestingRecommendation());
         $this->assertSame($specimen->getCliaTestingRecommendedText(), '');
+    }
+
+    public function testExceptionAddingSalivaSpecimenToGroupWhenGroupNotAcceptingSaliva()
+    {
+        $group = new ParticipantGroup('G123', 5);
+        $group->setAcceptsSalivaSpecimens(false);
+        $this->assertFalse($group->acceptsSalivaSpecimens());
+
+        $specimen = new Specimen('SPEC-100', $group);
+
+        $this->expectException(\RuntimeException::class);
+        $specimen->setType(Specimen::TYPE_SALIVA);
+    }
+
+    public function testExceptionAddingBloodSpecimenToGroupWhenGroupNotAcceptingBlood()
+    {
+        $group = new ParticipantGroup('G123', 5);
+        $group->setAcceptsBloodSpecimens(false);
+        $this->assertFalse($group->acceptsBloodSpecimens());
+
+        $specimen = new Specimen('SPEC-100', $group);
+
+        $this->expectException(\RuntimeException::class);
+        $specimen->setType(Specimen::TYPE_BLOOD);
     }
 
     /**
