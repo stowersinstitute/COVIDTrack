@@ -8,6 +8,7 @@
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
+            <th>Collection Time</th>
             <th>Well Plate</th>
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
@@ -26,6 +27,7 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
+            <td>{{ specimen.collectedAt ? specimen.collectedAt | date("Y-m-d H:i:s") : '' }}</td>
             <td>
                 {% for well in specimen.wells %}
                     {% if userCanViewWellPlates %}
