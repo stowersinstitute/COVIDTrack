@@ -27,7 +27,7 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
-            <td>{{ specimen.collectedAt ? specimen.collectedAt | date("Y-m-d H:i:s") : '' }}</td>
+            <td>{{ specimen.collectedAt ? specimen.collectedAt | date("Y-m-d H:ia") : '' }}</td>
             <td>
                 {% for well in specimen.wells %}
                     {% if userCanViewWellPlates %}
