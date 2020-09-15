@@ -174,6 +174,9 @@ class KioskController extends AbstractController
     /**
      * Checks if the given group ID is available for checkin
      *
+     * Required POST params:
+     * - participantGroupTitle (string) Participant Group Title to check
+     *
      * @Route(path="/group-available-check", methods={"POST"}, name="kiosk_group_available_check")
      */
     public function groupAvailableCheck(Request $request, EntityManagerInterface $em)

@@ -31,7 +31,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
     {% block scan_help %}
     {% include 'kiosk/scan-help.html.twig' with {
         image: 'images/mobile-w-qr.svg',
-        scanHintText: 'Set your device\'s screen brightness all the way up.',
+        scanHintText: 'If using a phone, set the screen brightness to high.',
         scanTipHtml: 'Scan QR code<br>below the screen'
     }%}
     {% endblock %}
@@ -83,7 +83,7 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 
                         // Unexpected errors like 500 server or network down
                         error: function(xhr, textStatus, error) {
-                            console.log("error in response: " + textStatus + " " + error);
+                            setInputStatus('ERROR', "Server error occurred or network unavailable. Please try again.");
                         }
                     });
                 } else {
