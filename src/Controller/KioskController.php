@@ -173,7 +173,7 @@ class KioskController extends AbstractController
             $em->persist($sessionTube);
             $em->flush();
 
-            return $this->redirectToRoute('kiosk_tube_saved', ['id' => $kioskSession->getId()]);
+            return $this->redirectToRoute('kiosk_review', ['id' => $kioskSession->getId()]);
         }
 
         return $this->render('kiosk/tube-input.html.twig', [
@@ -210,27 +210,6 @@ class KioskController extends AbstractController
     }
 
     /**
-     * After saving a tube, this screen is shown to the user to ask if they want to add another tube to the drop-off
-     * or continue on to the review step
-     *
-     * @Route(path="/{id<\d+>}/tube-saved", methods={"GET"}, name="kiosk_tube_saved")
-     */
-    public function tubeSaved(int $id, Request $request)
-    {
-        $this->mustHavePermissions();
-
-        $kiosk = $this->mustFindKiosk($request);
-        $kioskSession = $this->mustFindKioskSession($id);
-        if (!$this->usesSameKiosk($kioskSession, $kiosk)) {
-            return $this->redirectToRoute('kiosk_index');
-        }
-
-        return $this->render('kiosk/tube-saved.html.twig', [
-            'kioskSession' => $kioskSession,
-        ]);
-    }
-
-    /**
      * View previously added Tubes to verify before completion.
      * POST back to this route to complete Kiosk interaction.
      *
@@ -249,7 +228,7 @@ class KioskController extends AbstractController
         $form = $this->createFormBuilder()
             ->add('finish', SubmitType::class, [
                 'label' => 'Finish >',
-                'attr' => ['class' => 'btn btn-success'],
+                'attr' => ['class' => 'btn btn-success btn-lg'],
             ])
             ->getForm();
 
