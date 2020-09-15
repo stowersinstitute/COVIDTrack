@@ -39,6 +39,22 @@ class Tube
     const CHECKED_IN_ACCEPTED = "ACCEPTED";
     const CHECKED_IN_REJECTED = "REJECTED";
 
+    // Tube not yet ready to send. May still be gathering data.
+    const WEBHOOK_STATUS_PENDING = "PENDING";
+
+    // Tube is in queue ready to be sent next time webhook data sent.
+    const WEBHOOK_STATUS_QUEUED = "QUEUED";
+
+    // Tube was successfully sent through the webhook.
+    const WEBHOOK_STATUS_SUCCESS = "SUCCESS";
+
+    // Tube experienced errors when sending to the webhook.
+    const WEBHOOK_STATUS_ERROR = "ERROR";
+
+    // Tube will never be sent to webhook. May be an old record.
+    // TODO: Migration to mark all Tubes with status RETURNED or greater to be NEVER_SEND
+    const WEBHOOK_STATUS_NEVER_SEND = "NEVER_SEND";
+
     /**
      * @var int
      * @ORM\Id()
@@ -168,10 +184,39 @@ class Tube
      */
     private $externalProcessingAt;
 
+    // TODO: Add migration for these fields
+
+    /**
+     * Status of this record being sent through Web Hook system.
+     * Acceptable values are self::WEBHOOK_STATUS_* constants.
+     *
+     * @var null|string
+     * @ORM\Column(name="web_hook_status", type="string", nullable=true)
+     */
+    private $webHookStatus;
+
+    /**
+     * Human-readable description explaining more about current Web Hook status.
+     *
+     * @var null|string
+     * @ORM\Column(name="web_hook_status_message", type="text", nullable=true)
+     */
+    private $webHookStatusMessage;
+
+    /**
+     * Timestamp when record last attempted published through Web Hook system.
+     *
+     * @var null|\DateTimeImmutable
+     * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
+     */
+    private $webHookLastTriedPublishingAt;
+
     public function __construct(string $accessionId = null)
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
+        // TODO: Add test
+        $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
     public function __toString()
@@ -602,6 +647,10 @@ class Tube
         $this->setExternalProcessingAt($processingAt ?: new \DateTimeImmutable());
         $this->setStatus(self::STATUS_EXTERNAL);
 
+        // TODO: Add test
+        // Schedule for publishing to Web Hooks
+        $this->setWebHookQueued("Marked External Processing");
+
         $this->specimen->setStatus(Specimen::STATUS_EXTERNAL);
     }
 
@@ -649,6 +698,9 @@ class Tube
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
 
+        // TODO: Add Test
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, "Rejected tubes never sent");
+
         // Specimen
         $this->specimen->setStatus(Specimen::STATUS_REJECTED);
     }
@@ -690,6 +742,91 @@ class Tube
         $statuses = array_flip(static::getValidStatuses());
 
         return $statuses[$statusConstant];
+    }
+
+    /**
+     * @param string        $status     Tube::WEBHOOK_STATUS_* constant.
+     * @param string|null   $message
+     */
+    protected function setWebHookStatus(string $status, string $message = ''): void
+    {
+        $validStatuses = [
+            self::WEBHOOK_STATUS_PENDING,
+            self::WEBHOOK_STATUS_QUEUED,
+            self::WEBHOOK_STATUS_SUCCESS,
+            self::WEBHOOK_STATUS_ERROR,
+            self::WEBHOOK_STATUS_NEVER_SEND,
+        ];
+        if (!in_array($status, $validStatuses)) {
+            throw new \InvalidArgumentException('Invalid Web Hook Status');
+        }
+
+        $this->webHookStatus = $status;
+        $this->webHookStatusMessage = $message;
+    }
+
+    /**
+     * Mark as ready and queued to send to Web Hooks next time data is sent.
+     */
+    public function setWebHookQueued(string $message = '')
+    {
+        $this->webHookStatus = self::WEBHOOK_STATUS_QUEUED;
+        $this->webHookStatusMessage = $message;
+    }
+
+    /**
+     * @param \DateTimeImmutable $successReceivedAt Timestamp when successfully sent to Web Hook.
+     * @param string             $message
+     */
+    public function setWebHookSuccess(\DateTimeImmutable $successReceivedAt, string $message = '')
+    {
+        $this->webHookStatus = self::WEBHOOK_STATUS_SUCCESS;
+        $this->webHookStatusMessage = $message;
+        $this->setWebHookLastTriedPublishingAt($successReceivedAt);
+    }
+
+    /**
+     * Mark as having experienced an error when sending to Web Hooks.
+     *
+     * @param \DateTimeImmutable $errorReceivedAt Timestamp when experienced error sending to Web Hook.
+     */
+    public function setWebHookError(\DateTimeImmutable $errorReceivedAt, string $message = '')
+    {
+        $this->webHookStatus = self::WEBHOOK_STATUS_ERROR;
+        $this->webHookStatusMessage = $message;
+        $this->setWebHookLastTriedPublishingAt($errorReceivedAt);
+    }
+
+    /**
+     * Mark to never be sent to Web Hooks.
+     */
+    public function setWebHookNeverSend(string $message = '')
+    {
+        $this->webHookStatus = self::WEBHOOK_STATUS_NEVER_SEND;
+        $this->webHookStatusMessage = $message;
+    }
+
+    /**
+     * @return string|null Tube::WEBHOOK_STATUS_* constant
+     */
+    public function getWebHookStatus(): ?string
+    {
+        return $this->webHookStatus;
+    }
+
+    public function getWebHookStatusMessage(): ?string
+    {
+        return $this->webHookStatusMessage;
+    }
+
+    public function setWebHookLastTriedPublishingAt(?\DateTimeImmutable $timestamp): void
+    {
+        $this->webHookLastTriedPublishingAt = $timestamp;
+    }
+
+    public function getWebHookLastTriedPublishingAt(): ?\DateTimeImmutable
+    {
+        return $this->webHookLastTriedPublishingAt;
     }
 
     private function mustBeValidTubeType(?string $tubeType)

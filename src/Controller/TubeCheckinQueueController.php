@@ -86,7 +86,7 @@ class TubeCheckinQueueController extends AbstractController
             // Verify Tube workflow permits this operation
             foreach ($tubes as $tube) {
                 if (!$tube->willAllowExternalProcessing()) {
-                    $errors[] = sprintf('Tube "%s" does not support external processing', $tube->getAccessionId());
+                    $errors[] = sprintf('Tube "%s" does not currently support External Processing', $tube->getAccessionId());
                 }
             }
         }
