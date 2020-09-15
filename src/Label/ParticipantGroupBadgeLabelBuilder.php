@@ -43,7 +43,7 @@ class ParticipantGroupBadgeLabelBuilder extends AbstractLabelBuilder
         $fontSize = 6;
         $zpl->setFont($font, $fontSize);
 
-        $zpl->drawQrCode(0, 0, $this->group->getTitle(), 18);
+        $zpl->drawQrCode(0, 0, $this->group->getTitle(), 14);
         $zpl->drawText(0, 18, $this->group->getTitle(), 'N', ZplBuilder::JUSTIFY_LEFT, 18, 6);
 
         return $zpl->toZpl();

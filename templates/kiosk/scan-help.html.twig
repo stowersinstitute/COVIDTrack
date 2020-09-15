@@ -1,8 +1,14 @@
 <div id="scanTip">
 
-    {% if image %}
-        <img id="scanHint" src="{{ asset(image) }}">
-    {%  endif %}
+    <div id="scan-hint">
+        {% if image %}
+            <img src="{{ asset(image) }}">
+        {%  endif %}
+
+        {% if scanHintText|default %}
+            <div>{{ scanHintText }}</div>
+        {%  endif %}
+    </div>
 
     <div class="bouncing-box">
         {{ scanTipHtml|raw }}
@@ -12,11 +18,16 @@
 
 
 <style>
-    img#scanHint {
+    #scan-hint {
+        margin: 10rem auto;
+        text-align: center;
+    }
+
+    #scan-hint img{
         height: 20rem;
         width: auto;
-        display: block;
-        margin: 10rem auto;
+        display: inline-block;
+        margin-bottom: 1rem;
     }
 
     .bouncing-box {
