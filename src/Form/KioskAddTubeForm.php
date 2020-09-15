@@ -20,7 +20,7 @@ class KioskAddTubeForm extends AbstractType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'numDaysInPastForCollectionDate' => 3,
+            'numDaysInPastForCollectionDate' => 0,
             'participantGroup' => null,
         ]);
 
@@ -45,7 +45,7 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $times = [];
-        foreach (range(0, 22, 2) as $hour) {
+        foreach (range(7, 15, 1) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
 
@@ -86,6 +86,7 @@ class KioskAddTubeForm extends AbstractType
                 'choices' => $days,
                 'layout' => 'vertical',
                 'label' => 'Collection Date',
+                'data' => count($days) == 1 ? reset($days) : null,
                 'required' => true,
                 'constraints' => [new NotBlank()],
             ])
