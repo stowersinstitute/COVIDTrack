@@ -27,10 +27,34 @@
                     <dt>Participants</dt><dd>{{ group.participantCount }}</dd>
                     <dt>Is Active?</dt><dd>{{ group.isActive ? 'Yes' : 'No' }}</dd>
                     <dt>Is Control Group?</dt><dd>{{ group.isControl ? 'Yes' : 'No' }}</dd>
-                    <dt>Accepts Saliva?</dt><dd>{{ group.acceptsSalivaSpecimens ? 'Yes' : 'No' }}</dd>
-                    <dt>Accepts Blood?</dt><dd>{{ group.acceptsBloodSpecimens ? 'Yes' : 'No' }}</dd>
-                    <dt>Publish Viral Results to Web Hooks?</dt><dd>{{ group.viralResultsWebHooksEnabled ? 'Yes' : 'No' }}</dd>
-                    <dt>Publish Antibody Results to Web Hooks?</dt><dd>{{ group.antibodyResultsWebHooksEnabled ? 'Yes' : 'No' }}</dd>
+                    <dt>Accepts Saliva?</dt><dd>
+                        {% if group.acceptsSalivaSpecimens %}
+                            {{ group.isActive ? 'Yes' : 'Yes, but Group is Inactive, so not allowed' }}
+                        {% else %}
+                            No
+                        {% endif %}
+                    </dd>
+                    <dt>Accepts Saliva?</dt><dd>
+                        {% if group.acceptsBloodSpecimens %}
+                            {{ group.isActive ? 'Yes' : 'Yes, but Group is Inactive, so not allowed' }}
+                        {% else %}
+                            No
+                        {% endif %}
+                    </dd>
+                    <dt>Publish Viral Results to Web Hooks?</dt><dd>
+                        {% if group.viralResultsWebHooksEnabled %}
+                            {{ group.isActive ? 'Yes' : 'Yes, but Group is Inactive, so not published' }}
+                        {% else %}
+                            No
+                        {% endif %}
+                    </dd>
+                    <dt>Publish Antibody Results to Web Hooks?</dt><dd>
+                        {% if group.antibodyResultsWebHooksEnabled %}
+                            {{ group.isActive ? 'Yes' : 'Yes, but Group is Inactive, so not published' }}
+                        {% else %}
+                            No
+                        {% endif %}
+                    </dd>
                 </dl>
             </div>
         </div>
