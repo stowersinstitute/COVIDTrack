@@ -11,16 +11,28 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
 {% block body %}
     <div class="row">
         <div class="col-md-12">
-            {{ form_start(form) }}
-            {{ form_row(form.participantGroup, {'label': false, 'placeholder': 'Select Group here or Scan Group barcode using kiosk scanner'}) }}
+            {{ form_start(form, { 'attr': {'id': 'groupForm'}}) }}
+            {{ form_row(form.participantGroupTitle, {
+                'label': false,
+                'attr': {'placeholder': 'Scan QR code below the screen'},
+                'input_group_attr': {'class': 'input-group-lg'},
+                'button_text': 'Continue',
+                'button_attr': {'class': 'btn-success btn-lg'},
+                'right_button_icon_class': 'fa fa-fw fa-chevron-right'
+            }) }}
             {{ form_end(form) }}
+            <div class="callout callout-danger hidden" id="text-lookup-error-callout">
+                <h4>QR Code Error</h4>
+                <p></p>
+            </div>
         </div>
     </div>
 
     {% block scan_help %}
     {% include 'kiosk/scan-help.html.twig' with {
-        image: 'images/badge-w-qr.svg',
-        scanTipHtml: 'Scan Group barcode<br>below the screen'
+        image: 'images/mobile-w-qr.svg',
+        scanHintText: 'If using a phone, set the screen brightness to high.',
+        scanTipHtml: 'Scan QR code<br>below the screen'
     }%}
     {% endblock %}
 {% endblock %}
@@ -31,16 +43,100 @@ todo: ios doesn't allow playing audio until the user has interacted with the pag
     <script>
         // What to do when scanner input
         $(document).on( "scannerinput", function(e, inputString) {
-            if ($("option:contains(" + inputString + ")", "[data-scanner-input]").length === 0) {
-                console.log('Not an option');
-                return;
+            // We don't want the scanner typing in the input field.
+            $("[data-scanner-input]").blur();
+            $("[data-scanner-input]").val(inputString).trigger('input');
+            $("#form_participantGroupTitle_button").click();
+        });
+
+        $(document).ready(function(){
+            let textInput = $("#form_participantGroupTitle");
+            let lookupButton = $("#form_participantGroupTitle_button");
+            let isFormValid = false;
+
+            setInputStatus();
+
+            // Reset the detail sections when the input is changed
+            textInput.on('input', function() {
+                setInputStatus();
+            });
+
+            // Don't submit the form unless it is valid
+            $('#groupForm').on('submit', function(e) {
+                if(!isFormValid) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            lookupButton.click(function(){
+                let val = textInput.val();
+
+                if(val !== "") {
+                    setInputStatus('LOADING');
+
+                    $.ajax('{{ path('kiosk_group_available_check') }}', {
+                        method: 'POST',
+                        data: { participantGroupTitle: val },
+
+                        success: onAvailableCheckResponse,
+
+                        // Unexpected errors like 500 server or network down
+                        error: function(xhr, textStatus, error) {
+                            setInputStatus('ERROR', "Server error occurred or network unavailable. Please try again.");
+                        }
+                    });
+                } else {
+                    // Collapse form details
+                    setInputStatus();
+                }
+            });
+
+            /**
+             * What to do when we get a group check response from the server
+             * @param data AJAX Response Data
+             */
+            function onAvailableCheckResponse(data) {
+                if (data.isError) {
+                    setInputStatus('ERROR', data.message);
+                    return;
+                }
+                setInputStatus('SUCCESS');
+                textInput.parents('form').submit();
             }
 
-            let selection = "";
-            selection = $("option:contains(" + inputString + ")", "[data-scanner-input]").val();
+            /**
+             * Sets the icon in the group input field and any error message in the callout below the input field
+             * @param status Options: LOADING, ERROR, or SUCCESS
+             * @param message Error message to show in the callout
+             */
+            function setInputStatus(status = '', message = '') {
+                let statusWrapper = $("#lookup-status");
+                let errorCallout = $("#text-lookup-error-callout");
 
-            $("[data-scanner-input]").val(selection);
-            $("[data-scanner-input]").parents('form').submit();
+                isFormValid = false;
+
+                statusWrapper.empty();
+                errorCallout.toggleClass('hidden', true);
+
+                switch (status) {
+                    case 'LOADING':
+                        statusWrapper.append('<i class="fa fa-fw fa-virus fa-spin"></i>');
+                        break;
+                    case 'ERROR':
+                        statusWrapper.append('<i class="fa fa-fw fa-times text-red"></i>');
+                        errorCallout.toggleClass('hidden', false);
+                        $("p", errorCallout).html(message);
+                        break;
+                    case 'SUCCESS':
+                        statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
+                        isFormValid = true;
+                        break;
+                    default:
+                        statusWrapper.append('<i class="fa fa-fw fa-question text-gray"></i>');
+                        break;
+                }
+            }
         });
     </script>
 {% endblock %}

@@ -8,12 +8,11 @@ use App\Entity\Kiosk;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
 use App\Entity\ParticipantGroup;
-use App\Entity\ParticipantGroupRepository;
 use App\Entity\Tube;
 use App\Form\KioskAddTubeForm;
+use App\Form\Type\TextLookupType;
 use App\Util\EntityUtils;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -90,31 +89,20 @@ class KioskController extends AbstractController
         $kiosk = $this->mustFindKiosk($request);
         $kioskSession = new KioskSession($kiosk);
 
-        $form = $this->createFormBuilder($kioskSession)
-            ->add('participantGroup', EntityType::class, [
-                'class' => ParticipantGroup::class,
-                'query_builder' => function(ParticipantGroupRepository $repository) {
-                    return $repository->createQueryBuilder('g')
-                        ->where('g.isActive = true')
-                        ->andWhere('(g.acceptsSalivaSpecimens = true or g.acceptsBloodSpecimens = true)')
-                        ->orderBy('g.title', 'ASC')
-                    ;
-                },
-                'choice_name' => 'title',
-                'required' => true,
-                'empty_data' => "",
-                'placeholder' => '- None -',
+        $form = $this->createFormBuilder()
+            ->add('participantGroupTitle', TextLookupType::class, [
+                'label' => 'Group/Individual ID',
                 'attr' => ['class' => 'input-lg', 'data-scanner-input' => null],
-            ])
-            ->add('submit', SubmitType::class, [
-                'label' => 'Continue >',
-                'attr' => ['class' => 'btn-sm btn-success'],
+                'button_text' => 'Lookup',
             ])
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $kioskSession = $form->getData();
+            $data = $form->getData();
+            $group = $em->getRepository(ParticipantGroup::class)->findOneBy(['title' => $data['participantGroupTitle']]);
+
+            $kioskSession->setParticipantGroup($group);
 
             $em->persist($kioskSession);
             $em->flush();
@@ -180,6 +168,49 @@ class KioskController extends AbstractController
             'form' => $form->createView(),
             'kioskSession' => $kioskSession,
             'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
+        ]);
+    }
+
+    /**
+     * Checks if the given group ID is available for checkin
+     *
+     * Required POST params:
+     * - participantGroupTitle (string) Participant Group Title to check
+     *
+     * @Route(path="/group-available-check", methods={"POST"}, name="kiosk_group_available_check")
+     */
+    public function groupAvailableCheck(Request $request, EntityManagerInterface $em)
+    {
+        $this->mustHavePermissions();
+        $this->mustFindKiosk($request);
+
+        $groupTitle = $request->get('participantGroupTitle');
+
+        $group = $em->getRepository(ParticipantGroup::class)->findOneBy(['title' => $groupTitle]);
+
+        if (!$group) {
+            return new JsonResponse([
+                'isError' => true,
+                'message' => "Unknown ID. Please contact staff for assistance.",
+            ]);
+        }
+
+        if (!$group->isActive()) {
+            return new JsonResponse([
+                'isError' => true,
+                'message' => "Inactive ID. Please contact staff for assistance.",
+            ]);
+        }
+
+        if (!$group->acceptsBloodSpecimens() && !$group->acceptsSalivaSpecimens()) {
+            return new JsonResponse([
+                'isError' => true,
+                'message' => "No active sample drop off types for this ID. Please contact staff for assistance.",
+            ]);
+        }
+
+         return new JsonResponse([
+            'result' => true,
         ]);
     }
 
