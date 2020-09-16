@@ -145,9 +145,14 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNotSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
-        $tube->setCheckInDecision(Tube::CHECKED_IN_ACCEPTED);
+        $this->assertNull($tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        $checkedInAt = new \DateTimeImmutable('2020-12-20 12:55:44');
+        $tube->markAccepted('test-user', $checkedInAt);
+
         $this->assertSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+        $this->assertEquals($checkedInAt, $tube->getCheckedInAt());
     }
 
     public function testBloodRejectedCheckin()
@@ -163,9 +168,17 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNotSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
-        $tube->setCheckInDecision(Tube::CHECKED_IN_REJECTED);
+        $this->assertNull($tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        // Reject Tube
+        $checkedInAt = new \DateTimeImmutable('2020-12-21 12:55:44');
+        $tube->markRejected('test-user', $checkedInAt);
+
         $this->assertSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
+        $this->assertEquals($checkedInAt, $tube->getCheckedInAt());
+
+        $this->assertSame(Tube::WEBHOOK_STATUS_NEVER_SEND, $tube->getWebHookStatus());
     }
 
     public function testMarkingForExternalProcessingQueuesForWebHooks()
