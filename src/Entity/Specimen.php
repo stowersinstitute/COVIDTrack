@@ -101,6 +101,7 @@ class Specimen
     /**
      * Date and Time when this Specimen was extracted (collected) from the Participant.
      * For example, when they spit in the tube or did a blood draw.
+     * This value and Tube.collectedAt are the same.
      *
      * @var \DateTime
      * @ORM\Column(name="collected_at", type="datetime", nullable=true)
