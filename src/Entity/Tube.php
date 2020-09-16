@@ -52,7 +52,6 @@ class Tube
     const WEBHOOK_STATUS_ERROR = "ERROR";
 
     // Tube will never be sent to webhook. May be an old record.
-    // TODO: Migration to mark all Tubes with status RETURNED or greater to be NEVER_SEND
     const WEBHOOK_STATUS_NEVER_SEND = "NEVER_SEND";
 
     /**
