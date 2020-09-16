@@ -205,6 +205,14 @@ abstract class SpecimenResult
         return $this->getSpecimen()->getAccessionId();
     }
 
+    /**
+     * Timestamp when Participant spit into tube or had blood drawn.
+     */
+    public function getSpecimenCollectedAt(): ?\DateTimeInterface
+    {
+        return $this->getSpecimen()->getCollectedAt();
+    }
+
     public function getWellPlateBarcode(): ?string
     {
         return $this->getWellPlate() ? $this->getWellPlate()->getBarcode() : null;
