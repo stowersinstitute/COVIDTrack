@@ -68,6 +68,10 @@ class NewResultsWebHookRequest extends WebHookRequest
             }
 
             $publishedAt = $r->getCreatedAt()->setTimezone(new \DateTimeZone('UTC'));
+            $collectedAt = $r->getSpecimenCollectedAt();
+            if ($collectedAt) {
+                $collectedAt->setTimezone(new \DateTimeZone('UTC'));
+            }
             $iso8601 = 'Y-m-d\TH:i:s\Z';
 
             $group = $r->getSpecimen()->getParticipantGroup();
@@ -80,6 +84,7 @@ class NewResultsWebHookRequest extends WebHookRequest
                 'type' => $type,
                 'result' => $r->getConclusion(),
                 'published_at' => $publishedAt->format($iso8601),
+                'collected_at' => $collectedAt ? $collectedAt->format($iso8601) : null,
                 'group' => [
                     'id' => $group->getId(),
                     'external_id' => $group->getExternalId(),
