@@ -388,6 +388,11 @@ class Specimen
         return $this->participantGroup;
     }
 
+    public function setParticipantGroup(ParticipantGroup $group): void
+    {
+        $this->participantGroup = $group;
+    }
+
     public function getStatus(): string
     {
         return $this->status;
