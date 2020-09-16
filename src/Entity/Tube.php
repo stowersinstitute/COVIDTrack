@@ -184,8 +184,6 @@ class Tube
      */
     private $externalProcessingAt;
 
-    // TODO: Add migration for these fields
-
     /**
      * Status of this record being sent through Web Hook system.
      * Acceptable values are self::WEBHOOK_STATUS_* constants.
