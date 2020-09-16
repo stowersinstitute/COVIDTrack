@@ -388,6 +388,10 @@ class Specimen
         return $this->participantGroup;
     }
 
+    /**
+     * @internal Only available so admins can use SpecimenForm to edit a Specimen's Group
+     * @deprecated Not actually deprecated but reserved for only internal use
+     */
     public function setParticipantGroup(ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
