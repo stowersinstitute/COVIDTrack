@@ -125,6 +125,9 @@ class TubeTest extends TestCase
         $this->assertSame($tube->getStatus(), Tube::STATUS_EXTERNAL);
         $this->assertNotEmpty($tube->getExternalProcessingAt());
 
+        // Tube queued for web hooks
+        $this->assertSame(Tube::WEBHOOK_STATUS_QUEUED, $tube->getWebHookStatus());
+
         // Specimen must also updated to have Status "EXTERNAL"
         $this->assertSame(Specimen::STATUS_EXTERNAL, $specimen->getStatus());
 

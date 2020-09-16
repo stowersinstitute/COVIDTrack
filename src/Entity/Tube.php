@@ -212,7 +212,6 @@ class Tube
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
-        // TODO: Add test
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
@@ -646,7 +645,6 @@ class Tube
         $this->setExternalProcessingAt($processingAt ?: new \DateTimeImmutable());
         $this->setStatus(self::STATUS_EXTERNAL);
 
-        // TODO: Add test
         // Schedule for publishing to Web Hooks
         $this->setWebHookQueued("Marked External Processing");
 
@@ -697,7 +695,6 @@ class Tube
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
 
-        // TODO: Add Test
         $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, "Rejected tubes never sent");
 
         // Specimen
