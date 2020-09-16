@@ -289,6 +289,11 @@
             function showTubeTimeSelection(show = true) {
                 if (show) {
                     $("#tubeTimeSelection").collapse('show');
+
+                    let initialDay = $("#kiosk_add_tube_form_collectedAtDate").attr('value');
+                    if (initialDay) {
+                        $("#kiosk_add_tube_form_collectedAtDate").val(initialDay).trigger('input');
+                    }
                 } else {
                     $("#kiosk_add_tube_form_collectedAtDate").val('').trigger('input');
                     $("#kiosk_add_tube_form_collectedAtTime").val('').trigger('input');
