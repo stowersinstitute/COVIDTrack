@@ -90,7 +90,7 @@ class Tube
     private $specimen;
 
     /**
-     * Current status of tube.
+     * Current status of tube. Values are Tube::STATUS_* constant values.
      *
      * @var string
      * @ORM\Column(name="status", type="string")
