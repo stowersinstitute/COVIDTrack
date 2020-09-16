@@ -529,9 +529,11 @@ class Tube
     }
 
     /**
+     * @see Tube::markAccepted()
+     * @see Tube::markRejected()
      * @param string $decision self::CHECKED_IN_* constant
      */
-    public function setCheckInDecision(string $decision)
+    private function setCheckInDecision(string $decision)
     {
         $valid = [
             self::CHECKED_IN_ACCEPTED,
