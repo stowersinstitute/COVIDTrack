@@ -126,8 +126,8 @@ class WebHookResponse
 
         // Assume all results positively reported if request was successful
         if ($this->isRequestSuccessful()) {
-            foreach ($recordsSentInRequest as $result) {
-                $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+            foreach ($recordsSentInRequest as $record) {
+                $record->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
             }
         }
     }
