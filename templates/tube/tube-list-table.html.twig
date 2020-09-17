@@ -40,7 +40,7 @@
                         <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></span></th>
                     {% endif %}
                 {% endspaceless %}</td>
-                <td>{{ tube.webHookLastTriedPublishingAt ? webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>
+                <td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>
             </tr>
         {% endfor %}
         </tbody>
