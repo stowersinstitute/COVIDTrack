@@ -16,6 +16,9 @@ class NewResultsWebHookRequest extends WebHookRequest
      */
     private $results = [];
 
+    /**
+     * @param SpecimenResult[]
+     */
     public function __construct(array $results = [])
     {
         $this->setResults($results);
