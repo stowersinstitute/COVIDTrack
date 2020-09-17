@@ -6,6 +6,7 @@ use App\Command\CleanupExcelImportData;
 use App\Command\Report\NotifyOnAntibodyResultsCommand;
 use App\Command\Report\NotifyOnNonNegativeViralResultCommand;
 use App\Command\Report\NotifyOnRecommendedCliaViralResultsCommand;
+use App\Command\WebHook\TubesExternalProcessingCommand;
 use Zenstruck\ScheduleBundle\Schedule;
 use Zenstruck\ScheduleBundle\Schedule\ScheduleBuilder;
 
@@ -14,6 +15,10 @@ class ScheduledTasks implements ScheduleBuilder
     public function buildSchedule(Schedule $schedule): void
     {
         $schedule->environments('prod');
+
+        $schedule->addCommand(TubesExternalProcessingCommand::getDefaultName())
+            ->description('Web Hook: Publish Tubes Marked External Processing')
+            ->everyFiveMinutes();
 
         $schedule->addCommand(CleanupExcelImportData::getDefaultName(), '--force')
             ->description('Clean up unfinished Excel imports')
