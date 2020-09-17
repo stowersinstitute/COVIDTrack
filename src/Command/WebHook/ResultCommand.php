@@ -59,7 +59,7 @@ class ResultCommand extends BaseAppCommand
     protected function configure()
     {
         $this
-            ->setDescription('Publishes Specimen Results changes to web hook URL')
+            ->setDescription('Publishes Specimen Results changes to Web Hook API')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'When given, the Web Hook API URL will not be contacted')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save timestamp when results successfully published')
         ;
