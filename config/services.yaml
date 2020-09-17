@@ -90,10 +90,19 @@ services:
             - '@router'
 
     # WebHook API Connections
-    App\Api\WebHook\Client\ServiceNowHttpClient:
+    web_hook.service_now.results_http_client:
+        class: App\Api\WebHook\Client\ServiceNowHttpClient
         arguments:
             # $options array
             - url: '%env(WEBHOOK_RESULTS_URL)%'
+              username: '%env(WEBHOOK_USERNAME)%'
+              password: '%env(WEBHOOK_PASSWORD)%'
+            - "@monolog.logger.webhook"
+    web_hook.service_now.tubes_external_processing_http_client:
+        class: App\Api\WebHook\Client\ServiceNowHttpClient
+        arguments:
+            # $options array
+            - url: '%env(WEBHOOK_TUBES_EXTERNAL_PROCESSING_URL)%'
               username: '%env(WEBHOOK_USERNAME)%'
               password: '%env(WEBHOOK_PASSWORD)%'
             - "@monolog.logger.webhook"
@@ -102,4 +111,10 @@ services:
     App\Command\WebHook\ResultCommand:
         arguments:
             - '@doctrine.orm.entity_manager'
-            - '@App\Api\WebHook\Client\ServiceNowHttpClient'
+            - '@web_hook.service_now.results_http_client'
+
+    # Tube Command reports to ServiceNow
+    App\Command\WebHook\TubesExternalProcessingCommand:
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '@web_hook.service_now.tubes_external_processing_http_client'

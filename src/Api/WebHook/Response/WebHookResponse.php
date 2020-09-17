@@ -3,6 +3,7 @@
 namespace App\Api\WebHook\Response;
 
 use App\Entity\SpecimenResult;
+use App\Entity\Tube;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -107,11 +108,11 @@ class WebHookResponse
     }
 
     /**
-     * Update SpecimenResult records based on data in the Web Hook HTTP Response.
+     * Update records based on data in the Web Hook HTTP Response.
      *
-     * @param SpecimenResult[] $resultsSentInRequest
+     * @param SpecimenResult|Tube[] $recordsSentInRequest
      */
-    public function updateResultWebHookStatus(array $resultsSentInRequest): void
+    public function updateResultWebHookStatus(array $recordsSentInRequest): void
     {
         try {
             // Server Date from Response
@@ -125,8 +126,8 @@ class WebHookResponse
 
         // Assume all results positively reported if request was successful
         if ($this->isRequestSuccessful()) {
-            foreach ($resultsSentInRequest as $result) {
-                $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+            foreach ($recordsSentInRequest as $record) {
+                $record->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
             }
         }
     }

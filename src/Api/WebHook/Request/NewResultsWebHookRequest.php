@@ -16,6 +16,9 @@ class NewResultsWebHookRequest extends WebHookRequest
      */
     private $results = [];
 
+    /**
+     * @param SpecimenResult[]
+     */
     public function __construct(array $results = [])
     {
         $this->setResults($results);
@@ -67,13 +70,6 @@ class NewResultsWebHookRequest extends WebHookRequest
                     throw new \InvalidArgumentException('Unknown SpecimenResult class for building request type discriminator value');
             }
 
-            $publishedAt = $r->getCreatedAt()->setTimezone(new \DateTimeZone('UTC'));
-            $collectedAt = $r->getSpecimenCollectedAt();
-            if ($collectedAt) {
-                $collectedAt->setTimezone(new \DateTimeZone('UTC'));
-            }
-            $iso8601 = 'Y-m-d\TH:i:s\Z';
-
             $group = $r->getSpecimen()->getParticipantGroup();
 
             // NOTE: Adding fields below will require code that also sets
@@ -83,8 +79,8 @@ class NewResultsWebHookRequest extends WebHookRequest
                 'id' => $r->getId(),
                 'type' => $type,
                 'result' => $r->getConclusion(),
-                'published_at' => $publishedAt->format($iso8601),
-                'collected_at' => $collectedAt ? $collectedAt->format($iso8601) : null,
+                'published_at' => self::dateToRequestDataFormat($r->getCreatedAt()),
+                'collected_at' => self::dateToRequestDataFormat($r->getSpecimenCollectedAt()),
                 'group' => [
                     'id' => $group->getId(),
                     'external_id' => $group->getExternalId(),

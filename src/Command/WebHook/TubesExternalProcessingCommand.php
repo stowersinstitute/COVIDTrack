@@ -4,11 +4,10 @@ namespace App\Command\WebHook;
 
 use App\Api\WebHook\Client\HttpClient;
 use App\Api\WebHook\Client\ServiceNowHttpClient;
-use App\Api\WebHook\Request\NewResultsWebHookRequest;
+use App\Api\WebHook\Request\TubeExternalProcessingWebHookRequest;
+use App\Api\WebHook\Request\WebHookRequest;
 use App\Command\BaseAppCommand;
-use App\Entity\SpecimenResult;
-use App\Entity\SpecimenResultAntibody;
-use App\Entity\SpecimenResultQPCR;
+use App\Entity\Tube;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
@@ -17,25 +16,25 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Fire web hooks related to Results.
+ * Fire web hooks related to Tubes sent for External Processing.
  *
  * Usage to see next results available:
  *
- *     $ bin/console app:webhook:results -v --dry-run
+ *     $ bin/console app:webhook:tubes-external -v --dry-run
  *
  * Usage send web hook:
  *
- *     $ bin/console app:webhook:results -v
+ *     $ bin/console app:webhook:tubes-external -v
  *
  */
-class ResultCommand extends BaseAppCommand
+class TubesExternalProcessingCommand extends BaseAppCommand
 {
-    protected static $defaultName = 'app:webhook:results';
+    protected static $defaultName = 'app:webhook:tubes-external';
 
     /**
      * Prototype Request object. Internally cloned for each executed request.
      *
-     * @var NewResultsWebHookRequest|null
+     * @var TubeExternalProcessingWebHookRequest|null
      */
     private $request;
 
@@ -46,9 +45,9 @@ class ResultCommand extends BaseAppCommand
 
     /**
      * @param HttpClient $httpClient Compatible with HttpClient or any subclass like ServiceNowHttpClient
-     * @param NewResultsWebHookRequest|null $request Prototype Request object. Only inject for testing purposes.
+     * @param TubeExternalProcessingWebHookRequest|null $request Prototype Request object. Only inject for testing purposes.
      */
-    public function __construct(EntityManagerInterface $em, HttpClient $httpClient, ?NewResultsWebHookRequest $request = null)
+    public function __construct(EntityManagerInterface $em, HttpClient $httpClient, ?TubeExternalProcessingWebHookRequest $request = null)
     {
         parent::__construct($em);
 
@@ -59,7 +58,7 @@ class ResultCommand extends BaseAppCommand
     protected function configure()
     {
         $this
-            ->setDescription('Publishes Specimen Results changes to Web Hook API')
+            ->setDescription('Publishes list of Tubes sent for External Processing to Web Hook API')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'When given, the Web Hook API URL will not be contacted')
             ->addOption('skip-saving', null, InputOption::VALUE_NONE, 'Whether to save timestamp when results successfully published')
         ;
@@ -68,16 +67,16 @@ class ResultCommand extends BaseAppCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // These are the Specimen Results to be sent to Web Hooks
-        $newResults = $this->findResults();
+        $tubes = $this->findTubes();
 
-        if (count($newResults) < 1) {
-            $this->outputDebug('No results to send');
+        if (count($tubes) < 1) {
+            $this->outputDebug('No Tubes to send');
             return 0;
         }
 
-        $this->outputDebugResultsByGroup($newResults);
+        $this->outputDebugTubes($tubes);
 
-        $request = $this->buildWebHookRequest($newResults);
+        $request = $this->buildWebHookRequest($tubes);
 
         $this->outputDebug('<comment>Pending Request Body:</comment>');
         $this->outputDebug($request->toJson());
@@ -120,7 +119,7 @@ class ResultCommand extends BaseAppCommand
             $output->writeln('Authentication failure. Check credential constants in file .env.local');
             return 1;
         }
-        $this->outputDebug('<info>√ Authentication success</info>');
+        $this->outputDebug('<info>√ Authentication Success</info>');
 
         if (500 === $response->getStatusCode()) {
             $output->writeln('500 Response from Web Hook endpoint');
@@ -144,11 +143,11 @@ class ResultCommand extends BaseAppCommand
         $this->outputDebug($response->getBodyContents());
         $this->outputDebug('');
 
-        // Update SpecimenResult with data from Response
+        // Update record with data from Response
         $save = !$this->input->getOption('skip-saving');
         if ($save) {
-            $this->outputDebug("<comment>Updating Results Web Hook Status...</comment>\n");
-            $response->updateResultWebHookStatus($newResults);
+            $this->outputDebug("<comment>Updating Tubes Web Hook Status...</comment>\n");
+            $response->updateResultWebHookStatus($tubes);
 
             $this->em->flush();
         }
@@ -159,64 +158,50 @@ class ResultCommand extends BaseAppCommand
     }
 
     /**
-     * Find latest Results to send to Web Hook
+     * Find latest Tube records to send to Web Hook.
      *
-     * @return SpecimenResult[]
+     * @return Tube[]
      */
-    private function findResults(): array
+    private function findTubes(): array
     {
-        $antibody = $this->em
-            ->getRepository(SpecimenResultAntibody::class)
-            ->findDueForWebHook();
-
-        $viral = $this->em
-            ->getRepository(SpecimenResultQPCR::class)
-            ->findDueForWebHook();
-
-        return array_merge($antibody, $viral);
+        return $this->em
+            ->getRepository(Tube::class)
+            ->findDueForExternalProcessingWebHook();
     }
 
     /**
-     * Output debug info about results sent for each Participant Group.
+     * Output debug info about Tubes sent through Web Hook.
      * Use CLI flag "-v" to print results.
      *
-     * @param SpecimenResult[] $newResults
+     * @param Tube[] $tubes
      */
-    private function outputDebugResultsByGroup(array $newResults)
+    private function outputDebugTubes(array $tubes)
     {
-        $this->outputDebug('<comment>Queued Results:</comment>');
-        foreach ($newResults as $result) {
-            $groupId = $result->getSpecimen()->getParticipantGroup()->getExternalId();
-            $reportedAt = $result->getUpdatedAt()->format('Y-m-d H:i:s');
-            $conclusion = $result->getConclusionText();
+        $this->outputDebug('<comment>Queued Tubes:</comment>');
+        foreach ($tubes as $tube) {
+            $externalId = $tube->getParticipantGroupExternalId() ?? '(empty)';
+            $accessionId = $tube->getAccessionId() ?? '(empty)';
+            $collectedAt = WebHookRequest::dateToRequestDataFormat($tube->getCollectedAt());
+            $externalProcessingAt = WebHookRequest::dateToRequestDataFormat($tube->getReturnedAt());
 
-            switch (get_class($result)) {
-                case SpecimenResultAntibody::class:
-                    $resultType = 'Antibody';
-                    break;
-                case SpecimenResultQPCR::class:
-                    $resultType = 'Viral';
-                    break;
-            }
-
-            $this->outputDebug(sprintf('* %s %s %s %s', $groupId, $reportedAt, $resultType, $conclusion));
+            $this->outputDebug(sprintf('* %s Group External ID: %s; Collected At: %s; External Processing At: %s', $accessionId, $externalId, $collectedAt, $externalProcessingAt));
         }
         $this->outputDebug("");
     }
 
     /**
-     * Build Request object to send results to Web Hook API.
+     * Build Request object to send to Web Hook API.
      *
-     * @param SpecimenResult[] $newResults
+     * @param Tube[] $tubes
      */
-    private function buildWebHookRequest(array $newResults): NewResultsWebHookRequest
+    private function buildWebHookRequest(array $tubes): TubeExternalProcessingWebHookRequest
     {
         if (!$this->request) {
-            $this->request = new NewResultsWebHookRequest();
+            $this->request = new TubeExternalProcessingWebHookRequest();
         }
 
         $request = clone $this->request;
-        $request->setResults($newResults);
+        $request->setTubes($tubes);
 
         return $request;
     }

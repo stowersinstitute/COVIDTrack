@@ -250,12 +250,11 @@ abstract class SpecimenResult
     }
 
     /**
-     * Mark result as ready and queued to send to Web Hooks next time data is sent.
+     * Mark as ready and queued to send to Web Hooks next time data is sent.
      */
     public function setWebHookQueued(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_QUEUED;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_QUEUED, $message);
     }
 
     /**
@@ -264,30 +263,27 @@ abstract class SpecimenResult
      */
     public function setWebHookSuccess(\DateTimeImmutable $successReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_SUCCESS;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_SUCCESS, $message);
         $this->setWebHookLastTriedPublishingAt($successReceivedAt);
     }
 
     /**
-     * Mark result as having experienced an error when sending to Web Hooks.
+     * Mark as having experienced an error when sending to Web Hooks.
      *
      * @param \DateTimeImmutable $errorReceivedAt Timestamp when experienced error sending to Web Hook.
      */
     public function setWebHookError(\DateTimeImmutable $errorReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_ERROR;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_ERROR, $message);
         $this->setWebHookLastTriedPublishingAt($errorReceivedAt);
     }
 
     /**
-     * Mark result to never be sent to Web Hooks.
+     * Mark to never be sent to Web Hooks.
      */
     public function setWebHookNeverSend(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_NEVER_SEND;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, $message);
     }
 
     /**

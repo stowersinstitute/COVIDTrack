@@ -3,6 +3,7 @@
 namespace App\Api\WebHook\Response;
 
 use App\Entity\SpecimenResult;
+use App\Entity\Tube;
 
 /**
  * Response received from ServiceNow API.
@@ -78,7 +79,7 @@ class ServiceNowWebHookResponse extends WebHookResponse
 
     /**
      * Get row info (result of sending to ServiceNow import API) representing
-     * each Specimen Result sent in the API Request.
+     * each record sent in the API Request.
      *
      * Expected keys:
      *
@@ -144,18 +145,18 @@ class ServiceNowWebHookResponse extends WebHookResponse
     }
 
     /**
-     * Update SpecimenResult records based on data in the Web Hook HTTP Response.
+     * Update records based on data in the Web Hook HTTP Response.
      *
-     * @param SpecimenResult[] $resultsSentInRequest
+     * @param SpecimenResult|Tube[] $recordsSentInRequest
      */
-    public function updateResultWebHookStatus(array $resultsSentInRequest): void
+    public function updateResultWebHookStatus(array $recordsSentInRequest): void
     {
         /**
-         * Indexed by SpecimenResult.id to allow efficient look up and removal below.
+         * Indexed by ID to allow efficient look up and removal below.
          *
-         * @var SpecimenResult[] $resultsById
+         * @var SpecimenResult|Tube[] $recordsById
          */
-        $resultsById = array_reduce($resultsSentInRequest, function(array $carry, SpecimenResult $r) {
+        $recordsById = array_reduce($recordsSentInRequest, function(array $carry, object $r) {
             $carry[$r->getId()] = $r;
 
             return $carry;
@@ -182,38 +183,45 @@ class ServiceNowWebHookResponse extends WebHookResponse
 
             $id = $row['data']['id']; // "id" serialized in row in Request
 
-            $result = $resultsById[$id] ?? null;
-            if (empty($result)) {
+            $record = $recordsById[$id] ?? null;
+            if (empty($record)) {
                 continue;
             } else {
                 // Remove from index so not automatically updated below
-                unset($resultsById[$id]);
+                unset($recordsById[$id]);
             }
 
-            $result->setWebHookSuccess($timestamp, $row['message']);
+            $record->setWebHookSuccess($timestamp, $row['message']);
         }
 
         // Update unsuccessful rows returned in Response
         foreach ($this->getUnsuccessfulRows() as $row) {
+            if (empty($row['data'])) {
+                throw new \InvalidArgumentException('Response data does not contain object key "data" for this row');
+            }
+            if (empty($row['data']['id'])) {
+                throw new \InvalidArgumentException('Response data does not contain object key "data.id" for this row');
+            }
+
             $id = $row['data']['id']; // "id" serialized in row in Request
 
-            $result = $resultsById[$id] ?? null;
-            if (empty($result)) {
+            $record = $recordsById[$id] ?? null;
+            if (empty($record)) {
                 continue;
             } else {
                 // Remove from index so not automatically updated below
-                unset($resultsById[$id]);
+                unset($recordsById[$id]);
             }
 
-            $result->setWebHookError($timestamp, $row['message']);
+            $record->setWebHookError($timestamp, $row['message']);
         }
 
         // If Request was successful in general (and not an error / Exception)
-        // assume any remaining results not explicitly present in Response
+        // assume any remaining records not explicitly present in Response
         // are positively reported.
         if ($this->isRequestSuccessful()) {
-            foreach ($resultsById as $result) {
-                $result->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
+            foreach ($recordsById as $record) {
+                $record->setWebHookSuccess($timestamp, "Not explicitly present in Response. Assuming Success.");
             }
         }
     }

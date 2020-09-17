@@ -79,7 +79,6 @@ class SpecimenResultQPCRRepository extends EntityRepository
     /**
      * Find results that need sent to Viral Results Web Hook.
      *
-     * @param \DateTimeInterface $since
      * @return SpecimenResultQPCR[]
      */
     public function findDueForWebHook(): array

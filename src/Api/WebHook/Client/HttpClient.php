@@ -188,6 +188,11 @@ class HttpClient
         // TODO: Log config errors like empty URL, empty USERNAME, empty PW
         $options = $resolver->resolve($options);
 
+        // URL must be provided and valid
+        if (false === filter_var($options['url'], FILTER_VALIDATE_URL)) {
+            throw new \InvalidArgumentException('Invalid Web Hook URL in configuration options');
+        }
+
         $this->url = $options['url'];
         $this->username = $options['username'];
         $this->password = $options['password'];

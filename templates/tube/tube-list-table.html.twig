@@ -19,6 +19,8 @@
                 <th>Kit Type</th>
                 <th>Status</th>
                 <th>Printed At</th>
+                <th>Web Hook Status</th>
+                <th>Web Hook Last Sent</th>
             </tr>
         </thead>
         <tbody>
@@ -32,6 +34,13 @@
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
                 <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
+                <td>{% spaceless %}
+                    {{ tube.webHookStatus }}
+                    {% if tube.webHookStatusMessage %}
+                        <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></span></th>
+                    {% endif %}
+                {% endspaceless %}</td>
+                <td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>
             </tr>
         {% endfor %}
         </tbody>

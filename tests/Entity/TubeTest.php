@@ -6,6 +6,8 @@ use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\DropOff;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\SpecimenResult;
+use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
 use App\Entity\Tube;
 use App\Entity\WellPlate;
@@ -22,6 +24,10 @@ class TubeTest extends TestCase
 
         $this->assertFalse($tube->willAllowExternalProcessing());
         $this->assertNull($tube->getExternalProcessingAt());
+
+        // Web Hooks
+        $this->assertSame(Tube::WEBHOOK_STATUS_PENDING, $tube->getWebHookStatus());
+        $this->assertNull($tube->getWebHookLastTriedPublishingAt());
     }
 
     public function testParticipantDropOffProcess()
@@ -119,6 +125,9 @@ class TubeTest extends TestCase
         $this->assertSame($tube->getStatus(), Tube::STATUS_EXTERNAL);
         $this->assertNotEmpty($tube->getExternalProcessingAt());
 
+        // Tube queued for web hooks
+        $this->assertSame(Tube::WEBHOOK_STATUS_QUEUED, $tube->getWebHookStatus());
+
         // Specimen must also updated to have Status "EXTERNAL"
         $this->assertSame(Specimen::STATUS_EXTERNAL, $specimen->getStatus());
 
@@ -139,9 +148,14 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNotSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
-        $tube->setCheckInDecision(Tube::CHECKED_IN_ACCEPTED);
+        $this->assertNull($tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        $checkedInAt = new \DateTimeImmutable('2020-12-20 12:55:44');
+        $tube->markAccepted('test-user', $checkedInAt);
+
         $this->assertSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+        $this->assertEquals($checkedInAt, $tube->getCheckedInAt());
     }
 
     public function testBloodRejectedCheckin()
@@ -157,9 +171,45 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNotSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
-        $tube->setCheckInDecision(Tube::CHECKED_IN_REJECTED);
+        $this->assertNull($tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        // Reject Tube
+        $checkedInAt = new \DateTimeImmutable('2020-12-21 12:55:44');
+        $tube->markRejected('test-user', $checkedInAt);
+
         $this->assertSame(Tube::CHECKED_IN_REJECTED, $tube->getCheckInDecision());
+        $this->assertEquals($checkedInAt, $tube->getCheckedInAt());
+
+        $this->assertSame(Tube::WEBHOOK_STATUS_NEVER_SEND, $tube->getWebHookStatus());
+    }
+
+    public function testMarkingForExternalProcessingQueuesForWebHooks()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertSame(Tube::WEBHOOK_STATUS_PENDING, $tube->getWebHookStatus());
+
+        $processedAt = new \DateTimeImmutable('2020-06-15 12:33:44');
+        $tube->markExternalProcessing($processedAt);
+
+        $this->assertEquals($processedAt, $tube->getExternalProcessingAt());
+        $this->assertSame(Tube::WEBHOOK_STATUS_QUEUED, $tube->getWebHookStatus());
+    }
+
+    public function testSuccessfulSendingToWebHook()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertSame(Tube::WEBHOOK_STATUS_PENDING, $tube->getWebHookStatus());
+        $this->assertEquals(null, $tube->getWebHookLastTriedPublishingAt());
+
+        $successReceivedAt = new \DateTimeImmutable('2020-08-16 15:00:00');
+        $message = "Success test";
+        $tube->setWebHookSuccess($successReceivedAt, $message);
+
+        $this->assertSame(Tube::WEBHOOK_STATUS_SUCCESS, $tube->getWebHookStatus());
+        $this->assertEquals($successReceivedAt, $tube->getWebHookLastTriedPublishingAt());
     }
 
     /**
@@ -176,5 +226,19 @@ class TubeTest extends TestCase
             ->willReturn($accessionId);
 
         return $mock;
+    }
+
+    /**
+     * @param string $tubeType Tube::TYPE_* status
+     */
+    private function buildTubeDroppedOff(string $tubeType): Tube
+    {
+        $tube = new Tube('T123');
+        $group = ParticipantGroup::buildExample('GRP-A');
+        $dropoff = new DropOff();
+        $specIdGen = $this->getMockAccessionIdGenerator('S123');
+        $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, $tubeType, new \DateTimeImmutable());
+
+        return $tube;
     }
 }
