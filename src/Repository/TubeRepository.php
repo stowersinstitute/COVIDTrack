@@ -93,6 +93,11 @@ class TubeRepository extends EntityRepository
     public function findDueForExternalProcessingWebHook(): array
     {
         return $this->createQueryBuilder('t')
+            // TODO: CVDLS-254 Update Tube fixtures so query does not need this
+            ->join('t.participantGroup', 'pg')
+            ->andWhere('(pg.externalId IS NOT NULL)')
+            // TODO END
+
             ->andWhere('t.webHookStatus = :webHookStatus')
             ->setParameter('webHookStatus', Tube::WEBHOOK_STATUS_QUEUED)
 
