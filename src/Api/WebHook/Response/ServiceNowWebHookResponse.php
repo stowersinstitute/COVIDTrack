@@ -196,6 +196,13 @@ class ServiceNowWebHookResponse extends WebHookResponse
 
         // Update unsuccessful rows returned in Response
         foreach ($this->getUnsuccessfulRows() as $row) {
+            if (empty($row['data'])) {
+                throw new \InvalidArgumentException('Response data does not contain object key "data" for this row');
+            }
+            if (empty($row['data']['id'])) {
+                throw new \InvalidArgumentException('Response data does not contain object key "data.id" for this row');
+            }
+
             $id = $row['data']['id']; // "id" serialized in row in Request
 
             $record = $recordsById[$id] ?? null;
