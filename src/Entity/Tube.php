@@ -771,8 +771,7 @@ class Tube
      */
     public function setWebHookQueued(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_QUEUED;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_QUEUED, $message);
     }
 
     /**
@@ -781,8 +780,7 @@ class Tube
      */
     public function setWebHookSuccess(\DateTimeImmutable $successReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_SUCCESS;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_SUCCESS, $message);
         $this->setWebHookLastTriedPublishingAt($successReceivedAt);
     }
 
@@ -793,8 +791,7 @@ class Tube
      */
     public function setWebHookError(\DateTimeImmutable $errorReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_ERROR;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_ERROR, $message);
         $this->setWebHookLastTriedPublishingAt($errorReceivedAt);
     }
 
@@ -803,8 +800,7 @@ class Tube
      */
     public function setWebHookNeverSend(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_NEVER_SEND;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, $message);
     }
 
     /**

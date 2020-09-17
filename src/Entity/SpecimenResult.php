@@ -254,8 +254,7 @@ abstract class SpecimenResult
      */
     public function setWebHookQueued(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_QUEUED;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_QUEUED, $message);
     }
 
     /**
@@ -264,8 +263,7 @@ abstract class SpecimenResult
      */
     public function setWebHookSuccess(\DateTimeImmutable $successReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_SUCCESS;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_SUCCESS, $message);
         $this->setWebHookLastTriedPublishingAt($successReceivedAt);
     }
 
@@ -276,8 +274,7 @@ abstract class SpecimenResult
      */
     public function setWebHookError(\DateTimeImmutable $errorReceivedAt, string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_ERROR;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_ERROR, $message);
         $this->setWebHookLastTriedPublishingAt($errorReceivedAt);
     }
 
@@ -286,8 +283,7 @@ abstract class SpecimenResult
      */
     public function setWebHookNeverSend(string $message = '')
     {
-        $this->webHookStatus = self::WEBHOOK_STATUS_NEVER_SEND;
-        $this->webHookStatusMessage = $message;
+        $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, $message);
     }
 
     /**
