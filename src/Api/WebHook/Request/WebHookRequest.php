@@ -7,6 +7,8 @@ namespace App\Api\WebHook\Request;
  */
 abstract class WebHookRequest implements \JsonSerializable
 {
+    protected const DATE_FORMAT_ISO8601 = 'Y-m-d\TH:i:s\Z';
+
     public function toJson($options = 0, $depth = 512): string
     {
         return json_encode($this->jsonSerialize(), $options, $depth);
@@ -30,4 +32,21 @@ abstract class WebHookRequest implements \JsonSerializable
      * @return mixed
      */
     abstract public function getRequestData();
+
+    /**
+     * Convert a date to its string representation for sending through Web Hook API.
+     *
+     * @param \DateTimeInterface|null $date
+     * @return string|null Either the string-formatted date or NULL
+     */
+    public static function dateToRequestDataFormat(?\DateTimeInterface $date): ?string
+    {
+        if (!$date) {
+            return null;
+        }
+
+        return $date
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format(self::DATE_FORMAT_ISO8601);
+    }
 }

@@ -84,4 +84,22 @@ class TubeRepository extends EntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * Find records that need sent through Tube Web Hook API.
+     *
+     * @return Tube[]
+     */
+    public function findDueForExternalProcessingWebHook(): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.webHookStatus = :webHookStatus')
+            ->setParameter('webHookStatus', Tube::WEBHOOK_STATUS_QUEUED)
+
+            // Ordered to help humans find a specific Tube in the list
+            ->orderBy('t.accessionId')
+
+            ->getQuery()
+            ->execute();
+    }
 }

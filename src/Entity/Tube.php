@@ -435,6 +435,11 @@ class Tube
         $this->participantGroup = $group;
     }
 
+    public function getParticipantGroupExternalId(): ?string
+    {
+        return $this->participantGroup ? $this->participantGroup->getExternalId() : null;
+    }
+
     /**
      * Set when Participant returned Tube at a Kiosk
      */
