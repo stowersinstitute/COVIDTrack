@@ -69,6 +69,7 @@ class TubeExternalProcessingWebHookRequest extends WebHookRequest
             $group = $T->getParticipantGroup();
 
             return [
+                'id' => $T->getId(),
                 'group_external_id' => $group ? $group->getExternalId() : null,
                 'accession_id' => $T->getAccessionId(),
                 'collected_at' => self::dateToRequestDataFormat($T->getCollectedAt()),
