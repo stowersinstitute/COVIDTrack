@@ -1,18 +1,13 @@
 <?php
 
-
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 /**
  * A cell within an ExcelImportWorksheet
- *
- * @ORM\Entity
- * @ORM\Table(name="excel_import_cells")
  */
 class ExcelImportCell
 {
@@ -25,33 +20,18 @@ class ExcelImportCell
     const VALUE_BOOLEAN_NULL = 'B_NULL';
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
      * @var int 1-based row number (matches the row displayed in Excel)
-     *
-     * @ORM\Column(name="row_index", type="integer", nullable=false)
      */
     protected $rowIndex;
 
     /**
      * @var string Column label from Excel, eg. "A"
-     *
-     * @ORM\Column(name="col_index", type="string", length=255, nullable=false)
      */
     protected $colIndex;
 
     /**
      * @var string Cell value
      * @see setValueFromExcelCell
-     *
-     * @ORM\Column(name="value", type="text", nullable=true)
      */
     protected $value;
 
@@ -62,25 +42,21 @@ class ExcelImportCell
      *
      * @var string
      * @see setValueFromExcelCell
-     *
-     * @ORM\Column(name="value_type", type="string", length=255, nullable=true)
      */
     protected $valueType;
 
     /**
-     * @var ExcelImportWorksheet Worksheet this cell belongs to
-     *
-     * @ORM\ManyToOne(targetEntity="ExcelImportWorksheet", inversedBy="cells")
-     * @ORM\JoinColumn(name="worksheet_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @deprecated Find usage and remove $worksheet argument. Instead add to ExcelImportWorksheet->addCell()
      */
-    protected $worksheet;
-
     public function __construct(ExcelImportWorksheet $worksheet)
     {
-        $this->worksheet = $worksheet;
-        $this->worksheet->addCell($this);
-
         $this->valueType = self::VALUE_TYPE_SCALAR;
+        $worksheet->addCell($this);
+    }
+
+    public function getId(): int
+    {
+        return spl_object_id($this);
     }
 
     /**
@@ -159,11 +135,6 @@ class ExcelImportCell
         return $this->value;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     public function getRowIndex(): int
     {
         return $this->rowIndex;
@@ -193,13 +164,12 @@ class ExcelImportCell
         $this->value = $value;
     }
 
+    /**
+     * @deprecated No longer maintains Worksheet relationship
+     */
     public function getWorksheet(): ExcelImportWorksheet
     {
-        return $this->worksheet;
-    }
-
-    public function setWorksheet(ExcelImportWorksheet $worksheet): void
-    {
-        $this->worksheet = $worksheet;
+        throw new \RuntimeException('ExcelImportCell->getWorksheet() deprecated');
+//        return $this->worksheet;
     }
 }
