@@ -141,18 +141,7 @@ class ExcelImportWorkbook
 
     public function addWorksheet(ExcelImportWorksheet $worksheet)
     {
-        if ($this->hasWorksheet($worksheet)) return;
-
         $this->worksheets->add($worksheet);
-    }
-
-    public function hasWorksheet(ExcelImportWorksheet $worksheet) : bool
-    {
-        foreach ($this->worksheets as $currWorksheet) {
-            if (EntityUtils::isSameEntity($currWorksheet, $worksheet)) return true;
-        }
-
-        return false;
     }
 
     /**

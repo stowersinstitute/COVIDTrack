@@ -54,11 +54,6 @@ class ExcelImportCell
         $worksheet->addCell($this);
     }
 
-    public function getId(): int
-    {
-        return spl_object_id($this);
-    }
-
     /**
      * Sets the value of this cell to match what's in the Excel cell
      */

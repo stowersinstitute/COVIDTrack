@@ -86,18 +86,7 @@ class ExcelImportWorksheet
 
     public function addCell(ExcelImportCell $cell)
     {
-        if (!$this->hasCell($cell)) {
-            $this->cells->add($cell);
-        }
-    }
-
-    public function hasCell(ExcelImportCell $cell) : bool
-    {
-        foreach ($this->cells as $currCell) {
-            if (EntityUtils::isSameEntity($currCell, $cell)) return true;
-        }
-
-        return false;
+        $this->cells->add($cell);
     }
 
     public function getTitle(): string
