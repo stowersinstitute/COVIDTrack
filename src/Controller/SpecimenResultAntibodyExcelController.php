@@ -61,7 +61,8 @@ class SpecimenResultAntibodyExcelController extends AbstractController
 
         $importer = new SpecimenResultAntibodyImporter(
             $this->getDoctrine()->getManager(),
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process();
@@ -93,7 +94,8 @@ class SpecimenResultAntibodyExcelController extends AbstractController
 
         $importer = new SpecimenResultAntibodyImporter(
             $em,
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
         $importer->process(true);
 

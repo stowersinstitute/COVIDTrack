@@ -20,7 +20,7 @@ class TecanImporterTest extends BaseDatabaseTestCase
         ]);
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tecan-import.csv');
-        $importer = new TecanImporter($this->em, $workbook->getFirstWorksheet());
+        $importer = new TecanImporter($this->em, $workbook->getFirstWorksheet(), $workbook->getFilename());
 
         $processedTubes = $importer->process(true);
         $this->em->flush(); // Flush so below records all exist in database

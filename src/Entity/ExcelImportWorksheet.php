@@ -109,13 +109,4 @@ class ExcelImportWorksheet
     {
         $this->title = $title;
     }
-
-    /**
-     * @deprecated No longer used. Worksheet no longer has Workbook reference.
-     */
-    public function getWorkbook(): ExcelImportWorkbook
-    {
-        throw new \RuntimeException('ExcelImportWorksheet->getWorkbook() is deprecated');
-//        return $this->workbook;
-    }
 }

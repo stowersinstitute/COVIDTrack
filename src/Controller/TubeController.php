@@ -145,7 +145,7 @@ class TubeController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new TubeImporter($importingWorkbook->getFirstWorksheet());
+        $importer = new TubeImporter($importingWorkbook->getFirstWorksheet(), $importingWorkbook->getFilename());
         $importer->setEntityManager($em);
 
         $importer->process();
@@ -174,7 +174,7 @@ class TubeController extends AbstractController
         $importingWorkbook = $this->mustFindImport($importId);
         $excelImporter->userMustHavePermissions($importingWorkbook);
 
-        $importer = new TubeImporter($importingWorkbook->getFirstWorksheet());
+        $importer = new TubeImporter($importingWorkbook->getFirstWorksheet(), $importingWorkbook->getFilename());
         $importer->setEntityManager($em);
         $importer->process(true);
 

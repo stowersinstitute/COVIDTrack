@@ -18,9 +18,9 @@ class TubeImporter extends BaseExcelImporter
      */
     private $importedTubes = [];
 
-    public function __construct(ExcelImportWorksheet $worksheet)
+    public function __construct(ExcelImportWorksheet $worksheet, ?string $filename)
     {
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         $this->columnMap = [
             'accessionId' => 'A',

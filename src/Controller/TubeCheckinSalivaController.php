@@ -62,7 +62,8 @@ class TubeCheckinSalivaController extends AbstractController
 
         $importer = new TubeCheckinSalivaImporter(
             $this->getDoctrine()->getManager(),
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process();
@@ -94,7 +95,8 @@ class TubeCheckinSalivaController extends AbstractController
 
         $importer = new TubeCheckinSalivaImporter(
             $em,
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
         $importer->process(true);
         $output = $importer->getOutput();

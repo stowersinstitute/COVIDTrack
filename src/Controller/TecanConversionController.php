@@ -129,7 +129,8 @@ class TecanConversionController extends AbstractController
 
         $importer = new TecanImporter(
             $this->getDoctrine()->getManager(),
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process();
@@ -159,7 +160,8 @@ class TecanConversionController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $importer = new TecanImporter(
             $em,
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process(true);

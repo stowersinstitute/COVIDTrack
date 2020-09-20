@@ -42,11 +42,11 @@ class TubeCheckinBloodImporter extends BaseExcelImporter
      */
     private $platesCache = [];
 
-    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet, ?string $filename)
     {
         $this->setEntityManager($em);
 
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         // Array keys are available in HTML views to look up imported data
         $this->columnMap = [

@@ -29,9 +29,9 @@ class ParticipantGroupImporter extends BaseExcelImporter
      */
     private $seenTitles = [];
 
-    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator)
+    public function __construct(EntityManagerInterface $em, ExcelImportWorksheet $worksheet, ParticipantGroupAccessionIdGenerator $idGenerator, ?string $filename)
     {
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         $this->setEntityManager($em);
         $this->idGenerator = $idGenerator;

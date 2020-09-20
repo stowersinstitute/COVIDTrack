@@ -17,7 +17,7 @@ class TubeCheckinSalivaImporterTest extends BaseDatabaseTestCase
         ]);
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin-saliva.xlsx');
-        $importer = new TubeCheckinSalivaImporter($this->em, $workbook->getFirstWorksheet());
+        $importer = new TubeCheckinSalivaImporter($this->em, $workbook->getFirstWorksheet(), $workbook->getFilename());
 
         $checkedInTubes = $importer->process(true);
 

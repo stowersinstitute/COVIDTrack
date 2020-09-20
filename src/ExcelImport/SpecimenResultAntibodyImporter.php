@@ -44,13 +44,13 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
      */
     private $processedResults = [];
 
-    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet, ?string $filename)
     {
         $this->setEntityManager($em);
         $this->specimenRepo = $em->getRepository(Specimen::class);
         $this->plateRepo = $em->getRepository(WellPlate::class);
 
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         $this->columnMap = [
             'specimenId' => 'A',
