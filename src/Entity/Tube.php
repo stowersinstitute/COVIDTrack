@@ -215,6 +215,22 @@ class Tube
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
+    /**
+     * Build test Tube that satisfies minimum requirements to be sent for Web Hooks.
+     */
+    public static function buildExampleForWebHook(string $accessionId, int $id, string $groupAccessionId, string $groupExternalId): self
+    {
+        $T = new self($accessionId);
+        $T->id = $id;
+
+        $group = ParticipantGroup::buildExample($groupAccessionId);
+        $group->setExternalId($groupExternalId);
+
+        $T->setParticipantGroup($group);
+
+        return $T;
+    }
+
     public function __toString()
     {
         return $this->getAccessionId() ?: 'None';
@@ -746,10 +762,11 @@ class Tube
     }
 
     /**
-     * @param string        $status     Tube::WEBHOOK_STATUS_* constant.
-     * @param string|null   $message
+     * Does nothing when given value is valid, else throws an Exception.
+     *
+     * @param string $status Tube::WEBHOOK_STATUS_* constant value
      */
-    protected function setWebHookStatus(string $status, string $message = ''): void
+    public static function ensureValidWebHookStatus(string $status): void
     {
         $validStatuses = [
             self::WEBHOOK_STATUS_PENDING,
@@ -760,6 +777,45 @@ class Tube
         ];
         if (!in_array($status, $validStatuses)) {
             throw new \InvalidArgumentException('Invalid Web Hook Status');
+        }
+    }
+
+    /**
+     * Verify Tube has all data to be considered ready for sending to Tube web hooks.
+     *
+     * @throws \LogicException When required Tube data missing
+     */
+    public function verifyReadyForWebHook(): void
+    {
+        if (!$this->getId()) {
+            throw new \LogicException('Tube must have an ID');
+        }
+        if (null === $this->getAccessionId()) {
+            throw new \LogicException('Tube must have an Accession ID');
+        }
+        if (null === $this->getParticipantGroup()) {
+            throw new \LogicException('Tube must have an associated Participant Group');
+        }
+        if (null === $this->getParticipantGroup()->getExternalId()) {
+            throw new \LogicException('Tube Participant Group must have an External ID');
+        }
+    }
+
+    /**
+     * Set web hook status and message why it was set.
+     *
+     * @param string        $status     Tube::WEBHOOK_STATUS_* constant
+     * @param string|null   $message
+     * @throws \LogicException When required Tube data missing
+     */
+    public function setWebHookStatus(string $status, string $message = ''): void
+    {
+        self::ensureValidWebHookStatus($status);
+
+        // If trying to set status that will send to web hooks,
+        // verify has all required data to do so
+        if ($status === self::WEBHOOK_STATUS_QUEUED) {
+            $this->verifyReadyForWebHook();
         }
 
         $this->webHookStatus = $status;

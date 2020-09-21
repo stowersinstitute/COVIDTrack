@@ -56,6 +56,7 @@ security:
             - ROLE_TUBE_CHECK_IN
             - ROLE_REPORTS_GROUP_VIEW
             - ROLE_WELL_PLATE_EDIT
+            - ROLE_WEB_HOOKS
         ROLE_KIOSK_UI:
             - ROLE_SPECIMEN_DROP_OFF
         ROLE_PARTICIPANT_GROUP_EDIT:

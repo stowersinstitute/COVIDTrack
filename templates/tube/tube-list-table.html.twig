@@ -1,8 +1,20 @@
 {% block body %}
+{% set userCanViewWebHooks = is_granted("ROLE_WEB_HOOKS") %}
 
     {% include 'flash.html.twig' %}
 
     <div class="margin-bottom">
+        {% if userCanViewWebHooks %}
+        <div class="pull-right">
+            <strong>Web Hooks:</strong>
+            <button id="republishWebHooksBtn" type="button" class="btn btn-sm btn-success">
+                <i class="fas fa-fw fa-sync-alt"></i> Re-Publish
+            </button>
+            <button id="neverSendWebHooksBtn" type="button" class="btn btn-sm btn-danger">
+                <i class="fas fa-fw fa-sync-alt"></i> Never Send
+            </button>
+        </div>
+        {% endif %}
         <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#labelPrintModal">
             <i class="fa fa-fw fa-print"></i> Re-Print Selected Tubes
         </button>
@@ -19,8 +31,8 @@
                 <th>Kit Type</th>
                 <th>Status</th>
                 <th>Printed At</th>
-                <th>Web Hook Status</th>
-                <th>Web Hook Last Sent</th>
+                {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
+                {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
             </tr>
         </thead>
         <tbody>
@@ -34,13 +46,13 @@
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
                 <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
-                <td>{% spaceless %}
+                {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
                         <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></span></th>
                     {% endif %}
-                {% endspaceless %}</td>
-                <td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>
+                {% endspaceless %}</td>{% endif %}
+                {% if userCanViewWebHooks %}<td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
             </tr>
         {% endfor %}
         </tbody>
@@ -64,6 +76,53 @@
             </div>
         </div>
     </div>
+
+{% if userCanViewWebHooks %}
+    <script type="application/javascript">
+        /**
+         * Set checked Tubes to given status.
+         * @param webHookStatus {String} Tube::WEBHOOK_STATUS_* constant
+         */
+        function setTubeWebHookStatus(webHookStatus) {
+            const checkedTubes = $('.tube-checkbox:checked');
+            const tubeAccessionIds = jQuery.map(checkedTubes, function(checkboxEl) {
+                return $(checkboxEl).val();
+            });
+            if (tubeAccessionIds.length < 1) {
+                alert("Check 1 or more Tubes");
+                return;
+            }
+
+            const url = "{{ path('tube_web_hook_status') }}";
+            const params = {
+                tubeAccessionIds: tubeAccessionIds,
+                webHookStatus: webHookStatus
+            };
+            $.post(url, params)
+                .fail(function(responseObj) {
+                    // Error happened, show it
+                    const response = responseObj.responseJSON;
+                    const errorMsg = response.errorMsg;
+                    if (errorMsg) {
+                        alert(errorMsg);
+                        return;
+                    }
+                    alert('Error setting Tube web hook status');
+                })
+                .done(function(response) {
+                    alert("Tube web hook status successfully saved")
+                    // Refresh screen so new data visible
+                    location.reload();
+                });
+        }
+        $('#republishWebHooksBtn').on('click', function() {
+            setTubeWebHookStatus('QUEUED');
+        });
+        $('#neverSendWebHooksBtn').on('click', function() {
+            setTubeWebHookStatus('NEVER_SEND');
+        });
+    </script>
+{% endif %}
 
 <script type="application/javascript">
     $('#check-all').change(function() {
