@@ -31,6 +31,21 @@ class SpecimenRepository extends EntityRepository
     }
 
     /**
+     * List Specimens for displaying in list for Participant Group.
+     *
+     * @return Specimen[]
+     */
+    public function findForGroupList(ParticipantGroup $group): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.participantGroup = :participantGroup')
+            ->setParameter('participantGroup', $group)
+            ->orderBy('s.collectedAt', 'DESC')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * Find unique list of DateTimes for when Viral Results were uploaded for Specimens.
      *
      * @return \DateTime[]

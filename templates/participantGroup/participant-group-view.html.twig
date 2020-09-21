@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 {% set userCanEditGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
+{% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 
 {% block page_title %}
     Participant Group {{ group.title }}
@@ -58,6 +59,34 @@
                 </dl>
             </div>
         </div>
+
+    {% if userCanViewSpecimens %}
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">Specimens</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>Accession ID</th>
+                        <th>Type</th>
+                        <th>Collection Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for specimen in specimens %}
+                        <tr>
+                            <td><a href="{{ path('app_specimen_view', {accessionId: specimen.accessionId}) }}">{{ specimen.accessionId }}</a></td>
+                            <td>{{ specimen.getTypeText }}</td>
+                            <td>{{ specimen.collectedAt ? specimen.collectedAt|date("Y-m-d g:ia") : '' }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
     </div>
 
     <div class="col-md-6">

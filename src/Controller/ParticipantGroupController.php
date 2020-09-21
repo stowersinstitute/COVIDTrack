@@ -7,6 +7,7 @@ use App\Entity\ExcelImportWorkbook;
 use App\Entity\AuditLog;
 use App\Entity\LabelPrinter;
 use App\Entity\ParticipantGroup;
+use App\Entity\Specimen;
 use App\ExcelImport\ExcelImporter;
 use App\ExcelImport\ParticipantGroupImporter;
 use App\Form\GenericExcelImportType;
@@ -178,9 +179,14 @@ class ParticipantGroupController extends AbstractController
             ->getRepository(AuditLog::class)
             ->getLogEntries($group);
 
+        $specimens = $this->getDoctrine()
+            ->getRepository(Specimen::class)
+            ->findForGroupList($group);
+
         return $this->render('participantGroup/participant-group-view.html.twig', [
             'group' => $group,
             'auditLogs' => $auditLogs,
+            'specimens' => $specimens,
         ]);
     }
 
