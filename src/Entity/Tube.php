@@ -794,10 +794,10 @@ class Tube
             throw new \LogicException('Tube must have an Accession ID');
         }
         if (null === $this->getParticipantGroup()) {
-            throw new \LogicException('Tube must have an associated Participant Group');
+            throw new \LogicException(sprintf('Tube %s must have an associated Participant Group', $this->getAccessionId()));
         }
         if (null === $this->getParticipantGroup()->getExternalId()) {
-            throw new \LogicException('Tube Participant Group must have an External ID');
+            throw new \LogicException(sprintf('Tube %s Participant Group %s must have an External ID', $this->getAccessionId(), $this->getParticipantGroup()->getTitle()));
         }
     }
 
