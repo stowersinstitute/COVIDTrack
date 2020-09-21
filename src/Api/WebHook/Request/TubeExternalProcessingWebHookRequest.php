@@ -31,20 +31,14 @@ class TubeExternalProcessingWebHookRequest extends WebHookRequest
         }
     }
 
+    /**
+     * @throws \LogicException When Tube does not have all data to be sent to web hook
+     */
     public function addTube(Tube $T): void
     {
-        if (!$T->getId()) {
-            throw new \InvalidArgumentException('Tube must have an ID');
-        }
-        if (null === $T->getAccessionId()) {
-            throw new \InvalidArgumentException('Tube must have an Accession ID');
-        }
-        if (null === $T->getParticipantGroup()) {
-            throw new \InvalidArgumentException('Tube must have an associated Participant Group');
-        }
-        if (null === $T->getParticipantGroup()->getExternalId()) {
-            throw new \InvalidArgumentException('Tube Participant Group must have an External ID');
-        }
+        // Throws Exception if not ready. Tube requires specific data before
+        // being sent to a Web Hook. This always prevents adding without that data.
+        $T->verifyReadyForWebHook();
 
         $this->tubes[$T->getId()] = $T;
     }

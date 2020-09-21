@@ -151,9 +151,12 @@ class ParticipantGroup
     /**
      * Build for tests.
      */
-    public static function buildExample(string $accessionId, int $participantCount = 5): self
+    public static function buildExample(string $accessionId, int $participantCount = 5, string $externalId = null): self
     {
-        return new static($accessionId, $participantCount);
+        $G = new static($accessionId, $participantCount);
+        $G->setExternalId($externalId);
+
+        return $G;
     }
 
     public function __toString()

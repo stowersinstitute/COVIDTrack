@@ -99,11 +99,11 @@ class TubeTest extends TestCase
 
     public function testMarkExternalProcessingAllowedForSaliva()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowExternalProcessing());
 
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_SALIVA, new \DateTimeImmutable());
@@ -137,7 +137,7 @@ class TubeTest extends TestCase
 
     public function testBloodAcceptedCheckin()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowCheckinDecision());
 
@@ -160,11 +160,11 @@ class TubeTest extends TestCase
 
     public function testBloodRejectedCheckin()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowCheckinDecision());
 
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_BLOOD, new \DateTimeImmutable());
@@ -233,8 +233,8 @@ class TubeTest extends TestCase
      */
     private function buildTubeDroppedOff(string $tubeType): Tube
     {
-        $tube = new Tube('T123');
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, $tubeType, new \DateTimeImmutable());

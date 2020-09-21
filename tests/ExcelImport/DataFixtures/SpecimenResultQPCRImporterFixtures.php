@@ -52,7 +52,6 @@ class SpecimenResultQPCRImporterFixtures extends Fixture implements DependentFix
         $em->persist($resultsWellPlate);
 
         // Simulate printing labels for Tubes
-        $tubes = [];
         foreach ($this->getTubeData() as $data) {
             $tube = new Tube($data['accessionId']);
             $this->addReference($data['accessionId'], $tube);
