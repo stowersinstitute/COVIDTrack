@@ -49,7 +49,7 @@
                 {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
-                        <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></span></th>
+                        <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></span>
                     {% endif %}
                 {% endspaceless %}</td>{% endif %}
                 {% if userCanViewWebHooks %}<td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
