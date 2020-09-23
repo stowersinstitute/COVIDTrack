@@ -3,9 +3,27 @@
 {% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+{% set userCanViewWebHooks = is_granted("ROLE_WEB_HOOKS") %}
+
+{% if userCanViewWebHooks %}
+<div class="margin-bottom">
+    &nbsp; {# Necessary so div has body content for CSS margin to be applied #}
+    <div class="pull-right">
+        <strong>Web Hooks:</strong>
+        <button id="republishWebHooksBtn" type="button" class="btn btn-sm btn-success">
+            <i class="fas fa-fw fa-sync-alt"></i> Re-Publish
+        </button>
+        <button id="neverSendWebHooksBtn" type="button" class="btn btn-sm btn-danger">
+            <i class="fas fa-fw fa-times-circle"></i> Never Send
+        </button>
+    </div>
+</div>
+{% endif %}
+
 <table class="table table-bordered table-hover">
     <thead>
         <tr>
+            {% if userCanViewWebHooks %}<th style="width: 2em;"><input type="checkbox" id="check-all"></th>{% endif %}
             {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
             <th>Specimen</th>
             {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
@@ -13,12 +31,19 @@
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
             <th>Ct / Amp Score</th>
-            <th>Reported At</th>
+            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
+            {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
+            {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
         </tr>
     </thead>
     <tbody>
     {% for result in results %}
         <tr>
+            {% if userCanViewWebHooks %}
+            <td>
+                <input type="checkbox" class="result-checkbox" value="{{ result.id }}">
+            </td>
+            {% endif %}
             {% if userCanEditResults %}
             <td>
                 <a href="{{ path('results_qpcr_edit', {id: result.id}) }}">Edit</a>
@@ -49,8 +74,67 @@
                 {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
             </td>
             <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
+            {% if userCanViewWebHooks %}<td>{% spaceless %}
+                {{ result.webHookStatus }}
+                {% if result.webHookStatusMessage %}
+                    <i class="fas fa-question-circle question-icon-help" title="{{ result.webHookStatusMessage|e("html_attr") }}"></i>
+                {% endif %}
+            {% endspaceless %}</td>{% endif %}
+            {% if userCanViewWebHooks %}<td>{{ result.webHookLastTriedPublishingAt ? result.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
         </tr>
     {% endfor %}
     </tbody>
 </table>
+
+{% if userCanViewWebHooks %}
+    <script type="application/javascript">
+        // Check-all checkboxes in table
+        $('#check-all').change(function() {
+            $(".result-checkbox").prop('checked', $(this).is(':checked'));
+        });
+
+        /**
+         * Set checked Results to given status.
+         * @param webHookStatus {String} SpecimenResult::WEBHOOK_STATUS_* constant
+         */
+        function setResultWebHookStatus(webHookStatus) {
+            const checkedResults = $('.result-checkbox:checked');
+            const resultIds = jQuery.map(checkedResults, function(checkboxEl) {
+                return $(checkboxEl).val();
+            });
+            if (resultIds.length < 1) {
+                alert("Check 1 or more Results");
+                return;
+            }
+
+            const url = "{{ path('results_web_hook_status') }}";
+            const params = {
+                resultIds: resultIds,
+                webHookStatus: webHookStatus
+            };
+            $.post(url, params)
+                .fail(function(responseObj) {
+                    // Error happened, show it
+                    const response = responseObj.responseJSON;
+                    const errorMsg = response.errorMsg;
+                    if (errorMsg) {
+                        alert(errorMsg);
+                        return;
+                    }
+                    alert('Error setting web hook status');
+                })
+                .done(function(response) {
+                    alert("Web hook status successfully saved")
+                    // Refresh screen so new data visible
+                    location.reload();
+                });
+        }
+        $('#republishWebHooksBtn').on('click', function() {
+            setResultWebHookStatus('QUEUED');
+        });
+        $('#neverSendWebHooksBtn').on('click', function() {
+            setResultWebHookStatus('NEVER_SEND');
+        });
+    </script>
+{% endif %}
 {% endblock %}

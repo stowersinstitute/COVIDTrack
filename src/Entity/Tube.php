@@ -189,6 +189,7 @@ class Tube
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookStatus;
 
@@ -197,6 +198,7 @@ class Tube
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status_message", type="text", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookStatusMessage;
 
@@ -205,6 +207,7 @@ class Tube
      *
      * @var null|\DateTimeImmutable
      * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookLastTriedPublishingAt;
 

@@ -24,6 +24,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *     "qpcr" = "SpecimenResultQPCR",
  *     "antibody" = "SpecimenResultAntibody",
  * })
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 abstract class SpecimenResult
 {
@@ -84,6 +85,7 @@ abstract class SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookStatus;
 
@@ -92,6 +94,7 @@ abstract class SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status_message", type="text", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookStatusMessage;
 
@@ -100,6 +103,7 @@ abstract class SpecimenResult
      *
      * @var null|\DateTimeImmutable
      * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookLastTriedPublishingAt;
 
@@ -229,10 +233,25 @@ abstract class SpecimenResult
     }
 
     /**
+     * Set web hook status and message why it was set.
+     *
      * @param string                  $status       SpecimenResult::WEBHOOK_STATUS_* constant.
      * @param string|null             $message
      */
-    protected function setWebHookStatus(string $status, string $message = ''): void
+    public function setWebHookStatus(string $status, string $message = ''): void
+    {
+        self::ensureValidWebHookStatus($status);
+
+        $this->webHookStatus = $status;
+        $this->webHookStatusMessage = $message;
+    }
+
+    /**
+     * Does nothing when given value is valid, else throws an Exception.
+     *
+     * @param string $status SpecimenResult::WEBHOOK_STATUS_* constant value
+     */
+    public static function ensureValidWebHookStatus(string $status): void
     {
         $validStatuses = [
             self::WEBHOOK_STATUS_PENDING,
@@ -244,9 +263,6 @@ abstract class SpecimenResult
         if (!in_array($status, $validStatuses)) {
             throw new \InvalidArgumentException('Invalid Web Hook Status');
         }
-
-        $this->webHookStatus = $status;
-        $this->webHookStatusMessage = $message;
     }
 
     /**
