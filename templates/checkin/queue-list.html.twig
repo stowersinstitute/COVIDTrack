@@ -1,5 +1,4 @@
 {% block body %}
-{% set allowPerTubeDecision = is_granted("ROLE_TUBE_CHECK_IN") %}
 {% set salivaTubeType = constant('App\\Entity\\Tube::TYPE_SALIVA') %}
 
 <form method="POST" id="external-processing-form" action="{{ path('checkin_queue_external_processing') }}">
