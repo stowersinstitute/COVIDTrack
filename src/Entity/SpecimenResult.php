@@ -24,6 +24,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *     "qpcr" = "SpecimenResultQPCR",
  *     "antibody" = "SpecimenResultAntibody",
  * })
+ * @Gedmo\Loggable(logEntryClass="App\Entity\AuditLog")
  */
 abstract class SpecimenResult
 {
@@ -84,6 +85,7 @@ abstract class SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookStatus;
 
@@ -92,6 +94,7 @@ abstract class SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status_message", type="text", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookStatusMessage;
 
@@ -100,6 +103,7 @@ abstract class SpecimenResult
      *
      * @var null|\DateTimeImmutable
      * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     protected $webHookLastTriedPublishingAt;
 
