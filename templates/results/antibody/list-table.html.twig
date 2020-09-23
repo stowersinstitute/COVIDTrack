@@ -32,7 +32,7 @@
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
             <th>Well ID</th>
-            <th>Reported At <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="Time when Result was uploaded or entered into COVIDTrack"></span></th>
+            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
             {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
         </tr>
@@ -75,7 +75,7 @@
             {% if userCanViewWebHooks %}<td>{% spaceless %}
                 {{ result.webHookStatus }}
                 {% if result.webHookStatusMessage %}
-                    <span class="glyphicon glyphicon-info-sign text-primary" aria-hidden="true" title="{{ result.webHookStatusMessage|e("html_attr") }}"></span>
+                    <i class="fas fa-question-circle question-icon-help" title="{{ result.webHookStatusMessage|e("html_attr") }}"></i>
                 {% endif %}
             {% endspaceless %}</td>{% endif %}
             {% if userCanViewWebHooks %}<td>{{ result.webHookLastTriedPublishingAt ? result.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}

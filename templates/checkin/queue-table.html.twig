@@ -9,8 +9,8 @@
             <th>Tube Accession ID</th>
             <th>Type</th>
             <th>Printed At</th>
-            <th>Collected At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></span></th>
-            <th>Returned At <span class="glyphicon glyphicon-question-sign text-primary" aria-hidden="true" title="Date/Time Tube returned at a Kiosk."></span></th>
+            <th>Collected At <i class="fas fa-question-circle question-icon-help" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></i></th>
+            <th>Returned At <i class="fas fa-question-circle question-icon-help" title="Date/Time Tube returned at a Kiosk"></i></th>
             {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Reject</th>{% endif %}
         </tr>
     </thead>
@@ -33,7 +33,7 @@
             <td style="text-align:center;">
                 {# Reject #}
                 <button type="button" class="btn-tube-{{ tube.accessionId|e('html_attr') }} reject-one-tube btn btn-danger btn-sm" title="Reject" data-tube-id="{{ tube.accessionId|e('html_attr') }}">
-                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    <i class="fas fa-times"></i>
                 </button>
             </td>
             {% endif %}
