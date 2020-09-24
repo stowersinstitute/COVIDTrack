@@ -121,6 +121,9 @@ class SpecimenResultAntibody extends SpecimenResult
             'webHookLastTriedPublishingAt' => function(?\DateTimeInterface $value) {
                 return $value ? $value->format('Y-m-d g:ia') : null;
             },
+            'conclusion' => function($value) {
+                return $value ? self::lookupConclusionText($value) : '(empty)';
+            },
         ];
 
         $return = [];

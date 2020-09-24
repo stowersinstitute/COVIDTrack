@@ -176,9 +176,14 @@ abstract class SpecimenResult
 
     public function getConclusionText(): string
     {
-        $conclusions = array_flip(static::getFormConclusions());
+        return $this->conclusion ? self::lookupConclusionText($this->conclusion) : '';
+    }
 
-        return $conclusions[$this->getConclusion()] ?? '';
+    public static function lookupConclusionText(string $conclusionConstant): string
+    {
+        $types = array_flip(static::getFormConclusions());
+
+        return $types[$conclusionConstant] ?? '';
     }
 
     /**
