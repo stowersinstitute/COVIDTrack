@@ -138,7 +138,9 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('results_qpcr_list');
+            return $this->redirectToRoute('results_qpcr_view', [
+                'id' => $id,
+            ]);
         }
 
         return $this->render('results/qpcr/form.html.twig', [

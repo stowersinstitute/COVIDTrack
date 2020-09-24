@@ -134,7 +134,9 @@ class SpecimenResultAntibodyController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('results_antibody_list');
+            return $this->redirectToRoute('results_antibody_view', [
+                'id' => $id,
+            ]);
         }
 
         return $this->render('results/antibody/form.html.twig', [
