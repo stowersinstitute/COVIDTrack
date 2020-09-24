@@ -76,6 +76,7 @@ abstract class SpecimenResult
      *
      * @var string
      * @ORM\Column(name="conclusion", type="string", length=255)
+     * @Gedmo\Versioned
      */
     protected $conclusion;
 
@@ -147,62 +148,6 @@ abstract class SpecimenResult
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
-    }
-
-    /**
-     * Convert audit log field changes from internal format to human-readable format.
-     *
-     * Audit Logging tracks field/value changes using entity property names
-     * and values like this:
-     *
-     *     [
-     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
-     *         "createdAt" => \DateTime(...),
-     *     ]
-     *
-     * This method should convert the changes to human-readable values like this:
-     *
-     *     [
-     *         "Status" => "Accepted",
-     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
-     *     ]
-     *
-     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
-     * @return mixed[] Keys are human-readable field names, Values are human-readable values
-     */
-    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
-    {
-        $keyConverter = [
-            // Entity.propertyNameHere => Human-Readable Description
-            'webHookStatus' => 'Web Hook Status',
-            'webHookStatusMessage' => 'Web Hook Status Message',
-            'webHookLastTriedPublishingAt' => 'Web Hook Last Sent',
-        ];
-
-        /**
-         * Keys are array key from $changes
-         * Values are callbacks to convert $changes[$key] value
-         */
-        $valueConverter = [
-            'webHookLastTriedPublishingAt' => function(?\DateTimeInterface $value) {
-                return $value ? $value->format('Y-m-d g:ia') : null;
-            },
-        ];
-
-        $return = [];
-        foreach ($changes as $fieldId => $value) {
-            // If mapping fieldId to human-readable string, use it
-            // Else fallback to original fieldId
-            $key = $keyConverter[$fieldId] ?? $fieldId;
-
-            // If mapping callback defined for fieldId, use it
-            // Else fallback to current value
-            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
-
-            $return[$key] = $value;
-        }
-
-        return $return;
     }
 
     public function getConclusion(): string
