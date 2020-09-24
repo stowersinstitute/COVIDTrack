@@ -26,12 +26,12 @@
             <th>&nbsp;<!-- View --></th>
             <th>Specimen</th>
             {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
+            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             <th>Conclusion</th>
             <th>Signal</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
             <th>Well ID</th>
-            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
             {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
         </tr>
@@ -57,6 +57,7 @@
             {% if userCanViewGroups %}
                 <td><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></td>
             {% endif %}
+            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             <td>{{ result.conclusionText }}</td>
             <td>{{ result.signal }}</td>
             <td>
@@ -68,7 +69,6 @@
             </td>
             <td>{{ result.wellPosition }}</td>
             <td>{{ result.wellIdentifier }}</td>
-            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             {% if userCanViewWebHooks %}<td>{% spaceless %}
                 {{ result.webHookStatus }}
                 {% if result.webHookStatusMessage %}
