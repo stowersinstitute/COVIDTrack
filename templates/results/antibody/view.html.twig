@@ -27,6 +27,8 @@
 
                     <dt>Signal</dt><dd>{{ result.signal }}</dd>
 
+                    <hr style="border-top-color: #f4f4f4;"/>
+
                     <dt>Specimen</dt>
                     <dd>
                         {% if userCanViewSpecimens %}
@@ -40,6 +42,8 @@
                         <dt>Participant Group</dt>
                         <dd><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></dd>
                     {% endif %}
+
+                    <hr style="border-top-color: #f4f4f4;"/>
 
                     <dt>Well Plate Barcode</dt>
                     <dd>
@@ -55,6 +59,8 @@
 
                     <dt>Well ID</dt>
                     <dd>{{ result.wellIdentifier }}</dd>
+
+                    <hr style="border-top-color: #f4f4f4;"/>
 
                     <dt>Reported At</dt>
                     <dd>{{ result.createdAt | date("Y-m-d g:ia") }}</dd>

@@ -25,6 +25,15 @@
                 <dl class="dl-horizontal">
                     <dt>Conclusion</dt><dd>{{ result.conclusionText }}</dd>
 
+                    <dt>Ct / Amp Score</dt>
+                    <dd>
+                        {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
+                        {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
+                        {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
+                    </dd>
+
+                    <hr style="border-top-color: #f4f4f4;"/>
+
                     <dt>Specimen</dt>
                     <dd>
                         {% if userCanViewSpecimens %}
@@ -39,6 +48,8 @@
                         <dd><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></dd>
                     {% endif %}
 
+                    <hr style="border-top-color: #f4f4f4;"/>
+
                     <dt>Well Plate Barcode</dt>
                     <dd>
                         {% if userCanViewWellPlates %}
@@ -51,12 +62,7 @@
                     <dt>Well Plate Position</dt>
                     <dd>{{ result.wellPosition }}</dd>
 
-                    <dt>Ct / Amp Score</dt>
-                    <dd>
-                        {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
-                        {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
-                        {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
-                    </dd>
+                    <hr style="border-top-color: #f4f4f4;"/>
 
                     <dt>Reported At</dt>
                     <dd>{{ result.createdAt | date("Y-m-d g:ia") }}</dd>
