@@ -2,7 +2,6 @@
 {% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 {% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
-{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 {% set userCanViewWebHooks = is_granted("ROLE_WEB_HOOKS") %}
 
 {% if userCanViewWebHooks %}
@@ -24,7 +23,6 @@
     <thead>
         <tr>
             {% if userCanViewWebHooks %}<th style="width: 2em;"><input type="checkbox" id="check-all"></th>{% endif %}
-            {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
             <th>&nbsp;<!-- View --></th>
             <th>Specimen</th>
             {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
@@ -42,11 +40,6 @@
             {% if userCanViewWebHooks %}
             <td>
                 <input type="checkbox" class="result-checkbox" value="{{ result.id }}">
-            </td>
-            {% endif %}
-            {% if userCanEditResults %}
-            <td>
-                <a href="{{ path('results_qpcr_edit', {id: result.id}) }}">Edit</a>
             </td>
             {% endif %}
             <td>
