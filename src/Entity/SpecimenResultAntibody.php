@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Result of analyzing presence of antibodies in Specimen.
@@ -48,6 +49,7 @@ class SpecimenResultAntibody extends SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="signal_value", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $signal;
 
