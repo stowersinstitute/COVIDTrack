@@ -24,7 +24,8 @@
     <thead>
         <tr>
             {% if userCanViewWebHooks %}<th style="width: 2em;"><input type="checkbox" id="check-all"></th>{% endif %}
-            {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+            {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
+            <th>&nbsp;<!-- View --></th>
             <th>Specimen</th>
             {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
             <th>Conclusion</th>
@@ -50,6 +51,9 @@
                 <a href="{{ path('results_antibody_edit', {id: result.id}) }}">Edit</a>
             </td>
             {% endif %}
+            <td>
+                <a href="{{ path('results_antibody_view', {id: result.id}) }}">View</a>
+            </td>
             <td>
                 {% if userCanViewSpecimens %}
                     <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>

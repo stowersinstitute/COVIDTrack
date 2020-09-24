@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
 use App\Form\AntibodyResultsForm;
@@ -43,6 +44,27 @@ class SpecimenResultAntibodyController extends AbstractController
         return $this->render('results/antibody/list.html.twig', [
             'results' => $results,
             'filterForm' => $filterForm->createView(),
+        ]);
+    }
+
+    /**
+     * View a single Antibody Result.
+     *
+     * @Route("/{id<\d+>}/view", methods={"GET"}, name="results_antibody_view")
+     */
+    public function view(string $id, EntityManagerInterface $em) : Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
+
+        $result = $this->findResult($id);
+
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($result);
+
+        return $this->render('results/antibody/view.html.twig', [
+            'result' => $result,
+            'auditLogs' => $auditLogs,
         ]);
     }
 

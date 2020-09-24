@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}
+    Antibody Result for {{ result.specimenAccessionId }}
+{% endblock %}
+
+{% block body %}
+{% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
+{% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
+{% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
+{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    General
+
+                    {% if userCanEditResults %}
+                        <a href="{{ path('results_antibody_edit', {id: result.id}) }}" class="btn btn-primary btn-xs" style="margin-left:8px"><i class="fa fa-fw fa-edit"></i> Edit</a>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="box-body">
+                <dl class="dl-horizontal">
+                    <dt>Conclusion</dt><dd>{{ result.conclusionText }}</dd>
+
+                    <dt>Signal</dt><dd>{{ result.signal }}</dd>
+
+                    <dt>Specimen</dt>
+                    <dd>
+                        {% if userCanViewSpecimens %}
+                            <a href="{{ path('app_specimen_view', {accessionId: result.specimenAccessionId}) }}">{{ result.specimen }}</a>
+                        {% else %}
+                            {{ result.specimenAccessionId }}
+                        {% endif %}
+                    </dd>
+
+                    {% if userCanViewGroups %}
+                        <dt>Participant Group</dt>
+                        <dd><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></dd>
+                    {% endif %}
+
+                    <dt>Well Plate Barcode</dt>
+                    <dd>
+                        {% if userCanViewWellPlates %}
+                            <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>
+                        {% else %}
+                            {{ result.wellPlateBarcode }}
+                        {% endif %}
+                    </dd>
+
+                    <dt>Well Plate Position</dt>
+                    <dd>{{ result.wellPosition }}</dd>
+
+                    <dt>Well ID</dt>
+                    <dd>{{ result.wellIdentifier }}</dd>
+
+                    <dt>Reported At</dt>
+                    <dd>{{ result.createdAt | date("Y-m-d g:ia") }}</dd>
+
+                    <dt>Web Hook Status</dt>
+                    <dd>
+                        {{ result.webHookStatus }}
+                        {% if result.webHookStatusMessage %}
+                            <i class="fas fa-question-circle question-icon-help" title="{{ result.webHookStatusMessage|e("html_attr") }}"></i>
+                        {% endif %}
+                    </dd>
+
+                    <dt>Web Hook Last Sent</dt>
+                    <dd>{{ result.webHookLastTriedPublishingAt ? result.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        {% include 'audit-history.html.twig' with {auditLogs: auditLogs} %}
+    </div>
+</div>
+{% endblock %}
