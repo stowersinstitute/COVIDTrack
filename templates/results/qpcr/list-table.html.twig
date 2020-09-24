@@ -31,7 +31,6 @@
             <th>Conclusion</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
-            <th>Ct / Amp Score</th>
             <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
             {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
@@ -72,11 +71,6 @@
                 {% endif %}
             </td>
             <td>{{ result.wellPosition }}</td>
-            <td>
-                {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
-                {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
-                {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
-            </td>
             <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             {% if userCanViewWebHooks %}<td>{% spaceless %}
                 {{ result.webHookStatus }}
