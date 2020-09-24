@@ -45,7 +45,7 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $times = [];
-        foreach (range(7, 15, 1) as $hour) {
+        foreach (range(7, 18, 1) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
 
