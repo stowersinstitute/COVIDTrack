@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% import 'results/qpcr/macros.html.twig' as resultMacros %}
 {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
 {% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
@@ -89,9 +90,7 @@
                             <td>{{ result.wellPlateBarcode }}</td>
                             <td>{{ result.wellPosition }}</td>
                             <td>
-                                {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
-                                {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
-                                {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
+                                {{ resultMacros.renderCtAmpScore(result) }}
                             </td>
                             <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
                         </tr>

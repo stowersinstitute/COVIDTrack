@@ -1,3 +1,4 @@
+{% import 'results/qpcr/macros.html.twig' as resultMacros %}
 <table class="table table-bordered table-hover">
     <thead>
     <tr>
@@ -17,9 +18,7 @@
             <td>{{ result.wellPlateBarcode }}</td>
             <td>{{ result.wellPosition }}</td>
             <td>
-                Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>
-                Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>
-                Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>
+                {{ resultMacros.renderCtAmpScore(result) }}
             </td>
         </tr>
     {% endfor %}
