@@ -67,7 +67,8 @@
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
+                        <th>&nbsp;<!-- View --></th>
                         <th>Conclusion</th>
                         <th>Well Plate Barcode</th>
                         <th>Well Position</th>
@@ -83,6 +84,7 @@
                                 <a href="{{ path('results_qpcr_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
                             {% endif %}
+                            <td><a href="{{ path('results_qpcr_view', {id: result.id}) }}">View</a></td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.wellPlateBarcode }}</td>
                             <td>{{ result.wellPosition }}</td>
@@ -119,7 +121,8 @@
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
+                        <th>&nbsp;<!-- View --></th>
                         <th>Conclusion</th>
                         <th>Signal</th>
                         <th>Well Plate Barcode</th>
@@ -136,6 +139,7 @@
                                 <a href="{{ path('results_antibody_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
                             {% endif %}
+                            <td><a href="{{ path('results_antibody_view', {id: result.id}) }}">View</a></td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.signal }}</td>
                             <td>{{ result.wellPlateBarcode }}</td>

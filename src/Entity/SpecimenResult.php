@@ -76,6 +76,7 @@ abstract class SpecimenResult
      *
      * @var string
      * @ORM\Column(name="conclusion", type="string", length=255)
+     * @Gedmo\Versioned
      */
     protected $conclusion;
 
@@ -175,9 +176,14 @@ abstract class SpecimenResult
 
     public function getConclusionText(): string
     {
-        $conclusions = array_flip(static::getFormConclusions());
+        return $this->conclusion ? self::lookupConclusionText($this->conclusion) : '';
+    }
 
-        return $conclusions[$this->getConclusion()] ?? '';
+    public static function lookupConclusionText(string $conclusionConstant): string
+    {
+        $types = array_flip(static::getFormConclusions());
+
+        return $types[$conclusionConstant] ?? '';
     }
 
     /**

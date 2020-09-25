@@ -2,7 +2,6 @@
 {% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 {% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
-{% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
 {% set userCanViewWebHooks = is_granted("ROLE_WEB_HOOKS") %}
 
 {% if userCanViewWebHooks %}
@@ -24,14 +23,13 @@
     <thead>
         <tr>
             {% if userCanViewWebHooks %}<th style="width: 2em;"><input type="checkbox" id="check-all"></th>{% endif %}
-            {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+            <th>&nbsp;<!-- View --></th>
             <th>Specimen</th>
             {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
+            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             <th>Conclusion</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
-            <th>Ct / Amp Score</th>
-            <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
             {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
         </tr>
@@ -44,11 +42,9 @@
                 <input type="checkbox" class="result-checkbox" value="{{ result.id }}">
             </td>
             {% endif %}
-            {% if userCanEditResults %}
             <td>
-                <a href="{{ path('results_qpcr_edit', {id: result.id}) }}">Edit</a>
+                <a href="{{ path('results_qpcr_view', {id: result.id}) }}">View</a>
             </td>
-            {% endif %}
             <td>
                 {% if userCanViewSpecimens %}
                     <a href="{{ path('app_specimen_view', {accessionId: result.specimen.accessionId}) }}">{{ result.specimen }}</a>
@@ -59,6 +55,7 @@
             {% if userCanViewGroups %}
                 <td><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></td>
             {% endif %}
+            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             <td>{{ result.conclusionText }}</td>
             <td>
                 {% if userCanViewWellPlates %}
@@ -68,12 +65,6 @@
                 {% endif %}
             </td>
             <td>{{ result.wellPosition }}</td>
-            <td>
-                {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
-                {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
-                {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
-            </td>
-            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             {% if userCanViewWebHooks %}<td>{% spaceless %}
                 {{ result.webHookStatus }}
                 {% if result.webHookStatusMessage %}

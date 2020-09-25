@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Form\SpecimenResultQPCRFilterForm;
@@ -43,6 +44,27 @@ class SpecimenResultQPCRController extends AbstractController
         return $this->render('results/qpcr/list.html.twig', [
             'results' => $results,
             'filterForm' => $filterForm->createView(),
+        ]);
+    }
+
+    /**
+     * View a single Viral Result.
+     *
+     * @Route("/{id<\d+>}/view", methods={"GET"}, name="results_qpcr_view")
+     */
+    public function view(string $id, EntityManagerInterface $em) : Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_RESULTS_VIEW');
+
+        $result = $this->findResult($id);
+
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($result);
+
+        return $this->render('results/qpcr/view.html.twig', [
+            'result' => $result,
+            'auditLogs' => $auditLogs,
         ]);
     }
 
@@ -116,7 +138,9 @@ class SpecimenResultQPCRController extends AbstractController
                 ]);
             }
 
-            return $this->redirectToRoute('results_qpcr_list');
+            return $this->redirectToRoute('results_qpcr_view', [
+                'id' => $id,
+            ]);
         }
 
         return $this->render('results/qpcr/form.html.twig', [
