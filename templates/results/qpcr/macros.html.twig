@@ -1,0 +1,6 @@
+{# @param result SpecimenResultQPCR entity #}
+{% macro renderCtAmpScore(result) %}
+    {% if result.CT1 is not empty %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
+    {% if result.CT2 is not empty %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
+    {% if result.CT3 is not empty %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
+{% endmacro %}
