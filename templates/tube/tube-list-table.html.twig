@@ -20,9 +20,8 @@
         </button>
     </div>
 
-    {{ form_start(printForm) }}
-
     <table class="table table-bordered table-hover">
+        {{ form_start(filterForm) }}
         <thead>
             <tr>
                 <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
@@ -34,7 +33,46 @@
                 {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
                 {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
             </tr>
+
+            <tr id="tube-filter-row">
+                <th><!-- Check All --></th>
+                <th><!-- Accession ID --></th>
+                <th>
+                    <!-- Tube Type -->
+                    {{ form_row(filterForm.tubeType, {
+                        'attr': {'class': 'submit-on-change'}
+                    }) }}
+                </th>
+                <th><!-- Kit Type --></th>
+                <th>
+                    <!-- Status -->
+                    {{ form_row(filterForm.status, {
+                        'attr': {'class': 'submit-on-change'}
+                    }) }}
+                </th>
+                <th>
+                    <!-- Printed At -->
+                    {{ form_row(filterForm.createdAt, {
+                        'attr': {'class': 'filter-datepicker'}
+                    }) }}
+                </th>
+                {% if userCanViewWebHooks %}<th>
+                    <!-- Web Hook Status -->
+                    {{ form_row(filterForm.webHookStatus, {
+                        'attr': {'class': 'submit-on-change'}
+                    }) }}
+                </th>{% endif %}
+                {% if userCanViewWebHooks %}<th>
+                    <!-- Web Hook Published At -->
+                    {{ form_row(filterForm.webHookLastTriedPublishingAt, {
+                        'attr': {'class': 'filter-datepicker'}
+                    }) }}
+                </th>{% endif %}
+            </tr>
         </thead>
+        {{ form_end(filterForm) }}
+
+        {{ form_start(printForm) }}
         <tbody>
         {% for tube in tubes %}
             <tr>
@@ -54,31 +92,58 @@
                 {% endspaceless %}</td>{% endif %}
                 {% if userCanViewWebHooks %}<td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
             </tr>
+        {% else %}
+            <tr>
+                <td colspan="{{ userCanViewWebHooks ? "8" : "6" }}" class="danger text-center">No results found</td>
+            </tr>
         {% endfor %}
         </tbody>
-    </table>
 
-    <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
+        <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
+                    </div>
+                    <div class="modal-body">
+                        {{ form_row(printForm.printer) }}
+                        {{ form_row(printForm.labelType) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
+                        {{ form_row(printForm.print) }}
+                    </div>
+                    {{ form_end(printForm) }}
                 </div>
-                <div class="modal-body">
-                    {{ form_row(printForm.printer) }}
-                    {{ form_row(printForm.labelType) }}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
-                    {{ form_row(printForm.print) }}
-                </div>
-                {{ form_end(printForm) }}
             </div>
         </div>
-    </div>
+    </table>
 
 {% if userCanViewWebHooks %}
+    <!-- TODO: Build into yarn app.js and app.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
+    <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
     <script type="application/javascript">
+        // Enable Date Picker for filter elements
+        let datepickers = $('.filter-datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            clearBtn: true,
+            todayBtn: "linked",
+            todayHighlight: true
+        });
+
+        // Submit filter form when datepicker closes.
+        // Does NOT use .submit-on-change class because datepicker updates input
+        // value when selecting from calendar.
+        datepickers.on("hide", function(e) {
+            $(this.form).submit();
+        });
+
+        // Submit filter form when a form widget changes
+        $('#tube-filter-row .submit-on-change').on('change', function() {
+            $(this.form).submit();
+        });
+
         /**
          * Set checked Tubes to given status.
          * @param webHookStatus {String} Tube::WEBHOOK_STATUS_* constant

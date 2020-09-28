@@ -775,16 +775,23 @@ class Tube
      */
     public static function ensureValidWebHookStatus(string $status): void
     {
-        $validStatuses = [
-            self::WEBHOOK_STATUS_PENDING,
-            self::WEBHOOK_STATUS_QUEUED,
-            self::WEBHOOK_STATUS_SUCCESS,
-            self::WEBHOOK_STATUS_ERROR,
-            self::WEBHOOK_STATUS_NEVER_SEND,
-        ];
-        if (!in_array($status, $validStatuses)) {
+        if (!in_array($status, self::getValidWebHookStatuses())) {
             throw new \InvalidArgumentException('Invalid Web Hook Status');
         }
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidWebHookStatuses(): array
+    {
+        return [
+            'Success' => self::WEBHOOK_STATUS_SUCCESS,
+            'Error' => self::WEBHOOK_STATUS_ERROR,
+            'Never Send' => self::WEBHOOK_STATUS_NEVER_SEND,
+            'Queued' => self::WEBHOOK_STATUS_QUEUED,
+            'Pending More Data' => self::WEBHOOK_STATUS_PENDING,
+        ];
     }
 
     /**
