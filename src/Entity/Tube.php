@@ -99,6 +99,10 @@ class Tube
     private $status;
 
     /**
+     * What type of Specimen this Tube is meant to hold.
+     *
+     * Values are Tube::TYPE_* constants.
+     *
      * @var string
      * @ORM\Column(name="tube_type", type="string", length=255, nullable=true)
      * @Gedmo\Versioned
