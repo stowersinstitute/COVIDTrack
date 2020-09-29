@@ -190,8 +190,22 @@
 {% endif %}
 
 <script type="application/javascript">
+    // Checking header checkbox toggles all rows
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    // Any filter form widget with a value appears visually highlighted
+    // so easier to see when filters affect search results
+    $('#tube-filter-row input, #tube-filter-row select').each(function() {
+        let cssClassWhenHasValue = 'filter-with-value';
+
+        let formWidget = $(this);
+        if (formWidget.val() !== '') {
+            formWidget.addClass(cssClassWhenHasValue);
+        } else {
+            formWidget.removeClass(cssClassWhenHasValue);
+        }
     });
 </script>
 {% endblock %}
