@@ -12,11 +12,11 @@ class DateUtilsTest extends TestCase
      */
     public function testDayFloor(\DateTimeInterface $inputDate)
     {
-        $expected = $inputDate->format("Y-m-d") . ' 00:00:00';
+        $expected = $inputDate->format("Y-m-d") . ' 00:00:00.000000';
 
         $modifiedDate = DateUtils::dayFloor($inputDate);
 
-        $this->assertSame($expected, $modifiedDate->format("Y-m-d H:i:s"));
+        $this->assertSame($expected, $modifiedDate->format("Y-m-d H:i:s.u"));
     }
 
     public function provideDayFloor()
@@ -31,11 +31,11 @@ class DateUtilsTest extends TestCase
      */
     public function testDayCeil(\DateTimeInterface $inputDate)
     {
-        $expected = $inputDate->format("Y-m-d") . ' 23:59:59';
+        $expected = $inputDate->format("Y-m-d") . ' 23:59:59.999999';
 
         $modifiedDate = DateUtils::dayCeil($inputDate);
 
-        $this->assertSame($expected, $modifiedDate->format("Y-m-d H:i:s"));
+        $this->assertSame($expected, $modifiedDate->format("Y-m-d H:i:s.u"));
     }
 
     public function provideDayCeil()

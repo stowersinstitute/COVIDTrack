@@ -235,7 +235,7 @@ class DateUtils
 
         $relDate = clone $relDate;
 
-        return $relDate->setTime(0, 0, 0);
+        return $relDate->setTime(0, 0, 0, 0);
     }
 
     /**
@@ -252,7 +252,7 @@ class DateUtils
 
         $relDate = clone $relDate;
 
-        return $relDate->setTime(23, 59, 59);
+        return $relDate->setTime(23, 59, 59, 999999);
     }
 
     /**
