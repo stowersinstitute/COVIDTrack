@@ -70,6 +70,12 @@ class NewResultsWebHookRequest extends WebHookRequest
                     throw new \InvalidArgumentException('Unknown SpecimenResult class for building request type discriminator value');
             }
 
+            // Find Tube for this Result's Specimen
+            $tubeAccessionId = $r->getTubeAccessionId();
+            if (null === $tubeAccessionId) {
+                throw new \InvalidArgumentException('Tube containing Specimen does not have an Accession ID');
+            }
+
             $group = $r->getSpecimen()->getParticipantGroup();
 
             // NOTE: Adding fields below will require code that also sets
@@ -85,6 +91,9 @@ class NewResultsWebHookRequest extends WebHookRequest
                     'id' => $group->getId(),
                     'external_id' => $group->getExternalId(),
                     'title' => $group->getTitle(),
+                ],
+                'tube' => [
+                    'accession_id' => $tubeAccessionId,
                 ],
             ];
         }, array_values($this->results));
