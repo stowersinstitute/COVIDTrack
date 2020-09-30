@@ -21,9 +21,6 @@
     </div>
 
     <table id="tube-list-table" class="table table-bordered table-hover">
-        {{ form_start(filterForm, {
-            "attr": {"id":"filter-form"}
-        }) }}
         <thead>
             <tr id="tube-filter-row">
                 <th><!-- Check All --></th>
@@ -31,32 +28,47 @@
                 <th>
                     <!-- Tube Type -->
                     {{ form_row(filterForm.tubeType, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        }
                     }) }}
                 </th>
                 <th><!-- Kit Type --></th>
                 <th>
                     <!-- Status -->
                     {{ form_row(filterForm.status, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        }
                     }) }}
                 </th>
                 <th>
                     <!-- Printed At -->
                     {{ form_row(filterForm.createdAt, {
-                        'attr': {'class': 'filter-datepicker'}
+                        'attr': {
+                            'class': 'filter-datepicker',
+                            'form': 'filter-form'
+                        }
                     }) }}
                 </th>
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Status -->
                     {{ form_row(filterForm.webHookStatus, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        }
                     }) }}
                 </th>{% endif %}
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Published At -->
                     {{ form_row(filterForm.webHookLastTriedPublishingAt, {
-                        'attr': {'class': 'filter-datepicker'}
+                        'attr': {
+                            'class': 'filter-datepicker',
+                            'form': 'filter-form'
+                        }
                     }) }}
                 </th>{% endif %}
             </tr>
@@ -72,13 +84,12 @@
                 {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
             </tr>
         </thead>
-        {{ form_end(filterForm) }}
 
         <tbody>
         {% for tube in tubes %}
             <tr>
                 <td>
-                    <input type="checkbox" class="tube-checkbox" name="tubes[]" value="{{ tube.accessionId }}">
+                    <input type="checkbox" class="tube-checkbox" form="print-form" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
                 <td>{{ tube.accessionId }}</td>
                 <td>{{ tube.typeText }}</td>
@@ -99,27 +110,36 @@
             </tr>
         {% endfor %}
         </tbody>
+    </table>
 
-        <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    {{ form_start(printForm) }}
-                    <div class="modal-header">
-                        <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
-                    </div>
-                    <div class="modal-body">
-                        {{ form_row(printForm.printer) }}
-                        {{ form_row(printForm.labelType) }}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
-                        {{ form_row(printForm.print) }}
-                    </div>
-                    {{ form_end(printForm) }}
+    {{ form_start(filterForm, {
+        "attr": {"id":"filter-form"}
+    }) }}
+    {{ form_end(filterForm) }}
+
+    <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                {{ form_start(printForm, {
+                    'attr': {
+                        'id': 'print-form'
+                    }
+                }) }}
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
                 </div>
+                <div class="modal-body">
+                    {{ form_row(printForm.printer) }}
+                    {{ form_row(printForm.labelType) }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
+                    {{ form_row(printForm.print) }}
+                </div>
+                {{ form_end(printForm) }}
             </div>
         </div>
-    </table>
+    </div>
 
 <!-- TODO: Build into yarn app.js and app.css -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
