@@ -6,6 +6,7 @@ use App\Entity\Specimen;
 use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
+use App\Entity\Tube;
 use PHPUnit\Framework\TestCase;
 
 class SpecimenResultAntibodyTest extends TestCase
@@ -51,5 +52,18 @@ class SpecimenResultAntibodyTest extends TestCase
         $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_NON_NEGATIVE);
 
         $this->assertSame(SpecimenResult::WEBHOOK_STATUS_QUEUED, $result->getWebHookStatus());
+    }
+
+    public function testGetTubeAccessionId()
+    {
+        $tubeAccessionId = 'T0001';
+        $tube = new Tube($tubeAccessionId);
+        $specimen = Specimen::buildExampleReadyForResults('S100', null, $tube);
+        $well = SpecimenWell::buildExample($specimen);
+
+        // Result given a Conclusion, so at time of writing, record has all data supplied to Web Hook
+        $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_POSITIVE);
+
+        $this->assertSame($tubeAccessionId, $result->getTubeAccessionId());
     }
 }

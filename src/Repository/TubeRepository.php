@@ -43,6 +43,21 @@ class TubeRepository extends EntityRepository
             ->execute();
     }
 
+    /**
+     * Find all Tube records without an associated Specimen. These Tubes have
+     * had their barcode label printed or have not yet been returned at a Kiosk.
+     *
+     * @return Tube[]
+     */
+    public function findWithoutSpecimen(): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.specimen IS NULL')
+            ->orderBy('t.accessionId')
+            ->getQuery()
+            ->execute();
+    }
+
     public function findSpecimenAccessionIdByTubeAccessionId(string $tubeAccessionId): ?string
     {
         $found = $this->createQueryBuilder('t')

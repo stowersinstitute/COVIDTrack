@@ -20,9 +20,11 @@ class SpecimenTest extends TestCase
     public function testCreateSpecimen()
     {
         $group = ParticipantGroup::buildExample('G123', 5);
-        $s = new Specimen('CID123', $group);
+        $tube = new Tube('T123');
+        $s = new Specimen('CID123', $group, $tube);
 
         $this->assertSame('CID123', $s->getAccessionId());
+        $this->assertSame('T123', $s->getTubeAccessionId());
         $this->assertSame($s->getParticipantGroup(), $group);
         $this->assertSame(Specimen::STATUS_CREATED, $s->getStatus());
     }
@@ -361,7 +363,8 @@ class SpecimenTest extends TestCase
     public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()
     {
         $group = ParticipantGroup::buildExample('GRP1');
-        $specimen = new Specimen('S100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('S100', $group, $tube);
 
         $this->assertEmpty($specimen->getType());
         $this->assertEmpty($specimen->getTypeText());
@@ -377,7 +380,8 @@ class SpecimenTest extends TestCase
     public function testRejectedSpecimensAreNotPendingResults()
     {
         $group = ParticipantGroup::buildExample('GRP1');
-        $specimen = new Specimen('S100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('S100', $group, $tube);
 
         $this->assertEmpty($specimen->getCliaTestingRecommendation());
         $this->assertEmpty($specimen->getCliaTestingRecommendedText());
@@ -399,7 +403,8 @@ class SpecimenTest extends TestCase
         $group->setAcceptsSalivaSpecimens(false);
         $this->assertFalse($group->acceptsSalivaSpecimens());
 
-        $specimen = new Specimen('SPEC-100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $tube);
 
         $this->expectException(\RuntimeException::class);
         $specimen->setType(Specimen::TYPE_SALIVA);
@@ -411,7 +416,8 @@ class SpecimenTest extends TestCase
         $group->setAcceptsBloodSpecimens(false);
         $this->assertFalse($group->acceptsBloodSpecimens());
 
-        $specimen = new Specimen('SPEC-100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $tube);
 
         $this->expectException(\RuntimeException::class);
         $specimen->setType(Specimen::TYPE_BLOOD);
