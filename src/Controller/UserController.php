@@ -7,7 +7,6 @@ namespace App\Controller;
 use App\Entity\AppUser;
 use App\Entity\AuditLog;
 use App\Form\UserType;
-use App\Util\AppConfiguration;
 use App\Util\AppPermissions;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -70,7 +69,7 @@ class UserController extends AbstractController
         $this->denyAccessUnlessPermissions();
 
         // If LDAP is enabled redirect to the LDAP workflow
-        if (AppConfiguration::isLdapEnabled() && !$request->query->has('forceLocal')) {
+        if (self::isLdapEnabled() && !$request->query->has('forceLocal')) {
             return $this->redirectToRoute('ldap_user_onboarding_start');
         }
 
@@ -294,5 +293,10 @@ class UserController extends AbstractController
             ->getManager()
             ->getRepository(AppUser::class)
             ->findOneByUsername($username);
+    }
+
+    private static function isLdapEnabled(): bool
+    {
+        return isset($_ENV['LDAP_HOST']) && $_ENV['LDAP_HOST'] != '';
     }
 }
