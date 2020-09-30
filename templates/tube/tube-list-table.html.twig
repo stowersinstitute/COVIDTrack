@@ -20,20 +20,11 @@
         </button>
     </div>
 
-    <table class="table table-bordered table-hover">
-        {{ form_start(filterForm) }}
+    <table id="tube-list-table" class="table table-bordered table-hover">
+        {{ form_start(filterForm, {
+            "attr": {"id":"filter-form"}
+        }) }}
         <thead>
-            <tr>
-                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
-                <th>Accession ID</th>
-                <th>Type</th>
-                <th>Kit Type</th>
-                <th>Status</th>
-                <th>Printed At</th>
-                {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
-                {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
-            </tr>
-
             <tr id="tube-filter-row">
                 <th><!-- Check All --></th>
                 <th><!-- Accession ID --></th>
@@ -69,10 +60,20 @@
                     }) }}
                 </th>{% endif %}
             </tr>
+
+            <tr>
+                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+                <th>Accession ID</th>
+                <th>Type</th>
+                <th>Kit Type</th>
+                <th>Status</th>
+                <th>Printed At</th>
+                {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
+                {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
+            </tr>
         </thead>
         {{ form_end(filterForm) }}
 
-        {{ form_start(printForm) }}
         <tbody>
         {% for tube in tubes %}
             <tr>
@@ -102,6 +103,7 @@
         <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
+                    {{ form_start(printForm) }}
                     <div class="modal-header">
                         <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
                     </div>
@@ -131,17 +133,18 @@
         todayHighlight: true
     });
 
+    // Callback to submit
+    let executeFilterSearch = function() {
+        $("#filter-form").submit();
+    };
+
     // Submit filter form when datepicker closes.
     // Does NOT use .submit-on-change class because datepicker updates input
     // value when selecting from calendar.
-    datepickers.on("hide", function(e) {
-        $(this.form).submit();
-    });
+    datepickers.on("hide", executeFilterSearch);
 
     // Submit filter form when a form widget changes
-    $('#tube-filter-row .submit-on-change').on('change', function() {
-        $(this.form).submit();
-    });
+    $('#tube-filter-row .submit-on-change').on('change', executeFilterSearch);
 
     // Any filter form widget with a value appears visually highlighted
     // so easier to see when filters affect search results
@@ -208,6 +211,23 @@
     // Checking header checkbox toggles all rows
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    // Enable DataTable for table of Tubes
+    $('#tube-list-table').DataTable({
+        // Disable paging so users can view all records at once
+        paging: false,
+
+        // Disable global table search, otherwise our column filters don't work
+        searching: false,
+
+        // Disable features on checkbox column
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false
+            }
+        ]
     });
 </script>
 {% endblock %}
