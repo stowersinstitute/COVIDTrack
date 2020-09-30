@@ -32,13 +32,17 @@ class TubeFilterForm extends AbstractType
             ])
             ->add('createdAt', DateType::class, [
                 'label' => false,
-                'html5' => false, // Frontend uses JS datepicker, must be explicitly enabled
+                'html5' => false, // Frontend uses JS datepicker, explicitly enabled client-side
                 'widget' => 'single_text',
                 'format' => 'yyyy-MM-dd',
                 'input'  => 'datetime_immutable',
                 'required' => false,
-            ])
-            ->add('webHookStatus', ChoiceType::class, [
+            ]);
+
+        // Web Hook fields only visible to some users
+        if ($options['userCanViewWebHooks']) {
+            $builder
+                ->add('webHookStatus', ChoiceType::class, [
                 'label' => false,
                 'choices' => Tube::getValidWebHookStatuses(),
                 'placeholder' => '- Any -',
@@ -46,13 +50,15 @@ class TubeFilterForm extends AbstractType
             ])
             ->add('webHookLastTriedPublishingAt', DateType::class, [
                 'label' => false,
-                'html5' => false, // Frontend uses JS datepicker
+                'html5' => false, // Frontend uses JS datepicker, explicitly enabled client-side
                 'widget' => 'single_text',
                 'format' => 'yyyy-MM-dd',
                 'input'  => 'datetime_immutable',
                 'required' => false,
-            ])
-            ->getForm();
+            ]);
+        }
+
+        $builder->getForm();
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -60,6 +66,9 @@ class TubeFilterForm extends AbstractType
         $resolver->setDefaults([
             // Disable CSRF because this is a "GET" form that's only used for filtering
             'csrf_protection' => false,
+
+            // Used to enable/disable ability to filter on web hook fields
+            'userCanViewWebHooks' => false,
         ]);
     }
 }
