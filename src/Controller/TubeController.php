@@ -39,8 +39,17 @@ class TubeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
+        /**
+         * Whether user should see UI components related to Web Hooks.
+         * Affects data visible and form filters visible.
+         * @var bool $userCanViewWebHooks
+         */
+        $userCanViewWebHooks = $this->isGranted('ROLE_WEB_HOOKS');
+
         // Explicitly use FormFactory to remove form name from GET params for cleaner URL
-        $filterForm = $this->get('form.factory')->createNamed('', TubeFilterForm::class);
+        $filterForm = $this->get('form.factory')->createNamed('', TubeFilterForm::class, null, [
+            'userCanViewWebHooks' => $userCanViewWebHooks,
+        ]);
         $filterForm->handleRequest($request);
         $formData = [];
         if ($filterForm->isSubmitted() && $filterForm->isValid()) {
@@ -55,6 +64,7 @@ class TubeController extends AbstractController
             'tubes' => $tubes,
             'printForm' => $this->getPrintForm()->createView(),
             'filterForm' => $filterForm->createView(),
+            'userCanViewWebHooks' => $userCanViewWebHooks,
         ]);
     }
 
