@@ -40,32 +40,37 @@
                 <th>
                     <!-- Tube Type -->
                     {{ form_row(filterForm.tubeType, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {'class': 'submit-on-change'},
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 <th><!-- Kit Type --></th>
                 <th>
                     <!-- Status -->
                     {{ form_row(filterForm.status, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {'class': 'submit-on-change'},
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 <th>
                     <!-- Printed At -->
                     {{ form_row(filterForm.createdAt, {
-                        'attr': {'class': 'filter-datepicker'}
+                        'attr': {'class': 'filter-datepicker'},
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Status -->
                     {{ form_row(filterForm.webHookStatus, {
-                        'attr': {'class': 'submit-on-change'}
+                        'attr': {'class': 'submit-on-change'},
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Published At -->
                     {{ form_row(filterForm.webHookLastTriedPublishingAt, {
-                        'attr': {'class': 'filter-datepicker'}
+                        'attr': {'class': 'filter-datepicker'},
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
             </tr>
