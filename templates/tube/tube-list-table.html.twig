@@ -31,7 +31,8 @@
                         'attr': {
                             'class': 'submit-on-change',
                             'form': 'filter-form'
-                        }
+                        },
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 <th><!-- Kit Type --></th>
@@ -41,7 +42,8 @@
                         'attr': {
                             'class': 'submit-on-change',
                             'form': 'filter-form'
-                        }
+                        },
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 <th>
@@ -50,7 +52,8 @@
                         'attr': {
                             'class': 'filter-datepicker',
                             'form': 'filter-form'
-                        }
+                        },
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 {% if userCanViewWebHooks %}<th>
@@ -59,7 +62,8 @@
                         'attr': {
                             'class': 'submit-on-change',
                             'form': 'filter-form'
-                        }
+                        },
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
                 {% if userCanViewWebHooks %}<th>
@@ -68,7 +72,8 @@
                         'attr': {
                             'class': 'filter-datepicker',
                             'form': 'filter-form'
-                        }
+                        },
+                        'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
             </tr>
@@ -141,9 +146,6 @@
         </div>
     </div>
 
-<!-- TODO: Build into yarn app.js and app.css -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
-<script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 <script type="application/javascript">
     // Enable Date Picker for filter elements
     let datepickers = $('.filter-datepicker').datepicker({

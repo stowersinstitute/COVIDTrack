@@ -9,7 +9,8 @@
 require('bootstrap/dist/css/bootstrap.css');
 require('admin-lte/dist/css/AdminLTE.css');
 require('admin-lte/dist/css/skins/skin-blue.css');
-require('@fortawesome/fontawesome-free/css/all.css')
+require('bootstrap-datepicker/dist/css/bootstrap-datepicker.css');
+require('@fortawesome/fontawesome-free/css/all.css');
 require('../css/app.css');
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
@@ -17,6 +18,7 @@ require('../css/app.css');
 import $ from 'jquery';
 global.$ = global.jQuery = $;
 import 'bootstrap/dist/js/bootstrap';
+import 'bootstrap-datepicker/dist/js/bootstrap-datepicker';
 import 'admin-lte/dist/js/adminlte';
 
 import jsQR from 'jsqr';
