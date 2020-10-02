@@ -237,13 +237,30 @@
 
     // Enable DataTable for table of Tubes
     $('#tube-list-table').DataTable({
-        // Disable paging so users can view all records at once
-        paging: false,
-
-        // Disable global table search, otherwise our column filters don't work
+        // Disable global table search field. We provide our own column search filters.
         searching: false,
 
-        // Disable features on checkbox column
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + max + " records</strong>";
+        },
+
+        // Disable some features on checkbox column.
+        // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
                 targets: 0,
