@@ -31,6 +31,9 @@ class TubeFilterForm extends AbstractType
                 'required' => false,
             ])
             ->add('createdAt', DateType::class, [
+                'attr' => [
+                    'placeholder' => '- Any Date -',
+                ],
                 'label' => false,
                 'html5' => false, // Frontend uses JS datepicker, explicitly enabled client-side
                 'widget' => 'single_text',
@@ -49,6 +52,9 @@ class TubeFilterForm extends AbstractType
                 'required' => false,
             ])
             ->add('webHookLastTriedPublishingAt', DateType::class, [
+                'attr' => [
+                    'placeholder' => '- Any Date -',
+                ],
                 'label' => false,
                 'html5' => false, // Frontend uses JS datepicker, explicitly enabled client-side
                 'widget' => 'single_text',
