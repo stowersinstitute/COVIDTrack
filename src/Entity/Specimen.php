@@ -73,6 +73,14 @@ class Specimen
     private $participantGroup;
 
     /**
+     * Tube that contains this Specimen.
+     *
+     * @var Tube
+     * @ORM\OneToOne(targetEntity="App\Entity\Tube", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $tube;
+
+    /**
      * Wells where this Specimen is contained.
      *
      * @var SpecimenWell[]|ArrayCollection
@@ -126,10 +134,11 @@ class Specimen
      */
     private $status;
 
-    public function __construct(string $accessionId, ParticipantGroup $group)
+    public function __construct(string $accessionId, ParticipantGroup $group, Tube $tube)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
+        $this->tube = $tube;
 
         $this->status = self::STATUS_CREATED;
         $this->wells = new ArrayCollection();
@@ -138,23 +147,21 @@ class Specimen
         $this->createdAt = new \DateTimeImmutable();
 
         $group->addSpecimen($this);
+        $tube->setSpecimen($this);
     }
 
     /**
      * Create a new Specimen
      *
-     * @param ParticipantGroup $group
-     * @param SpecimenAccessionIdGenerator $gen
      * @param string|null $accessionId If given, this string will used as the accession ID instead of a generated one.
-     * @return Specimen
      */
-    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
+    public static function createNew(ParticipantGroup $group, Tube $tube, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
     {
         if (!$accessionId) {
             $accessionId = $gen->generate();
         }
 
-        return new static($accessionId, $group);
+        return new static($accessionId, $group, $tube);
     }
 
     /**
@@ -176,7 +183,7 @@ class Specimen
         }
 
         // New Specimen
-        $s = static::createNew($group, $gen, $specimenAccessionId);
+        $s = static::createNew($group, $tube, $gen, $specimenAccessionId);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
@@ -202,37 +209,40 @@ class Specimen
     /**
      * Build for tests.
      */
-    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null): self
+    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null, ?Tube $tube = null): self
     {
         $group = $group ?: ParticipantGroup::buildExample('G100');
 
-        return new static($accessionId, $group);
+        $tube = $tube ?: new Tube('T100');
+        $tube->setParticipantGroup($group);
+
+        return new static($accessionId, $group, $tube);
     }
 
     /**
      * Example Specimen for automated tests. Created in workflow status ready to
      * add Viral or Antibody Results.
      */
-    public static function buildExampleReadyForResults(string $accessionId, ?ParticipantGroup $group = null): self
+    public static function buildExampleReadyForResults(string $accessionId, ?ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $s = static::buildExample($accessionId, $group);
+        $s = static::buildExample($accessionId, $group, $tube);
 
         $s->setStatus(static::STATUS_EXTERNAL);
 
         return $s;
     }
 
-    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $specimen = static::buildExample($accessionId, $group);
+        $specimen = static::buildExample($accessionId, $group, $tube);
         $specimen->setType(static::TYPE_SALIVA);
 
         return $specimen;
     }
 
-    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $specimen = static::buildExample($accessionId, $group);
+        $specimen = static::buildExample($accessionId, $group, $tube);
         $specimen->setType(static::TYPE_BLOOD);
 
         return $specimen;
@@ -382,6 +392,16 @@ class Specimen
         $types = array_flip(static::getFormTypes());
 
         return $types[$typeConstant] ?? '';
+    }
+
+    public function getTube(): Tube
+    {
+        return $this->tube;
+    }
+
+    public function getTubeAccessionId(): ?string
+    {
+        return $this->tube->getAccessionId();
     }
 
     public function getParticipantGroup(): ParticipantGroup

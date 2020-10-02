@@ -186,6 +186,7 @@ class ResultCommand extends BaseAppCommand
     {
         $this->outputDebug('<comment>Queued Results:</comment>');
         foreach ($newResults as $result) {
+            $tubeAccessionId = $result->getTubeAccessionId();
             $groupId = $result->getSpecimen()->getParticipantGroup()->getExternalId();
             $reportedAt = $result->getUpdatedAt()->format('Y-m-d H:i:s');
             $conclusion = $result->getConclusionText();
@@ -199,7 +200,7 @@ class ResultCommand extends BaseAppCommand
                     break;
             }
 
-            $this->outputDebug(sprintf('* %s %s %s %s', $groupId, $reportedAt, $resultType, $conclusion));
+            $this->outputDebug(sprintf('* %s; Tube: %s; Results Updated At: %s; %s %s', $groupId, $tubeAccessionId, $reportedAt, $resultType, $conclusion));
         }
         $this->outputDebug("");
     }

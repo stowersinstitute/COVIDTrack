@@ -150,6 +150,16 @@ abstract class SpecimenResult
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
+    public function getTube(): Tube
+    {
+        return $this->getSpecimen()->getTube();
+    }
+
+    public function getTubeAccessionId(): ?string
+    {
+        return $this->getSpecimen()->getTubeAccessionId();
+    }
+
     public function getConclusion(): string
     {
         return $this->conclusion;

@@ -5,6 +5,7 @@ namespace App\Form;
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\Tube;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -41,6 +42,13 @@ class SpecimenForm extends AbstractType
                 'placeholder' => '- Select -',
                 'choices' => $this->em->getRepository(ParticipantGroup::class)->findActive(),
             ])
+            ->add('tube', EntityType::class, [
+                'label' => 'Tube',
+                'class' => Tube::class,
+                'required' => true,
+                'placeholder' => '- Select -',
+                'choices' => $this->em->getRepository(Tube::class)->findWithoutSpecimen(),
+            ])
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
                 'placeholder' => '- Select -',
@@ -67,9 +75,9 @@ class SpecimenForm extends AbstractType
             'empty_data' => function(FormInterface $form) {
                 $accessionId = $this->specimenIdGen->generate();
                 $group = $form->get('participantGroup')->getData();
-                $s = new Specimen($accessionId, $group);
+                $tube = $form->get('tube')->getData();
 
-                return $s;
+                return new Specimen($accessionId, $group, $tube);
             }
         ]);
     }
