@@ -18,10 +18,10 @@
                 {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
             </tr>
 
-            <tr id="tube-filter-row">
+            <tr id="tube-filter-row" class="filter-header-row">
                 <th><!-- Check All --></th>
                 <th><!-- Accession ID --></th>
-                <th>
+                <th style="min-width:100px">
                     <!-- Tube Type -->
                     {{ form_row(filterForm.tubeType, {
                         'attr': {'class': 'submit-on-change'},
@@ -79,15 +79,15 @@
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
-                <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
-                <td>{{ tube.externalProcessingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
+                <td class="nowrap-cell">{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
+                <td class="nowrap-cell">{{ tube.externalProcessingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
                 {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
                         <i class="fas fa-question-circle question-icon-help" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></i>
                     {% endif %}
                 {% endspaceless %}</td>{% endif %}
-                {% if userCanViewWebHooks %}<td>{{ tube.webHookLastTriedPublishingAt ? tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
+                {% if userCanViewWebHooks %}<td class="nowrap-cell">{{ tube.webHookLastTriedPublishingAt is empty ? '' : tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>{% endif %}
             </tr>
         {% else %}
             <tr>
