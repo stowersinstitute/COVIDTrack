@@ -110,6 +110,13 @@ class TubeRepository extends EntityRepository
             $qb->setParameter('f_createdAt_upper', DateUtils::dayCeil($data['createdAt']));
         }
 
+        // External Processing At
+        if (isset($data['externalProcessingAt'])) {
+            $qb->andWhere('t.externalProcessingAt BETWEEN :f_externalProcessingAt_lower AND :f_externalProcessingAt_upper');
+            $qb->setParameter('f_externalProcessingAt_lower', DateUtils::dayFloor($data['externalProcessingAt']));
+            $qb->setParameter('f_externalProcessingAt_upper', DateUtils::dayCeil($data['externalProcessingAt']));
+        }
+
         // Web Hook Status
         if (isset($data['webHookStatus'])) {
             $qb->andWhere('t.webHookStatus = :f_webHookStatus');

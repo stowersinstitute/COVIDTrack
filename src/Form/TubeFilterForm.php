@@ -40,6 +40,17 @@ class TubeFilterForm extends AbstractType
                 'format' => 'yyyy-MM-dd',
                 'input'  => 'datetime_immutable',
                 'required' => false,
+            ])
+            ->add('externalProcessingAt', DateType::class, [
+                'attr' => [
+                    'placeholder' => '- Any Date -',
+                ],
+                'label' => false,
+                'html5' => false, // Frontend uses JS datepicker, explicitly enabled client-side
+                'widget' => 'single_text',
+                'format' => 'yyyy-MM-dd',
+                'input'  => 'datetime_immutable',
+                'required' => false,
             ]);
 
         // Web Hook fields only visible to some users

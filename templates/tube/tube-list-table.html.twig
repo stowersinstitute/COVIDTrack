@@ -13,6 +13,7 @@
                 <th>Kit Type</th>
                 <th>Status</th>
                 <th>Printed At</th>
+                <th>Ext. Processing At</th>
                 {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
                 {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
             </tr>
@@ -38,6 +39,13 @@
                 <th>
                     <!-- Printed At -->
                     {{ form_row(filterForm.createdAt, {
+                        'attr': {'class': 'filter-datepicker'},
+                        'row_attr': {'class': 'no-margin'}
+                    }) }}
+                </th>
+                <th>
+                    <!-- External Processing At -->
+                    {{ form_row(filterForm.externalProcessingAt, {
                         'attr': {'class': 'filter-datepicker'},
                         'row_attr': {'class': 'no-margin'}
                     }) }}
@@ -72,6 +80,7 @@
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
                 <td>{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
+                <td>{{ tube.externalProcessingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
                 {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
