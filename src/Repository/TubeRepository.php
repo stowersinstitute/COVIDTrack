@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Tube;
+use App\Util\DateUtils;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -90,9 +91,36 @@ class TubeRepository extends EntityRepository
     {
         $qb = $this->createQueryBuilder('t');
 
+        // Tube Type
+        if (isset($data['tubeType'])) {
+            $qb->andWhere('t.tubeType = :f_tubeType');
+            $qb->setParameter('f_tubeType', $data['tubeType']);
+        }
+
+        // Status
         if (isset($data['status'])) {
             $qb->andWhere('t.status = :f_status');
             $qb->setParameter('f_status', $data['status']);
+        }
+
+        // Created At
+        if (isset($data['createdAt'])) {
+            $qb->andWhere('t.createdAt BETWEEN :f_createdAt_lower AND :f_createdAt_upper');
+            $qb->setParameter('f_createdAt_lower', DateUtils::dayFloor($data['createdAt']));
+            $qb->setParameter('f_createdAt_upper', DateUtils::dayCeil($data['createdAt']));
+        }
+
+        // Web Hook Status
+        if (isset($data['webHookStatus'])) {
+            $qb->andWhere('t.webHookStatus = :f_webHookStatus');
+            $qb->setParameter('f_webHookStatus', $data['webHookStatus']);
+        }
+
+        // Web Hook Last Tried Publishing At
+        if (isset($data['webHookLastTriedPublishingAt'])) {
+            $qb->andWhere('t.webHookLastTriedPublishingAt BETWEEN :f_webHookLastTriedPublishingAt_lower AND :f_webHookLastTriedPublishingAt_upper');
+            $qb->setParameter('f_webHookLastTriedPublishingAt_lower', DateUtils::dayFloor($data['webHookLastTriedPublishingAt']));
+            $qb->setParameter('f_webHookLastTriedPublishingAt_upper', DateUtils::dayCeil($data['webHookLastTriedPublishingAt']));
         }
 
         $qb->addOrderBy('t.createdAt', 'DESC');
