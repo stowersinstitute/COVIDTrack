@@ -76,7 +76,7 @@ class Specimen
      * Tube that contains this Specimen.
      *
      * @var Tube
-     * @ORM\OneToOne(targetEntity="App\Entity\Tube", mappedBy="specimen")
+     * @ORM\OneToOne(targetEntity="App\Entity\Tube", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private $tube;
 
