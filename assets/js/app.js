@@ -10,6 +10,7 @@ require('bootstrap/dist/css/bootstrap.css');
 require('admin-lte/dist/css/AdminLTE.css');
 require('admin-lte/dist/css/skins/skin-blue.css');
 require('bootstrap-datepicker/dist/css/bootstrap-datepicker.css');
+require('datatables.net-bs/css/dataTables.bootstrap.css');
 require('@fortawesome/fontawesome-free/css/all.css');
 require('../css/app.css');
 
@@ -20,6 +21,8 @@ global.$ = global.jQuery = $;
 import 'bootstrap/dist/js/bootstrap';
 import 'bootstrap-datepicker/dist/js/bootstrap-datepicker';
 import 'admin-lte/dist/js/adminlte';
+import 'datatables.net/js/jquery.dataTables';
+import 'datatables.net-bs/js/dataTables.bootstrap';
 
 import jsQR from 'jsqr';
 // There is probably a better way to do this by putting the template JS code in a file that gets compiled, but this works for now.
