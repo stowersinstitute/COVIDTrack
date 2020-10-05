@@ -33,6 +33,9 @@ class Tube
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED";
 
+    // When Tube's Specimen has results available
+    const STATUS_RESULTS = "RESULTS";
+
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
 
@@ -698,6 +701,14 @@ class Tube
     }
 
     /**
+     * When the Tube's Specimen has analysis results reported.
+     */
+    public function markResultsAvailable(): void
+    {
+        $this->setStatus(self::STATUS_RESULTS);
+    }
+
+    /**
      * Check-In Technician confirms the Tube and Specimen appear in acceptable
      * condition to perform further research.
      */
@@ -759,6 +770,7 @@ class Tube
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
+            'Results Available' => self::STATUS_RESULTS,
             'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
         ];
