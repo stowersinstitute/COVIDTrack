@@ -3,6 +3,23 @@
 
     {% include 'flash.html.twig' %}
 
+    <div class="margin-bottom">
+        {% if userCanViewWebHooks %}
+        <div class="pull-right">
+            <strong>Web Hooks:</strong>
+            <button id="republishWebHooksBtn" type="button" class="btn btn-sm btn-success">
+                <i class="fas fa-fw fa-sync-alt"></i> Re-Publish
+            </button>
+            <button id="neverSendWebHooksBtn" type="button" class="btn btn-sm btn-danger">
+                <i class="fas fa-fw fa-times-circle"></i> Never Send
+            </button>
+        </div>
+        {% endif %}
+        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#labelPrintModal">
+            <i class="fa fa-fw fa-print"></i> Re-Print Selected Tubes
+        </button>
+    </div>
+
     <table class="table table-bordered table-hover">
         {{ form_start(filterForm) }}
         <thead>
