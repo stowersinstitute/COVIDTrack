@@ -6,6 +6,7 @@ use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultAntibody;
 use App\Entity\SpecimenWell;
+use App\Entity\Tube;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -161,9 +162,10 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
 
     private function getRandomSpecimenPendingResultsForGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
     {
-        /** @var Specimen[] $specimens */
-        $qb = $em->getRepository(Specimen::class)
-            ->createQueryBuilder('s')
+        /** @var Tube[] $tubes */
+        $qb = $em->getRepository(Tube::class)
+            ->createQueryBuilder('t')
+            ->join('t.specimen', 's')
             ->join('s.wells', 'wells')
 
             // Blood Specimen
@@ -190,17 +192,19 @@ class AppAntibodyResultsFixtures extends Fixture implements DependentFixtureInte
                 ->setParameter('seenSpecimenIds', $this->specimenIdsWithResults);
         }
 
-        $specimens = $qb->getQuery()->execute();
+        $tubes = $qb->getQuery()->execute();
 
-        if (count($specimens) !== 1) {
-            // Might've run out of Specimens to result
+        if (count($tubes) !== 1) {
+            // Might've run out of Tubes to result
             return null;
         }
 
-        $found = array_shift($specimens);
-        $this->specimenIdsWithResults[] = $found->getId();
+        $tube = array_shift($tubes);
+        $specimen = $tube->getSpecimen();
 
-        return $found;
+        $this->specimenIdsWithResults[] = $specimen->getId();
+
+        return $specimen;
     }
 
     private function getRandomSpecimenWithExistingAntibodyResultInGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
