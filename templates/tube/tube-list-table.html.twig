@@ -296,7 +296,11 @@
         ],
 
         // Default sort on Printed At column with newest at top
-        order: [[5, 'desc']]
+        order: [[5, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true
     });
 </script>
 {% endblock %}
