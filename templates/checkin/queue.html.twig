@@ -5,16 +5,14 @@
 {% block body %}
 
 <div class="row">
-    <div class="row margin-bottom">
-        <div class="col-md-9">
-            <div class="pull-right">
-                <a href="{{ path('checkin_saliva_import_start') }}" class="btn btn-primary"><i class="fa fa-fw fa-upload"></i> Import Saliva</a>
-                <a href="{{ path('checkin_blood_import_start') }}" class="btn btn-primary"><i class="fa fa-fw fa-upload"></i> Import Blood</a>
-            </div>
+    <div class="col-xs-12 margin-bottom">
+        <div class="pull-right">
+            <a href="{{ path('checkin_saliva_import_start') }}" class="btn btn-primary"><i class="fa fa-fw fa-upload"></i> Import Saliva</a>
+            <a href="{{ path('checkin_blood_import_start') }}" class="btn btn-primary"><i class="fa fa-fw fa-upload"></i> Import Blood</a>
         </div>
     </div>
 
-    <div class="col-md-9">
+    <div class="col-xs-12">
         <div class="box">
             <div class="box-body">
                 {% include 'checkin/queue-list.html.twig' %}
