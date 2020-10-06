@@ -22,10 +22,22 @@
 
     <table id="tube-list-table" class="table table-bordered table-hover">
         <thead>
-            <tr id="tube-filter-row">
+            <tr>
+                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+                <th>Accession ID</th>
+                <th>Type</th>
+                <th>Kit Type</th>
+                <th>Status</th>
+                <th>Printed At</th>
+                <th>External<br>Processing At</th>
+                {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
+                {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
+            </tr>
+
+            <tr id="tube-filter-row" class="filter-header-row">
                 <th><!-- Check All --></th>
                 <th><!-- Accession ID --></th>
-                <th>
+                <th style="min-width:100px">
                     <!-- Tube Type -->
                     {{ form_row(filterForm.tubeType, {
                         'attr': {
@@ -56,6 +68,13 @@
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
+                <th>
+                    <!-- External Processing At -->
+                    {{ form_row(filterForm.externalProcessingAt, {
+                        'attr': {'class': 'filter-datepicker'},
+                        'row_attr': {'class': 'no-margin'}
+                    }) }}
+                </th>
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Status -->
                     {{ form_row(filterForm.webHookStatus, {
@@ -77,17 +96,6 @@
                     }) }}
                 </th>{% endif %}
             </tr>
-
-            <tr>
-                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
-                <th>Accession ID</th>
-                <th>Type</th>
-                <th>Kit Type</th>
-                <th>Status</th>
-                <th>Printed At</th>
-                {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
-                {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
-            </tr>
         </thead>
 
         <tbody>
@@ -100,28 +108,33 @@
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
+
                 {% if tube.printedAt is empty %}
                     <td></td>
                 {% else %}
-                    <td data-sort="{{ tube.printedAt|date("U")|e("html_attr") }}">{{ tube.printedAt|date("Y-m-d g:ia") }}</td>
+                    <td class="nowrap-cell" data-sort="{{ tube.printedAt|date("U")|e("html_attr") }}">{{ tube.printedAt|date("Y-m-d g:ia") }}</td>
                 {% endif %}
+
+                {% if tube.externalProcessingAt is empty %}
+                    <td></td>
+                {% else %}
+                    <td class="nowrap-cell" data-sort="{{ tube.externalProcessingAt|date("U")|e("html_attr") }}">{{ tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
+                {% endif %}
+
                 {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
                         <i class="fas fa-question-circle question-icon-help" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></i>
                     {% endif %}
                 {% endspaceless %}</td>{% endif %}
+
                 {% if userCanViewWebHooks %}
                     {% if tube.webHookLastTriedPublishingAt is empty %}
                         <td></td>
                     {% else %}
-                        <td data-sort="{{ tube.webHookLastTriedPublishingAt|date("U")|e("html_attr") }}">{{ tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>
+                        <td class="nowrap-cell" data-sort="{{ tube.webHookLastTriedPublishingAt|date("U")|e("html_attr") }}">{{ tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>
                     {% endif %}
                 {% endif %}
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="{{ userCanViewWebHooks ? "8" : "6" }}" class="danger text-center">No results found</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -279,7 +292,16 @@
         ],
 
         // Default sort on Printed At column with newest at top
-        order: [[5, 'desc']]
+        order: [[5, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
     });
 </script>
 {% endblock %}

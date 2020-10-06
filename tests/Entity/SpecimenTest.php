@@ -173,6 +173,42 @@ class SpecimenTest extends TestCase
         $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
     }
 
+    public function testTubeStatusHasResultsAfterAddingViralResults()
+    {
+        $tube = new Tube('T555');
+        $specimen = Specimen::buildExampleReadyForResults('C100', null, $tube);
+
+        $this->assertSame('T555', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getQPCRResults());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result
+        $well = SpecimenWell::buildExample($specimen);
+        $result = SpecimenResultQPCR::createFromWell($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Verify has result and expected Tube status
+        $this->assertCount(1, $specimen->getQPCRResults());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testTubeStatusHasResultsAfterAddingAntibodyResults()
+    {
+        $tube = new Tube('T444');
+        $specimen = Specimen::buildExampleReadyForResults('C101', null, $tube);
+
+        $this->assertSame('T444', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getAntibodyResults());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result
+        $well = SpecimenWell::buildExample($specimen);
+        $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_POSITIVE);
+
+        // Verify has result and expected Tube status
+        $this->assertCount(1, $specimen->getAntibodyResults());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
     public function testGetQPCRResultsAfterAddingResults()
     {
         $specimen = Specimen::buildExampleReadyForResults('C100');

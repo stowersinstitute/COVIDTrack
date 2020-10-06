@@ -467,8 +467,12 @@ class Specimen
             self::STATUS_EXTERNAL,
         ];
         if (in_array($this->status, $updateIfInStatus)) {
+            // Specimen now has results
             $newStatus = self::STATUS_RESULTS;
             $this->setStatus($newStatus);
+
+            // Tube now has results
+            $this->tube->markResultsAvailable();
         }
 
         return $this->getStatus();

@@ -53,6 +53,13 @@ body {
     color:#3c8dbc;
 }
 
-.filter-with-value {
+.filter-header-row select {
+    padding-left:6px;
+}
+.filter-header-row .filter-with-value {
     background-color: #fcf8e3;
+}
+
+.nowrap-cell {
+    white-space: nowrap;
 }
