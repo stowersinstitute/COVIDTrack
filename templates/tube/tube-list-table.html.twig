@@ -20,8 +20,7 @@
         </button>
     </div>
 
-    <table class="table table-bordered table-hover">
-        {{ form_start(filterForm) }}
+    <table id="tube-list-table" class="table table-bordered table-hover">
         <thead>
             <tr>
                 <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
@@ -41,7 +40,10 @@
                 <th style="min-width:100px">
                     <!-- Tube Type -->
                     {{ form_row(filterForm.tubeType, {
-                        'attr': {'class': 'submit-on-change'},
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
@@ -49,14 +51,20 @@
                 <th>
                     <!-- Status -->
                     {{ form_row(filterForm.status, {
-                        'attr': {'class': 'submit-on-change'},
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
                 <th>
                     <!-- Printed At -->
                     {{ form_row(filterForm.createdAt, {
-                        'attr': {'class': 'filter-datepicker'},
+                        'attr': {
+                            'class': 'filter-datepicker',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
@@ -70,41 +78,63 @@
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Status -->
                     {{ form_row(filterForm.webHookStatus, {
-                        'attr': {'class': 'submit-on-change'},
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
                 {% if userCanViewWebHooks %}<th>
                     <!-- Web Hook Published At -->
                     {{ form_row(filterForm.webHookLastTriedPublishingAt, {
-                        'attr': {'class': 'filter-datepicker'},
+                        'attr': {
+                            'class': 'filter-datepicker',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>{% endif %}
             </tr>
         </thead>
-        {{ form_end(filterForm) }}
 
-        {{ form_start(printForm) }}
         <tbody>
         {% for tube in tubes %}
             <tr>
                 <td>
-                    <input type="checkbox" class="tube-checkbox" name="tubes[]" value="{{ tube.accessionId }}">
+                    <input type="checkbox" class="tube-checkbox" form="print-form" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
                 <td>{{ tube.accessionId }}</td>
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
-                <td class="nowrap-cell">{{ tube.printedAt is empty ? '' : tube.printedAt|date("Y-m-d g:ia") }}</td>
-                <td class="nowrap-cell">{{ tube.externalProcessingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
+
+                {% if tube.printedAt is empty %}
+                    <td></td>
+                {% else %}
+                    <td class="nowrap-cell" data-sort="{{ tube.printedAt|date("U")|e("html_attr") }}">{{ tube.printedAt|date("Y-m-d g:ia") }}</td>
+                {% endif %}
+
+                {% if tube.externalProcessingAt is empty %}
+                    <td></td>
+                {% else %}
+                    <td class="nowrap-cell" data-sort="{{ tube.externalProcessingAt|date("U")|e("html_attr") }}">{{ tube.externalProcessingAt|date("Y-m-d H:i:s") }}</td>
+                {% endif %}
+
                 {% if userCanViewWebHooks %}<td>{% spaceless %}
                     {{ tube.webHookStatus }}
                     {% if tube.webHookStatusMessage %}
                         <i class="fas fa-question-circle question-icon-help" title="{{ tube.webHookStatusMessage|e("html_attr") }}"></i>
                     {% endif %}
                 {% endspaceless %}</td>{% endif %}
-                {% if userCanViewWebHooks %}<td class="nowrap-cell">{{ tube.webHookLastTriedPublishingAt is empty ? '' : tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>{% endif %}
+
+                {% if userCanViewWebHooks %}
+                    {% if tube.webHookLastTriedPublishingAt is empty %}
+                        <td></td>
+                    {% else %}
+                        <td class="nowrap-cell" data-sort="{{ tube.webHookLastTriedPublishingAt|date("U")|e("html_attr") }}">{{ tube.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>
+                    {% endif %}
+                {% endif %}
             </tr>
         {% else %}
             <tr>
@@ -114,9 +144,19 @@
         </tbody>
     </table>
 
+    {{ form_start(filterForm, {
+        "attr": {"id":"filter-form"}
+    }) }}
+    {{ form_end(filterForm) }}
+
     <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+                {{ form_start(printForm, {
+                    'attr': {
+                        'id': 'print-form'
+                    }
+                }) }}
                 <div class="modal-header">
                     <h4 class="modal-title text-center" id="labelPrintModalLabel">Re-Print Selected Tubes</h4>
                 </div>
@@ -142,17 +182,18 @@
         todayHighlight: true
     });
 
+    // Callback to submit
+    let executeFilterSearch = function() {
+        $("#filter-form").submit();
+    };
+
     // Submit filter form when datepicker closes.
     // Does NOT use .submit-on-change class because datepicker updates input
     // value when selecting from calendar.
-    datepickers.on("hide", function(e) {
-        $(this.form).submit();
-    });
+    datepickers.on("hide", executeFilterSearch);
 
     // Submit filter form when a form widget changes
-    $('#tube-filter-row .submit-on-change').on('change', function() {
-        $(this.form).submit();
-    });
+    $('#tube-filter-row .submit-on-change').on('change', executeFilterSearch);
 
     // Any filter form widget with a value appears visually highlighted
     // so easier to see when filters affect search results
@@ -219,6 +260,43 @@
     // Checking header checkbox toggles all rows
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    // Enable DataTable for table of Tubes
+    $('#tube-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + max + " records</strong>";
+        },
+
+        // Disable some features on checkbox column.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false
+            }
+        ],
+
+        // Default sort on Printed At column with newest at top
+        order: [[5, 'desc']]
     });
 </script>
 {% endblock %}
