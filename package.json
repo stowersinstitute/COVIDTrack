@@ -25,6 +25,8 @@
         "jquery": "~3.4.1"
     },
     "resolutions": {
+        "datatables.net": "1.10.22",
+        "datatables.net-bs": "1.10.22",
         "jquery": "3.4.1"
     }
 }
