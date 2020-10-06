@@ -136,10 +136,6 @@
                     {% endif %}
                 {% endif %}
             </tr>
-        {% else %}
-            <tr>
-                <td colspan="{{ userCanViewWebHooks ? "8" : "6" }}" class="danger text-center">No results found</td>
-            </tr>
         {% endfor %}
         </tbody>
     </table>
@@ -300,7 +296,12 @@
 
         // Sort columns using first <thead> row
         // instead of last row (which contain our filter form widgets)
-        "bSortCellsTop": true
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
     });
 </script>
 {% endblock %}
