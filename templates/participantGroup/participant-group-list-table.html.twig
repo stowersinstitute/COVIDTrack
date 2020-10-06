@@ -16,7 +16,7 @@
 
 {{ form_start(form) }}
 
-<table class="table table-bordered table-hover">
+<table id="group-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
             {% if userCanPrintLabels %}
@@ -55,8 +55,8 @@
                 <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
             <td>{{ group.participantCount }}</td>
-            <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
+            <td class="nowrap-cell" data-sort="{{ group.createdAt|date("U")|e("html_attr") }}">{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td class="nowrap-cell" data-sort="{{ group.updatedAt|date("U")|e("html_attr") }}">{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
             <td>{% spaceless %}
                 {% set activeText = group.isActive ? 'Yes' : 'No' %}
                 {{ _self.tableBadge(group.isActive, activeText) }}
@@ -124,6 +124,64 @@
 <script type="application/javascript">
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    // Enable DataTable for table of Groups
+    $('#group-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + max + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false
+            },
+            {
+                targets: 1,
+                orderable: false
+            },
+            {
+                targets: 7,
+                orderable: false
+            },
+            {
+                targets: 8,
+                orderable: false
+            }
+        ],
+
+        // Default sort on Last Modified column with most recent at top
+        order: [[6, 'desc'], [5, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
     });
 </script>
 {% endif %}
