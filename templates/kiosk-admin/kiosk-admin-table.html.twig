@@ -1,4 +1,4 @@
-<table class="table table-bordered table-hover">
+<table id="kiosk-list-table" class="table table-bordered table-hover">
     <thead>
     <tr>
         <th>&nbsp;</th>
@@ -44,3 +44,45 @@
     {% endfor %}
     </tbody>
 </table>
+
+<script type="application/javascript">
+    // Enable DataTable for table of Specimens
+    $('#kiosk-list-table').DataTable({
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} blocks because we don't use them.
+        // Renders blocks as:
+        // {filter}
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'fit',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 0,
+                orderable: false
+            }
+        ],
+
+        // Default sort on Label column alphabetical
+        order: [[1, 'asc']],
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
+    });
+</script>
