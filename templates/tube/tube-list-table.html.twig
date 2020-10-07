@@ -71,7 +71,10 @@
                 <th>
                     <!-- External Processing At -->
                     {{ form_row(filterForm.externalProcessingAt, {
-                        'attr': {'class': 'filter-datepicker'},
+                        'attr': {
+                            'class': 'filter-datepicker',
+                            'form': 'filter-form'
+                        },
                         'row_attr': {'class': 'no-margin'}
                     }) }}
                 </th>
