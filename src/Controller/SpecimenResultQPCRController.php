@@ -14,14 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Interact with Specimen Results for qPCR.
+ * Interact with Viral Results for qPCR performed on a Specimen.
  *
  * @Route(path="/results/qpcr")
  */
 class SpecimenResultQPCRController extends AbstractController
 {
     /**
-     * List all Results
+     * List all Viral Results
      *
      * @Route(path="/", methods={"GET"}, name="results_qpcr_list")
      */
@@ -69,7 +69,7 @@ class SpecimenResultQPCRController extends AbstractController
     }
 
     /**
-     * Create a single new Result
+     * Create a single new Viral Result
      *
      * - specimenAccessionId (string) Specimen.accessionId to create results for
      *
@@ -106,7 +106,7 @@ class SpecimenResultQPCRController extends AbstractController
     }
 
     /**
-     * Edit a single Result.
+     * Edit a single Viral Result.
      *
      * Optional query string params:
      *
