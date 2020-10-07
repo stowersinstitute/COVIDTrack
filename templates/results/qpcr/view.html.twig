@@ -55,7 +55,7 @@
 
                     <dt>Well Plate Barcode</dt>
                     <dd>
-                        {% if userCanViewWellPlates %}
+                        {% if userCanViewWellPlates and result.wellPlateBarcode is not empty %}
                             <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>
                         {% else %}
                             {{ result.wellPlateBarcode }}
