@@ -115,8 +115,8 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             $rawSpecimenIdOrTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenIdOrTubeId']);
 
-            // Case-insensitive so these map directly to entity constants
-            $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
+            $rawConclusionText = $this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']);
+            $rawConclusion = $this->conclusionTextToConstant($rawConclusionText);
 
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
             $rawPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['position']);
@@ -375,5 +375,19 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         $this->em->persist($well);
 
         return $well;
+    }
+
+    /**
+     * Find the SpecimenResultQPCR::CONCLUSION_* constant given the cell text
+     * entered in Conclusion column.
+     *
+     * @param string|null $rawConclusionText NULL if Conclusion left empty, else cell text
+     * @return string|null NULL if text not mapped to SpecimenResultQPCR::CONCLUSION_* constant
+     */
+    private function conclusionTextToConstant(?string $rawConclusionText): ?string
+    {
+        if (null === $rawConclusionText) return null;
+
+        return SpecimenResultQPCR::lookupConclusionConstant($rawConclusionText);
     }
 }
