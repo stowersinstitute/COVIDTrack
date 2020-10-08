@@ -103,6 +103,12 @@ class TubeRepository extends EntityRepository
             $qb->setParameter('f_status', $data['status']);
         }
 
+        // Quality Check Status
+        if (isset($data['qualityCheckStatus'])) {
+            $qb->andWhere('t.qualityCheckStatus = :f_qualityCheckStatus');
+            $qb->setParameter('f_qualityCheckStatus', $data['qualityCheckStatus']);
+        }
+
         // Created At
         if (isset($data['createdAt'])) {
             $qb->andWhere('t.createdAt BETWEEN :f_createdAt_lower AND :f_createdAt_upper');

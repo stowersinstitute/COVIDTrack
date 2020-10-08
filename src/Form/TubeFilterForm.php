@@ -30,6 +30,12 @@ class TubeFilterForm extends AbstractType
                 'placeholder' => '- Any -',
                 'required' => false,
             ])
+            ->add('qualityCheckStatus', ChoiceType::class, [
+                'label' => false,
+                'choices' => Tube::getValidQualityCheckStatus(),
+                'placeholder' => '- Any -',
+                'required' => false,
+            ])
             ->add('createdAt', DateType::class, [
                 'attr' => [
                     'placeholder' => '- Any Date -',

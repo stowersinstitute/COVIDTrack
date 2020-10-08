@@ -28,6 +28,7 @@
                 <th>Type</th>
                 <th>Kit Type</th>
                 <th>Status</th>
+                <th>Quality</th>
                 <th>Printed At</th>
                 <th>External<br>Processing At</th>
                 {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
@@ -51,6 +52,16 @@
                 <th>
                     <!-- Status -->
                     {{ form_row(filterForm.status, {
+                        'attr': {
+                            'class': 'submit-on-change',
+                            'form': 'filter-form'
+                        },
+                        'row_attr': {'class': 'no-margin'}
+                    }) }}
+                </th>
+                <th>
+                    <!-- Quality -->
+                    {{ form_row(filterForm.qualityCheckStatus, {
                         'attr': {
                             'class': 'submit-on-change',
                             'form': 'filter-form'
@@ -111,6 +122,7 @@
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
+                <td>{{ tube.qualityCheckStatusText }}</td>
 
                 {% if tube.printedAt is empty %}
                     <td></td>
@@ -295,7 +307,7 @@
         ],
 
         // Default sort on Printed At column with newest at top
-        order: [[5, 'desc']],
+        order: [[6, 'desc']],
 
         // Sort columns using first <thead> row
         // instead of last row (which contain our filter form widgets)
