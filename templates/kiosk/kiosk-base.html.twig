@@ -18,6 +18,12 @@
         .content-wrapper {
             margin-left: 0;
         }
+        .main-header {
+            z-index: 2000;
+        }
+        .modal-dialog {
+            padding-top: 65px;
+        }
     </style>
 </head>
 <body class="hold-transition skin-blue layout-top-nav">
@@ -36,6 +42,16 @@
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
                         <i class="fa fa-bars"></i>
                     </button>
+                    <div class="status-indicator-wrap">
+                        <div id="status-network" class="status-indicator" data-toggle="tooltip" data-placement="bottom"
+                             title="Current Network Status<ul><li>Solid White: Connected<li>Blinking Red: no network connection">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div id="status-heartbeat" class="status-indicator text-dim" data-toggle="tooltip" data-placement="bottom"
+                             title="Kiosk Server Ping<ul><li>Dim White: Idle<li>Pulsing White: Connecting to server<li>Blinking Red: Error connecting to server</ul>">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
@@ -102,6 +118,8 @@
     }
 
     function doHeartbeat() {
+        $('#status-heartbeat').addClass('working');
+        $('#status-heartbeat').removeClass('error');
         var hbData = {
             appVersion: "{{ app_current_version|escape('js') }}",
             // Number of seconds since the page loaded
@@ -136,10 +154,15 @@
             })
             .fail(function(xhr, textStatus, error) {
                 console.log("error in response: " + textStatus + " " + error);
+                console.log("error in response:", xhr, textStatus, error);
 
                 // Prevent kiosk interaction until successful heartbeat (see success())
                 showMaintenanceModal();
-            });
+                $('#status-heartbeat').addClass('error');
+            })
+            .always(function(xhr) {
+                $('#status-heartbeat').removeClass('working');
+            })
     }
 
     CT_PAGE_LOADED_AT = new Date();
@@ -151,6 +174,22 @@
 
     $('form').submit(function() {
         $('#loadingMask').modal('show');
+    });
+
+    function onOnlineChange(e){
+        if(navigator.onLine) {
+            $('#status-network').removeClass('error');
+            doHeartbeat();
+        } else {
+            $('#status-network').addClass('error');
+        }
+    }
+
+    window.addEventListener('online',  onOnlineChange);
+    window.addEventListener('offline', onOnlineChange);
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({html: true});
     });
 </script>
 </body>
