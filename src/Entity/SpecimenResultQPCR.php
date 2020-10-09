@@ -241,10 +241,10 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
-            'Negative' => self::CONCLUSION_NEGATIVE,
-            'Non-Negative' => self::CONCLUSION_NON_NEGATIVE,
+            'Not Detected' => self::CONCLUSION_NEGATIVE,
+            'Inconclusive' => self::CONCLUSION_NON_NEGATIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,
-            'Positive' => self::CONCLUSION_POSITIVE,
+            'Detected' => self::CONCLUSION_POSITIVE,
         ];
     }
 

@@ -35,7 +35,7 @@ class SpecimenResultQPCRTest extends TestCase
     public function testLookupConclusionConstant()
     {
         // When mapped to a valid constant
-        $found = SpecimenResultQPCR::lookupConclusionConstant('Positive');
+        $found = SpecimenResultQPCR::lookupConclusionConstant('Detected');
         $this->assertSame(SpecimenResultQPCR::CONCLUSION_POSITIVE, $found);
 
         // When search text not mapped
