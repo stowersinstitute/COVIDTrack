@@ -28,7 +28,7 @@
                 <th>Type</th>
                 <th>Kit Type</th>
                 <th>Status</th>
-                <th>Quality</th>
+                <th>Check-In<br>Decision</th>
                 <th>Printed At</th>
                 <th>External<br>Processing At</th>
                 {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
@@ -60,8 +60,8 @@
                     }) }}
                 </th>
                 <th>
-                    <!-- Quality -->
-                    {{ form_row(filterForm.qualityCheckStatus, {
+                    <!-- Check-In Decision -->
+                    {{ form_row(filterForm.checkInDecision, {
                         'attr': {
                             'class': 'submit-on-change',
                             'form': 'filter-form'
@@ -122,7 +122,7 @@
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
-                <td>{{ tube.qualityCheckStatusText }}</td>
+                <td>{{ tube.checkInDecisionText }}</td>
 
                 {% if tube.printedAt is empty %}
                     <td></td>

@@ -30,9 +30,9 @@ class TubeFilterForm extends AbstractType
                 'placeholder' => '- Any -',
                 'required' => false,
             ])
-            ->add('qualityCheckStatus', ChoiceType::class, [
+            ->add('checkInDecision', ChoiceType::class, [
                 'label' => false,
-                'choices' => Tube::getValidQualityCheckStatus(),
+                'choices' => Tube::getValidCheckInDecisions(),
                 'placeholder' => '- Any -',
                 'required' => false,
             ])

@@ -12,45 +12,47 @@ final class Version20201008151034 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return 'Add Tube.qualityCheckStatus';
+        return 'Migrate Tube.status=ACCEPTED or REJECTED to use RETURNED with Tube.checkInDecision';
     }
 
     public function up(Schema $schema) : void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        // Add qualityCheckStatus, for now allows NULL
-        $this->addSql('ALTER TABLE tubes ADD qualityCheckStatus VARCHAR(255) DEFAULT NULL');
-
-        // Default value for all existing records
-        $this->addSql(sprintf('UPDATE tubes SET qualityCheckStatus="%s"', Tube::QUALITY_UNKNOWN));
-
-        // Convert status="ACCEPTED" to (status="RETURNED" and qualityCheckStatus="ACCEPTED")
+        // Default value for existing records with NULL
         $this->addSql(sprintf('
         UPDATE tubes
         SET
-          qualityCheckStatus="%s",
-          `status`="%s"
+          check_in_decision="%s"
         WHERE
-          `status`="%s"', Tube::QUALITY_ACCEPTED, Tube::STATUS_RETURNED, Tube::STATUS_ACCEPTED));
+          check_in_decision IS NULL', Tube::CHECKED_IN_UNKNOWN));
 
-        // Convert status="REJECTED" to (status="RETURNED" and qualityCheckStatus="REJECTED")
+        // Convert status="ACCEPTED" to (status="RETURNED" and checkInDecision="ACCEPTED")
         $this->addSql(sprintf('
         UPDATE tubes
         SET
-          qualityCheckStatus="%s",
+          check_in_decision="%s",
           `status`="%s"
         WHERE
-          `status`="%s"', Tube::QUALITY_REJECTED, Tube::STATUS_RETURNED, Tube::STATUS_REJECTED));
+          `status`="%s"', Tube::CHECKED_IN_ACCEPTED, Tube::STATUS_RETURNED, Tube::STATUS_ACCEPTED));
 
-        // Make qualityCheckStatus NOT NULL that every row has a value
-        $this->addSql('ALTER TABLE tubes CHANGE qualityCheckStatus qualityCheckStatus VARCHAR(255) NOT NULL');
+        // Convert status="REJECTED" to (status="RETURNED" and checkInDecision="REJECTED")
+        $this->addSql(sprintf('
+        UPDATE tubes
+        SET
+          check_in_decision="%s",
+          `status`="%s"
+        WHERE
+          `status`="%s"', Tube::CHECKED_IN_REJECTED, Tube::STATUS_RETURNED, Tube::STATUS_REJECTED));
+
+        // Make checkInDecision NOT NULL now that every row has a value
+        $this->addSql('ALTER TABLE tubes CHANGE check_in_decision check_in_decision VARCHAR(255) NOT NULL');
     }
 
     public function down(Schema $schema) : void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE tubes DROP qualityCheckStatus');
+        $this->addSql('ALTER TABLE tubes CHANGE check_in_decision check_in_decision VARCHAR(255) DEFAULT NULL');
     }
 }

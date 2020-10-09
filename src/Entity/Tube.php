@@ -48,6 +48,7 @@ class Tube
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
 
+    const CHECKED_IN_UNKNOWN = "UNKNOWN";
     const CHECKED_IN_ACCEPTED = "ACCEPTED";
     const CHECKED_IN_REJECTED = "REJECTED";
 
@@ -165,7 +166,7 @@ class Tube
      * Values are self::CHECK_IN_* constants.
      *
      * @var string
-     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     * @ORM\Column(name="check_in_decision", type="string", length=255)
      * @Gedmo\Versioned
      */
     private $checkInDecision;
@@ -243,6 +244,7 @@ class Tube
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
         $this->qualityCheckStatus = self::QUALITY_UNKNOWN;
+        $this->checkInDecision = self::CHECKED_IN_UNKNOWN;
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
@@ -632,11 +634,7 @@ class Tube
      */
     private function setCheckInDecision(string $decision)
     {
-        $valid = [
-            self::CHECKED_IN_ACCEPTED,
-            self::CHECKED_IN_REJECTED,
-        ];
-        if (!in_array($decision, $valid)) {
+        if (!in_array($decision, self::getValidCheckInDecisions())) {
             throw new \InvalidArgumentException('Invalid check-in decision');
         }
 
@@ -645,14 +643,23 @@ class Tube
 
     public function getCheckInDecisionText(): string
     {
-        switch ($this->checkInDecision) {
-            case self::CHECKED_IN_ACCEPTED:
-                return 'Accepted';
-            case self::CHECKED_IN_REJECTED:
-                return 'Rejected';
-            default:
-                return '';
-        }
+        if (empty($this->checkInDecision)) return '';
+
+        $valid = array_flip(self::getValidCheckInDecisions());
+
+        return $valid[$this->checkInDecision] ?? '';
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidCheckInDecisions(): array
+    {
+        return [
+            'Unknown' => self::QUALITY_UNKNOWN,
+            'Accepted' => self::QUALITY_ACCEPTED,
+            'Rejected' => self::QUALITY_REJECTED,
+        ];
     }
 
     /**
@@ -787,7 +794,6 @@ class Tube
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
         // Tube
-        $this->setStatus(self::STATUS_ACCEPTED);
         $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);

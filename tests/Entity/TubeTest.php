@@ -148,7 +148,7 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNull($tube->getCheckInDecision());
+        $this->assertSame(Tube::CHECKED_IN_UNKNOWN, $tube->getCheckInDecision());
         $this->assertNull($tube->getCheckedInAt());
 
         $checkedInAt = new \DateTimeImmutable('2020-12-20 12:55:44');
@@ -171,7 +171,7 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNull($tube->getCheckInDecision());
+        $this->assertSame(Tube::CHECKED_IN_UNKNOWN, $tube->getCheckInDecision());
         $this->assertNull($tube->getCheckedInAt());
 
         // Reject Tube
