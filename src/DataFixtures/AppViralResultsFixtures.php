@@ -62,7 +62,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         // Reasonable positive/negative rate
         $possibleResults = $this->buildQPCRResultsDistribution();
 
-        // Add 1 result to many wells
+        // Add Results with a Well
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
             // for this many days worth of testing
@@ -94,6 +94,26 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     }
                 }
             }
+        }
+
+        // Add Results without a Well
+        $createdAtLeastOneSpecimenWithoutWell = false;
+        foreach ($groups as $group) {
+            $specimen = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
+
+            // Might not have enough fixture Specimens to keep going
+            if (!$specimen) continue;
+
+            $createdAtLeastOneSpecimenWithoutWell = true;
+
+            // Create Result
+            $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+            $result->setCreatedAt(new \DateTimeImmutable('-1 day'));
+
+            $em->persist($result);
+        }
+        if (!$createdAtLeastOneSpecimenWithoutWell) {
+            throw new \RuntimeException('Fixtures cannot add Result to Group because not enough Specimen fixtures exist. Increase Specimen fixture count.');
         }
 
         // Must flush so below code knows about results we just created
