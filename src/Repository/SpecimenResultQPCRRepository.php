@@ -110,6 +110,7 @@ class SpecimenResultQPCRRepository extends EntityRepository
     public function filterByFormData(array $data): array
     {
         $qb = $this->createDefaultQueryBuilder('r');
+        $qb->leftJoin('r.well', 'w')->addSelect('w');
 
         if (isset($data['conclusion'])) {
             $qb->andWhere('r.conclusion = :f_conclusion');
