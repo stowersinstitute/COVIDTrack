@@ -33,17 +33,10 @@ class Tube
     // When Tube's Specimen has results available
     const STATUS_RESULTS = "RESULTS";
     /**
-     * @deprecated Replace with Tube.qualityCheckStatus
+     * @deprecated Replace with Tube.checkInDecision
      */
     const STATUS_ACCEPTED = "ACCEPTED";
-    /**
-     * @deprecated Replace with Tube.qualityCheckStatus
-     */
-    const STATUS_REJECTED = "REJECTED";
-
-    const QUALITY_UNKNOWN = "UNKNOWN";
-    const QUALITY_ACCEPTED = "ACCEPTED";
-    const QUALITY_REJECTED = "REJECTED";
+    const STATUS_REJECTED = "REJECTED"; // Possible final status
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
@@ -110,17 +103,6 @@ class Tube
      * @Gedmo\Versioned
      */
     private $status;
-
-    /**
-     * After the Tube has been returned by a Participant, describes the
-     * condition of the Tube and its Specimen regarding its viability for
-     * continued research and processing.
-     *
-     * @var string
-     * @ORM\Column(name="qualityCheckStatus", type="string")
-     * @Gedmo\Versioned
-     */
-    private $qualityCheckStatus;
 
     /**
      * What type of Specimen this Tube is meant to hold.
@@ -243,7 +225,6 @@ class Tube
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
-        $this->qualityCheckStatus = self::QUALITY_UNKNOWN;
         $this->checkInDecision = self::CHECKED_IN_UNKNOWN;
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
@@ -305,7 +286,6 @@ class Tube
             // Specimen.propertyNameHere => Human-Readable Description
             'accessionId' => 'Accession ID',
             'status' => 'Status',
-            'qualityCheckStatus' => 'Quality Check Status',
             'tubeType' => 'Type',
             'kitType' => 'Kit Type',
             'collectedAt' => 'Collected At',
@@ -327,10 +307,6 @@ class Tube
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
                 return self::lookupStatusText($value);
-            },
-            // Convert QUALITY_* constants into human-readable text
-            'qualityCheckStatus' => function($value) {
-                return self::lookupQualityCheckStatusText($value);
             },
             'collectedAt' => $dateTimeConvert,
             'returnedAt' => $dateTimeConvert,
@@ -403,50 +379,6 @@ class Tube
     public function getStatus(): string
     {
         return $this->status;
-    }
-
-    public function getQualityCheckStatus(): string
-    {
-        return $this->qualityCheckStatus;
-    }
-
-    /**
-     * @param string $const Tube::QUALITY_* constant
-     */
-    public function setQualityCheckStatus(string $const): void
-    {
-        $this->mustBeValidQualityCheckStatus($const);
-
-        $this->qualityCheckStatus = $const;
-    }
-
-    /**
-     * Get human-readable text of Quality Check Status.
-     *
-     * @return string Tube::QUALITY_* constant
-     */
-    public function getQualityCheckStatusText(): string
-    {
-        return self::lookupQualityCheckStatusText($this->qualityCheckStatus);
-    }
-
-    public static function lookupQualityCheckStatusText(string $const): string
-    {
-        $statuses = array_flip(static::getValidQualityCheckStatus());
-
-        return $statuses[$const];
-    }
-
-    /**
-     * @return string[]
-     */
-    public static function getValidQualityCheckStatus(): array
-    {
-        return [
-            'Unknown' => self::QUALITY_UNKNOWN,
-            'Accepted' => self::QUALITY_ACCEPTED,
-            'Rejected' => self::QUALITY_REJECTED,
-        ];
     }
 
     public function getTubeType(): ?string
@@ -656,9 +588,9 @@ class Tube
     public static function getValidCheckInDecisions(): array
     {
         return [
-            'Unknown' => self::QUALITY_UNKNOWN,
-            'Accepted' => self::QUALITY_ACCEPTED,
-            'Rejected' => self::QUALITY_REJECTED,
+            'Unknown' => self::CHECKED_IN_UNKNOWN,
+            'Accepted' => self::CHECKED_IN_ACCEPTED,
+            'Rejected' => self::CHECKED_IN_REJECTED,
         ];
     }
 
@@ -793,13 +725,9 @@ class Tube
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
-        // Tube
         $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
-
-        // Specimen
-        $this->specimen->setStatus(Specimen::STATUS_ACCEPTED);
     }
 
     /**
@@ -997,13 +925,6 @@ class Tube
         if ($tubeType === null) return;
 
         if (!in_array($tubeType, self::getValidTubeTypes())) {
-            throw new \InvalidArgumentException('Invalid Tube Type');
-        }
-    }
-
-    private function mustBeValidQualityCheckStatus(string $const)
-    {
-        if (!in_array($const, self::getValidQualityCheckStatus())) {
             throw new \InvalidArgumentException('Invalid Tube Type');
         }
     }
