@@ -551,7 +551,9 @@ class Tube
      */
     public function willAllowTecanImport(): bool
     {
-        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
+        // RETURNED -- Tube must have come back with a Specimen in it
+        // REJECTED -- In case a rejected Tube has changed their mind
+        return in_array($this->status, [self::STATUS_RETURNED, self::STATUS_REJECTED]);
     }
 
     public function getCheckInDecision(): ?string

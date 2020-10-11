@@ -26,8 +26,6 @@ class Specimen
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
-    // So do these need deprecated like Tube? How should they change relative to the Tube?
-    const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
@@ -464,7 +462,6 @@ class Specimen
         $updateIfInStatus = [
             self::STATUS_CREATED,
             self::STATUS_RETURNED,
-            self::STATUS_ACCEPTED,
             self::STATUS_EXTERNAL,
         ];
         if (in_array($this->status, $updateIfInStatus)) {
@@ -488,7 +485,6 @@ class Specimen
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
-            'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
         ];
@@ -659,7 +655,7 @@ class Specimen
     {
         $valid = [
             self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
-            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RETURNED, // Specimen has been returned in a Tube
             self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 

@@ -135,10 +135,15 @@ class SpecimenRepository extends EntityRepository
         return $this->createQueryBuilder('s')
             ->select('count(s.id)')
             ->join('s.participantGroup', 'participantGroup')
+            ->join('s.tube', 'tube')
 
-            // Correct status
+            // Specimen has been returned
             ->where('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+            ->setParameter('status', Specimen::STATUS_RETURNED)
+
+            // In a Tube that hasn't been rejected
+            ->andWhere('tube.checkInDecision != :check_in_rejected')
+            ->setParameter('check_in_rejected', Tube::CHECKED_IN_REJECTED)
 
             // Not in a control group
             ->andWhere('participantGroup.isControl = false')
