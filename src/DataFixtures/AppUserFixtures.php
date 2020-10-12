@@ -38,6 +38,7 @@ class AppUserFixtures extends Fixture implements FixtureGroupInterface
         $this->buildUser($manager, 'coordinator', [
             'ROLE_PARTICIPANT_GROUP_EDIT',
             'ROLE_PRINT_GROUP_LABELS',
+            'ROLE_RESULTS_EDIT',
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE,
             BaseResultsNotificationCommand::NOTIFY_USERS_WITH_ROLE_ANTIBODY,
         ]);

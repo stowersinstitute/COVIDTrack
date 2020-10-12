@@ -26,7 +26,7 @@
             <div class="box-body">
                 <dl class="dl-horizontal">
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
-                    <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
+                    <dt>Participation Group</dt><dd><a href="{{ path('app_participant_group_view', {title: specimen.participantGroup.title}) }}">{{ specimen.participantGroup }}</a></dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
                     <dt>Well Plate</dt><dd>
                         {% for well in specimen.wells %}
