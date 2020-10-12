@@ -432,6 +432,9 @@ class Specimen
 
         if ($status === self::STATUS_REJECTED) {
             $this->recalculateCliaTestingRecommendation();
+        } else if ($status === self::STATUS_RESULTS) {
+            // Tube now has results
+            $this->tube->markResultsAvailable();
         }
     }
 
@@ -466,11 +469,7 @@ class Specimen
         ];
         if (in_array($this->status, $updateIfInStatus)) {
             // Specimen now has results
-            $newStatus = self::STATUS_RESULTS;
-            $this->setStatus($newStatus);
-
-            // Tube now has results
-            $this->tube->markResultsAvailable();
+            $this->setStatus(self::STATUS_RESULTS);
         }
 
         return $this->getStatus();
