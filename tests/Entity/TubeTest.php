@@ -197,6 +197,28 @@ class TubeTest extends TestCase
         $this->assertSame(Tube::WEBHOOK_STATUS_QUEUED, $tube->getWebHookStatus());
     }
 
+    public function testMarkingResultsAvailable()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+        $tube->markResultsAvailable();
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testMarkingResultsAvailableSavesCheckInStatus()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertNotSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        $tube->markResultsAvailable();
+
+        $this->assertNotNull($tube->getCheckedInAt());
+        $this->assertSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+    }
+
     public function testSuccessfulSendingToWebHook()
     {
         $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);

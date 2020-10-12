@@ -523,6 +523,8 @@ class Tube
     /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
+     *
+     * @deprecated Step no longer enforced against status. Can checkin any time.
      */
     public function willAllowCheckinDecision(): bool
     {
@@ -531,14 +533,11 @@ class Tube
             return true;
         }
 
-        // Blood Tubes
-        if ($this->tubeType === self::TYPE_BLOOD) {
-            // Status before Accepted/Rejected
-            return $this->status === self::STATUS_RETURNED;
-        }
-
-        // Saliva Tubes
-        return in_array($this->status, [self::STATUS_EXTERNAL, self::STATUS_RETURNED]);
+        return in_array($this->status, [
+            self::STATUS_RETURNED,
+            self::STATUS_EXTERNAL,
+            self::STATUS_RESULTS,
+        ]);
     }
 
     /**
@@ -712,7 +711,12 @@ class Tube
      */
     public function markResultsAvailable(): void
     {
+        // Tube has results
         $this->setStatus(self::STATUS_RESULTS);
+
+        // Tube considered Approved, since a Rejected Tube would not yield results
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
+        $this->setCheckedInAt(new \DateTimeImmutable());
     }
 
     /**
