@@ -12,6 +12,14 @@ use App\Repository\TubeRepository;
 use App\Util\EntityUtils;
 use Doctrine\ORM\EntityManager;
 
+/**
+ * Ingests Excel workbook with Viral Results and outputs SpecimenResultQPCR
+ * entities ready to persist.
+ *
+ * Viral Result data must begin on Row 2.
+ *
+ * See $this->columnMap for which Excel column values are mapped.
+ */
 class SpecimenResultQPCRImporter extends BaseExcelImporter
 {
     /**
