@@ -763,6 +763,8 @@ class Tube
     }
 
     /**
+     * Current Tube.status values that can be newly assigned to a Tube.
+     *
      * @return string[]
      */
     public static function getValidStatuses(): array
