@@ -1,10 +1,10 @@
 {% block body %}
     {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
     {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
-<table class="table table-bordered table-hover">
+<table id="specimen-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            {% if userCanEditSpecimens %}<th>&nbsp;</th>{% endif %}
+            {% if userCanEditSpecimens %}<th class="no-sort">&nbsp;</th>{% endif %}
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
@@ -27,8 +27,12 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
-            <td>{{ specimen.collectedAt ? specimen.collectedAt | date("Y-m-d H:ia") : '' }}</td>
-            <td>
+            {% if specimen.collectedAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ specimen.collectedAt|date("U")|e("html_attr") }}">{{ specimen.collectedAt | date("Y-m-d H:ia") }}</td>
+            {% endif %}
+            <td class="nowrap-cell">
                 {% for well in specimen.wells %}
                     {% if userCanViewWellPlates %}
                     <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a>
@@ -44,4 +48,52 @@
     {% endfor %}
     </tbody>
 </table>
+
+<script type="application/javascript">
+    // Enable DataTable for table of Specimens
+    $('#specimen-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 'no-sort',
+                orderable: false
+            }
+        ],
+
+        // Default sort on Collection Time column with most recent at top
+        order: [[4, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
+    });
+</script>
 {% endblock %}

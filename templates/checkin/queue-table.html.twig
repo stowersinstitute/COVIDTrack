@@ -1,17 +1,17 @@
 {% set allowPerTubeDecision = is_granted("ROLE_TUBE_CHECK_IN") %}
 {% set salivaTubeType = constant('App\\Entity\\Tube::TYPE_SALIVA') %}
-<table class="table table-bordered table-hover table-striped">
+<table id="queue-list-table" class="table table-bordered table-hover table-striped">
     <thead>
         <tr>
             {% if displayRowCheckboxes %}
-            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
             {% endif %}
             <th>Tube Accession ID</th>
             <th>Type</th>
             <th>Printed At</th>
             <th>Collected At <i class="fas fa-question-circle question-icon-help" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></i></th>
             <th>Returned At <i class="fas fa-question-circle question-icon-help" title="Date/Time Tube returned at a Kiosk"></i></th>
-            {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Reject</th>{% endif %}
+            {% if allowPerTubeDecision %}<th class="no-sort" style="width:100px; text-align:center;">Reject</th>{% endif %}
         </tr>
     </thead>
     <tbody>
@@ -26,9 +26,25 @@
             {% endif %}
             <td>{{ tube.accessionId }}</td>
             <td>{{ tube.typeText }}</td>
-            <td>{{ tube.printedAt is empty ? "" : tube.printedAt|date("Y-m-d g:ia") }}</td>
-            <td>{{ tube.collectedAt is empty ? "" : tube.collectedAt|date("Y-m-d g:ia") }}</td>
-            <td>{{ tube.returnedAt is empty ? "" : tube.returnedAt|date("Y-m-d g:ia") }}</td>
+
+            {% if tube.printedAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ tube.printedAt|date("U")|e("html_attr") }}">{{ tube.printedAt|date("Y-m-d g:ia") }}</td>
+            {% endif %}
+
+            {% if tube.collectedAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ tube.collectedAt|date("U")|e("html_attr") }}">{{ tube.collectedAt|date("Y-m-d g:ia") }}</td>
+            {% endif %}
+
+            {% if tube.returnedAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ tube.returnedAt|date("U")|e("html_attr") }}">{{ tube.returnedAt|date("Y-m-d g:ia") }}</td>
+            {% endif %}
+
             {% if allowPerTubeDecision %}
             <td style="text-align:center;">
                 {# Reject #}
@@ -44,6 +60,7 @@
 
 {% if allowPerTubeDecision %}
 <script>
+    // Clicking Reject button will reject Tube
     $('.reject-one-tube').on('click', function() {
         const $btn = $(this);
         const tubeId = $btn.data('tube-id');
@@ -69,6 +86,50 @@
             // Disable clicking button again
             $btn.prop('disabled', true);
         });
+    });
+
+    // Enable DataTable for table of Tubes in Queue
+    $('#queue-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Only display {table} data.
+        // Counts provided by custom view.
+        // Hides {information}, {pagination}, {length} and {filter} blocks because we don't use them.
+        // https://datatables.net/reference/option/dom
+        dom: 't',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 'no-sort',
+                orderable: false
+            }
+        ],
+
+        // Default sort on Returned At column with most recent at top
+        order: [[5, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
     });
 </script>
 {% endif %}
