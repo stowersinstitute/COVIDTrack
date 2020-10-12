@@ -2,9 +2,9 @@
 {% set userCanViewSpecimens = is_granted('ROLE_SPECIMEN_VIEW') %}
 {% set userCanViewGroups = is_granted('ROLE_PARTICIPANT_GROUP_EDIT') %}
 {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
-{% set userCanViewWebHooks = is_granted("ROLE_WEB_HOOKS") %}
+{% set userCanManageWebHooks = is_granted("ROLE_WEB_HOOKS") %}
 
-{% if userCanViewWebHooks %}
+{% if userCanManageWebHooks %}
 <div class="margin-bottom">
     &nbsp; {# Necessary so div has body content for CSS margin to be applied #}
     <div class="pull-right">
@@ -19,29 +19,31 @@
 </div>
 {% endif %}
 
-<table class="table table-bordered table-hover">
+<table id="results-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            {% if userCanViewWebHooks %}<th style="width: 2em;"><input type="checkbox" id="check-all"></th>{% endif %}
-            <th>&nbsp;<!-- View --></th>
+            <th class="no-sort" style="width: 2em;">
+                {% if userCanManageWebHooks %}<input type="checkbox" id="check-all">{% endif %}
+            </th>
+            <th class="no-sort">&nbsp;<!-- View --></th>
             <th>Specimen</th>
-            {% if userCanViewGroups %}<th>Participant Group</th>{% endif %}
+            <th>Participant Group</th>
             <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
             <th>Conclusion</th>
             <th>Well Plate Barcode</th>
             <th>Well Position</th>
-            {% if userCanViewWebHooks %}<th>Web Hook Status</th>{% endif %}
-            {% if userCanViewWebHooks %}<th>Web Hook Last Sent</th>{% endif %}
+            <th>Web Hook Status</th>
+            <th>Web Hook Last Sent</th>
         </tr>
     </thead>
     <tbody>
     {% for result in results %}
         <tr>
-            {% if userCanViewWebHooks %}
             <td>
+                {% if userCanManageWebHooks %}
                 <input type="checkbox" class="result-checkbox" value="{{ result.id }}">
+                {% endif %}
             </td>
-            {% endif %}
             <td>
                 <a href="{{ path('results_qpcr_view', {id: result.id}) }}">View</a>
             </td>
@@ -52,12 +54,14 @@
                     {{ result.specimen.accessionId }}
                 {% endif %}
             </td>
-            {% if userCanViewGroups %}
-                <td><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></td>
-            {% endif %}
-            <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
-            <td>{{ result.conclusionText }}</td>
             <td>
+                {% if userCanViewGroups %}
+                <a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a>
+                {% endif %}
+            </td>
+            <td class="nowrap-cell" data-sort="{{ result.createdAt|date("U")|e("html_attr") }}">{{ result.createdAt | date("Y-m-d g:ia") }}</td>
+            <td>{{ result.conclusionText }}</td>
+            <td class="nowrap-cell">
                 {% if userCanViewWellPlates and result.wellPlateBarcode is not empty %}
                     <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>
                 {% else %}
@@ -65,19 +69,24 @@
                 {% endif %}
             </td>
             <td>{{ result.wellPosition }}</td>
-            {% if userCanViewWebHooks %}<td>{% spaceless %}
+
+            <td>{% spaceless %}
                 {{ result.webHookStatus }}
                 {% if result.webHookStatusMessage %}
                     <i class="fas fa-question-circle question-icon-help" title="{{ result.webHookStatusMessage|e("html_attr") }}"></i>
                 {% endif %}
-            {% endspaceless %}</td>{% endif %}
-            {% if userCanViewWebHooks %}<td>{{ result.webHookLastTriedPublishingAt ? result.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") : ''}}</td>{% endif %}
+            {% endspaceless %}</td>
+
+            {% if result.webHookLastTriedPublishingAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ result.webHookLastTriedPublishingAt|date("U")|e("html_attr") }}">{{ result.webHookLastTriedPublishingAt|date("Y-m-d H:i:s") }}</td>
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
 </table>
 
-{% if userCanViewWebHooks %}
     <script type="application/javascript">
         // Check-all checkboxes in table
         $('#check-all').change(function() {
@@ -126,6 +135,51 @@
         $('#neverSendWebHooksBtn').on('click', function() {
             setResultWebHookStatus('NEVER_SEND');
         });
+
+        // Enable DataTable for table of Results
+        $('#results-list-table').DataTable({
+            // Disable global table search field. We provide our own column search filters.
+            searching: false,
+
+            // Disable paging so users can view all records at once.
+            paging: false,
+
+            // Display info line before table instead of after it.
+            // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+            // Renders blocks as:
+            // {information}
+            // {table}
+            // https://datatables.net/reference/option/dom
+            dom: 'it',
+
+            // Re-word {information} block to only show record count.
+            // Normally this area includes page counts but our paging is disabled,
+            // so just display the full count.
+            // https://datatables.net/reference/option/infoCallback
+            infoCallback: function(settings, start, end, max, total, pre) {
+                return "<strong>Found " + total + " records</strong>";
+            },
+
+            // Disable some features for select columns.
+            // https://datatables.net/reference/option/columnDefs
+            columnDefs: [
+                {
+                    targets: 'no-sort',
+                    orderable: false
+                }
+            ],
+
+            // Default sort on Reported At column with most recent at top
+            order: [[4, 'desc']],
+
+            // Sort columns using first <thead> row
+            // instead of last row (which contain our filter form widgets)
+            "bSortCellsTop": true,
+
+            // Text displayed when no results found
+            "language": {
+                "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+            }
+        });
     </script>
-{% endif %}
 {% endblock %}
