@@ -8,12 +8,12 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Exception\IrreversibleMigration;
 
-final class Version20201008151032 extends AbstractMigration
+final class Version20201008151035 extends AbstractMigration
 {
     public function getDescription() : string
     {
         // Ensures Tube has same status as Specimen when Results exist
-        return 'Tube.status updated from RETURNED to RESULTS when associated Specimen has results';
+        return 'Tube.status is RESULTS when associated Specimen has results';
     }
 
     public function up(Schema $schema) : void
@@ -24,8 +24,7 @@ final class Version20201008151032 extends AbstractMigration
 UPDATE tubes
 SET `status` = "RESULTS"
 WHERE
-    `status` = "RETURNED"
-    AND id IN (
+    id IN (
         SELECT t.id
         FROM tubes t
         JOIN specimens s ON t.specimen_id=s.id
