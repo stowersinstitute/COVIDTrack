@@ -173,7 +173,7 @@ class SpecimenTest extends TestCase
         $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
     }
 
-    public function testTubeStatusHasResultsAfterAddingViralResults()
+    public function testTubeStatusHasResultsAfterAddingViralResultsWithWellPlate()
     {
         $tube = new Tube('T555');
         $specimen = Specimen::buildExampleReadyForResults('C100', null, $tube);
@@ -188,6 +188,28 @@ class SpecimenTest extends TestCase
 
         // Verify has result and expected Tube status
         $this->assertCount(1, $specimen->getQPCRResults());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testTubeStatusHasResultsAfterAddingViralResultsWithoutWellPlate()
+    {
+        $tube = new Tube('T555');
+        $specimen = Specimen::buildExampleReadyForResults('D100', null, $tube);
+
+        $this->assertSame('T555', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getQPCRResults());
+        $this->assertNotSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result without well plate
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Verify Result has Specimen associated
+        $this->assertSame('D100', $result->getSpecimenAccessionId());
+
+        // Verify Specimen associated with Result and expected statuses
+        $this->assertCount(1, $specimen->getQPCRResults());
+        $this->assertSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
         $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
     }
 

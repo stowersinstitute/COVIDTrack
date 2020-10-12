@@ -1,9 +1,9 @@
 {% block body %}
 {% set userCanEditPlates = is_granted('ROLE_WELL_PLATE_EDIT') %}
-<table class="table table-bordered table-hover">
+<table id="wellplate-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            {% if userCanEditPlates %}<th>&nbsp;</th>{% endif %}
+            <th class="no-sort">&nbsp;</th>
             <th>Barcode</th>
             <th>Storage Location</th>
             <th>Created At</th>
@@ -13,19 +13,65 @@
     <tbody>
     {% for wellPlate in wellPlates %}
         <tr>
-            {% if userCanEditPlates %}
             <td>
+                {% if userCanEditPlates %}
                 <a href="{{ path('well_plate_edit', {barcode: wellPlate.barcode}) }}">Edit</a>
+                {% endif %}
             </td>
-            {% endif %}
             <td>
                 <a href="{{ path('well_plate_view', {barcode: wellPlate.barcode}) }}">{{ wellPlate.barcode }}</a>
             </td>
             <td>{{ wellPlate.storageLocation }}</td>
-            <td>{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
+            <td data-sort="{{ wellPlate.createdAt|date("U")|e("html_attr") }}">{{ wellPlate.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td data-sort="{{ wellPlate.updatedAt|date("U")|e("html_attr") }}">{{ wellPlate.updatedAt | date("Y-m-d H:i:s") }}</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+
+<script>
+    // Enable DataTable for table of Tubes in Queue
+    $('#wellplate-list-table').DataTable({
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and  blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {filter}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'ift',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 'no-sort',
+                orderable: false
+            }
+        ],
+
+        // Default sort on Last Modified column with most recent at top
+        order: [[4, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
+    });
+</script>
 {% endblock %}

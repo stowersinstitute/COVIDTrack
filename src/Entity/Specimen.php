@@ -688,6 +688,8 @@ class Specimen
         }
 
         $this->resultsQPCR->add($result);
+
+        $this->updateStatusWhenResultsSet();
     }
 
     /**
