@@ -103,7 +103,7 @@ class TubeRepository extends EntityRepository
             $qb->setParameter('f_status', $data['status']);
         }
 
-        // Quality
+        // Check-In Decision
         if (isset($data['checkInDecision'])) {
             $qb->andWhere('t.checkInDecision = :f_checkInDecision');
             $qb->setParameter('f_checkInDecision', $data['checkInDecision']);
