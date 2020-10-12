@@ -32,10 +32,6 @@ class Tube
     const STATUS_EXTERNAL = "EXTERNAL";
     // When Tube's Specimen has results available
     const STATUS_RESULTS = "RESULTS";
-    /**
-     * @deprecated Replace with Tube.checkInDecision
-     */
-    const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible final status
 
     const TYPE_BLOOD = "BLOOD";
@@ -777,7 +773,6 @@ class Tube
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
             'Results Available' => self::STATUS_RESULTS,
-            'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
         ];
     }

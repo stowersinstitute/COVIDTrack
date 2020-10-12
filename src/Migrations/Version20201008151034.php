@@ -34,7 +34,7 @@ final class Version20201008151034 extends AbstractMigration
           check_in_decision="%s",
           `status`="%s"
         WHERE
-          `status`="%s"', Tube::CHECKED_IN_ACCEPTED, Tube::STATUS_RETURNED, Tube::STATUS_ACCEPTED));
+          `status`="ACCEPTED"', Tube::CHECKED_IN_ACCEPTED, Tube::STATUS_RETURNED));
 
         // Convert status="REJECTED" to (status="RETURNED" and checkInDecision="REJECTED")
         $this->addSql(sprintf('
