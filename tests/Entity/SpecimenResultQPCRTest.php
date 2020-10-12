@@ -41,4 +41,12 @@ class SpecimenResultQPCRTest extends TestCase
         // When search text not mapped
         $this->assertNull(SpecimenResultQPCR::lookupConclusionConstant('Some Unknown Text'));
     }
+
+    public function testReturnsConclusionTextDifferentThanConstantValue()
+    {
+        $specimen = Specimen::buildExampleReadyForResults('S100', null, new Tube('T0001'));
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        $this->assertSame('Detected', $result->getConclusionText());
+    }
 }
