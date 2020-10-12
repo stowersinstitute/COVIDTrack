@@ -141,10 +141,6 @@ class SpecimenRepository extends EntityRepository
             ->where('s.status = :status')
             ->setParameter('status', Specimen::STATUS_RETURNED)
 
-            // In a Tube that hasn't been rejected
-            ->andWhere('tube.checkInDecision != :check_in_rejected')
-            ->setParameter('check_in_rejected', Tube::CHECKED_IN_REJECTED)
-
             // Not in a control group
             ->andWhere('participantGroup.isControl = false')
 
