@@ -7,6 +7,7 @@ namespace DoctrineMigrations;
 use App\Entity\Tube;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Doctrine\Migrations\Exception\IrreversibleMigration;
 
 final class Version20201008151034 extends AbstractMigration
 {
@@ -52,6 +53,6 @@ final class Version20201008151034 extends AbstractMigration
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE tubes CHANGE check_in_decision check_in_decision VARCHAR(255) DEFAULT NULL');
+        throw new IrreversibleMigration('Restore from backup');
     }
 }
