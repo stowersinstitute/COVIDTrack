@@ -206,6 +206,10 @@ abstract class SpecimenResult
     {
         $types = array_flip(static::getFormConclusions());
 
+        if (!isset($types[$conclusionConstant])) {
+            throw new \LogicException('Current conclusion constant not mapped to display text');
+        }
+
         return $types[$conclusionConstant] ?? '';
     }
 
