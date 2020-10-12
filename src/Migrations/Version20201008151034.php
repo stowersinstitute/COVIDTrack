@@ -19,7 +19,7 @@ final class Version20201008151034 extends AbstractMigration
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        // Default value for existing records with NULL
+        // Assign a default value for records without check_in_decision
         $this->addSql(sprintf('
         UPDATE tubes
         SET
