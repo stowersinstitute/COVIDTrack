@@ -36,14 +36,13 @@ final class Version20201008151034 extends AbstractMigration
         WHERE
           `status`="ACCEPTED"', Tube::CHECKED_IN_ACCEPTED, Tube::STATUS_RETURNED));
 
-        // Convert status="REJECTED" to (status="RETURNED" and checkInDecision="REJECTED")
+        // Ensure Tubes with status="REJECTED" also mark checkInDecision="REJECTED"
         $this->addSql(sprintf('
         UPDATE tubes
         SET
-          check_in_decision="%s",
-          `status`="%s"
+          check_in_decision="%s"
         WHERE
-          `status`="%s"', Tube::CHECKED_IN_REJECTED, Tube::STATUS_RETURNED, Tube::STATUS_REJECTED));
+          `status`="%s"', Tube::CHECKED_IN_REJECTED, Tube::STATUS_REJECTED));
 
         // Make checkInDecision NOT NULL now that every row has a value
         $this->addSql('ALTER TABLE tubes CHANGE check_in_decision check_in_decision VARCHAR(255) NOT NULL');
