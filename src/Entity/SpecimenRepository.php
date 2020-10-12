@@ -137,9 +137,12 @@ class SpecimenRepository extends EntityRepository
             ->join('s.participantGroup', 'participantGroup')
             ->join('s.tube', 'tube')
 
-            // Specimen has been returned
-            ->where('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_RETURNED)
+            // Specimen statuses where results can be added
+            ->where('s.status IN (:status)')
+            ->setParameter('status', [
+                Specimen::STATUS_RETURNED,
+                Specimen::STATUS_EXTERNAL,
+            ])
 
             // Not in a control group
             ->andWhere('participantGroup.isControl = false')
