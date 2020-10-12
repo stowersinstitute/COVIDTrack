@@ -784,6 +784,8 @@ class Specimen
         }
 
         $this->resultsAntibody->add($result);
+
+        $this->updateStatusWhenResultsSet();
     }
 
     /**
