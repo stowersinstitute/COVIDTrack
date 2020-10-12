@@ -63,3 +63,74 @@ body {
 .nowrap-cell {
     white-space: nowrap;
 }
+
+.tooltip-inner ul {
+    padding-left: 20px;
+    margin-bottom: 0px;
+}
+
+.tooltip-inner li {
+    text-align: left;
+}
+
+.status-indicator-wrap {
+    float: right;
+}
+
+.status-indicator {
+    padding: 15px 8px 15px 7px;
+    color: white;
+    display: inline-block;
+}
+
+.status-indicator.error {
+    animation-duration: 2s;
+    animation-name: blink;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+    color: #dd4b39 !important;
+}
+
+.status-indicator.working {
+    animation-duration: 2s;
+    animation-name: beat;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+}
+
+.text-dim {
+    opacity: .4;
+}
+
+@keyframes beat {
+    from {
+        opacity: .2;
+    }
+    50% {
+        opacity: 1;
+    }
+    to {
+        opacity: .2;
+    }
+}
+
+@keyframes blink {
+    from {
+        opacity: .4;
+    }
+    15% {
+        opacity: 1;
+    }
+    30% {
+        opacity: .2;
+    }
+    45% {
+        opacity: 1;
+    }
+    60% {
+        opacity: .4;
+    }
+    to {
+        opacity: .4;
+    }
+}
