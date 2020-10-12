@@ -26,11 +26,7 @@ class TubeFilterForm extends AbstractType
             ])
             ->add('status', ChoiceType::class, [
                 'label' => false,
-                'choices' => array_merge(Tube::getValidStatuses(), [
-                    // Add status values of old Tube records, but are not
-                    // available to be assigned to current Tubes.
-                    'Accepted' => 'ACCEPTED', // Tube::STATUS_ACCEPTED
-                ]),
+                'choices' => Tube::getValidStatuses(),
                 'placeholder' => '- Any -',
                 'required' => false,
             ])
