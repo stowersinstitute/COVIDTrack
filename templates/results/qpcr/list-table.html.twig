@@ -62,7 +62,7 @@
             <td class="nowrap-cell" data-sort="{{ result.createdAt|date("U")|e("html_attr") }}">{{ result.createdAt | date("Y-m-d g:ia") }}</td>
             <td>{{ result.conclusionText }}</td>
             <td class="nowrap-cell">
-                {% if userCanViewWellPlates %}
+                {% if userCanViewWellPlates and result.wellPlateBarcode is not empty %}
                     <a href="{{ path('well_plate_view', {barcode: result.wellPlateBarcode}) }}">{{ result.wellPlateBarcode }}</a>
                 {% else %}
                     {{ result.wellPlateBarcode }}
