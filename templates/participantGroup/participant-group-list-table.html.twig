@@ -20,11 +20,11 @@
     <thead>
         <tr>
             {% if userCanPrintLabels %}
-            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
             {% endif %}
 
             {% if userCanEditGroups %}
-            <th>&nbsp;</th>
+            <th class="no-sort">&nbsp;</th>
             {% endif %}
 
             <th>Title</th>
@@ -32,8 +32,8 @@
             <th>Created</th>
             <th>Last Modified</th>
             <th>Active?</th>
-            <th>Accepted Specimens</th>
-            <th>Results<br>to Web Hooks</th>
+            <th class="no-sort">Accepted Specimens</th>
+            <th class="no-sort">Results<br>to Web Hooks</th>
         </tr>
     </thead>
     <tbody>
@@ -154,19 +154,7 @@
         // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
-                targets: 0,
-                orderable: false
-            },
-            {
-                targets: 1,
-                orderable: false
-            },
-            {
-                targets: 7,
-                orderable: false
-            },
-            {
-                targets: 8,
+                targets: 'no-sort',
                 orderable: false
             }
         ],

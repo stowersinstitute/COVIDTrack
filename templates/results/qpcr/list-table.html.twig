@@ -22,10 +22,10 @@
 <table id="results-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th style="width: 2em;">
+            <th class="no-sort" style="width: 2em;">
                 {% if userCanManageWebHooks %}<input type="checkbox" id="check-all">{% endif %}
             </th>
-            <th>&nbsp;<!-- View --></th>
+            <th class="no-sort">&nbsp;<!-- View --></th>
             <th>Specimen</th>
             <th>Participant Group</th>
             <th>Reported At <i class="fas fa-question-circle question-icon-help" title="Time when Result was uploaded or entered into COVIDTrack"></i></th>
@@ -164,11 +164,7 @@
             // https://datatables.net/reference/option/columnDefs
             columnDefs: [
                 {
-                    targets: 0,
-                    orderable: false
-                },
-                {
-                    targets: 1,
+                    targets: 'no-sort',
                     orderable: false
                 }
             ],

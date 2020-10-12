@@ -4,14 +4,14 @@
     <thead>
         <tr>
             {% if displayRowCheckboxes %}
-            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
             {% endif %}
             <th>Tube Accession ID</th>
             <th>Type</th>
             <th>Printed At</th>
             <th>Collected At <i class="fas fa-question-circle question-icon-help" title="Date/Time Specimen collected by Participant. For example, when they spit in the tube."></i></th>
             <th>Returned At <i class="fas fa-question-circle question-icon-help" title="Date/Time Tube returned at a Kiosk"></i></th>
-            {% if allowPerTubeDecision %}<th style="width:100px; text-align:center;">Reject</th>{% endif %}
+            {% if allowPerTubeDecision %}<th class="no-sort" style="width:100px; text-align:center;">Reject</th>{% endif %}
         </tr>
     </thead>
     <tbody>
@@ -114,11 +114,7 @@
         // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
-                targets: 0,
-                orderable: false
-            },
-            {
-                targets: 6,
+                targets: 'no-sort',
                 orderable: false
             }
         ],

@@ -23,7 +23,7 @@
     <table id="tube-list-table" class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+                <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
                 <th>Accession ID</th>
                 <th>Type</th>
                 <th>Kit Type</th>
@@ -286,7 +286,7 @@
         // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
-                targets: 0,
+                targets: 'no-sort',
                 orderable: false
             }
         ],

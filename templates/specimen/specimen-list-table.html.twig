@@ -4,7 +4,7 @@
 <table id="specimen-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            {% if userCanEditSpecimens %}<th>&nbsp;</th>{% endif %}
+            {% if userCanEditSpecimens %}<th class="no-sort">&nbsp;</th>{% endif %}
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
@@ -78,7 +78,7 @@
         // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
-                targets: 0,
+                targets: 'no-sort',
                 orderable: false
             }
         ],

@@ -1,7 +1,7 @@
 <table id="kiosk-list-table" class="table table-bordered table-hover">
     <thead>
     <tr>
-        <th>&nbsp;</th>
+        <th class="no-sort">&nbsp;</th>
         <th>Label</th>
         <th>Location</th>
         <th>Healthy?</th>
@@ -72,7 +72,7 @@
         // https://datatables.net/reference/option/columnDefs
         columnDefs: [
             {
-                targets: 0,
+                targets: 'no-sort',
                 orderable: false
             }
         ],
