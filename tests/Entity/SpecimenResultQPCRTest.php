@@ -31,4 +31,22 @@ class SpecimenResultQPCRTest extends TestCase
 
         $this->assertSame($tubeAccessionId, $result->getTubeAccessionId());
     }
+
+    public function testLookupConclusionConstant()
+    {
+        // When mapped to a valid constant
+        $found = SpecimenResultQPCR::lookupConclusionConstant('Detected');
+        $this->assertSame(SpecimenResultQPCR::CONCLUSION_POSITIVE, $found);
+
+        // When search text not mapped
+        $this->assertNull(SpecimenResultQPCR::lookupConclusionConstant('Some Unknown Text'));
+    }
+
+    public function testReturnsConclusionTextDifferentThanConstantValue()
+    {
+        $specimen = Specimen::buildExampleReadyForResults('S100', null, new Tube('T0001'));
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+
+        $this->assertSame('Detected', $result->getConclusionText());
+    }
 }

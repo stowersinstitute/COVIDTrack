@@ -52,6 +52,8 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
                 'rowNumber' => 12,
             ],
         ];
+//        var_dump($errors);exit;
+        // If this assertion fails uncomment above line for easier debugging
         $this->assertCount(count($expectedErrors), $errors);
         foreach ($expectedErrors as $expectedError) {
             $found = false;

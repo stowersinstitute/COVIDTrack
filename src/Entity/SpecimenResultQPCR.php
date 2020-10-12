@@ -190,6 +190,19 @@ class SpecimenResultQPCR extends SpecimenResult
         return $return;
     }
 
+   /**
+     * @param string $text Text normally displayed in web form to select conclusions
+     * @return string|null SpecimenResultQPCR::CONCLUSION_* constant, else NULL if not mapped to a conclusion
+     */
+    public static function lookupConclusionConstant(string $text): ?string
+    {
+        // Keys are human-readable text
+        // Values are constant values
+        $conclusions = self::getFormConclusions();
+
+        return $conclusions[$text] ?? null;
+    }
+
     public function getWell(): ?SpecimenWell
     {
         return $this->well;
@@ -228,10 +241,10 @@ class SpecimenResultQPCR extends SpecimenResult
     public static function getFormConclusions(): array
     {
         return [
-            'Negative' => self::CONCLUSION_NEGATIVE,
-            'Non-Negative' => self::CONCLUSION_NON_NEGATIVE,
+            'Not Detected' => self::CONCLUSION_NEGATIVE,
+            'Inconclusive' => self::CONCLUSION_NON_NEGATIVE,
             'Recommended' => self::CONCLUSION_RECOMMENDED,
-            'Positive' => self::CONCLUSION_POSITIVE,
+            'Detected' => self::CONCLUSION_POSITIVE,
         ];
     }
 

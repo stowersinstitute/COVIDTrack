@@ -179,9 +179,22 @@ abstract class SpecimenResult
         $this->conclusion = $conclusion;
     }
 
+    /**
+     * @param string $conclusion SpecimenResult::CONCLUSION_* constant value
+     */
     public static function isValidConclusion(string $conclusion): bool
     {
         return in_array($conclusion, static::getFormConclusions());
+    }
+
+    /**
+     * @param string $conclusionText Human-readable Conclusion text value
+     */
+    public static function isValidConclusionText(string $conclusionText): bool
+    {
+        $valid = static::getFormConclusions();
+
+        return isset($valid[$conclusionText]);
     }
 
     public function getConclusionText(): string
@@ -192,6 +205,10 @@ abstract class SpecimenResult
     public static function lookupConclusionText(string $conclusionConstant): string
     {
         $types = array_flip(static::getFormConclusions());
+
+        if (!isset($types[$conclusionConstant])) {
+            throw new \LogicException('Current conclusion constant not mapped to display text');
+        }
 
         return $types[$conclusionConstant] ?? '';
     }
