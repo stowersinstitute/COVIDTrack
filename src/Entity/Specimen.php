@@ -26,6 +26,10 @@ class Specimen
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
+    /**
+     * @deprecated Will be removed after all Specimen in Accepted status are moved to other statuses
+     */
+    const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
 
@@ -484,6 +488,7 @@ class Specimen
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
+            'Accepted' => self::STATUS_ACCEPTED, // deprecated
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
         ];
