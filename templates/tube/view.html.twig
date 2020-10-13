@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 {% set userCanViewSpecimen = is_granted('ROLE_SPECIMEN_VIEW') %}
+{% set userCanRejectTubes = is_granted('ROLE_TUBE_CHECK_IN') %}
 
 {% block page_title %}
     Tube {{ tube.accessionId }}
@@ -53,9 +54,23 @@
         </div>
 
         <div class="col-md-6">
+            {% if userCanRejectTubes %}
+            <div class="box box-success margin-bottom">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Actions</h3>
+                </div>
+                <div class="box-body">
+                    <form method="post" action="{{ path('checkin_reject_tube') }}" onsubmit="return confirm('Reject This Tube?');">
+                        <input type="hidden" name="tubeId" value="{{ tube.accessionId }}">
+                        <input type="hidden" name="redirect" value="1">
+                        <button type="submit" class="btn btn-sm btn-danger" {% if tube.status == "REJECTED" %}disabled="disabled" title="Already Rejected"{% endif %}><i class="fas fa-times" style="margin-right:5px"></i> Reject This Tube</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
             {% include 'audit-history.html.twig' with {auditLogs: auditLogs} %}
         </div>
-
     </div>
 
 {% endblock %}
