@@ -13,6 +13,62 @@
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
         </tr>
+
+        <tr id="specimen-filter-row" class="filter-header-row">
+            {% if userCanEditSpecimens %}<th><!-- Edit --></th>{% endif %}
+            <th><!-- Accession ID --></th>
+            <th>
+                <!-- Participant Group -->
+                {{ form_row(filterForm.participantGroup, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Type -->
+                {{ form_row(filterForm.type, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Collection Time -->
+                {{ form_row(filterForm.collectedAt, {
+                    'attr': {
+                        'class': 'filter-datepicker',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Well Plate -->
+                {{ form_row(filterForm.wellPlate, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th><!-- CLIA Testing Recommended? --></th>
+            <th>
+                <!-- Status -->
+                {{ form_row(filterForm.status, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+        </tr>
     </thead>
     <tbody>
     {% for specimen in specimens %}
@@ -48,6 +104,11 @@
     {% endfor %}
     </tbody>
 </table>
+
+{{ form_start(filterForm, {
+    "attr": {"id":"filter-form"}
+}) }}
+{{ form_end(filterForm) }}
 
 <script type="application/javascript">
     // Enable DataTable for table of Specimens
@@ -93,6 +154,40 @@
         // Text displayed when no results found
         "language": {
             "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
+    });
+
+    // Enable Date Picker for filter elements
+    let datepickers = $('.filter-datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        clearBtn: true,
+        todayBtn: "linked",
+        todayHighlight: true
+    });
+
+    // Callback to submit
+    let executeFilterSearch = function() {
+        $("#filter-form").submit();
+    };
+
+    // Submit filter form when datepicker closes.
+    // Does NOT use .submit-on-change class because datepicker updates input
+    // value when selecting from calendar.
+    datepickers.on("hide", executeFilterSearch);
+
+    // Submit filter form when a form widget changes
+    $('#specimen-filter-row .submit-on-change').on('change', executeFilterSearch);
+
+    // Any filter form widget with a value appears visually highlighted
+    // so easier to see when filters affect search results
+    $('#specimen-filter-row input, #specimen-filter-row select').each(function() {
+        let cssClassWhenHasValue = 'filter-with-value';
+
+        let formWidget = $(this);
+        if (formWidget.val() !== '') {
+            formWidget.addClass(cssClassWhenHasValue);
+        } else {
+            formWidget.removeClass(cssClassWhenHasValue);
         }
     });
 </script>
