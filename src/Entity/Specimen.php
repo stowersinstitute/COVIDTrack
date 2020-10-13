@@ -498,6 +498,10 @@ class Specimen
     {
         $statuses = array_flip(static::getFormStatuses());
 
+        // Hardcoded to support legacy statuses that appear in audit log
+        // but are no longer supported
+        $statuses['ACCEPTED'] = 'Accepted';
+
         return $statuses[$statusConstant] ?? '';
     }
 
