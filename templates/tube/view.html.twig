@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+{% set userCanViewSpecimen = is_granted('ROLE_SPECIMEN_VIEW') %}
+
+{% block page_title %}
+    Tube {{ tube.accessionId }}
+{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        General
+                    </h3>
+                </div>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Accession ID</dt><dd>{{ tube.accessionId }}</dd>
+                        <dt>Printed At</dt><dd>{{ tube.createdAt|date("Y-m-d g:ia") }}</dd>
+                        <dt>Status</dt><dd>{{ tube.statusText }}</dd>
+                        <dt>Type</dt><dd>{{ tube.typeText }}</dd>
+                        {% if userCanViewSpecimen %}
+                            <dt>Specimen</dt><dd>
+                            {% if tube.specimen is empty %}
+                                Not Available until Returned
+                            {% else %}
+                                <a href="{{ path('app_specimen_view', {accessionId: tube.specimen.accessionId}) }}">{{ tube.specimen.accessionId }}</a>
+                            {% endif %}
+                            </dd>
+                        {% endif %}
+
+                        <hr>
+
+                        <dt>Kit Type</dt><dd>{{ tube.kitType }}</dd>
+                        <dt>Collected At</dt><dd>{{ tube.collectedAt is empty ? '' : tube.collectedAt|date('Y-m-d g:ia') }}</dd>
+
+                        <hr>
+
+                        <dt>Check-In At</dt><dd>{{ tube.checkedInAt is empty ? '' : tube.checkedInAt|date('Y-m-d g:ia') }}</dd>
+                        <dt>Check-In</dt><dd>{{ tube.checkInDecisionText }}</dd>
+                        <dt>Check-In By</dt><dd>{{ tube.checkedInByUsername }}</dd>
+
+                        <hr>
+
+                        <dt>External Processing At</dt><dd>{{ tube.externalProcessingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</dd>
+                        <dt>Web Hook Status</dt><dd>{{ tube.webHookStatus }}</dd>
+                        <dt>Web Hook Message</dt><dd>{{ tube.webHookStatusMessage }}</dd>
+                        <dt>Web Hook Last Sent</dt><dd>{{ tube.webHookLastTriedPublishingAt is empty ? '' : tube.externalProcessingAt|date("Y-m-d H:i:s") }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            {% include 'audit-history.html.twig' with {auditLogs: auditLogs} %}
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -286,9 +286,13 @@ class Tube
             'kitType' => 'Kit Type',
             'collectedAt' => 'Collected At',
             'returnedAt' => 'Returned At',
-            'checkInDecision' => 'Check-in Decision',
+            'checkInDecision' => 'Check-in',
             'checkedInAt' => 'Checked-in At',
             'checkedInByUsername' => 'Checked-in By',
+            'externalProcessingAt' => 'External Processing At',
+            'webHookStatus' => 'Web Hook Status',
+            'webHookStatusMessage' => 'Web Hook Message',
+            'webHookLastTriedPublishingAt' => 'Web Hook Last Sent',
         ];
 
         $dateTimeConvert = function(?\DateTimeInterface $value) {
@@ -307,6 +311,11 @@ class Tube
             'collectedAt' => $dateTimeConvert,
             'returnedAt' => $dateTimeConvert,
             'checkedInAt' => $dateTimeConvert,
+            'externalProcessingAt' => function(?\DateTimeInterface $value) {
+                // Uses different display value than other DateTimes
+                // because displayed differently in external system we don't control
+                return $value ? $value->format('Y-m-d H:i:s') : null;
+            }
         ];
 
         $return = [];
