@@ -20,14 +20,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SpecimenFilterForm extends AbstractType
 {
-    /** @var EntityManagerInterface */
-    private $em;
-
-    public function __construct(EntityManagerInterface $em, SpecimenAccessionIdGenerator $specimenIdGen)
-    {
-        $this->em = $em;
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
