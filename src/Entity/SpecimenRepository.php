@@ -31,6 +31,23 @@ class SpecimenRepository extends EntityRepository
     }
 
     /**
+     * List Specimens for displaying as All Specimens list.
+     *
+     * @return Specimen[]
+     */
+    public function findForList(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->select('s, pGroup, well, tube')
+            ->join('s.participantGroup', 'pGroup')
+            ->leftJoin('s.wells', 'well')
+            ->leftJoin('s.tube', 'tube')
+            ->orderBy('s.collectedAt')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * List Specimens for displaying in list for Participant Group.
      *
      * @return Specimen[]

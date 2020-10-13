@@ -29,7 +29,7 @@ class SpecimenController extends AbstractController
 
         $specimens = $this->getDoctrine()
             ->getRepository(Specimen::class)
-            ->findAll();
+            ->findForList();
 
         return $this->render('specimen/specimen-list.html.twig', [
             'specimens' => $specimens,
