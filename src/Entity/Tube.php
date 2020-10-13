@@ -315,6 +315,7 @@ class Tube
             'returnedAt' => $dateTimeConvertShort,
             'checkedInAt' => $dateTimeConvertShort,
             'externalProcessingAt' => $dateTimeConvertLong,
+            'webHookLastTriedPublishingAt' => $dateTimeConvertLong,
         ];
 
         $return = [];
