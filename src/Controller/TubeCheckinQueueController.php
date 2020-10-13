@@ -121,6 +121,10 @@ class TubeCheckinQueueController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
 
+        if (!$request->request->has('tubeId')) {
+            throw new \InvalidArgumentException('POST parameter "tubeId" is required');
+        }
+
         $tubeId = $request->request->get('tubeId');
 
         /** @var Tube $tube */
