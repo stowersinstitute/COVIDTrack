@@ -295,8 +295,11 @@ class Tube
             'webHookLastTriedPublishingAt' => 'Web Hook Last Sent',
         ];
 
-        $dateTimeConvert = function(?\DateTimeInterface $value) {
+        $dateTimeConvertShort = function(?\DateTimeInterface $value) {
             return $value ? $value->format('Y-m-d g:ia') : null;
+        };
+        $dateTimeConvertLong = function(?\DateTimeInterface $value) {
+            return $value ? $value->format('Y-m-d H:i:s') : null;
         };
 
         /**
@@ -308,14 +311,10 @@ class Tube
             'status' => function($value) {
                 return self::lookupStatusText($value);
             },
-            'collectedAt' => $dateTimeConvert,
-            'returnedAt' => $dateTimeConvert,
-            'checkedInAt' => $dateTimeConvert,
-            'externalProcessingAt' => function(?\DateTimeInterface $value) {
-                // Uses different display value than other DateTimes
-                // because displayed differently in external system we don't control
-                return $value ? $value->format('Y-m-d H:i:s') : null;
-            }
+            'collectedAt' => $dateTimeConvertShort,
+            'returnedAt' => $dateTimeConvertShort,
+            'checkedInAt' => $dateTimeConvertShort,
+            'externalProcessingAt' => $dateTimeConvertLong,
         ];
 
         $return = [];
