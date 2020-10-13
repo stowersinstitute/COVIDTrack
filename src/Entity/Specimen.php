@@ -502,7 +502,11 @@ class Specimen
         // but are no longer supported
         $statuses['ACCEPTED'] = 'Accepted';
 
-        return $statuses[$statusConstant] ?? '';
+        if (!isset($statuses[$statusConstant])) {
+            throw new \RuntimeException('Unsupported status constant value when rendering status text');
+        }
+
+        return $statuses[$statusConstant];
     }
 
     /**
