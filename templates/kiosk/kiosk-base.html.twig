@@ -172,7 +172,7 @@
     // and then every 60 seconds
     setInterval(doHeartbeat, 60 * 1000);
 
-    $('form').submit(function() {
+    $(window).on('beforeunload', function() {
         $('#loadingMask').modal('show');
     });
 
