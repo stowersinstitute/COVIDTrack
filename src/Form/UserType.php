@@ -67,6 +67,8 @@ class UserType extends AbstractType
         // Permissions
         $this->addRoleField($builder, 'ROLE_ADMIN', 'System Admin');
 
+        $this->addRoleField($builder, 'ROLE_CONFIG_ALL', 'Config Access');
+
         $this->addRoleField($builder, 'ROLE_KIOSK_UI', 'Kiosk Access');
 
         $this->addRoleField($builder, 'ROLE_PARTICIPANT_GROUP_EDIT', 'Participant Groups: Edit');
