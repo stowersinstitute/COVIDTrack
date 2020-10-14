@@ -1,29 +1,43 @@
 <?php
 
-
 namespace App\Configuration;
-
 
 use App\Entity\SystemConfigurationEntry;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Provides a service to read application settings
+ * Service to read application settings
  *
- * If an EntityManagerInterface is provided settings will be read from and committed to the database
+ * If an EntityManagerInterface is provided settings will be read and written
+ * to the database.
  */
 class AppConfiguration
 {
-    /** @var EntityManagerInterface */
+    /**
+     * Persists config to the database. Service is optional for a few reasons:
+     *
+     * - Makes testing a lot easier.
+     * - This service could be used for initial application setup before the
+     *   database connection information is defined.
+     *
+     * @var null|EntityManagerInterface
+     */
     protected $em;
 
     /**
-     * @var mixed[] Cache of settings
+     * Cache of settings to reduce database interactions.
+     *
+     * @var mixed[]
      */
     protected $cache = [];
 
     /**
-     * @var bool If true, configuration changes are immediately committed to the database with flush()
+     * When true, configuration changes are immediately committed to the
+     * database with flush().
+     *
+     * When false, application code must explicitly call EM->flush().
+     *
+     * @var bool
      */
     protected $autoFlush = true;
 
