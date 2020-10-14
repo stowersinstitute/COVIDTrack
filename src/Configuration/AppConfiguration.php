@@ -61,7 +61,7 @@ class AppConfiguration
         return array_key_exists($referenceId, $this->cache);
     }
 
-    public function set(string $referenceId, $value)
+    public function set(string $referenceId, $value, string $label = null)
     {
         $this->cache[$referenceId] = $value;
 
@@ -71,7 +71,13 @@ class AppConfiguration
                 $entry = new SystemConfigurationEntry($referenceId);
                 $this->em->persist($entry);
             }
+
+            if (null !== $label) {
+                $entry->setLabel($label);
+            }
+
             $entry->setValue($value);
+
             if ($this->autoFlush) $this->em->flush();
         }
     }
@@ -83,8 +89,7 @@ class AppConfiguration
     {
         if ($this->hasReferenceId($referenceId)) throw new \InvalidArgumentException(sprintf('referenceId "%s" already exists', $referenceId));
 
-        $entry = new SystemConfigurationEntry($referenceId);
-        $entry->setLabel($label);
+        $entry = new SystemConfigurationEntry($referenceId, $label);
         $entry->setValue($value);
 
         $this->cache[$referenceId] = $entry->getValue();
