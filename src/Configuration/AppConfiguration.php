@@ -132,8 +132,12 @@ class AppConfiguration
         return $this->autoFlush;
     }
 
-    public function setAutoFlush(bool $autoFlush): void
+    public function setAutoFlush(bool $autoFlush, bool $flushNow = true): void
     {
         $this->autoFlush = $autoFlush;
+
+        if ($flushNow && $this->em) {
+            $this->em->flush();
+        }
     }
 }
