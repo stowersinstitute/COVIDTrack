@@ -8,6 +8,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Actions for configuring the application.
@@ -70,6 +72,19 @@ class ConfigController extends AbstractController
                 'choices' => $hoursChoices,
                 'placeholder' => '- Select -',
                 'required' => true,
+                'constraints' => [
+                    new Callback(
+                        function ($max, ExecutionContextInterface $context) use (&$form) {
+                            $min = $form->getData()[self::TUBE_COLLECTED_AT_START];
+
+                            if (null === $max || null === $min) return;
+
+                            if ($max < $min ) {
+                                $context->addViolation('This time must be after Collection Time Start');
+                            }
+                        }
+                    ),
+                ],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save',
