@@ -14,7 +14,6 @@
     </div>
 {% endif %}
 
-{{ form_start(form) }}
 
 <table id="group-list-table" class="table table-bordered table-hover">
     <thead>
@@ -41,7 +40,7 @@
         <tr>
             {% if userCanPrintLabels %}
             <td>
-                <input type="checkbox" class="tube-checkbox" name="groups[]" value="{{ group.title }}">
+                <input type="checkbox" class="tube-checkbox" form="print-form" name="groups[]" value="{{ group.title }}">
             </td>
             {% endif %}
 
@@ -104,17 +103,28 @@
 <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
+            {{ form_start(form, {
+                "attr": {"id":"print-form"}
+            }) }}
             <div class="modal-header">
                 <h4 class="modal-title text-center" id="labelPrintModalLabel">Print Group Labels</h4>
             </div>
             <div class="modal-body">
-                {{ form_row(form.printer) }}
+                {{ form_row(form.printer, {
+                    'attr': {
+                        'form': 'print-form'
+                    }
+                }) }}
                 {# Don't render the numToPrint field since the backend will print the group count #}
                 {% do form.numToPrint.setRendered() %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
-                {{ form_row(form.print) }}
+                {{ form_row(form.print, {
+                    'attr': {
+                        'form': 'print-form'
+                    }
+                }) }}
             </div>
             {{ form_end(form) }}
         </div>
