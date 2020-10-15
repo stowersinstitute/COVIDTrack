@@ -82,6 +82,51 @@ class ParticipantGroupController extends AbstractController
     }
 
     /**
+     * Change active status for each submitted group.
+     *
+     * Required POST params:
+     *
+     * - groupTitles (string[]) ParticipantGroup.title to update
+     * - isActive (string) "1" for active, "0" for inactive
+     *
+     * @Route(path="/active-status", methods={"POST"}, name="group_set_active_status")
+     */
+    public function setActiveStatus(Request $request, EntityManagerInterface $em) : Response
+    {
+        try {
+            $this->denyAccessUnlessGranted('ROLE_PARTICIPANT_GROUP_EDIT');
+
+            if (!$request->request->has('groupTitles')) {
+                throw new \InvalidArgumentException('Param groupTitles is required');
+            }
+            if (!$request->request->has('isActive')) {
+                throw new \InvalidArgumentException('Param isActive is required');
+            }
+
+            $titles = $request->request->get('groupTitles');
+            $isActive = (bool)$request->request->get('isActive');
+
+            $groups = $this->getDoctrine()
+                ->getRepository(ParticipantGroup::class)
+                ->findBy(['title' => $titles]);
+            foreach ($groups as $group) {
+                $group->setIsActive($isActive);
+            }
+
+            $em->flush();
+
+            $this->addFlash('success', 'Groups saved!');
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
+
+        return $this->json(['success' => true]);
+    }
+
+    /**
      * Edit a single Group.
      *
      * @Route("/{title}/edit", methods={"GET", "POST"}, name="app_participant_group_edit")
