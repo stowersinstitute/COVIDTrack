@@ -21,10 +21,14 @@ class KioskAddTubeForm extends AbstractType
 
         $resolver->setDefaults([
             'numDaysInPastForCollectionDate' => 0,
+            'minCollectionTimeHour' => 0,
+            'maxCollectionTimeHour' => 23,
             'participantGroup' => null,
         ]);
 
         $resolver->setAllowedTypes('participantGroup', ParticipantGroup::class);
+        $resolver->setAllowedValues('minCollectionTimeHour', range(0,23));
+        $resolver->setAllowedValues('maxCollectionTimeHour', range(0,23));
 
         $resolver->setRequired('participantGroup');
     }
@@ -45,7 +49,7 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $times = [];
-        foreach (range(7, 18, 1) as $hour) {
+        foreach (range($options['minCollectionTimeHour'], $options['maxCollectionTimeHour'], 1) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
 

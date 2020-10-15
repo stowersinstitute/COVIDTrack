@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
+use App\Configuration\AppConfiguration;
 use App\Entity\Kiosk;
 use App\Entity\KioskSession;
 use App\Entity\KioskSessionTube;
@@ -121,7 +122,7 @@ class KioskController extends AbstractController
      *
      * @Route(path="/{id<\d+>}/add-tube", methods={"GET", "POST"}, name="kiosk_add_tube")
      */
-    public function tubeInput(int $id, Request $request, EntityManagerInterface $em)
+    public function tubeInput(int $id, Request $request, EntityManagerInterface $em, AppConfiguration $appConfig)
     {
         $this->mustHavePermissions();
 
@@ -134,7 +135,9 @@ class KioskController extends AbstractController
         }
 
         $form = $this->createForm(KioskAddTubeForm::class, null, [
-            'participantGroup' => $kioskSession->getParticipantGroup()
+            'participantGroup' => $kioskSession->getParticipantGroup(),
+            'minCollectionTimeHour' => (int)$appConfig->get(ConfigController::TUBE_COLLECTED_AT_START),
+            'maxCollectionTimeHour' => (int)$appConfig->get(ConfigController::TUBE_COLLECTED_AT_END),
         ]);
 
         $form->handleRequest($request);

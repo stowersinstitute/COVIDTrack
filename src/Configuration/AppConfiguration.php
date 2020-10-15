@@ -1,29 +1,43 @@
 <?php
 
-
 namespace App\Configuration;
-
 
 use App\Entity\SystemConfigurationEntry;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Provides a service to read application settings
+ * Service to read application settings
  *
- * If an EntityManagerInterface is provided settings will be read from and committed to the database
+ * If an EntityManagerInterface is provided settings will be read and written
+ * to the database.
  */
 class AppConfiguration
 {
-    /** @var EntityManagerInterface */
+    /**
+     * Persists config to the database. Service is optional for a few reasons:
+     *
+     * - Makes testing a lot easier.
+     * - This service could be used for initial application setup before the
+     *   database connection information is defined.
+     *
+     * @var null|EntityManagerInterface
+     */
     protected $em;
 
     /**
-     * @var mixed[] Cache of settings
+     * Cache of settings to reduce database interactions.
+     *
+     * @var mixed[]
      */
     protected $cache = [];
 
     /**
-     * @var bool If true, configuration changes are immediately committed to the database with flush()
+     * When true, configuration changes are immediately committed to the
+     * database with flush().
+     *
+     * When false, application code must explicitly call EM->flush().
+     *
+     * @var bool
      */
     protected $autoFlush = true;
 
@@ -47,7 +61,7 @@ class AppConfiguration
         return array_key_exists($referenceId, $this->cache);
     }
 
-    public function set(string $referenceId, $value)
+    public function set(string $referenceId, $value, string $label = null)
     {
         $this->cache[$referenceId] = $value;
 
@@ -57,7 +71,13 @@ class AppConfiguration
                 $entry = new SystemConfigurationEntry($referenceId);
                 $this->em->persist($entry);
             }
+
+            if (null !== $label) {
+                $entry->setLabel($label);
+            }
+
             $entry->setValue($value);
+
             if ($this->autoFlush) $this->em->flush();
         }
     }
@@ -69,8 +89,7 @@ class AppConfiguration
     {
         if ($this->hasReferenceId($referenceId)) throw new \InvalidArgumentException(sprintf('referenceId "%s" already exists', $referenceId));
 
-        $entry = new SystemConfigurationEntry($referenceId);
-        $entry->setLabel($label);
+        $entry = new SystemConfigurationEntry($referenceId, $label);
         $entry->setValue($value);
 
         $this->cache[$referenceId] = $entry->getValue();
@@ -113,8 +132,12 @@ class AppConfiguration
         return $this->autoFlush;
     }
 
-    public function setAutoFlush(bool $autoFlush): void
+    public function setAutoFlush(bool $autoFlush, bool $flushNow = true): void
     {
         $this->autoFlush = $autoFlush;
+
+        if ($flushNow && $this->em) {
+            $this->em->flush();
+        }
     }
 }
