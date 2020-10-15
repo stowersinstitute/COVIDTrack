@@ -5,37 +5,39 @@
         <th>&nbsp;</th>
         <th>&nbsp;</th>
         <th class="text-center bg-gray">System Admin</th>
-        <th class="text-center">Kiosk Access</th>
-        <th colspan="2" class="text-center bg-gray">Participant Groups</th>
-        <th colspan="2" class="text-center">Specimens</th>
-        <th colspan="2" class="text-center bg-gray">Results</th>
-        <th colspan="2" class="text-center">Well Plates</th>
-        <th colspan="2" class="text-center bg-gray">Print</th>
-        <th colspan="2" class="text-center">Notifications</th>
+        <th class="text-center">Configuration</th>
+        <th class="text-center bg-gray">Kiosk Access</th>
+        <th colspan="2" class="text-center">Participant Groups</th>
+        <th colspan="2" class="text-center bg-gray">Specimens</th>
+        <th colspan="2" class="text-center">Results</th>
+        <th colspan="2" class="text-center bg-gray">Well Plates</th>
+        <th colspan="2" class="text-center">Print</th>
+        <th colspan="2" class="text-center bg-gray">Notifications</th>
     </tr>
     <tr>
         <th>Username</th>
         <th>Display Name</th>
         <th class="bg-gray">&nbsp;{# System Admin #}</th>
-        <th>&nbsp;{# Kiosk UI #}</th>
+        <th>&nbsp;{# Config #}</th>
+        <th class="text-center bg-gray">&nbsp;{# Kiosk UI #}</th>
         {# Participant Groups #}
-        <th class="text-center bg-gray">Edit</th>
-        <th class="text-center bg-gray">View</th>
-        {# Specimens #}
-        <th class="text-center">Drop Off</th>
-        <th class="text-center">Check In</th>
-        {# Results #}
-        <th class="text-center bg-gray">Upload and Edit</th>
-        <th class="text-center bg-gray">View</th>
-        {# Well Plates #}
         <th class="text-center">Edit</th>
         <th class="text-center">View</th>
+        {# Specimens #}
+        <th class="text-center bg-gray">Drop Off</th>
+        <th class="text-center bg-gray">Check In</th>
+        {# Results #}
+        <th class="text-center">Upload and Edit</th>
+        <th class="text-center">View</th>
+        {# Well Plates #}
+        <th class="text-center bg-gray">Edit</th>
+        <th class="text-center bg-gray">View</th>
         {# Print #}
-        <th class="text-center bg-gray">Tube Labels</th>
-        <th class="text-center bg-gray">Group Labels</th>
+        <th class="text-center">Tube Labels</th>
+        <th class="text-center">Group Labels</th>
         {# Notifications #}
-        <th class="text-center">Viral Results</th>
-        <th class="text-center">Antibody Results</th>
+        <th class="text-center bg-gray">Viral Results</th>
+        <th class="text-center bg-gray">Antibody Results</th>
     </tr>
     </thead>
     <tbody>
@@ -47,26 +49,28 @@
             <td>{{ user.displayName }}</td>
             {# System Admin #}
             <td class="text-center bg-gray">{% if 'ROLE_ADMIN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            {# Config #}
+            <td class="text-center">{% if 'ROLE_CONFIG_ALL' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Kiosk UI #}
-            <td class="text-center">{% if 'ROLE_KIOSK_UI' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_KIOSK_UI' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Participant Groups #}
-            <td class="text-center bg-gray">{% if 'ROLE_PARTICIPANT_GROUP_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center bg-gray">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PARTICIPANT_GROUP_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Specimens #}
-            <td class="text-center">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center">{% if 'ROLE_TUBE_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_SPECIMEN_DROP_OFF' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_TUBE_CHECK_IN' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Results #}
-            <td class="text-center bg-gray">{% if 'ROLE_RESULTS_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center bg-gray">{% if 'ROLE_RESULTS_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_RESULTS_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_RESULTS_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Well Plates #}
-            <td class="text-center">{% if 'ROLE_WELL_PLATE_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center">{% if 'ROLE_WELL_PLATE_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_WELL_PLATE_EDIT' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_WELL_PLATE_VIEW' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Print #}
-            <td class="text-center bg-gray">{% if 'ROLE_PRINT_TUBE_LABELS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center bg-gray">{% if 'ROLE_PRINT_GROUP_LABELS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PRINT_TUBE_LABELS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center">{% if 'ROLE_PRINT_GROUP_LABELS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
             {# Notifications #}
-            <td class="text-center">{% if 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
-            <td class="text-center">{% if 'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_NOTIFY_ABOUT_VIRAL_RESULTS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
+            <td class="text-center bg-gray">{% if 'ROLE_NOTIFY_ABOUT_ANTIBODY_RESULTS' in rolesByUser[user.username] %}<i class="fa fa-check-square text-green"></i>{% endif %}</td>
         </tr>
     {% endfor %}
     </tbody>

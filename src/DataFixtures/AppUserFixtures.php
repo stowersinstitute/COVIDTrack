@@ -36,6 +36,7 @@ class AppUserFixtures extends Fixture implements FixtureGroupInterface
 
         // Study Coordinator (with explicit notification role)
         $this->buildUser($manager, 'coordinator', [
+            'ROLE_CONFIG_ALL',
             'ROLE_PARTICIPANT_GROUP_EDIT',
             'ROLE_PRINT_GROUP_LABELS',
             'ROLE_RESULTS_EDIT',

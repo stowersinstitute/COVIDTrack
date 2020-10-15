@@ -270,5 +270,14 @@ Renders a top-level navigation node in the tree navigation.
                 },
             ], ['ROLE_KIOSK_UI', 'ROLE_ADMIN'])
         }}
+        {{
+        _self.treenode('Configuration', 'fa-cog', [
+            {
+                text: 'Kiosk',
+                iconClass: 'fa-tablet-alt',
+                route: 'config_kiosk'
+            },
+        ], ['ROLE_CONFIG_ALL'])
+        }}
     </ul>
 </section>
