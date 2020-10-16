@@ -8,36 +8,35 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Exception\IrreversibleMigration;
 
-final class Version20201013204145 extends AbstractMigration
+final class Version147 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return 'Saliva Specimens belonging to CONTROL group moved from Accepted status';
+        // Ensures Tube has same status as Specimen when Results exist
+        return 'Tube.status is RESULTS when associated Specimen has results';
     }
 
     public function up(Schema $schema) : void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        // Update CONTROL Specimens currently in ACCEPTED status to RETURNED
         $this->addSql('
-        UPDATE specimens
-        SET
-          `status`="RETURNED",
-          `clia_testing_recommendation`=NULL
-        WHERE
-          `status`="ACCEPTED"
-          AND id IN (
-            SELECT s.id
-            FROM specimens s
-              JOIN participant_groups g ON s.`participant_group_id`=g.id
-            WHERE g.title="CONTROL"
-          )
+UPDATE tubes
+SET `status` = "RESULTS"
+WHERE
+    id IN (
+        SELECT t.id
+        FROM tubes t
+        JOIN specimens s ON t.specimen_id=s.id
+        WHERE s.`status` = "RESULTS"
+    )
 ');
     }
 
     public function down(Schema $schema) : void
     {
+        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+
         throw new IrreversibleMigration('Restore from backup');
     }
 }
