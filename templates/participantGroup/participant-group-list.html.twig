@@ -5,6 +5,8 @@
 {% block body %}
 <div class="row">
     <div class="col-md-12">
+        {% include 'flash.html.twig' %}
+
         <div class="box">
             <div class="box-body table-responsive">
                 {% include('participantGroup/participant-group-list-table.html.twig') %}
