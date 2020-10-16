@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
@@ -21,6 +22,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -255,6 +257,27 @@ class TubeController extends AbstractController
         ]);
     }
 
+    /**
+     * View a single Tube.
+     *
+     * @Route("/{accessionId}", methods={"GET"}, name="tube_view")
+     */
+    public function view(string $accessionId)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
+
+        $tube = $this->findTube($accessionId);
+
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($tube);
+
+        return $this->render('tube/view.html.twig', [
+            'tube' => $tube,
+            'auditLogs' => $auditLogs,
+        ]);
+    }
+
     private function mustFindImport(int $importId): ExcelImportWorkbook
     {
         $workbook = $this->getDoctrine()
@@ -299,5 +322,18 @@ class TubeController extends AbstractController
         return new JsonResponse([
             'errorMsg' => $msg,
         ], 400);
+    }
+
+    private function findTube($id): Tube
+    {
+        $T = $this->getDoctrine()
+            ->getRepository(Tube::class)
+            ->findOneByAccessionId($id);
+
+        if (!$T) {
+            throw new NotFoundHttpException('Cannot find Tube');
+        }
+
+        return $T;
     }
 }

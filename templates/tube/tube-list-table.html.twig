@@ -107,7 +107,7 @@
                 <td>
                     <input type="checkbox" class="tube-checkbox" form="print-form" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
-                <td>{{ tube.accessionId }}</td>
+                <td><a href="{{ path('tube_view', { accessionId: tube.accessionId }) }}">{{ tube.accessionId }}</a></td>
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
@@ -295,7 +295,7 @@
         ],
 
         // Default sort on Printed At column with newest at top
-        order: [[5, 'desc']],
+        order: [[5, 'desc']], // TODO: Verify other PR not merged first https://bitbucket.stowers.org/projects/SCI-004079-COVID19/repos/covid-sample-tracker/pull-requests/240/overview
 
         // Sort columns using first <thead> row
         // instead of last row (which contain our filter form widgets)
