@@ -134,3 +134,7 @@ body {
         opacity: .4;
     }
 }
+
+dl hr {
+    border-top-color: #f4f4f4;
+}

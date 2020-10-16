@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    Viral Result for {{ result.specimenAccessionId }}
+    <i class="fa fa-virus"></i> Viral Result for {{ result.specimenAccessionId }}
 {% endblock %}
 
 {% block body %}
@@ -35,7 +35,7 @@
                         {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
                     </dd>
 
-                    <hr style="border-top-color: #f4f4f4;"/>
+                    <hr>
 
                     <dt>Specimen</dt>
                     <dd>
@@ -51,7 +51,7 @@
                         <dd><a href="{{ path('app_participant_group_view', {title: result.specimen.participantGroup.title}) }}">{{ result.specimen.participantGroup }}</a></dd>
                     {% endif %}
 
-                    <hr style="border-top-color: #f4f4f4;"/>
+                    <hr>
 
                     <dt>Well Plate Barcode</dt>
                     <dd>
@@ -65,7 +65,7 @@
                     <dt>Well Plate Position</dt>
                     <dd>{{ result.wellPosition }}</dd>
 
-                    <hr style="border-top-color: #f4f4f4;"/>
+                    <hr>
 
                     <dt>Web Hook Status</dt>
                     <dd>

@@ -118,7 +118,7 @@
                 <td>
                     <input type="checkbox" class="tube-checkbox" form="print-form" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
-                <td>{{ tube.accessionId }}</td>
+                <td><a href="{{ path('tube_view', { accessionId: tube.accessionId }) }}">{{ tube.accessionId }}</a></td>
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\AuditLog;
 use App\Entity\Specimen;
+use App\Form\SpecimenFilterForm;
 use App\Form\SpecimenForm;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,16 +24,25 @@ class SpecimenController extends AbstractController
      *
      * @Route(path="/", methods={"GET"})
      */
-    public function list()
+    public function list(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_SPECIMEN_VIEW');
 
+        // Explicitly use FormFactory to remove form name from GET params for cleaner URL
+        $filterForm = $this->get('form.factory')->createNamed('', SpecimenFilterForm::class);
+        $filterForm->handleRequest($request);
+        $formData = [];
+        if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+            $formData = $filterForm->getData();
+        }
+
         $specimens = $this->getDoctrine()
             ->getRepository(Specimen::class)
-            ->findForList();
+            ->filterByFormData($formData);
 
         return $this->render('specimen/specimen-list.html.twig', [
             'specimens' => $specimens,
+            'filterForm' => $filterForm->createView(),
         ]);
     }
 

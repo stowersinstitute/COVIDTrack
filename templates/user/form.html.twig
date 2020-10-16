@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if user.id %} Edit User {{ user.username }} {% else %} New User {% endif %}
+    <i class="fa fa-user"></i> {% if user.id %} Edit User {{ user.username }} {% else %} New User {% endif %}
 {% endblock %}
 
 {% block body %}
