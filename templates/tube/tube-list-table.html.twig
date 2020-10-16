@@ -24,7 +24,6 @@
         <thead>
             <tr>
                 <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
-                <th class="no-sort">&nbsp;<!-- View --></th>
                 <th>Accession ID</th>
                 <th>Type</th>
                 <th>Kit Type</th>
@@ -37,7 +36,6 @@
 
             <tr id="tube-filter-row" class="filter-header-row">
                 <th><!-- Check All --></th>
-                <th><!-- View --></th>
                 <th><!-- Accession ID --></th>
                 <th style="min-width:100px">
                     <!-- Tube Type -->
@@ -109,10 +107,7 @@
                 <td>
                     <input type="checkbox" class="tube-checkbox" form="print-form" name="tubes[]" value="{{ tube.accessionId }}">
                 </td>
-                <td>
-                    <a href="{{ path('tube_view', { accessionId: tube.accessionId }) }}">View</a>
-                </td>
-                <td>{{ tube.accessionId }}</td>
+                <td><a href="{{ path('tube_view', { accessionId: tube.accessionId }) }}">{{ tube.accessionId }}</a></td>
                 <td>{{ tube.typeText }}</td>
                 <td>{{ tube.kitType }}</td>
                 <td>{{ tube.statusText }}</td>
@@ -300,7 +295,7 @@
         ],
 
         // Default sort on Printed At column with newest at top
-        order: [[6, 'desc']], // TODO: Verify other PR not merged first https://bitbucket.stowers.org/projects/SCI-004079-COVID19/repos/covid-sample-tracker/pull-requests/240/overview
+        order: [[5, 'desc']], // TODO: Verify other PR not merged first https://bitbucket.stowers.org/projects/SCI-004079-COVID19/repos/covid-sample-tracker/pull-requests/240/overview
 
         // Sort columns using first <thead> row
         // instead of last row (which contain our filter form widgets)
