@@ -26,6 +26,9 @@ class Specimen
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
+    /**
+     * @deprecated Will be removed after all Specimen in Accepted status are moved to other statuses
+     */
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
@@ -255,14 +258,14 @@ class Specimen
      * and values like this:
      *
      *     [
-     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
+     *         "status" => "RESULTS", // STATUS_RESULTS constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "Accepted",
+     *         "status" => "Results Available",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -433,6 +436,9 @@ class Specimen
 
         if ($status === self::STATUS_REJECTED) {
             $this->recalculateCliaTestingRecommendation();
+        } else if ($status === self::STATUS_RESULTS) {
+            // Tube now has results
+            $this->tube->markResultsAvailable();
         }
     }
 
@@ -463,16 +469,11 @@ class Specimen
         $updateIfInStatus = [
             self::STATUS_CREATED,
             self::STATUS_RETURNED,
-            self::STATUS_ACCEPTED,
             self::STATUS_EXTERNAL,
         ];
         if (in_array($this->status, $updateIfInStatus)) {
             // Specimen now has results
-            $newStatus = self::STATUS_RESULTS;
-            $this->setStatus($newStatus);
-
-            // Tube now has results
-            $this->tube->markResultsAvailable();
+            $this->setStatus(self::STATUS_RESULTS);
         }
 
         return $this->getStatus();
@@ -487,7 +488,7 @@ class Specimen
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
-            'Accepted' => self::STATUS_ACCEPTED,
+            'Accepted' => self::STATUS_ACCEPTED, // deprecated
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
         ];
@@ -502,7 +503,15 @@ class Specimen
     {
         $statuses = array_flip(static::getFormStatuses());
 
-        return $statuses[$statusConstant] ?? '';
+        // Hardcoded to support legacy statuses that appear in audit log
+        // but are no longer supported
+        $statuses['ACCEPTED'] = 'Accepted';
+
+        if (!isset($statuses[$statusConstant])) {
+            throw new \RuntimeException('Unsupported status constant value when rendering status text');
+        }
+
+        return $statuses[$statusConstant];
     }
 
     /**
@@ -658,7 +667,7 @@ class Specimen
     {
         $valid = [
             self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
-            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RETURNED, // Specimen has been returned in a Tube
             self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 
@@ -787,6 +796,8 @@ class Specimen
         }
 
         $this->resultsAntibody->add($result);
+
+        $this->updateStatusWhenResultsSet();
     }
 
     /**

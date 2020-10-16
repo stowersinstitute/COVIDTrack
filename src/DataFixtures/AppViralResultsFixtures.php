@@ -195,9 +195,9 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
 
-            // Has been accepted by a Check-in Technician
+            // Has been returned
             ->andWhere('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+            ->setParameter('status', Specimen::STATUS_RETURNED)
 
             // Is on a Well Plate
             ->andWhere('wells.wellPlate IS NOT NULL')

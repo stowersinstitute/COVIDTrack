@@ -103,6 +103,12 @@ class TubeRepository extends EntityRepository
             $qb->setParameter('f_status', $data['status']);
         }
 
+        // Check-In Decision
+        if (isset($data['checkInDecision'])) {
+            $qb->andWhere('t.checkInDecision = :f_checkInDecision');
+            $qb->setParameter('f_checkInDecision', $data['checkInDecision']);
+        }
+
         // Created At
         if (isset($data['createdAt'])) {
             $qb->andWhere('t.createdAt BETWEEN :f_createdAt_lower AND :f_createdAt_upper');

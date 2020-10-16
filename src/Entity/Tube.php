@@ -30,15 +30,14 @@ class Tube
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
-    const STATUS_ACCEPTED = "ACCEPTED";
-    const STATUS_REJECTED = "REJECTED";
-
     // When Tube's Specimen has results available
     const STATUS_RESULTS = "RESULTS";
+    const STATUS_REJECTED = "REJECTED"; // Possible final status
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
 
+    const CHECKED_IN_UNKNOWN = "UNKNOWN";
     const CHECKED_IN_ACCEPTED = "ACCEPTED";
     const CHECKED_IN_REJECTED = "REJECTED";
 
@@ -93,7 +92,7 @@ class Tube
     private $specimen;
 
     /**
-     * Current status of tube. Values are Tube::STATUS_* constant values.
+     * Current workflow status. Values are Tube::STATUS_* constant values.
      *
      * @var string
      * @ORM\Column(name="status", type="string")
@@ -145,7 +144,7 @@ class Tube
      * Values are self::CHECK_IN_* constants.
      *
      * @var string
-     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     * @ORM\Column(name="check_in_decision", type="string", length=255)
      * @Gedmo\Versioned
      */
     private $checkInDecision;
@@ -222,6 +221,7 @@ class Tube
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
+        $this->checkInDecision = self::CHECKED_IN_UNKNOWN;
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
     }
 
@@ -262,14 +262,14 @@ class Tube
      * and values like this:
      *
      *     [
-     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
+     *         "status" => "RESULTS", // STATUS_RESULTS constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "Accepted",
+     *         "status" => "Results Available",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -532,6 +532,8 @@ class Tube
     /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
+     *
+     * @deprecated Step no longer enforced against status. Can checkin any time.
      */
     public function willAllowCheckinDecision(): bool
     {
@@ -540,14 +542,11 @@ class Tube
             return true;
         }
 
-        // Blood Tubes
-        if ($this->tubeType === self::TYPE_BLOOD) {
-            // Status before Accepted/Rejected
-            return $this->status === self::STATUS_RETURNED;
-        }
-
-        // Saliva Tubes
-        return in_array($this->status, [self::STATUS_EXTERNAL, self::STATUS_RETURNED]);
+        return in_array($this->status, [
+            self::STATUS_RETURNED,
+            self::STATUS_EXTERNAL,
+            self::STATUS_RESULTS,
+        ]);
     }
 
     /**
@@ -556,7 +555,9 @@ class Tube
      */
     public function willAllowTecanImport(): bool
     {
-        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
+        // RETURNED -- Tube must have come back with a Specimen in it
+        // REJECTED -- In case a rejected Tube has changed their mind
+        return in_array($this->status, [self::STATUS_RETURNED, self::STATUS_REJECTED]);
     }
 
     public function getCheckInDecision(): ?string
@@ -571,11 +572,7 @@ class Tube
      */
     private function setCheckInDecision(string $decision)
     {
-        $valid = [
-            self::CHECKED_IN_ACCEPTED,
-            self::CHECKED_IN_REJECTED,
-        ];
-        if (!in_array($decision, $valid)) {
+        if (!in_array($decision, self::getValidCheckInDecisions())) {
             throw new \InvalidArgumentException('Invalid check-in decision');
         }
 
@@ -584,14 +581,23 @@ class Tube
 
     public function getCheckInDecisionText(): string
     {
-        switch ($this->checkInDecision) {
-            case self::CHECKED_IN_ACCEPTED:
-                return 'Accepted';
-            case self::CHECKED_IN_REJECTED:
-                return 'Rejected';
-            default:
-                return '';
-        }
+        if (empty($this->checkInDecision)) return '';
+
+        $valid = array_flip(self::getValidCheckInDecisions());
+
+        return $valid[$this->checkInDecision] ?? '';
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidCheckInDecisions(): array
+    {
+        return [
+            'Unknown' => self::CHECKED_IN_UNKNOWN,
+            'Accepted' => self::CHECKED_IN_ACCEPTED,
+            'Rejected' => self::CHECKED_IN_REJECTED,
+        ];
     }
 
     /**
@@ -714,7 +720,12 @@ class Tube
      */
     public function markResultsAvailable(): void
     {
+        // Tube has results
         $this->setStatus(self::STATUS_RESULTS);
+
+        // Tube considered Approved, since a Rejected Tube would not yield results
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
+        $this->setCheckedInAt(new \DateTimeImmutable());
     }
 
     /**
@@ -725,14 +736,9 @@ class Tube
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
-        // Tube
-        $this->setStatus(self::STATUS_ACCEPTED);
         $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
-
-        // Specimen
-        $this->specimen->setStatus(Specimen::STATUS_ACCEPTED);
     }
 
     /**
@@ -770,6 +776,8 @@ class Tube
     }
 
     /**
+     * Current Tube.status values that can be newly assigned to a Tube.
+     *
      * @return string[]
      */
     public static function getValidStatuses(): array
@@ -780,7 +788,6 @@ class Tube
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
             'Results Available' => self::STATUS_RESULTS,
-            'Accepted' => self::STATUS_ACCEPTED,
             'Rejected' => self::STATUS_REJECTED,
         ];
     }

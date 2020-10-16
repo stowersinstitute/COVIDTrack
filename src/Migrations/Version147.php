@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Entity\Tube;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\Migrations\Exception\IrreversibleMigration;
 
-final class Version142 extends AbstractMigration
+final class Version147 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return 'All Tubes previously used at time of query should never be sent to Tube API Web Hooks';
+        // Ensures Tube has same status as Specimen when Results exist
+        return 'Tube.status is RESULTS when associated Specimen has results';
     }
 
     public function up(Schema $schema) : void
@@ -21,12 +21,16 @@ final class Version142 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('
-        UPDATE tubes SET web_hook_status = "' . Tube::WEBHOOK_STATUS_NEVER_SEND . '"
-        WHERE `status` = "' . Tube::STATUS_EXTERNAL . '"
-            OR `status` = "' . Tube::STATUS_RETURNED . '"
-            OR `status` = "ACCEPTED"
-            OR `status` = "' . Tube::STATUS_REJECTED . '"
-         ');
+UPDATE tubes
+SET `status` = "RESULTS"
+WHERE
+    id IN (
+        SELECT t.id
+        FROM tubes t
+        JOIN specimens s ON t.specimen_id=s.id
+        WHERE s.`status` = "RESULTS"
+    )
+');
     }
 
     public function down(Schema $schema) : void
