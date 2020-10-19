@@ -309,6 +309,12 @@ class Tube
         $valueConverter = [
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
+                // If no value logged
+                if ($value === null) return '';
+
+                // For removed status
+                if ($value === 'ACCEPTED') return 'Accepted';
+
                 return self::lookupStatusText($value);
             },
             'collectedAt' => $dateTimeConvertShort,
