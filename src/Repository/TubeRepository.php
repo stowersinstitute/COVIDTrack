@@ -35,8 +35,13 @@ class TubeRepository extends EntityRepository
     public function findReadyForCheckin(): array
     {
         return $this->createQueryBuilder('t')
+            // Returned at Kiosk
             ->where('t.status = :status')
             ->setParameter('status', Tube::STATUS_RETURNED)
+
+            // Has not yet yielded a check-in decision
+            ->andWhere('t.checkInDecision = :checkInDecision')
+            ->setParameter('checkInDecision', Tube::CHECKED_IN_UNKNOWN)
 
             ->orderBy('t.accessionId')
 
