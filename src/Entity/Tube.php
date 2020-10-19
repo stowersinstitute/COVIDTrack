@@ -797,6 +797,7 @@ class Tube
             'External Processing' => self::STATUS_EXTERNAL,
             'Results Available' => self::STATUS_RESULTS,
             'Rejected' => self::STATUS_REJECTED,
+            'Invalid' => "INVALID",
         ];
     }
 
