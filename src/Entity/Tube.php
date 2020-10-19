@@ -765,8 +765,10 @@ class Tube
 
         $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, "Rejected tubes never sent");
 
-        // Specimen
-        $this->specimen->setStatus(Specimen::STATUS_REJECTED);
+        // Specimen may not exist yet, depending on Tube status
+        if ($this->specimen) {
+            $this->specimen->setStatus(Specimen::STATUS_REJECTED);
+        }
     }
 
     /**
