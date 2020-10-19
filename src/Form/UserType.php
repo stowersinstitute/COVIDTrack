@@ -74,8 +74,7 @@ class UserType extends AbstractType
         $this->addRoleField($builder, 'ROLE_PARTICIPANT_GROUP_EDIT', 'Participant Groups: Edit');
         $this->addRoleField($builder, 'ROLE_PARTICIPANT_GROUP_VIEW', 'Participant Groups: View');
 
-        $this->addRoleField($builder, 'ROLE_SPECIMEN_DROP_OFF', 'Specimens: Drop Off');
-        $this->addRoleField($builder, 'ROLE_TUBE_CHECK_IN', 'Specimens: Check In');
+        $this->addRoleField($builder, 'ROLE_TUBE_CHECK_IN', 'Tube: Check In');
 
         $this->addRoleField($builder, 'ROLE_RESULTS_EDIT', 'Results: Upload and Edit');
         $this->addRoleField($builder, 'ROLE_RESULTS_VIEW', 'Results: View');

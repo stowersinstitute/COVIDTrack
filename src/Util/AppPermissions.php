@@ -47,9 +47,6 @@ class AppPermissions
         'ROLE_RESULTS_EDIT',
         'ROLE_RESULTS_VIEW',
 
-        // Specimens
-        'ROLE_SPECIMEN_DROP_OFF',
-
         // Tubes
         'ROLE_TUBE_CHECK_IN',
 
