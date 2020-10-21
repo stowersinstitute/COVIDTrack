@@ -20,6 +20,11 @@ class ConfigController extends AbstractController
 {
     public const TUBE_COLLECTED_AT_START = 'kiosk_tube_collectedAt_start';
     public const TUBE_COLLECTED_AT_END = 'kiosk_tube_collectedAt_end';
+    public const TUBE_COLLECTION_TIME_EXPERIENCE = 'kiosk_tube_collection_experience';
+
+    public const TUBE_COLLECTION_TIME_OPTION_AUTO = 'auto';
+    public const TUBE_COLLECTION_TIME_OPTION_PRESELECT = 'preselect';
+    public const TUBE_COLLECTION_TIME_OPTION_MANUAL = 'manual';
 
     /**
      * Configure options for how the Kiosk application works.
@@ -85,6 +90,18 @@ class ConfigController extends AbstractController
                         }
                     ),
                 ],
+            ])
+            ->add(self::TUBE_COLLECTION_TIME_EXPERIENCE, ChoiceType::class, [
+                'label' => 'Drop Off Collection Time Handling',
+                'help' => 'Add Tube: Controls if and how to present the "Collection Time" input to participants',
+                'data' => $appConfig->get(self::TUBE_COLLECTION_TIME_EXPERIENCE),
+                'choices' => [
+                    'Automatically set to the time of drop off' => self::TUBE_COLLECTION_TIME_OPTION_AUTO,
+                    'Kiosk interface is defaulted to the current time' => self::TUBE_COLLECTION_TIME_OPTION_PRESELECT,
+                    'Kiosk interface forces user time selection' => self::TUBE_COLLECTION_TIME_OPTION_MANUAL,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save',
