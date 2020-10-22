@@ -62,6 +62,18 @@ class ConfigController extends AbstractController
             '11:00pm' => '23',
         ];
         $form = $this->createFormBuilder()
+            ->add(self::TUBE_COLLECTION_TIME_EXPERIENCE, ChoiceType::class, [
+                'label' => 'Collection Time: Selection',
+                'help' => 'Add Tube: Controls if and how to present the "Collection Time" input to participants',
+                'data' => $appConfig->get(self::TUBE_COLLECTION_TIME_EXPERIENCE),
+                'choices' => [
+                    'Do not ask for a Collection Time. Automatically save current time as Drop Off time.' => self::TUBE_COLLECTION_TIME_OPTION_AUTO,
+                    'Current time appears automatically selected. User can change the Collection Time.' => self::TUBE_COLLECTION_TIME_OPTION_PRESELECT,
+                    'User must select their Collection Time.' => self::TUBE_COLLECTION_TIME_OPTION_MANUAL,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
             ->add(self::TUBE_COLLECTED_AT_START, ChoiceType::class, [
                 'label' => 'Collection Time: Start',
                 'help' => 'Add Tube: Earliest Collection Time selectable',
@@ -90,18 +102,6 @@ class ConfigController extends AbstractController
                         }
                     ),
                 ],
-            ])
-            ->add(self::TUBE_COLLECTION_TIME_EXPERIENCE, ChoiceType::class, [
-                'label' => 'Drop Off Collection Time Handling',
-                'help' => 'Add Tube: Controls if and how to present the "Collection Time" input to participants',
-                'data' => $appConfig->get(self::TUBE_COLLECTION_TIME_EXPERIENCE),
-                'choices' => [
-                    'Automatically set to the time of drop off' => self::TUBE_COLLECTION_TIME_OPTION_AUTO,
-                    'Kiosk interface is defaulted to the current time' => self::TUBE_COLLECTION_TIME_OPTION_PRESELECT,
-                    'Kiosk interface forces user time selection' => self::TUBE_COLLECTION_TIME_OPTION_MANUAL,
-                ],
-                'placeholder' => '- Select -',
-                'required' => true,
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Save',
