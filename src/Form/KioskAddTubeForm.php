@@ -16,9 +16,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class KioskAddTubeForm extends AbstractType
 {
     // 12:00am (Midnight)
-    private const COLLECTION_TIME_DEFAULT_MIN = 0;
+    public const COLLECTION_TIME_DEFAULT_MIN = 0;
     // 11:00pm
-    private const COLLECTION_TIME_DEFAULT_MAX = 23;
+    public const COLLECTION_TIME_DEFAULT_MAX = 23;
 
     public function configureOptions(OptionsResolver $resolver)
     {

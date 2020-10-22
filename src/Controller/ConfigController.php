@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Configuration\AppConfiguration;
+use App\Form\KioskAddTubeForm;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +32,7 @@ class ConfigController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_CONFIG_ALL', 'Access Denied', 'You do not have permission to view this page.');
 
         $hoursChoices = [
-            '12:00am' => '0',
+            '12:00am' => KioskAddTubeForm::COLLECTION_TIME_DEFAULT_MIN,
             '1:00am' => '1',
             '2:00am' => '2',
             '3:00am' => '3',
@@ -54,7 +55,7 @@ class ConfigController extends AbstractController
             '8:00pm' => '20',
             '9:00pm' => '21',
             '10:00pm' => '22',
-            '11:00pm' => '23',
+            '11:00pm' => KioskAddTubeForm::COLLECTION_TIME_DEFAULT_MAX,
         ];
         $form = $this->createFormBuilder()
             ->add(self::TUBE_COLLECTED_AT_START, ChoiceType::class, [
