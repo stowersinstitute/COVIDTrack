@@ -111,9 +111,6 @@ class KioskAdminController extends AbstractController
         $kiosk = $kioskRepo->find($kioskId);
         if (!$kiosk) throw new \InvalidArgumentException('Invalid Kiosk ID');
 
-        // Verify it is currently provisioned
-        if (!$kiosk->isProvisioned()) throw new \LogicException('This kiosk is already not provisioned.');
-
         $kiosk->setIsProvisioned(false);
         $em->flush();
 
