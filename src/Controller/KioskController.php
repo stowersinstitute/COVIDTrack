@@ -136,8 +136,8 @@ class KioskController extends AbstractController
 
         $form = $this->createForm(KioskAddTubeForm::class, null, [
             'participantGroup' => $kioskSession->getParticipantGroup(),
-            'minCollectionTimeHour' => (int)$appConfig->get(ConfigController::TUBE_COLLECTED_AT_START),
-            'maxCollectionTimeHour' => (int)$appConfig->get(ConfigController::TUBE_COLLECTED_AT_END),
+            'minCollectionTimeHour' => $appConfig->get(ConfigController::TUBE_COLLECTED_AT_START),
+            'maxCollectionTimeHour' => $appConfig->get(ConfigController::TUBE_COLLECTED_AT_END),
         ]);
 
         $form->handleRequest($request);
