@@ -11,6 +11,7 @@ use App\Form\Type\TextLookupType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -28,10 +29,15 @@ class KioskAddTubeForm extends AbstractType
             'participantGroup' => null,
         ]);
 
+        $resolver->addNormalizer('collectionTimeExperience', function(Options $options, $value) {
+            return $value ?: ConfigController::TUBE_COLLECTION_TIME_OPTION_MANUAL;
+        });
+
         $resolver->setAllowedTypes('participantGroup', ParticipantGroup::class);
         $resolver->setAllowedValues('minCollectionTimeHour', range(0,23));
         $resolver->setAllowedValues('maxCollectionTimeHour', range(0,23));
         $resolver->setAllowedValues('collectionTimeExperience', [
+            null,
             ConfigController::TUBE_COLLECTION_TIME_OPTION_AUTO,
             ConfigController::TUBE_COLLECTION_TIME_OPTION_PRESELECT,
             ConfigController::TUBE_COLLECTION_TIME_OPTION_MANUAL,
