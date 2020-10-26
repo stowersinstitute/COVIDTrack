@@ -56,21 +56,23 @@
 
             </div>
 
-            <div id="tubeTimeSelection" class="collapse">
-                <div id="date-time-error" class="callout callout-danger hidden" style="text-align:center">
-                    <h4>Collection Time Error</h4>
-                    <p>You must select a Collection Time in the past</p>
-                </div>
-                <div class="row row-no-gutters">
-                    <div class="col-xs-4 collection-date-widget">
-                        {{ form_row(form.collectedAtDate) }}
+            {% if form.collectedAtDate is defined %}
+                <div id="tubeTimeSelection" class="collapse">
+                    <div id="date-time-error" class="callout callout-danger hidden" style="text-align:center">
+                        <h4>Collection Time Error</h4>
+                        <p>You must select a Collection Time in the past</p>
                     </div>
-                    <div class="col-xs-8 collection-time-widget">
-                        {{ form_row(form.collectedAtTime) }}
+                    <div class="row row-no-gutters">
+                        <div class="col-xs-4 collection-date-widget">
+                            {{ form_row(form.collectedAtDate) }}
+                        </div>
+                        <div class="col-xs-8 collection-time-widget">
+                            {{ form_row(form.collectedAtTime) }}
+                        </div>
                     </div>
-                </div>
 
-            </div>
+                </div>
+            {% endif %}
 
             <div id="tubeContinueButtons" class="collapse">
                 <div class="row">
@@ -137,20 +139,26 @@
         });
 
         $(document).ready(function(){
+            let tubeAccessionStatus = '';
+
+            let tubeAccessionIdField = $("#kiosk_add_tube_form_accessionId");
+            let tubeTypeField = $("#kiosk_add_tube_form_tubeType");
+            let dateCollectedField = $("#kiosk_add_tube_form_collectedAtDate");
+            let timeCollectedField = $("#kiosk_add_tube_form_collectedAtTime");
+
             setTubeInputStatus();
 
             // Reset the detail sections when the input is changed
-            $("#kiosk_add_tube_form_accessionId").on('input', function() {
+            tubeAccessionIdField.on('input', function() {
                 setTubeInputStatus();
                 showTubeDetailSelection(false);
             });
 
             $("#kiosk_add_tube_form_accessionId_button").click(function(){
-                var val = $('#kiosk_add_tube_form_accessionId').val();
+                let val = tubeAccessionIdField.val();
 
                 if(val !== "") {
                     setTubeInputStatus('LOADING');
-                    showTubeDetailSelection(false);
 
                     $.ajax('{{ path('kiosk_tube_available_check') }}', {
                         method: 'POST',
@@ -164,23 +172,26 @@
                         }
                     });
                 } else {
-                    // Collapse form details
                     setTubeInputStatus();
-                    showTubeDetailSelection(false);
                 }
             });
 
-            $("#kiosk_add_tube_form_tubeType").on('input', function(e) {
+            tubeTypeField.on('input', function(e) {
                 if($(e.target).val() !== "") {
-                    showTubeTimeSelection(true);
+                    // If we have the collection date fields and show them, if not just show the continue button
+                    if(dateCollectedField.length) {
+                        showTubeTimeSelection(true);
+                    } else {
+                        showTubeContinueButtons(true);
+                    }
                 } else {
                     showTubeTimeSelection(false);
                 }
             });
 
             $("#kiosk_add_tube_form_collectedAtDate, #kiosk_add_tube_form_collectedAtTime").on('input', function(e) {
-                let dateVal = $("#kiosk_add_tube_form_collectedAtDate").val();
-                let timeVal = $("#kiosk_add_tube_form_collectedAtTime").val();
+                let dateVal = dateCollectedField.val();
+                let timeVal = timeCollectedField.val();
 
                 // Only continue if both date and time selected
                 if (!dateVal || !timeVal) {
@@ -223,11 +234,9 @@
             function onAvailableCheckResponse(data) {
                 if (data.isError) {
                     setTubeInputStatus('ERROR', data.message);
-                    showTubeDetailSelection(false);
                     return;
                 }
 
-                showTubeDetailSelection(true);
                 setTubeInputStatus('SUCCESS');
             }
 
@@ -244,18 +253,26 @@
 
                 switch (status) {
                     case 'LOADING':
+                        tubeAccessionStatus = 'LOADING';
                         statusWrapper.append('<i class="fa fa-fw fa-virus fa-spin"></i>');
+                        showTubeDetailSelection(false);
                         break;
                     case 'ERROR':
+                        tubeAccessionStatus = 'ERROR';
                         statusWrapper.append('<i class="fa fa-fw fa-times text-red"></i>');
                         $("#tube-error-callout").toggleClass('hidden', false);
                         $("#tube-error-callout p").html(message);
+                        showTubeDetailSelection(false);
                         break;
                     case 'SUCCESS':
+                        tubeAccessionStatus = 'SUCCESS';
                         statusWrapper.append('<i class="fa fa-fw fa-check text-green"></i>');
+                        showTubeDetailSelection(true);
                         break;
                     default:
+                        tubeAccessionStatus = '';
                         statusWrapper.append('<i class="fa fa-fw fa-question text-gray"></i>');
+                        showTubeDetailSelection(false);
                         break;
                 }
             }
@@ -264,21 +281,19 @@
              * Shows (and hides) the tube detail section (Tube Type and Time UI) handles display of the scanning hint
              */
             function showTubeDetailSelection(show = true) {
-                if (show) {
-                    $("#tubeDetailSelection").collapse('show');
+                if (show && tubeAccessionStatus === 'SUCCESS') {
+                    let initialType = tubeTypeField.attr('value') || '';
+                    tubeTypeField.val(initialType).trigger('input');
 
-                    let initialType = $("#kiosk_add_tube_form_tubeType").attr('value');
-                    if (initialType) {
-                        $("#kiosk_add_tube_form_tubeType").val(initialType).trigger('input');
-                    }
+                    $("#tubeDetailSelection").collapse('show');
 
                     $("#scanTip").hide();
                     $("#kiosk_add_tube_form_accessionId_button").hide();
                 } else {
-                    $("#kiosk_add_tube_form_tubeType").val('').trigger('input');
                     $("#tubeDetailSelection").collapse('hide');
                     $("#scanTip").show();
                     $("#kiosk_add_tube_form_accessionId_button").show();
+                    showTubeTimeSelection(false);
                 }
             }
 
@@ -287,22 +302,22 @@
              * @param show
              */
             function showTubeTimeSelection(show = true) {
-                if (show) {
-                    $("#tubeTimeSelection").collapse('show');
+                let initialDay = dateCollectedField.attr('value') || '';
+                dateCollectedField.val(initialDay).trigger('input');
 
-                    let initialDay = $("#kiosk_add_tube_form_collectedAtDate").attr('value');
-                    if (initialDay) {
-                        $("#kiosk_add_tube_form_collectedAtDate").val(initialDay).trigger('input');
-                    }
+                let initialTime = timeCollectedField.attr('value') || '';
+                timeCollectedField.val(initialTime).trigger('input');
+
+                if (show && tubeTypeField.val() !== '' && tubeAccessionStatus === 'SUCCESS') {
+                    $("#tubeTimeSelection").collapse('show');
                 } else {
-                    $("#kiosk_add_tube_form_collectedAtDate").val('').trigger('input');
-                    $("#kiosk_add_tube_form_collectedAtTime").val('').trigger('input');
                     $("#tubeTimeSelection").collapse('hide');
+                    showTubeContinueButtons(false);
                 }
             }
 
             function showTubeContinueButtons(show = true) {
-                if (show) {
+                if (show && tubeAccessionStatus === 'SUCCESS') {
                     $("#tubeContinueButtons").collapse('show');
                 } else {
                     $("#tubeContinueButtons").collapse('hide');

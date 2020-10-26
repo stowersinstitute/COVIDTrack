@@ -27,8 +27,6 @@
         $('#{{ id }}').bind('input', function(e) {
             if($(e.target).val() === '') {
                 $('a[data-toggle="{{ id }}"]').removeClass('active').addClass('not-active');
-            } else {
-                $('a[data-toggle="{{ id }}"]').removeClass('not-active').addClass('active');
             }
         });
     </script>
@@ -47,8 +45,13 @@
                 {# Column 1 #}
                 {% for title, value in choices %}
                     {% if 'am' in title %}
-                        <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
-                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                        <a class="btn btn-primary {{ (data == value) ? 'active' : 'not-active' }}"
+                           aria-pressed="{{ (data == value) ? 'true' : 'false' }}"
+                           data-toggle="{{ id }}"
+                           data-title="{{ value }}"
+                        >
+                            <i class="fa fa-fw fa-check"></i>{{ title }}
+                        </a>
                     {% endif %}
                 {% endfor %}
             </div>
@@ -58,8 +61,13 @@
                 {# Column 2 #}
                 {% for title, value in choices %}
                     {% if 'pm' in title %}
-                        <a class="btn btn-primary not-active" data-toggle="{{ id }}" data-title="{{ value }}">
-                            <i class="fa fa-fw fa-check"></i>{{ title }}</a>
+                        <a class="btn btn-primary {{ (data == value) ? 'active' : 'not-active' }}"
+                           aria-pressed="{{ (data == value) ? 'true' : 'false' }}"
+                           data-toggle="{{ id }}"
+                           data-title="{{ value }}"
+                        >
+                            <i class="fa fa-fw fa-check"></i>{{ title }}
+                        </a>
                     {% endif %}
                 {% endfor %}
             </div>
