@@ -21,6 +21,11 @@ class ConfigController extends AbstractController
 {
     public const TUBE_COLLECTED_AT_START = 'kiosk_tube_collectedAt_start';
     public const TUBE_COLLECTED_AT_END = 'kiosk_tube_collectedAt_end';
+    public const TUBE_COLLECTION_TIME_EXPERIENCE = 'kiosk_tube_collection_experience';
+
+    public const TUBE_COLLECTION_TIME_OPTION_AUTO = 'auto';
+    public const TUBE_COLLECTION_TIME_OPTION_PRESELECT = 'preselect';
+    public const TUBE_COLLECTION_TIME_OPTION_MANUAL = 'manual';
 
     /**
      * Configure options for how the Kiosk application works.
@@ -58,6 +63,18 @@ class ConfigController extends AbstractController
             '11:00pm' => KioskAddTubeForm::COLLECTION_TIME_DEFAULT_MAX,
         ];
         $form = $this->createFormBuilder()
+            ->add(self::TUBE_COLLECTION_TIME_EXPERIENCE, ChoiceType::class, [
+                'label' => 'Collection Time: Selection',
+                'help' => 'Add Tube: Controls if and how to present the "Collection Time" input to participants',
+                'data' => $appConfig->get(self::TUBE_COLLECTION_TIME_EXPERIENCE),
+                'choices' => [
+                    'Do not ask for a Collection Time. Automatically save current time as Drop Off time.' => self::TUBE_COLLECTION_TIME_OPTION_AUTO,
+                    'Current time appears automatically selected. User can change the Collection Time.' => self::TUBE_COLLECTION_TIME_OPTION_PRESELECT,
+                    'User must select their Collection Time.' => self::TUBE_COLLECTION_TIME_OPTION_MANUAL,
+                ],
+                'placeholder' => '- Select -',
+                'required' => true,
+            ])
             ->add(self::TUBE_COLLECTED_AT_START, ChoiceType::class, [
                 'label' => 'Collection Time: Start',
                 'help' => 'Add Tube: Earliest Collection Time selectable',

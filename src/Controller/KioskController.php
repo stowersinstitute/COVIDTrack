@@ -134,10 +134,12 @@ class KioskController extends AbstractController
             return $this->redirectToRoute('kiosk_index');
         }
 
+        $collectionTimeExperience = $appConfig->get(ConfigController::TUBE_COLLECTION_TIME_EXPERIENCE);
         $form = $this->createForm(KioskAddTubeForm::class, null, [
             'participantGroup' => $kioskSession->getParticipantGroup(),
             'minCollectionTimeHour' => $appConfig->get(ConfigController::TUBE_COLLECTED_AT_START),
             'maxCollectionTimeHour' => $appConfig->get(ConfigController::TUBE_COLLECTED_AT_END),
+            'collectionTimeExperience' => $collectionTimeExperience,
         ]);
 
         $form->handleRequest($request);
@@ -154,7 +156,12 @@ class KioskController extends AbstractController
             }
 
             $tubeType = $formData['tubeType'];
-            $collectedAt = new \DateTimeImmutable($formData['collectedAtDate'] . $formData['collectedAtTime']);
+
+            if ($collectionTimeExperience === ConfigController::TUBE_COLLECTION_TIME_OPTION_AUTO) {
+                $collectedAt = new \DateTimeImmutable('now');
+            } else {
+                $collectedAt = new \DateTimeImmutable($formData['collectedAtDate'] . $formData['collectedAtTime']);
+            }
 
             $sessionTube = new KioskSessionTube($kioskSession, $tube, $tubeType, $collectedAt);
             $kioskSession->addTubeData($sessionTube);
@@ -170,7 +177,7 @@ class KioskController extends AbstractController
         return $this->render('kiosk/tube-input.html.twig', [
             'form' => $form->createView(),
             'kioskSession' => $kioskSession,
-            'kiosk_state' => Kiosk::STATE_TUBE_INPUT,
+            'kiosk_state' => Kiosk::STATE_TUBE_INPUT
         ]);
     }
 

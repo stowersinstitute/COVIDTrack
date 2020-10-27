@@ -9,6 +9,7 @@
         <th>Idle</th>
         <th>Version</th>
         <th>Device IP</th>
+        <th class="no-sort"></th>
     </tr>
     </thead>
     <tbody>
@@ -40,6 +41,14 @@
             <td>{{ kiosk.getPrnIdleTime() }}</td>
             <td>{{ kiosk.lastHeartbeatVersionId }}</td>
             <td>{{ kiosk.lastHeartbeatIp }}</td>
+            <td>
+                {% if kiosk.provisioned %}
+                    <a href="{{ path('kiosk_admin_unprovision', {kioskId: kiosk.id}) }}" class="btn btn-xs btn-warning">
+                        <i class="fa fa-fw fa-unlink"></i>
+                        Unprovision
+                    </a>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
     </tbody>
