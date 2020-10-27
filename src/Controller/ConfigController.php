@@ -81,7 +81,7 @@ class ConfigController extends AbstractController
                 'data' => $appConfig->get(self::TUBE_COLLECTED_AT_START),
                 'choices' => $hoursChoices,
                 'placeholder' => '- Select -',
-                'required' => true,
+                'required' => false,
             ])
             ->add(self::TUBE_COLLECTED_AT_END, ChoiceType::class, [
                 'label' => 'Collection Time: End',
@@ -89,7 +89,7 @@ class ConfigController extends AbstractController
                 'data' => $appConfig->get(self::TUBE_COLLECTED_AT_END),
                 'choices' => $hoursChoices,
                 'placeholder' => '- Select -',
-                'required' => true,
+                'required' => false,
                 'constraints' => [
                     new Callback(
                         function ($max, ExecutionContextInterface $context) use (&$form) {
