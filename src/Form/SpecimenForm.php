@@ -7,6 +7,7 @@ use App\Entity\ParticipantGroup;
 use App\Entity\ParticipantGroupRepository;
 use App\Entity\Specimen;
 use App\Entity\Tube;
+use App\Repository\TubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -35,6 +36,12 @@ class SpecimenForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        /**
+         * Specimen being edited, else NULL when form is creating a new Specimen
+         * @var Specimen $specimen
+         */
+        $specimen = $builder->getData();
+
         $builder
             ->add('participantGroup', EntityType::class, [
                 'label' => 'Participant Group',
@@ -55,7 +62,19 @@ class SpecimenForm extends AbstractType
                 'class' => Tube::class,
                 'required' => true,
                 'placeholder' => '- Select -',
-                'choices' => $this->em->getRepository(Tube::class)->findWithoutSpecimen(),
+                'query_builder' => function(TubeRepository $repo) use ($specimen) {
+                    $qb = $repo->createQueryBuilder('t')
+                        ->where('t.specimen IS NULL')
+                        ->orderBy('t.accessionId');
+
+                    // Ensure Specimen being edited has current Tube in select list
+                    if ($specimen) {
+                        $qb->orWhere('t.specimen = :specimenBeingEdited')
+                            ->setParameter('specimenBeingEdited', $specimen);
+                    }
+
+                    return $qb;
+                },
             ])
             ->add('type', ChoiceType::class, [
                 'choices' => Specimen::getFormTypes(),
