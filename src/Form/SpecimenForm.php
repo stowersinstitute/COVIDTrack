@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\AccessionId\SpecimenAccessionIdGenerator;
 use App\Entity\ParticipantGroup;
+use App\Entity\ParticipantGroupRepository;
 use App\Entity\Specimen;
 use App\Entity\Tube;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,7 +41,14 @@ class SpecimenForm extends AbstractType
                 'class' => ParticipantGroup::class,
                 'required' => true,
                 'placeholder' => '- Select -',
-                'choices' => $this->em->getRepository(ParticipantGroup::class)->findActive(),
+                'query_builder' => function(ParticipantGroupRepository $repo) {
+                    return $repo->getDefaultQueryBuilder('g');
+                },
+                'choice_label' => function(ParticipantGroup $g) {
+                    $display = (string)$g;
+
+                    return $g->isActive() ? $display : $display.' (Inactive)';
+                },
             ])
             ->add('tube', EntityType::class, [
                 'label' => 'Tube',
