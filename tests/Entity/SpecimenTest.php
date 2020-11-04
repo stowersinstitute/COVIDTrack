@@ -481,6 +481,24 @@ class SpecimenTest extends TestCase
         $specimen->setType(Specimen::TYPE_BLOOD);
     }
 
+    public function testChangeTube()
+    {
+        $group = new ParticipantGroup('G100', 1);
+        $originalTube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $originalTube);
+
+        $this->assertSame($specimen->getTube(), $originalTube);
+
+        $newTube = new Tube('T200');
+        $specimen->setTube($newTube);
+
+        // Verify Specimen associated with New Tube
+        $this->assertSame($specimen->getTube(), $newTube);
+
+        // Verify Specimen no longer associated to Old Tube
+        $this->assertNull($originalTube->getSpecimen());
+    }
+
     /**
      * @param string $accessionId Accession ID to return when calling ->generate() on the mock
      * @return MockObject|SpecimenAccessionIdGenerator
