@@ -421,6 +421,25 @@ class Specimen
         $this->participantGroup = $group;
     }
 
+    /**
+     * This should happen very rarely and only for data entry errors.
+     * Reassign Specimen to another Tube.
+     *
+     * @internal
+     */
+    public function setTube(Tube $newTube)
+    {
+        // Return early if Tube already associated
+        if ($this->tube->getId() !== null && $this->tube->getId() === $newTube->getId()) return;
+
+        // Remove from current Tube
+        $this->tube->setSpecimen(null);
+
+        // Associate with new Tube
+        $this->tube = $newTube;
+        $newTube->setSpecimen($this);
+    }
+
     public function getStatus(): string
     {
         return $this->status;
