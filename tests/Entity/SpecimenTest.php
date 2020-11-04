@@ -414,8 +414,6 @@ class SpecimenTest extends TestCase
 
         $salivaSpecimen = Specimen::createFromTube($salivaTube, $gen);
         $this->assertSame($salivaTube->getAccessionId(), $salivaTube->getSpecimen()->getAccessionId());
-
-
     }
 
     public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()
@@ -479,6 +477,24 @@ class SpecimenTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $specimen->setType(Specimen::TYPE_BLOOD);
+    }
+
+    public function testChangingSpecimenGroup()
+    {
+        $group1 = new ParticipantGroup('ONE', 1);
+
+        $tube = new Tube('T100');
+        $tube->setParticipantGroup($group1);
+        $specimen = new Specimen('SPEC-100', $group1, $tube);
+
+        $this->assertSame($tube->getParticipantGroup(), $group1);
+        $this->assertSame($specimen->getParticipantGroup(), $group1);
+
+        $group2 = new ParticipantGroup('TWO', 1);
+        $specimen->setParticipantGroup($group2);
+
+        $this->assertSame($tube->getParticipantGroup(), $group2);
+        $this->assertSame($specimen->getParticipantGroup(), $group2);
     }
 
     /**

@@ -419,6 +419,7 @@ class Specimen
     public function setParticipantGroup(ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
+        $this->tube->setParticipantGroup($group);
     }
 
     public function getStatus(): string
