@@ -85,7 +85,7 @@ class Tube
     /**
      * Specimen created as result of Tube being checked in.
      *
-     * @var null|Specimen
+     * @var Specimen
      * @ORM\OneToOne(targetEntity="App\Entity\Specimen", inversedBy="tube", cascade={"persist"})
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -634,10 +634,10 @@ class Tube
      * a Specimen.
      *
      * @internal
-     * @deprecated Not really deprecated, but only call from tests, Specimen::__construct(), Specimen::setTube()
+     * @deprecated Not really deprecated, but only call from Specimen::__construct() and tests
      * @see Tube::kioskDropoffComplete() where Tube is normally associated with a Specimen
      */
-    public function setSpecimen(?Specimen $specimen): void
+    public function setSpecimen(Specimen $specimen): void
     {
         $this->specimen = $specimen;
     }
