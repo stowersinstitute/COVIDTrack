@@ -62,6 +62,10 @@ class SpecimenForm extends AbstractType
                 'class' => Tube::class,
                 'required' => true,
                 'placeholder' => '- Select -',
+                // Disabled when editing existing Specimen
+                'disabled' => (bool)$specimen,
+                // Help explains why disabled
+                'help' => (bool)$specimen ? 'Tube cannot be changed' : '',
                 'query_builder' => function(TubeRepository $repo) use ($specimen) {
                     $qb = $repo->createQueryBuilder('t')
                         ->where('t.specimen IS NULL')
