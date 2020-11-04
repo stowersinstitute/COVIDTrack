@@ -17,14 +17,19 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class KioskAddTubeForm extends AbstractType
 {
+    // 12:00am (Midnight)
+    public const COLLECTION_TIME_DEFAULT_MIN = 0;
+    // 11:00pm
+    public const COLLECTION_TIME_DEFAULT_MAX = 23;
+
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'numDaysInPastForCollectionDate' => 4,
-            'minCollectionTimeHour' => 0,
-            'maxCollectionTimeHour' => 23,
+            'minCollectionTimeHour' => null,
+            'maxCollectionTimeHour' => null,
             'collectionTimeExperience' => ConfigController::TUBE_COLLECTION_TIME_OPTION_MANUAL,
             'participantGroup' => null,
         ]);
@@ -34,8 +39,19 @@ class KioskAddTubeForm extends AbstractType
         });
 
         $resolver->setAllowedTypes('participantGroup', ParticipantGroup::class);
-        $resolver->setAllowedValues('minCollectionTimeHour', range(0,23));
-        $resolver->setAllowedValues('maxCollectionTimeHour', range(0,23));
+
+        $isValidCollectionTime = function ($value) {
+            // false so in_array() allows $value to be NULL, string number or int number
+            // $value is NULL when Kiosk Config value is not set
+            // $value is a string number when stored in Kiosk Config database setting
+            // $value can be integer number when passed programmatically from somewhere else
+            $strictComparison = false;
+            $valid = range(static::COLLECTION_TIME_DEFAULT_MIN, static::COLLECTION_TIME_DEFAULT_MAX);
+
+            return in_array($value, $valid, $strictComparison);
+        };
+        $resolver->setAllowedValues('minCollectionTimeHour', $isValidCollectionTime);
+        $resolver->setAllowedValues('maxCollectionTimeHour', $isValidCollectionTime);
         $resolver->setAllowedValues('collectionTimeExperience', [
             null,
             ConfigController::TUBE_COLLECTION_TIME_OPTION_AUTO,
@@ -62,7 +78,7 @@ class KioskAddTubeForm extends AbstractType
         }
 
         $times = [];
-        foreach (range($options['minCollectionTimeHour'], $options['maxCollectionTimeHour'], 1) as $hour) {
+        foreach ($this->getCollectionTimeHours($options) as $hour) {
             $H = strlen($hour) === 1 ? sprintf('0%d', $hour) : (string)$hour;
             $date = \DateTime::createFromFormat('H:i', $H.':00');
 
@@ -128,6 +144,27 @@ class KioskAddTubeForm extends AbstractType
                 'attr' => ['class' => 'btn-lg btn-success'],
             ])
             ->getForm();
+    }
+
+    /**
+     * Get range of hours (0 thru 23) allowed to be selected for Collection Time.
+     *
+     * @param array $options Form Options passed to configureOptions($options)
+     * @return int[]
+     */
+    private function getCollectionTimeHours(array $options): array
+    {
+        $min = self::COLLECTION_TIME_DEFAULT_MIN;
+        if ($options['minCollectionTimeHour'] !== null) {
+            $min = $options['minCollectionTimeHour'];
+        }
+
+        $max = self::COLLECTION_TIME_DEFAULT_MAX;
+        if ($options['maxCollectionTimeHour'] !== null) {
+            $max = $options['maxCollectionTimeHour'];
+        }
+
+        return range($min, $max, 1);
     }
 
     private function getDefaultCollectionDate(array $days, string $handling): ?string
