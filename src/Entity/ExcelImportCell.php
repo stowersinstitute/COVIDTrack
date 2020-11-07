@@ -45,9 +45,6 @@ class ExcelImportCell
      */
     protected $valueType;
 
-    /**
-     * @deprecated Find usage and remove $worksheet argument. Instead add to ExcelImportWorksheet->addCell()
-     */
     public function __construct(ExcelImportWorksheet $worksheet)
     {
         $this->valueType = self::VALUE_TYPE_SCALAR;
