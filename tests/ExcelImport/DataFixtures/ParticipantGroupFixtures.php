@@ -17,6 +17,7 @@ class ParticipantGroupFixtures extends Fixture
         foreach ($this->getData() as $data) {
             $group = new ParticipantGroup($data['accessionId'], $data['participantCount']);
             $group->setTitle($data['title']);
+            $group->setExternalId($data['externalId']);
 
             $this->setReference($data['referenceId'], $group);
 
@@ -34,18 +35,21 @@ class ParticipantGroupFixtures extends Fixture
                 'title' => 'Blue',
                 'accessionId' => 'GRP-1',
                 'participantCount' => 5,
+                'externalId' => 'EXT-1',
             ],
             [
                 'referenceId' => 'tests.group.red',
                 'title' => 'Red',
                 'accessionId' => 'GRP-2',
                 'participantCount' => 6,
+                'externalId' => 'EXT-2',
             ],
             [
                 'referenceId' => 'tests.group.green',
                 'title' => 'Green',
                 'accessionId' => 'GRP-3',
                 'participantCount' => 7,
+                'externalId' => 'EXT-3',
             ],
         ];
     }

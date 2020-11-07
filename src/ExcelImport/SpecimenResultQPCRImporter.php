@@ -12,6 +12,14 @@ use App\Repository\TubeRepository;
 use App\Util\EntityUtils;
 use Doctrine\ORM\EntityManager;
 
+/**
+ * Ingests Excel workbook with Viral Results and outputs SpecimenResultQPCR
+ * entities ready to persist.
+ *
+ * Viral Result data must begin on Row 2.
+ *
+ * See $this->columnMap for which Excel column values are mapped.
+ */
 class SpecimenResultQPCRImporter extends BaseExcelImporter
 {
     /**
@@ -115,8 +123,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
 
             $rawSpecimenIdOrTubeId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenIdOrTubeId']);
 
-            // Case-insensitive so these map directly to entity constants
-            $rawConclusion = strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']));
+            $rawConclusion = $this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion']);
 
             $rawPlateBarcode = $this->worksheet->getCellValue($rowNumber, $this->columnMap['plateBarcode']);
             $rawPosition = $this->worksheet->getCellValue($rowNumber, $this->columnMap['position']);
@@ -132,6 +139,9 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             $rowOk = true;
             $rowOk = $rowOk && $this->validateSpecimenLookup($rawSpecimenIdOrTubeId, $rowNumber);
             $rowOk = $rowOk && $this->validateConclusion($rawConclusion, $rowNumber);
+
+            // Validation already confirmed $rawConclusion maps to a constant
+            $conclusionConstant = SpecimenResultQPCR::lookupConclusionConstant($rawConclusion);
 
             if (!empty($rawPosition) || !empty($rawPlateBarcode)) {
                 $rowOk = $rowOk && $this->validatePlateAndPosition($rawPlateBarcode, $rawPosition, $rawSpecimenIdOrTubeId, $rowNumber);
@@ -151,9 +161,9 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
             if (!empty($rawPosition)){
                 $plate = $this->findOrCreatePlate($rawPlateBarcode);
                 $well = $this->findOrCreateWell($rawPosition, $plate, $specimen);
-                $qpcr = SpecimenResultQPCR::createFromWell($well, $rawConclusion);
+                $qpcr = SpecimenResultQPCR::createFromWell($well, $conclusionConstant);
             } else {
-                $qpcr = new SpecimenResultQPCR($specimen, $rawConclusion);
+                $qpcr = new SpecimenResultQPCR($specimen, $conclusionConstant);
             }
 
             // New Result
@@ -199,7 +209,7 @@ class SpecimenResultQPCRImporter extends BaseExcelImporter
         }
 
         // Conclusion must be valid
-        if (!SpecimenResultQPCR::isValidConclusion($rawConclusion)) {
+        if (!SpecimenResultQPCR::isValidConclusionText($rawConclusion)) {
             $this->messages[] = ImportMessage::newError(
                 'Conclusion value not supported',
                 $rowNumber,

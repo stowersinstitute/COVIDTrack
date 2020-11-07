@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Tube;
+use App\Util\DateUtils;
 use Doctrine\ORM\EntityRepository;
 
 /**
@@ -34,8 +35,13 @@ class TubeRepository extends EntityRepository
     public function findReadyForCheckin(): array
     {
         return $this->createQueryBuilder('t')
+            // Returned at Kiosk
             ->where('t.status = :status')
             ->setParameter('status', Tube::STATUS_RETURNED)
+
+            // Has not yet yielded a check-in decision
+            ->andWhere('t.checkInDecision = :checkInDecision')
+            ->setParameter('checkInDecision', Tube::CHECKED_IN_UNKNOWN)
 
             ->orderBy('t.accessionId')
 
@@ -75,9 +81,49 @@ class TubeRepository extends EntityRepository
     {
         $qb = $this->createQueryBuilder('t');
 
+        // Tube Type
+        if (isset($data['tubeType'])) {
+            $qb->andWhere('t.tubeType = :f_tubeType');
+            $qb->setParameter('f_tubeType', $data['tubeType']);
+        }
+
+        // Status
         if (isset($data['status'])) {
             $qb->andWhere('t.status = :f_status');
             $qb->setParameter('f_status', $data['status']);
+        }
+
+        // Check-In Decision
+        if (isset($data['checkInDecision'])) {
+            $qb->andWhere('t.checkInDecision = :f_checkInDecision');
+            $qb->setParameter('f_checkInDecision', $data['checkInDecision']);
+        }
+
+        // Created At
+        if (isset($data['createdAt'])) {
+            $qb->andWhere('t.createdAt BETWEEN :f_createdAt_lower AND :f_createdAt_upper');
+            $qb->setParameter('f_createdAt_lower', DateUtils::dayFloor($data['createdAt']));
+            $qb->setParameter('f_createdAt_upper', DateUtils::dayCeil($data['createdAt']));
+        }
+
+        // External Processing At
+        if (isset($data['externalProcessingAt'])) {
+            $qb->andWhere('t.externalProcessingAt BETWEEN :f_externalProcessingAt_lower AND :f_externalProcessingAt_upper');
+            $qb->setParameter('f_externalProcessingAt_lower', DateUtils::dayFloor($data['externalProcessingAt']));
+            $qb->setParameter('f_externalProcessingAt_upper', DateUtils::dayCeil($data['externalProcessingAt']));
+        }
+
+        // Web Hook Status
+        if (isset($data['webHookStatus'])) {
+            $qb->andWhere('t.webHookStatus = :f_webHookStatus');
+            $qb->setParameter('f_webHookStatus', $data['webHookStatus']);
+        }
+
+        // Web Hook Last Tried Publishing At
+        if (isset($data['webHookLastTriedPublishingAt'])) {
+            $qb->andWhere('t.webHookLastTriedPublishingAt BETWEEN :f_webHookLastTriedPublishingAt_lower AND :f_webHookLastTriedPublishingAt_upper');
+            $qb->setParameter('f_webHookLastTriedPublishingAt_lower', DateUtils::dayFloor($data['webHookLastTriedPublishingAt']));
+            $qb->setParameter('f_webHookLastTriedPublishingAt_upper', DateUtils::dayCeil($data['webHookLastTriedPublishingAt']));
         }
 
         $qb->addOrderBy('t.createdAt', 'DESC');

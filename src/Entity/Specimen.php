@@ -26,6 +26,9 @@ class Specimen
     const STATUS_CREATED = "CREATED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
+    /**
+     * @deprecated Will be removed after all Specimen in Accepted status are moved to other statuses
+     */
     const STATUS_ACCEPTED = "ACCEPTED";
     const STATUS_REJECTED = "REJECTED"; // Possible Final Status
     const STATUS_RESULTS = "RESULTS"; // Possible Final Status
@@ -71,6 +74,14 @@ class Specimen
      * @ORM\JoinColumn(name="participant_group_id", referencedColumnName="id")
      */
     private $participantGroup;
+
+    /**
+     * Tube that contains this Specimen.
+     *
+     * @var Tube
+     * @ORM\OneToOne(targetEntity="App\Entity\Tube", mappedBy="specimen", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $tube;
 
     /**
      * Wells where this Specimen is contained.
@@ -126,10 +137,11 @@ class Specimen
      */
     private $status;
 
-    public function __construct(string $accessionId, ParticipantGroup $group)
+    public function __construct(string $accessionId, ParticipantGroup $group, Tube $tube)
     {
         $this->accessionId = $accessionId;
         $this->participantGroup = $group;
+        $this->tube = $tube;
 
         $this->status = self::STATUS_CREATED;
         $this->wells = new ArrayCollection();
@@ -138,23 +150,21 @@ class Specimen
         $this->createdAt = new \DateTimeImmutable();
 
         $group->addSpecimen($this);
+        $tube->setSpecimen($this);
     }
 
     /**
      * Create a new Specimen
      *
-     * @param ParticipantGroup $group
-     * @param SpecimenAccessionIdGenerator $gen
      * @param string|null $accessionId If given, this string will used as the accession ID instead of a generated one.
-     * @return Specimen
      */
-    public static function createNew(ParticipantGroup $group, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
+    public static function createNew(ParticipantGroup $group, Tube $tube, SpecimenAccessionIdGenerator $gen, ?string $accessionId): self
     {
         if (!$accessionId) {
             $accessionId = $gen->generate();
         }
 
-        return new static($accessionId, $group);
+        return new static($accessionId, $group, $tube);
     }
 
     /**
@@ -176,7 +186,7 @@ class Specimen
         }
 
         // New Specimen
-        $s = static::createNew($group, $gen, $specimenAccessionId);
+        $s = static::createNew($group, $tube, $gen, $specimenAccessionId);
 
         // Specimen Type
         // TODO: Convert Tube::TYPE_* to use Specimen::TYPE_*?
@@ -202,37 +212,40 @@ class Specimen
     /**
      * Build for tests.
      */
-    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null): self
+    public static function buildExample(string $accessionId, ?ParticipantGroup $group = null, ?Tube $tube = null): self
     {
         $group = $group ?: ParticipantGroup::buildExample('G100');
 
-        return new static($accessionId, $group);
+        $tube = $tube ?: new Tube('T100');
+        $tube->setParticipantGroup($group);
+
+        return new static($accessionId, $group, $tube);
     }
 
     /**
      * Example Specimen for automated tests. Created in workflow status ready to
      * add Viral or Antibody Results.
      */
-    public static function buildExampleReadyForResults(string $accessionId, ?ParticipantGroup $group = null): self
+    public static function buildExampleReadyForResults(string $accessionId, ?ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $s = static::buildExample($accessionId, $group);
+        $s = static::buildExample($accessionId, $group, $tube);
 
         $s->setStatus(static::STATUS_EXTERNAL);
 
         return $s;
     }
 
-    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExampleSaliva(string $accessionId, ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $specimen = static::buildExample($accessionId, $group);
+        $specimen = static::buildExample($accessionId, $group, $tube);
         $specimen->setType(static::TYPE_SALIVA);
 
         return $specimen;
     }
 
-    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null): self
+    public static function buildExampleBlood(string $accessionId, ParticipantGroup $group = null, ?Tube $tube = null): self
     {
-        $specimen = static::buildExample($accessionId, $group);
+        $specimen = static::buildExample($accessionId, $group, $tube);
         $specimen->setType(static::TYPE_BLOOD);
 
         return $specimen;
@@ -245,14 +258,14 @@ class Specimen
      * and values like this:
      *
      *     [
-     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
+     *         "status" => "RESULTS", // STATUS_RESULTS constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "Accepted",
+     *         "status" => "Results Available",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -384,6 +397,16 @@ class Specimen
         return $types[$typeConstant] ?? '';
     }
 
+    public function getTube(): Tube
+    {
+        return $this->tube;
+    }
+
+    public function getTubeAccessionId(): ?string
+    {
+        return $this->tube->getAccessionId();
+    }
+
     public function getParticipantGroup(): ParticipantGroup
     {
         return $this->participantGroup;
@@ -396,6 +419,7 @@ class Specimen
     public function setParticipantGroup(ParticipantGroup $group): void
     {
         $this->participantGroup = $group;
+        $this->tube->setParticipantGroup($group);
     }
 
     public function getStatus(): string
@@ -413,6 +437,9 @@ class Specimen
 
         if ($status === self::STATUS_REJECTED) {
             $this->recalculateCliaTestingRecommendation();
+        } else if ($status === self::STATUS_RESULTS) {
+            // Tube now has results
+            $this->tube->markResultsAvailable();
         }
     }
 
@@ -443,12 +470,11 @@ class Specimen
         $updateIfInStatus = [
             self::STATUS_CREATED,
             self::STATUS_RETURNED,
-            self::STATUS_ACCEPTED,
             self::STATUS_EXTERNAL,
         ];
         if (in_array($this->status, $updateIfInStatus)) {
-            $newStatus = self::STATUS_RESULTS;
-            $this->setStatus($newStatus);
+            // Specimen now has results
+            $this->setStatus(self::STATUS_RESULTS);
         }
 
         return $this->getStatus();
@@ -463,7 +489,7 @@ class Specimen
             'Created' => self::STATUS_CREATED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
-            'Accepted' => self::STATUS_ACCEPTED,
+            'Accepted' => self::STATUS_ACCEPTED, // deprecated
             'Rejected' => self::STATUS_REJECTED,
             'Results Available' => self::STATUS_RESULTS,
         ];
@@ -478,7 +504,15 @@ class Specimen
     {
         $statuses = array_flip(static::getFormStatuses());
 
-        return $statuses[$statusConstant] ?? '';
+        // Hardcoded to support legacy statuses that appear in audit log
+        // but are no longer supported
+        $statuses['ACCEPTED'] = 'Accepted';
+
+        if (!isset($statuses[$statusConstant])) {
+            throw new \RuntimeException('Unsupported status constant value when rendering status text');
+        }
+
+        return $statuses[$statusConstant];
     }
 
     /**
@@ -634,7 +668,7 @@ class Specimen
     {
         $valid = [
             self::STATUS_EXTERNAL, // Returned from External Processing, but not formally checked-in
-            self::STATUS_ACCEPTED, // Specimen checked-in as Acceptable condition
+            self::STATUS_RETURNED, // Specimen has been returned in a Tube
             self::STATUS_RESULTS,  // Already has results, can add more than 1 result
         ];
 
@@ -667,6 +701,8 @@ class Specimen
         }
 
         $this->resultsQPCR->add($result);
+
+        $this->updateStatusWhenResultsSet();
     }
 
     /**
@@ -761,6 +797,8 @@ class Specimen
         }
 
         $this->resultsAntibody->add($result);
+
+        $this->updateStatusWhenResultsSet();
     }
 
     /**

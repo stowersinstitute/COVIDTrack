@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% import 'results/qpcr/macros.html.twig' as resultMacros %}
 {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
 {% set userCanViewResults = is_granted('ROLE_RESULTS_VIEW') %}
 {% set userCanEditResults = is_granted('ROLE_RESULTS_EDIT') %}
@@ -6,7 +7,7 @@
 {% set salivaConstant = constant('App\\Entity\\Specimen::TYPE_SALIVA') %}
 
 {% block page_title %}
-    Specimen {{ specimen.accessionId }}
+    <i class="fa fa-flask"></i> Specimen {{ specimen.accessionId }}
 {% endblock %}
 
 {% block body %}
@@ -25,7 +26,7 @@
             <div class="box-body">
                 <dl class="dl-horizontal">
                     <dt>Accession ID</dt><dd>{{ specimen.accessionId }}</dd>
-                    <dt>Participation Group</dt><dd>{{ specimen.participantGroup }}</dd>
+                    <dt>Participation Group</dt><dd><a href="{{ path('app_participant_group_view', {title: specimen.participantGroup.title}) }}">{{ specimen.participantGroup }}</a></dd>
                     <dt>Type</dt><dd>{{ specimen.typeText }}</dd>
                     <dt>Well Plate</dt><dd>
                         {% for well in specimen.wells %}
@@ -67,7 +68,8 @@
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
+                        <th>&nbsp;<!-- View --></th>
                         <th>Conclusion</th>
                         <th>Well Plate Barcode</th>
                         <th>Well Position</th>
@@ -83,13 +85,12 @@
                                 <a href="{{ path('results_qpcr_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
                             {% endif %}
+                            <td><a href="{{ path('results_qpcr_view', {id: result.id}) }}">View</a></td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.wellPlateBarcode }}</td>
                             <td>{{ result.wellPosition }}</td>
                             <td>
-                                {% if result.CT1 is not null %}Ct1: {{ result.CT1 }} / {{ result.CT1AmpScore }}<br>{% endif %}
-                                {% if result.CT2 is not null %}Ct2: {{ result.CT2 }} / {{ result.CT2AmpScore }}<br>{% endif %}
-                                {% if result.CT3 is not null %}Ct3: {{ result.CT3 }} / {{ result.CT3AmpScore }}<br>{% endif %}
+                                {{ resultMacros.renderCtAmpScore(result) }}
                             </td>
                             <td>{{ result.createdAt | date("Y-m-d g:ia") }}</td>
                         </tr>
@@ -119,7 +120,8 @@
                 <table class="table table-condensed">
                     <thead>
                     <tr>
-                        {% if userCanEditResults %}<th>&nbsp;</th>{% endif %}
+                        {% if userCanEditResults %}<th>&nbsp;<!-- Edit --></th>{% endif %}
+                        <th>&nbsp;<!-- View --></th>
                         <th>Conclusion</th>
                         <th>Signal</th>
                         <th>Well Plate Barcode</th>
@@ -136,6 +138,7 @@
                                 <a href="{{ path('results_antibody_edit', {id: result.id, accessionId: specimen.accessionId}) }}">Edit</a>
                             </td>
                             {% endif %}
+                            <td><a href="{{ path('results_antibody_view', {id: result.id}) }}">View</a></td>
                             <td>{{ result.conclusionText }}</td>
                             <td>{{ result.signal }}</td>
                             <td>{{ result.wellPlateBarcode }}</td>

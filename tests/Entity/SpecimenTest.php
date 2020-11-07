@@ -20,9 +20,11 @@ class SpecimenTest extends TestCase
     public function testCreateSpecimen()
     {
         $group = ParticipantGroup::buildExample('G123', 5);
-        $s = new Specimen('CID123', $group);
+        $tube = new Tube('T123');
+        $s = new Specimen('CID123', $group, $tube);
 
         $this->assertSame('CID123', $s->getAccessionId());
+        $this->assertSame('T123', $s->getTubeAccessionId());
         $this->assertSame($s->getParticipantGroup(), $group);
         $this->assertSame(Specimen::STATUS_CREATED, $s->getStatus());
     }
@@ -169,6 +171,64 @@ class SpecimenTest extends TestCase
         $this->assertCount(2, $specimen->getRnaWellPlateBarcodes());
         $this->assertContains('FIRST', $specimen->getRnaWellPlateBarcodes());
         $this->assertContains('SECOND', $specimen->getRnaWellPlateBarcodes());
+    }
+
+    public function testTubeStatusHasResultsAfterAddingViralResultsWithWellPlate()
+    {
+        $tube = new Tube('T555');
+        $specimen = Specimen::buildExampleReadyForResults('C100', null, $tube);
+
+        $this->assertSame('T555', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getQPCRResults());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result
+        $well = SpecimenWell::buildExample($specimen);
+        $result = SpecimenResultQPCR::createFromWell($well, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Verify has result and expected Tube status
+        $this->assertCount(1, $specimen->getQPCRResults());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testTubeStatusHasResultsAfterAddingViralResultsWithoutWellPlate()
+    {
+        $tube = new Tube('T555');
+        $specimen = Specimen::buildExampleReadyForResults('D100', null, $tube);
+
+        $this->assertSame('T555', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getQPCRResults());
+        $this->assertNotSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result without well plate
+        $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_NEGATIVE);
+
+        // Verify Result has Specimen associated
+        $this->assertSame('D100', $result->getSpecimenAccessionId());
+
+        // Verify Specimen associated with Result and expected statuses
+        $this->assertCount(1, $specimen->getQPCRResults());
+        $this->assertSame(Specimen::STATUS_RESULTS, $specimen->getStatus());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testTubeStatusHasResultsAfterAddingAntibodyResults()
+    {
+        $tube = new Tube('T444');
+        $specimen = Specimen::buildExampleReadyForResults('C101', null, $tube);
+
+        $this->assertSame('T444', $specimen->getTubeAccessionId());
+        $this->assertCount(0, $specimen->getAntibodyResults());
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+
+        // Add result
+        $well = SpecimenWell::buildExample($specimen);
+        $result = new SpecimenResultAntibody($well, SpecimenResultAntibody::CONCLUSION_POSITIVE);
+
+        // Verify has result and expected Tube status
+        $this->assertCount(1, $specimen->getAntibodyResults());
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
     }
 
     public function testGetQPCRResultsAfterAddingResults()
@@ -354,14 +414,13 @@ class SpecimenTest extends TestCase
 
         $salivaSpecimen = Specimen::createFromTube($salivaTube, $gen);
         $this->assertSame($salivaTube->getAccessionId(), $salivaTube->getSpecimen()->getAccessionId());
-
-
     }
 
     public function testNewSpecimensDoNotRecommendCLIATestingUntilTypedSaliva()
     {
         $group = ParticipantGroup::buildExample('GRP1');
-        $specimen = new Specimen('S100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('S100', $group, $tube);
 
         $this->assertEmpty($specimen->getType());
         $this->assertEmpty($specimen->getTypeText());
@@ -377,7 +436,8 @@ class SpecimenTest extends TestCase
     public function testRejectedSpecimensAreNotPendingResults()
     {
         $group = ParticipantGroup::buildExample('GRP1');
-        $specimen = new Specimen('S100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('S100', $group, $tube);
 
         $this->assertEmpty($specimen->getCliaTestingRecommendation());
         $this->assertEmpty($specimen->getCliaTestingRecommendedText());
@@ -399,7 +459,8 @@ class SpecimenTest extends TestCase
         $group->setAcceptsSalivaSpecimens(false);
         $this->assertFalse($group->acceptsSalivaSpecimens());
 
-        $specimen = new Specimen('SPEC-100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $tube);
 
         $this->expectException(\RuntimeException::class);
         $specimen->setType(Specimen::TYPE_SALIVA);
@@ -411,10 +472,29 @@ class SpecimenTest extends TestCase
         $group->setAcceptsBloodSpecimens(false);
         $this->assertFalse($group->acceptsBloodSpecimens());
 
-        $specimen = new Specimen('SPEC-100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $tube);
 
         $this->expectException(\RuntimeException::class);
         $specimen->setType(Specimen::TYPE_BLOOD);
+    }
+
+    public function testChangingSpecimenGroup()
+    {
+        $group1 = new ParticipantGroup('ONE', 1);
+
+        $tube = new Tube('T100');
+        $tube->setParticipantGroup($group1);
+        $specimen = new Specimen('SPEC-100', $group1, $tube);
+
+        $this->assertSame($tube->getParticipantGroup(), $group1);
+        $this->assertSame($specimen->getParticipantGroup(), $group1);
+
+        $group2 = new ParticipantGroup('TWO', 1);
+        $specimen->setParticipantGroup($group2);
+
+        $this->assertSame($tube->getParticipantGroup(), $group2);
+        $this->assertSame($specimen->getParticipantGroup(), $group2);
     }
 
     /**

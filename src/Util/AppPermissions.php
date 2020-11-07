@@ -25,6 +25,9 @@ class AppPermissions
     public const AVAILABLE_ROLES = [
         'ROLE_ADMIN',
 
+        // Config options available via web UI
+        'ROLE_CONFIG_ALL',
+
         // Kiosk
         'ROLE_KIOSK_UI',                // Can access the kiosk ui and drop off samples
 
@@ -43,9 +46,6 @@ class AppPermissions
         // Results
         'ROLE_RESULTS_EDIT',
         'ROLE_RESULTS_VIEW',
-
-        // Specimens
-        'ROLE_SPECIMEN_DROP_OFF',
 
         // Tubes
         'ROLE_TUBE_CHECK_IN',

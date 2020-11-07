@@ -99,11 +99,11 @@ class TubeTest extends TestCase
 
     public function testMarkExternalProcessingAllowedForSaliva()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowExternalProcessing());
 
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_SALIVA, new \DateTimeImmutable());
@@ -137,7 +137,7 @@ class TubeTest extends TestCase
 
     public function testBloodAcceptedCheckin()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowCheckinDecision());
 
@@ -148,7 +148,7 @@ class TubeTest extends TestCase
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNull($tube->getCheckInDecision());
+        $this->assertSame(Tube::CHECKED_IN_UNKNOWN, $tube->getCheckInDecision());
         $this->assertNull($tube->getCheckedInAt());
 
         $checkedInAt = new \DateTimeImmutable('2020-12-20 12:55:44');
@@ -160,18 +160,18 @@ class TubeTest extends TestCase
 
     public function testBloodRejectedCheckin()
     {
-        $tube = new Tube('T123');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
 
         $this->assertFalse($tube->willAllowCheckinDecision());
 
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, Tube::TYPE_BLOOD, new \DateTimeImmutable());
 
         $this->assertTrue($tube->willAllowCheckinDecision());
 
-        $this->assertNull($tube->getCheckInDecision());
+        $this->assertSame(Tube::CHECKED_IN_UNKNOWN, $tube->getCheckInDecision());
         $this->assertNull($tube->getCheckedInAt());
 
         // Reject Tube
@@ -195,6 +195,28 @@ class TubeTest extends TestCase
 
         $this->assertEquals($processedAt, $tube->getExternalProcessingAt());
         $this->assertSame(Tube::WEBHOOK_STATUS_QUEUED, $tube->getWebHookStatus());
+    }
+
+    public function testMarkingResultsAvailable()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertNotSame(Tube::STATUS_RESULTS, $tube->getStatus());
+        $tube->markResultsAvailable();
+        $this->assertSame(Tube::STATUS_RESULTS, $tube->getStatus());
+    }
+
+    public function testMarkingResultsAvailableSavesCheckInStatus()
+    {
+        $tube = $this->buildTubeDroppedOff(Tube::TYPE_SALIVA);
+
+        $this->assertNotSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
+        $this->assertNull($tube->getCheckedInAt());
+
+        $tube->markResultsAvailable();
+
+        $this->assertNotNull($tube->getCheckedInAt());
+        $this->assertSame(Tube::CHECKED_IN_ACCEPTED, $tube->getCheckInDecision());
     }
 
     public function testSuccessfulSendingToWebHook()
@@ -233,8 +255,8 @@ class TubeTest extends TestCase
      */
     private function buildTubeDroppedOff(string $tubeType): Tube
     {
-        $tube = new Tube('T123');
-        $group = ParticipantGroup::buildExample('GRP-A');
+        $tube = Tube::buildExampleForWebHook('T123', 100, 'GRP-A', 'EXT-123');
+        $group = $tube->getParticipantGroup();
         $dropoff = new DropOff();
         $specIdGen = $this->getMockAccessionIdGenerator('S123');
         $tube->kioskDropoffComplete($specIdGen, $dropoff, $group, $tubeType, new \DateTimeImmutable());

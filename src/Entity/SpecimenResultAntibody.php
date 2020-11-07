@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Result of analyzing presence of antibodies in Specimen.
@@ -48,6 +49,7 @@ class SpecimenResultAntibody extends SpecimenResult
      *
      * @var null|string
      * @ORM\Column(name="signal_value", type="string", length=255, nullable=true)
+     * @Gedmo\Versioned
      */
     private $signal;
 
@@ -77,6 +79,67 @@ class SpecimenResultAntibody extends SpecimenResult
 
         $this->setConclusion($conclusion);
         $this->setSignal($signal);
+    }
+
+    /**
+     * Convert audit log field changes from internal format to human-readable format.
+     *
+     * Audit Logging tracks field/value changes using entity property names
+     * and values like this:
+     *
+     *     [
+     *         "status" => "RESULTS", // STATUS_RESULTS constant value
+     *         "createdAt" => \DateTime(...),
+     *     ]
+     *
+     * This method should convert the changes to human-readable values like this:
+     *
+     *     [
+     *         "status" => "Results Available",
+     *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
+     *     ]
+     *
+     * @param array $changes Keys are internal entity propertyNames, Values are internal entity values
+     * @return mixed[] Keys are human-readable field names, Values are human-readable values
+     */
+    public static function makeHumanReadableAuditLogFieldChanges(array $changes): array
+    {
+        $keyConverter = [
+            // Entity.propertyNameHere => Human-Readable Description
+            'conclusion' => 'Conclusion',
+            'signal' => 'Signal',
+            'webHookStatus' => 'Web Hook Status',
+            'webHookStatusMessage' => 'Web Hook Status Message',
+            'webHookLastTriedPublishingAt' => 'Web Hook Last Sent',
+        ];
+
+        /**
+         * Keys are array key from $changes
+         * Values are callbacks to convert $changes[$key] value
+         */
+        $valueConverter = [
+            'webHookLastTriedPublishingAt' => function(?\DateTimeInterface $value) {
+                return $value ? $value->format('Y-m-d g:ia') : null;
+            },
+            'conclusion' => function($value) {
+                return $value ? self::lookupConclusionText($value) : '(empty)';
+            },
+        ];
+
+        $return = [];
+        foreach ($changes as $fieldId => $value) {
+            // If mapping fieldId to human-readable string, use it
+            // Else fallback to original fieldId
+            $key = $keyConverter[$fieldId] ?? $fieldId;
+
+            // If mapping callback defined for fieldId, use it
+            // Else fallback to current value
+            $value = isset($valueConverter[$fieldId]) ? $valueConverter[$fieldId]($value) : $value;
+
+            $return[$key] = $value;
+        }
+
+        return $return;
     }
 
     public function getWell(): SpecimenWell

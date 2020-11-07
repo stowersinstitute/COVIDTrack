@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\AuditLog;
 use App\Entity\ExcelImportWorkbook;
 use App\Entity\LabelPrinter;
 use App\Entity\Tube;
@@ -19,7 +20,9 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -38,8 +41,17 @@ class TubeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
 
+        /**
+         * Whether user should see UI components related to Web Hooks.
+         * Affects data visible and form filters visible.
+         * @var bool $userCanViewWebHooks
+         */
+        $userCanViewWebHooks = $this->isGranted('ROLE_WEB_HOOKS');
+
         // Explicitly use FormFactory to remove form name from GET params for cleaner URL
-        $filterForm = $this->get('form.factory')->createNamed('', TubeFilterForm::class);
+        $filterForm = $this->get('form.factory')->createNamed('', TubeFilterForm::class, null, [
+            'userCanViewWebHooks' => $userCanViewWebHooks,
+        ]);
         $filterForm->handleRequest($request);
         $formData = [];
         if ($filterForm->isSubmitted() && $filterForm->isValid()) {
@@ -54,6 +66,7 @@ class TubeController extends AbstractController
             'tubes' => $tubes,
             'printForm' => $this->getPrintForm()->createView(),
             'filterForm' => $filterForm->createView(),
+            'userCanViewWebHooks' => $userCanViewWebHooks,
         ]);
     }
 
@@ -98,6 +111,61 @@ class TubeController extends AbstractController
         }
 
         return $this->redirect($request->headers->get('referer'));
+    }
+
+    /**
+     * Set selected Tubes to a specific Tube::WEBHOOK_STATUS_* constant.
+     *
+     * Required params:
+     *
+     * - tubeAccessionIds (string[]) Array of Tube.accessionId to publish
+     * - webHookStatus (string) Tube::WEBHOOK_STATUS_* constant value
+     *
+     * @Route(path="/web-hook/status", methods={"POST"}, name="tube_web_hook_status")
+     */
+    public function webhookStatus(Request $request, EntityManagerInterface $em)
+    {
+        $this->denyAccessUnlessGranted('ROLE_WEB_HOOKS', 'Web Hooks Access Required', 'You must have Web Hooks permission to set Tube Web Hook status');
+
+        if (!$request->request->has('tubeAccessionIds')) {
+            return $this->createJsonErrorResponse('Param tubeAccessionIds is required');
+        }
+        if (!$request->request->has('webHookStatus')) {
+            return $this->createJsonErrorResponse('Param webHookStatus is required');
+        }
+
+        // Verify valid web hook status
+        $webHookStatus = $request->request->get('webHookStatus');
+        try {
+            Tube::ensureValidWebHookStatus($webHookStatus);
+        } catch (\InvalidArgumentException $e) {
+            // Return error to client as JSON errorMsg
+            return $this->createJsonErrorResponse($e->getMessage());
+        }
+
+        // Convert to Tubes
+        $repo = $em->getRepository(Tube::class);
+        foreach ($request->request->get('tubeAccessionIds') as $accessionId) {
+            $tube = $repo->findOneByAccessionId($accessionId);
+            if (!$tube) {
+                return $this->createJsonErrorResponse(sprintf('Cannot find Tube by Accession ID: "%s"', $accessionId));
+            }
+
+            // Finally set web hook status from client
+            try {
+                $tube->setWebHookStatus($webHookStatus, 'Status manually set');
+            } catch (\LogicException $e) {
+                // Exception thrown when required data missing.
+                // Return error to client as JSON errorMsg.
+                return $this->createJsonErrorResponse(sprintf('Tube "%s": %s', $accessionId, $e->getMessage()));
+            }
+        }
+
+        $em->flush();
+
+        return new JsonResponse([
+            'success' => true,
+        ]);
     }
 
     /**
@@ -189,6 +257,27 @@ class TubeController extends AbstractController
         ]);
     }
 
+    /**
+     * View a single Tube.
+     *
+     * @Route("/{accessionId}", methods={"GET"}, name="tube_view")
+     */
+    public function view(string $accessionId)
+    {
+        $this->denyAccessUnlessGranted('ROLE_PRINT_TUBE_LABELS');
+
+        $tube = $this->findTube($accessionId);
+
+        $auditLogs = $this->getDoctrine()
+            ->getRepository(AuditLog::class)
+            ->getLogEntries($tube);
+
+        return $this->render('tube/view.html.twig', [
+            'tube' => $tube,
+            'auditLogs' => $auditLogs,
+        ]);
+    }
+
     private function mustFindImport(int $importId): ExcelImportWorkbook
     {
         $workbook = $this->getDoctrine()
@@ -226,5 +315,25 @@ class TubeController extends AbstractController
             ])
             ->setAction($this->generateUrl('tube_print'))
             ->getForm();
+    }
+
+    private function createJsonErrorResponse(string $msg): JsonResponse
+    {
+        return new JsonResponse([
+            'errorMsg' => $msg,
+        ], 400);
+    }
+
+    private function findTube($id): Tube
+    {
+        $T = $this->getDoctrine()
+            ->getRepository(Tube::class)
+            ->findOneByAccessionId($id);
+
+        if (!$T) {
+            throw new NotFoundHttpException('Cannot find Tube');
+        }
+
+        return $T;
     }
 }

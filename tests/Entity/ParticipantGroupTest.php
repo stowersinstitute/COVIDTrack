@@ -4,6 +4,7 @@ namespace App\Tests\Entity;
 
 use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
+use App\Entity\Tube;
 use PHPUnit\Framework\TestCase;
 
 class ParticipantGroupTest extends TestCase
@@ -27,7 +28,8 @@ class ParticipantGroupTest extends TestCase
     public function testAddingSameSpecimenTwiceNotDuplicated()
     {
         $group = new ParticipantGroup('GRP-1', 5);
-        $specimen = new Specimen('SPEC-100', $group);
+        $tube = new Tube('T100');
+        $specimen = new Specimen('SPEC-100', $group, $tube);
 
         // Specimen Group properly set
         $this->assertSame($group, $specimen->getParticipantGroup());

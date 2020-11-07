@@ -98,4 +98,22 @@ class KioskAdminController extends AbstractController
 
         return $this->redirectToRoute('kiosk_admin_list');
     }
+
+    /**
+     * @Route(path="/{kioskId<\d+>}/unprovision", name="kiosk_admin_unprovision", methods={"GET"})
+     */
+    public function unprovision(int $kioskId, Request $request, EntityManagerInterface $em)
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $kioskRepo = $em->getRepository(Kiosk::class);
+
+        $kiosk = $kioskRepo->find($kioskId);
+        if (!$kiosk) throw new \InvalidArgumentException('Invalid Kiosk ID');
+
+        $kiosk->setIsProvisioned(false);
+        $em->flush();
+
+        return $this->redirectToRoute('kiosk_admin_list');
+    }
 }

@@ -115,11 +115,20 @@ class TubeCheckinQueueController extends AbstractController
      *
      * - tubeId {string} Tube.accessionId
      *
+     * Optional POST params:
+     *
+     * - redirect {string} When given any value, Response will redirect to given Tube's View screen.
+     *                     When missing will return JSON.
+     *
      * @Route(path="/reject", methods={"POST"}, name="checkin_reject_tube")
      */
     public function reject(Request $request)
     {
         $this->denyAccessUnlessGranted('ROLE_TUBE_CHECK_IN');
+
+        if (!$request->request->has('tubeId')) {
+            throw new \InvalidArgumentException('POST parameter "tubeId" is required');
+        }
 
         $tubeId = $request->request->get('tubeId');
 
@@ -137,6 +146,11 @@ class TubeCheckinQueueController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $em->persist($tube);
         $em->flush();
+
+        // Redirect if requested by client
+        if ($request->request->has('redirect')) {
+            return $this->redirectToRoute('tube_view', ['accessionId' => $tube->getAccessionId()]);
+        }
 
         return new JsonResponse([
             'tubeId' => $tubeId,

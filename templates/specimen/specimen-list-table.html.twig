@@ -1,10 +1,10 @@
 {% block body %}
     {% set userCanEditSpecimens = is_granted('ROLE_SPECIMEN_EDIT') %}
     {% set userCanViewWellPlates = is_granted('ROLE_WELL_PLATE_VIEW') %}
-<table class="table table-bordered table-hover">
+<table id="specimen-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
-            {% if userCanEditSpecimens %}<th>&nbsp;</th>{% endif %}
+            {% if userCanEditSpecimens %}<th class="no-sort">&nbsp;</th>{% endif %}
             <th>Accession ID</th>
             <th>Participant Group</th>
             <th>Type</th>
@@ -12,6 +12,62 @@
             <th>Well Plate</th>
             <th>CLIA Testing Recommended?</th>
             <th>Status</th>
+        </tr>
+
+        <tr id="specimen-filter-row" class="filter-header-row">
+            {% if userCanEditSpecimens %}<th><!-- Edit --></th>{% endif %}
+            <th><!-- Accession ID --></th>
+            <th>
+                <!-- Participant Group -->
+                {{ form_row(filterForm.participantGroup, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Type -->
+                {{ form_row(filterForm.type, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Collection Time -->
+                {{ form_row(filterForm.collectedAt, {
+                    'attr': {
+                        'class': 'filter-datepicker',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th>
+                <!-- Well Plate -->
+                {{ form_row(filterForm.wellPlate, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
+            <th><!-- CLIA Testing Recommended? --></th>
+            <th>
+                <!-- Status -->
+                {{ form_row(filterForm.status, {
+                    'attr': {
+                        'class': 'submit-on-change',
+                        'form': 'filter-form'
+                    },
+                    'row_attr': {'class': 'no-margin'}
+                }) }}
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -27,8 +83,12 @@
             </td>
             <td>{{ specimen.participantGroup }}</td>
             <td>{{ specimen.typeText }}</td>
-            <td>{{ specimen.collectedAt ? specimen.collectedAt | date("Y-m-d H:ia") : '' }}</td>
-            <td>
+            {% if specimen.collectedAt is empty %}
+                <td></td>
+            {% else %}
+                <td class="nowrap-cell" data-sort="{{ specimen.collectedAt|date("U")|e("html_attr") }}">{{ specimen.collectedAt | date("Y-m-d H:ia") }}</td>
+            {% endif %}
+            <td class="nowrap-cell">
                 {% for well in specimen.wells %}
                     {% if userCanViewWellPlates %}
                     <a href="{{ path('well_plate_view', {barcode: well.wellPlateBarcode}) }}">{{ well.wellPlatePositionDisplayString }}</a>
@@ -44,4 +104,91 @@
     {% endfor %}
     </tbody>
 </table>
+
+{{ form_start(filterForm, {
+    "attr": {"id":"filter-form"}
+}) }}
+{{ form_end(filterForm) }}
+
+<script type="application/javascript">
+    // Enable DataTable for table of Specimens
+    $('#specimen-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 'no-sort',
+                orderable: false
+            }
+        ],
+
+        // Default sort on Collection Time column with most recent at top
+        order: [[4, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
+    });
+
+    // Enable Date Picker for filter elements
+    let datepickers = $('.filter-datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        clearBtn: true,
+        todayBtn: "linked",
+        todayHighlight: true
+    });
+
+    // Callback to submit
+    let executeFilterSearch = function() {
+        $("#filter-form").submit();
+    };
+
+    // Submit filter form when datepicker closes.
+    // Does NOT use .submit-on-change class because datepicker updates input
+    // value when selecting from calendar.
+    datepickers.on("hide", executeFilterSearch);
+
+    // Submit filter form when a form widget changes
+    $('#specimen-filter-row .submit-on-change').on('change', executeFilterSearch);
+
+    // Any filter form widget with a value appears visually highlighted
+    // so easier to see when filters affect search results
+    $('#specimen-filter-row input, #specimen-filter-row select').each(function() {
+        let cssClassWhenHasValue = 'filter-with-value';
+
+        let formWidget = $(this);
+        if (formWidget.val() !== '') {
+            formWidget.addClass(cssClassWhenHasValue);
+        } else {
+            formWidget.removeClass(cssClassWhenHasValue);
+        }
+    });
+</script>
 {% endblock %}

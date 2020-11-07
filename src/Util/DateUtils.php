@@ -224,37 +224,35 @@ class DateUtils
     /**
      * Returns midnight on the specified date. Defaults to the current day if no $relDate is passed
      *
-     * @param \DateTime $relDate
-     * @return \DateTime
+     * @param \DateTimeInterface $relDate
+     * @return \DateTimeInterface
      */
-    public static function dayFloor(\DateTime $relDate = null)
+    public static function dayFloor(\DateTimeInterface $relDate = null)
     {
         if ($relDate === null) {
             $relDate = new \DateTime();
         }
 
         $relDate = clone $relDate;
-        $relDate->setTime(0, 0, 0);
 
-        return $relDate;
+        return $relDate->setTime(0, 0, 0, 0);
     }
 
     /**
      * Returns 23:59:59 on the specified date. Defaults to the current day if no $relDate is passed
      *
-     * @param \DateTime $relDate
-     * @return \DateTime
+     * @param \DateTimeInterface $relDate
+     * @return \DateTimeInterface
      */
-    public static function dayCeil(\DateTime $relDate = null)
+    public static function dayCeil(\DateTimeInterface $relDate = null)
     {
         if ($relDate === null) {
             $relDate = new \DateTime();
         }
 
         $relDate = clone $relDate;
-        $relDate->setTime(23, 59, 59);
 
-        return $relDate;
+        return $relDate->setTime(23, 59, 59, 999999);
     }
 
     /**

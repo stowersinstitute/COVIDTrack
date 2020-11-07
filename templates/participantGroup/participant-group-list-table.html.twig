@@ -6,25 +6,33 @@
     <span class="badge {{ appearActive ? 'bg-green' : 'bg-gray' }}" title="{{ title }}" style="margin-right:3px">{{ text }}</span>
 {% endmacro %}
 
-{% if userCanPrintLabels %}
+{% if userCanPrintLabels or userCanEditGroups%}
     <div class="margin-bottom">
+        {% if userCanEditGroups %}
+        <div class="pull-right">
+            <button id="activate-groups" type="button" class="btn btn-success">Activate</button>
+            <button id="inactivate-groups" type="button" class="btn">Inactivate</button>
+        </div>
+        {% endif %}
+
+        {% if userCanPrintLabels %}
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#labelPrintModal">
            <i class="fa fa-fw fa-id-badge"></i> Print Selected Group Labels
         </button>
+        {% endif %}
     </div>
 {% endif %}
 
-{{ form_start(form) }}
 
-<table class="table table-bordered table-hover">
+<table id="group-list-table" class="table table-bordered table-hover">
     <thead>
         <tr>
             {% if userCanPrintLabels %}
-            <th style="width: 2em;"><input type="checkbox" id="check-all"></th>
+            <th class="no-sort" style="width: 2em;"><input type="checkbox" id="check-all"></th>
             {% endif %}
 
             {% if userCanEditGroups %}
-            <th>&nbsp;</th>
+            <th class="no-sort">&nbsp;</th>
             {% endif %}
 
             <th>Title</th>
@@ -32,8 +40,8 @@
             <th>Created</th>
             <th>Last Modified</th>
             <th>Active?</th>
-            <th>Accepted Specimens</th>
-            <th>Results<br>to Web Hooks</th>
+            <th class="no-sort">Accepted Specimens</th>
+            <th class="no-sort">Results<br>to Web Hooks</th>
         </tr>
     </thead>
     <tbody>
@@ -41,7 +49,7 @@
         <tr>
             {% if userCanPrintLabels %}
             <td>
-                <input type="checkbox" class="tube-checkbox" name="groups[]" value="{{ group.title }}">
+                <input type="checkbox" class="tube-checkbox" form="print-form" name="groups[]" value="{{ group.title }}">
             </td>
             {% endif %}
 
@@ -55,8 +63,8 @@
                 <a href="{{ path('app_participant_group_view', {title: group.title}) }}">{{ group.title }}</a>
             </td>
             <td>{{ group.participantCount }}</td>
-            <td>{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
-            <td>{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
+            <td class="nowrap-cell" data-sort="{{ group.createdAt|date("U")|e("html_attr") }}">{{ group.createdAt | date("Y-m-d H:i:s") }}</td>
+            <td class="nowrap-cell" data-sort="{{ group.updatedAt|date("U")|e("html_attr") }}">{{ group.updatedAt | date("Y-m-d H:i:s") }}</td>
             <td>{% spaceless %}
                 {% set activeText = group.isActive ? 'Yes' : 'No' %}
                 {{ _self.tableBadge(group.isActive, activeText) }}
@@ -104,17 +112,28 @@
 <div class="modal fade modal-primary" id="labelPrintModal" tabindex="-1" role="dialog" aria-labelledby="labelPrintModalLabel" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
+            {{ form_start(form, {
+                "attr": {"id":"print-form"}
+            }) }}
             <div class="modal-header">
                 <h4 class="modal-title text-center" id="labelPrintModalLabel">Print Group Labels</h4>
             </div>
             <div class="modal-body">
-                {{ form_row(form.printer) }}
+                {{ form_row(form.printer, {
+                    'attr': {
+                        'form': 'print-form'
+                    }
+                }) }}
                 {# Don't render the numToPrint field since the backend will print the group count #}
                 {% do form.numToPrint.setRendered() %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline pull-left" data-dismiss="modal"><i class="fa fa-chevron-left"></i> Cancel</button>
-                {{ form_row(form.print) }}
+                {{ form_row(form.print, {
+                    'attr': {
+                        'form': 'print-form'
+                    }
+                }) }}
             </div>
             {{ form_end(form) }}
         </div>
@@ -124,6 +143,91 @@
 <script type="application/javascript">
     $('#check-all').change(function() {
         $(".tube-checkbox").prop('checked', $(this).is(':checked'));
+    });
+
+    /**
+     * Use as button click-handler to activate or inactivate the checked groups on this page.
+     *
+     * @param isActive {Boolean} true for activating given groups, false for deactivating
+     */
+    let updateGroupActiveTo = function(isActive) {
+        return function() {
+            let checkedItems = $('.tube-checkbox:checked');
+            if (checkedItems.length < 1) {
+                alert('Check one or more Groups');
+                return;
+            }
+
+            let params = {
+                isActive: isActive ? "1" : "0",
+                groupTitles: jQuery.map(checkedItems, function(checkboxEl) {
+                    return $(checkboxEl).val();
+                })
+            };
+
+            $.ajax('{{ path('group_set_active_status') }}', {
+                method: 'POST',
+                data: params,
+
+                success: function(response) {
+                    location.reload();
+                },
+
+                // Unexpected errors like 500 server or network down
+                error: function(xhr, textStatus, error) {
+                    console.log("Error %o: %o; Response: %o", textStatus, error, xhr.responseJSON);
+                    alert("Error updating Group active status. See browser console for more details.");
+                }
+            });
+        }
+    };
+    $('#activate-groups').click(updateGroupActiveTo(true));
+    $('#inactivate-groups').click(updateGroupActiveTo(false));
+
+    // Enable DataTable for table of Groups
+    $('#group-list-table').DataTable({
+        // Disable global table search field. We provide our own column search filters.
+        searching: false,
+
+        // Disable paging so users can view all records at once.
+        paging: false,
+
+        // Display info line before table instead of after it.
+        // Also hides {pagination}, {length} and {filter} blocks because we don't use them.
+        // Renders blocks as:
+        // {information}
+        // {table}
+        // https://datatables.net/reference/option/dom
+        dom: 'it',
+
+        // Re-word {information} block to only show record count.
+        // Normally this area includes page counts but our paging is disabled,
+        // so just display the full count.
+        // https://datatables.net/reference/option/infoCallback
+        infoCallback: function(settings, start, end, max, total, pre) {
+            return "<strong>Found " + total + " records</strong>";
+        },
+
+        // Disable some features for select columns.
+        // https://datatables.net/reference/option/columnDefs
+        columnDefs: [
+            {
+                targets: 'no-sort',
+                orderable: false
+            }
+        ],
+
+        // Default sort on Last Modified column with most recent at top
+        order: [[6, 'desc'], [5, 'desc']],
+
+        // Sort columns using first <thead> row
+        // instead of last row (which contain our filter form widgets)
+        "bSortCellsTop": true,
+
+        // Text displayed when no results found
+        "language": {
+            "emptyTable": "<em>No results found. Remove filters to display records.</em>"
+        }
     });
 </script>
 {% endif %}

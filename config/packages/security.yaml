@@ -44,6 +44,7 @@ security:
     role_hierarchy:
         ROLE_ADMIN:
             - ROLE_ALLOWED_TO_SWITCH
+            - ROLE_CONFIG_ALL
             - ROLE_KIOSK_UI
             - ROLE_PARTICIPANT_GROUP_EDIT
             - ROLE_PRINT_TUBE_LABELS
@@ -52,12 +53,12 @@ security:
             - ROLE_SPECIMEN_EDIT
             - ROLE_RESULTS_EDIT
             - ROLE_RESULTS_VIEW
-            - ROLE_SPECIMEN_DROP_OFF
             - ROLE_TUBE_CHECK_IN
             - ROLE_REPORTS_GROUP_VIEW
             - ROLE_WELL_PLATE_EDIT
+            - ROLE_WEB_HOOKS
         ROLE_KIOSK_UI:
-            - ROLE_SPECIMEN_DROP_OFF
+            ~
         ROLE_PARTICIPANT_GROUP_EDIT:
             - ROLE_PARTICIPANT_GROUP_VIEW
         ROLE_PARTICIPANT_GROUP_VIEW:

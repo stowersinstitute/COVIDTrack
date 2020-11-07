@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Form\SpecimenFilterForm;
 use App\Util\DateUtils;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
@@ -28,6 +29,71 @@ class SpecimenRepository extends EntityRepository
         return $this->findOneBy([
             'accessionId' => $accessionId,
         ]);
+    }
+
+    /**
+     * Filter list of Specimens to display.
+     *
+     * @see SpecimenFilterForm
+     * @return Specimen[]
+     */
+    public function filterByFormData(array $data): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            // Pre-join and select data displayed on Specimens > List screen
+            ->select('s, pGroup, well, tube')
+            ->join('s.participantGroup', 'pGroup')
+            ->leftJoin('s.wells', 'well')
+            ->leftJoin('s.tube', 'tube')
+            ->orderBy('s.collectedAt');
+
+        // Participant Group
+        if (isset($data['participantGroup'])) {
+            $qb->andWhere('s.participantGroup = :f_participantGroup');
+            $qb->setParameter('f_participantGroup', $data['participantGroup']);
+        }
+
+        // Type
+        if (isset($data['type'])) {
+            $qb->andWhere('s.type = :f_type');
+            $qb->setParameter('f_type', $data['type']);
+        }
+
+        // Status
+        if (isset($data['status'])) {
+            $qb->andWhere('s.status = :f_status');
+            $qb->setParameter('f_status', $data['status']);
+        }
+
+        // Collection Time
+        if (isset($data['collectedAt'])) {
+            $qb->andWhere('s.collectedAt BETWEEN :f_collectedAt_lower AND :f_collectedAt_upper');
+            $qb->setParameter('f_collectedAt_lower', DateUtils::dayFloor($data['collectedAt']));
+            $qb->setParameter('f_collectedAt_upper', DateUtils::dayCeil($data['collectedAt']));
+        }
+
+        // Well Plate
+        if (isset($data['wellPlate'])) {
+            $qb->andWhere('well.wellPlate = :f_wellPlate');
+            $qb->setParameter('f_wellPlate', $data['wellPlate']);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * List Specimens for displaying in list for Participant Group.
+     *
+     * @return Specimen[]
+     */
+    public function findForGroupList(ParticipantGroup $group): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.participantGroup = :participantGroup')
+            ->setParameter('participantGroup', $group)
+            ->orderBy('s.collectedAt', 'DESC')
+            ->getQuery()
+            ->execute();
     }
 
     /**
@@ -120,10 +186,14 @@ class SpecimenRepository extends EntityRepository
         return $this->createQueryBuilder('s')
             ->select('count(s.id)')
             ->join('s.participantGroup', 'participantGroup')
+            ->join('s.tube', 'tube')
 
-            // Correct status
-            ->where('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+            // Specimen statuses where results can be added
+            ->where('s.status IN (:status)')
+            ->setParameter('status', [
+                Specimen::STATUS_RETURNED,
+                Specimen::STATUS_EXTERNAL,
+            ])
 
             // Not in a control group
             ->andWhere('participantGroup.isControl = false')

@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block page_title %}
-    {% if kiosk is empty %} New Kiosk {% else %} Edit <strong>{{ kiosk.label }}</strong> {% endif %}
+    <i class="fa fa-tablet-alt"></i> {% if kiosk is empty %} New Kiosk {% else %} Edit <strong>{{ kiosk.label }}</strong> {% endif %}
 {% endblock %}
 
 {% block body %}

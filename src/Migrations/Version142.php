@@ -24,7 +24,7 @@ final class Version142 extends AbstractMigration
         UPDATE tubes SET web_hook_status = "' . Tube::WEBHOOK_STATUS_NEVER_SEND . '"
         WHERE `status` = "' . Tube::STATUS_EXTERNAL . '"
             OR `status` = "' . Tube::STATUS_RETURNED . '"
-            OR `status` = "' . Tube::STATUS_ACCEPTED . '"
+            OR `status` = "ACCEPTED"
             OR `status` = "' . Tube::STATUS_REJECTED . '"
          ');
     }

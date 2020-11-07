@@ -6,6 +6,7 @@ use App\Entity\ParticipantGroup;
 use App\Entity\Specimen;
 use App\Entity\SpecimenResultQPCR;
 use App\Entity\SpecimenWell;
+use App\Entity\Tube;
 use App\Entity\WellPlate;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -61,7 +62,7 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
         // Reasonable positive/negative rate
         $possibleResults = $this->buildQPCRResultsDistribution();
 
-        // Add 1 result to many wells
+        // Add Results with a Well
         foreach ($groups as $group) {
             // Generate Resulted Specimens for all Group Participants
             // for this many days worth of testing
@@ -93,6 +94,26 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                     }
                 }
             }
+        }
+
+        // Add Results without a Well
+        $createdAtLeastOneSpecimenWithoutWell = false;
+        foreach ($groups as $group) {
+            $specimen = $this->getRandomSpecimenPendingResultsForGroup($em, $group);
+
+            // Might not have enough fixture Specimens to keep going
+            if (!$specimen) continue;
+
+            $createdAtLeastOneSpecimenWithoutWell = true;
+
+            // Create Result
+            $result = new SpecimenResultQPCR($specimen, SpecimenResultQPCR::CONCLUSION_POSITIVE);
+            $result->setCreatedAt(new \DateTimeImmutable('-1 day'));
+
+            $em->persist($result);
+        }
+        if (!$createdAtLeastOneSpecimenWithoutWell) {
+            throw new \RuntimeException('Fixtures cannot add Result to Group because not enough Specimen fixtures exist. Increase Specimen fixture count.');
         }
 
         // Must flush so below code knows about results we just created
@@ -160,9 +181,10 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
 
     private function getRandomSpecimenPendingResultsForGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen
     {
-        /** @var Specimen[] $specimens */
-        $qb = $em->getRepository(Specimen::class)
-            ->createQueryBuilder('s')
+        /** @var Tube[] $tubes */
+        $qb = $em->getRepository(Tube::class)
+            ->createQueryBuilder('t')
+            ->join('t.specimen', 's')
             ->join('s.wells', 'wells')
 
             // Saliva Specimen
@@ -173,9 +195,12 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
             ->andWhere('s.participantGroup = :group')
             ->setParameter('group', $group)
 
-            // Has been accepted by a Check-in Technician
-            ->andWhere('s.status = :status')
-            ->setParameter('status', Specimen::STATUS_ACCEPTED)
+            // In status that can accept results
+            ->andWhere('s.status IN (:resultsStatuses)')
+            ->setParameter('resultsStatuses', [
+                Specimen::STATUS_RETURNED,
+                Specimen::STATUS_EXTERNAL,
+            ])
 
             // Is on a Well Plate
             ->andWhere('wells.wellPlate IS NOT NULL')
@@ -193,17 +218,19 @@ class AppViralResultsFixtures extends Fixture implements DependentFixtureInterfa
                 ->setParameter('seenSpecimenIds', $this->specimenIdsWithResults);
         }
 
-        $specimens = $qb->getQuery()->execute();
+        $tubes = $qb->getQuery()->execute();
 
-        if (count($specimens) !== 1) {
+        if (count($tubes) !== 1) {
             // Might've run out of Specimens to result
             return null;
         }
 
-        $found = array_shift($specimens);
-        $this->specimenIdsWithResults[] = $found->getId();
+        $tube = array_shift($tubes);
+        $specimen = $tube->getSpecimen();
 
-        return $found;
+        $this->specimenIdsWithResults[] = $specimen->getId();
+
+        return $specimen;
     }
 
     private function getRandomSpecimenWithExistingViralResultInGroup(ObjectManager $em, ParticipantGroup $group): ?Specimen

@@ -87,7 +87,11 @@ class ParticipantGroupRepository extends EntityRepository
             ->getQuery()->getResult();
     }
 
-    private function getDefaultQueryBuilder(string $alias = 'g'): QueryBuilder
+    /**
+     * Get QueryBuilder with default orderBy and other common query parts
+     * already applied.
+     */
+    public function getDefaultQueryBuilder(string $alias = 'g'): QueryBuilder
     {
         return $this->createQueryBuilder($alias)
             ->orderBy($alias.'.title', 'ASC');

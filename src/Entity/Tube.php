@@ -30,12 +30,14 @@ class Tube
     const STATUS_PRINTED = "PRINTED";
     const STATUS_RETURNED = "RETURNED";
     const STATUS_EXTERNAL = "EXTERNAL";
-    const STATUS_ACCEPTED = "ACCEPTED";
-    const STATUS_REJECTED = "REJECTED";
+    // When Tube's Specimen has results available
+    const STATUS_RESULTS = "RESULTS";
+    const STATUS_REJECTED = "REJECTED"; // Possible final status
 
     const TYPE_BLOOD = "BLOOD";
     const TYPE_SALIVA = "SALIVA";
 
+    const CHECKED_IN_UNKNOWN = "UNKNOWN";
     const CHECKED_IN_ACCEPTED = "ACCEPTED";
     const CHECKED_IN_REJECTED = "REJECTED";
 
@@ -84,13 +86,13 @@ class Tube
      * Specimen created as result of Tube being checked in.
      *
      * @var Specimen
-     * @ORM\ManyToOne(targetEntity="App\Entity\Specimen", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="App\Entity\Specimen", inversedBy="tube", cascade={"persist"})
      * @ORM\JoinColumn(name="specimen_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $specimen;
 
     /**
-     * Current status of tube. Values are Tube::STATUS_* constant values.
+     * Current workflow status. Values are Tube::STATUS_* constant values.
      *
      * @var string
      * @ORM\Column(name="status", type="string")
@@ -99,6 +101,10 @@ class Tube
     private $status;
 
     /**
+     * What type of Specimen this Tube is meant to hold.
+     *
+     * Values are Tube::TYPE_* constants.
+     *
      * @var string
      * @ORM\Column(name="tube_type", type="string", length=255, nullable=true)
      * @Gedmo\Versioned
@@ -138,7 +144,7 @@ class Tube
      * Values are self::CHECK_IN_* constants.
      *
      * @var string
-     * @ORM\Column(name="check_in_decision", type="string", length=255, nullable=true)
+     * @ORM\Column(name="check_in_decision", type="string", length=255)
      * @Gedmo\Versioned
      */
     private $checkInDecision;
@@ -189,6 +195,7 @@ class Tube
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status", type="string", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookStatus;
 
@@ -197,6 +204,7 @@ class Tube
      *
      * @var null|string
      * @ORM\Column(name="web_hook_status_message", type="text", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookStatusMessage;
 
@@ -205,6 +213,7 @@ class Tube
      *
      * @var null|\DateTimeImmutable
      * @ORM\Column(name="web_hook_last_tried_publishing_at", type="datetime_immutable", nullable=true)
+     * @Gedmo\Versioned
      */
     private $webHookLastTriedPublishingAt;
 
@@ -212,7 +221,24 @@ class Tube
     {
         $this->accessionId = $accessionId;
         $this->status = self::STATUS_CREATED;
+        $this->checkInDecision = self::CHECKED_IN_UNKNOWN;
         $this->webHookStatus = self::WEBHOOK_STATUS_PENDING;
+    }
+
+    /**
+     * Build test Tube that satisfies minimum requirements to be sent for Web Hooks.
+     */
+    public static function buildExampleForWebHook(string $accessionId, int $id, string $groupAccessionId, string $groupExternalId): self
+    {
+        $T = new self($accessionId);
+        $T->id = $id;
+
+        $group = ParticipantGroup::buildExample($groupAccessionId);
+        $group->setExternalId($groupExternalId);
+
+        $T->setParticipantGroup($group);
+
+        return $T;
     }
 
     public function __toString()
@@ -236,14 +262,14 @@ class Tube
      * and values like this:
      *
      *     [
-     *         "status" => "ACCEPTED", // STATUS_ACCEPTED constant value
+     *         "status" => "RESULTS", // STATUS_RESULTS constant value
      *         "createdAt" => \DateTime(...),
      *     ]
      *
      * This method should convert the changes to human-readable values like this:
      *
      *     [
-     *         "Status" => "Accepted",
+     *         "status" => "Results Available",
      *         "Created At" => \DateTime(...), // Frontend can custom print with ->format(...)
      *     ]
      *
@@ -260,13 +286,20 @@ class Tube
             'kitType' => 'Kit Type',
             'collectedAt' => 'Collected At',
             'returnedAt' => 'Returned At',
-            'checkInDecision' => 'Check-in Decision',
+            'checkInDecision' => 'Check-in',
             'checkedInAt' => 'Checked-in At',
             'checkedInByUsername' => 'Checked-in By',
+            'externalProcessingAt' => 'External Processing At',
+            'webHookStatus' => 'Web Hook Status',
+            'webHookStatusMessage' => 'Web Hook Message',
+            'webHookLastTriedPublishingAt' => 'Web Hook Last Sent',
         ];
 
-        $dateTimeConvert = function(?\DateTimeInterface $value) {
+        $dateTimeConvertShort = function(?\DateTimeInterface $value) {
             return $value ? $value->format('Y-m-d g:ia') : null;
+        };
+        $dateTimeConvertLong = function(?\DateTimeInterface $value) {
+            return $value ? $value->format('Y-m-d H:i:s') : null;
         };
 
         /**
@@ -276,11 +309,19 @@ class Tube
         $valueConverter = [
             // Convert STATUS_* constants into human-readable text
             'status' => function($value) {
+                // If no value logged
+                if ($value === null) return '';
+
+                // For removed status
+                if ($value === 'ACCEPTED') return 'Accepted';
+
                 return self::lookupStatusText($value);
             },
-            'collectedAt' => $dateTimeConvert,
-            'returnedAt' => $dateTimeConvert,
-            'checkedInAt' => $dateTimeConvert,
+            'collectedAt' => $dateTimeConvertShort,
+            'returnedAt' => $dateTimeConvertShort,
+            'checkedInAt' => $dateTimeConvertShort,
+            'externalProcessingAt' => $dateTimeConvertLong,
+            'webHookLastTriedPublishingAt' => $dateTimeConvertLong,
         ];
 
         $return = [];
@@ -497,6 +538,8 @@ class Tube
     /**
      * Whether this Tube is in the correct state to be processed for a check-in
      * by a Check-in Technician.
+     *
+     * @deprecated Step no longer enforced against status. Can checkin any time.
      */
     public function willAllowCheckinDecision(): bool
     {
@@ -505,14 +548,11 @@ class Tube
             return true;
         }
 
-        // Blood Tubes
-        if ($this->tubeType === self::TYPE_BLOOD) {
-            // Status before Accepted/Rejected
-            return $this->status === self::STATUS_RETURNED;
-        }
-
-        // Saliva Tubes
-        return in_array($this->status, [self::STATUS_EXTERNAL, self::STATUS_RETURNED]);
+        return in_array($this->status, [
+            self::STATUS_RETURNED,
+            self::STATUS_EXTERNAL,
+            self::STATUS_RESULTS,
+        ]);
     }
 
     /**
@@ -521,7 +561,9 @@ class Tube
      */
     public function willAllowTecanImport(): bool
     {
-        return in_array($this->status, [self::STATUS_ACCEPTED, self::STATUS_REJECTED]);
+        // RETURNED -- Tube must have come back with a Specimen in it
+        // REJECTED -- In case a rejected Tube has changed their mind
+        return in_array($this->status, [self::STATUS_RETURNED, self::STATUS_REJECTED]);
     }
 
     public function getCheckInDecision(): ?string
@@ -536,11 +578,7 @@ class Tube
      */
     private function setCheckInDecision(string $decision)
     {
-        $valid = [
-            self::CHECKED_IN_ACCEPTED,
-            self::CHECKED_IN_REJECTED,
-        ];
-        if (!in_array($decision, $valid)) {
+        if (!in_array($decision, self::getValidCheckInDecisions())) {
             throw new \InvalidArgumentException('Invalid check-in decision');
         }
 
@@ -549,14 +587,23 @@ class Tube
 
     public function getCheckInDecisionText(): string
     {
-        switch ($this->checkInDecision) {
-            case self::CHECKED_IN_ACCEPTED:
-                return 'Accepted';
-            case self::CHECKED_IN_REJECTED:
-                return 'Rejected';
-            default:
-                return '';
-        }
+        if (empty($this->checkInDecision)) return '';
+
+        $valid = array_flip(self::getValidCheckInDecisions());
+
+        return $valid[$this->checkInDecision] ?? '';
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidCheckInDecisions(): array
+    {
+        return [
+            'Unknown' => self::CHECKED_IN_UNKNOWN,
+            'Accepted' => self::CHECKED_IN_ACCEPTED,
+            'Rejected' => self::CHECKED_IN_REJECTED,
+        ];
     }
 
     /**
@@ -582,6 +629,14 @@ class Tube
         $this->checkedInByUsername = $checkedInByUsername;
     }
 
+    /**
+     * You probably want to call method Tube->kioskDropoffComplete() to assign
+     * a Specimen.
+     *
+     * @internal
+     * @deprecated Not really deprecated, but only call from Specimen::__construct() and tests
+     * @see Tube::kioskDropoffComplete() where Tube is normally associated with a Specimen
+     */
     public function setSpecimen(Specimen $specimen): void
     {
         $this->specimen = $specimen;
@@ -667,6 +722,19 @@ class Tube
     }
 
     /**
+     * When the Tube's Specimen has analysis results reported.
+     */
+    public function markResultsAvailable(): void
+    {
+        // Tube has results
+        $this->setStatus(self::STATUS_RESULTS);
+
+        // Tube considered Approved, since a Rejected Tube would not yield results
+        $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
+        $this->setCheckedInAt(new \DateTimeImmutable());
+    }
+
+    /**
      * Check-In Technician confirms the Tube and Specimen appear in acceptable
      * condition to perform further research.
      */
@@ -674,14 +742,9 @@ class Tube
     {
         if ($checkedInAt === null) $checkedInAt = new \DateTimeImmutable();
 
-        // Tube
-        $this->setStatus(self::STATUS_ACCEPTED);
         $this->setCheckInDecision(self::CHECKED_IN_ACCEPTED);
         $this->setCheckedInAt($checkedInAt);
         $this->setCheckedInByUsername($checkedInBy);
-
-        // Specimen
-        $this->specimen->setStatus(Specimen::STATUS_ACCEPTED);
     }
 
     /**
@@ -702,8 +765,10 @@ class Tube
 
         $this->setWebHookStatus(self::WEBHOOK_STATUS_NEVER_SEND, "Rejected tubes never sent");
 
-        // Specimen
-        $this->specimen->setStatus(Specimen::STATUS_REJECTED);
+        // Specimen may not exist yet, depending on Tube status
+        if ($this->specimen) {
+            $this->specimen->setStatus(Specimen::STATUS_REJECTED);
+        }
     }
 
     /**
@@ -719,6 +784,8 @@ class Tube
     }
 
     /**
+     * Current Tube.status values that can be newly assigned to a Tube.
+     *
      * @return string[]
      */
     public static function getValidStatuses(): array
@@ -728,8 +795,9 @@ class Tube
             'Label Printed' => self::STATUS_PRINTED,
             'Returned' => self::STATUS_RETURNED,
             'External Processing' => self::STATUS_EXTERNAL,
-            'Accepted' => self::STATUS_ACCEPTED,
+            'Results Available' => self::STATUS_RESULTS,
             'Rejected' => self::STATUS_REJECTED,
+            'Invalid' => "INVALID",
         ];
     }
 
@@ -746,20 +814,67 @@ class Tube
     }
 
     /**
-     * @param string        $status     Tube::WEBHOOK_STATUS_* constant.
-     * @param string|null   $message
+     * Does nothing when given value is valid, else throws an Exception.
+     *
+     * @param string $status Tube::WEBHOOK_STATUS_* constant value
      */
-    protected function setWebHookStatus(string $status, string $message = ''): void
+    public static function ensureValidWebHookStatus(string $status): void
     {
-        $validStatuses = [
-            self::WEBHOOK_STATUS_PENDING,
-            self::WEBHOOK_STATUS_QUEUED,
-            self::WEBHOOK_STATUS_SUCCESS,
-            self::WEBHOOK_STATUS_ERROR,
-            self::WEBHOOK_STATUS_NEVER_SEND,
-        ];
-        if (!in_array($status, $validStatuses)) {
+        if (!in_array($status, self::getValidWebHookStatuses())) {
             throw new \InvalidArgumentException('Invalid Web Hook Status');
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getValidWebHookStatuses(): array
+    {
+        return [
+            'Success' => self::WEBHOOK_STATUS_SUCCESS,
+            'Error' => self::WEBHOOK_STATUS_ERROR,
+            'Never Send' => self::WEBHOOK_STATUS_NEVER_SEND,
+            'Queued' => self::WEBHOOK_STATUS_QUEUED,
+            'Pending More Data' => self::WEBHOOK_STATUS_PENDING,
+        ];
+    }
+
+    /**
+     * Verify Tube has all data to be considered ready for sending to Tube web hooks.
+     *
+     * @throws \LogicException When required Tube data missing
+     */
+    public function verifyReadyForWebHook(): void
+    {
+        if (!$this->getId()) {
+            throw new \LogicException('Tube must have an ID');
+        }
+        if (null === $this->getAccessionId()) {
+            throw new \LogicException('Tube must have an Accession ID');
+        }
+        if (null === $this->getParticipantGroup()) {
+            throw new \LogicException(sprintf('Tube %s must have an associated Participant Group', $this->getAccessionId()));
+        }
+        if (null === $this->getParticipantGroup()->getExternalId()) {
+            throw new \LogicException(sprintf('Tube %s Participant Group %s must have an External ID', $this->getAccessionId(), $this->getParticipantGroup()->getTitle()));
+        }
+    }
+
+    /**
+     * Set web hook status and message why it was set.
+     *
+     * @param string        $status     Tube::WEBHOOK_STATUS_* constant
+     * @param string|null   $message
+     * @throws \LogicException When required Tube data missing
+     */
+    public function setWebHookStatus(string $status, string $message = ''): void
+    {
+        self::ensureValidWebHookStatus($status);
+
+        // If trying to set status that will send to web hooks,
+        // verify has all required data to do so
+        if ($status === self::WEBHOOK_STATUS_QUEUED) {
+            $this->verifyReadyForWebHook();
         }
 
         $this->webHookStatus = $status;
