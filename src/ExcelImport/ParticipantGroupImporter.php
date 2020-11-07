@@ -92,12 +92,12 @@ class ParticipantGroupImporter extends BaseExcelImporter
             return $this->processedGroups;
         }
 
-        $groupRepo = $this->em->getRepository(ParticipantGroup::class);
-
         $result = [
             'active' => [],
             'inactive' => [],
         ];
+
+        $dbGroupsByTitle = $this->getGroupsByTitle();
 
         for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
             // If all values are blank assume it's just empty excel data
@@ -126,8 +126,8 @@ class ParticipantGroupImporter extends BaseExcelImporter
             // If any field failed validation do not import the row
             if (!$rowOk) continue;
 
-            // Group record located by Title
-            $group = $groupRepo->findOneBy(['title' => $rawTitle]);
+            // Locate Group record by Title
+            $group = $dbGroupsByTitle[$rawTitle];
 
             // New group
             if (!$group) {
@@ -362,5 +362,56 @@ class ParticipantGroupImporter extends BaseExcelImporter
         }
 
         return true;
+    }
+
+    /**
+     * Find ParticipantGroup entity for all Titles given in Excel and index
+     * by Title. For example:
+     *
+     * [
+     *     'Blue' => ParticipantGroup, // Found a group with title === "Blue" in database
+     *     'Green' => null, // Cannot find group with title === "Green" in database
+     * ]
+     *
+     * @return array Keys are ParticipantGroup.title uploaded in Excel, Values are their ParticipantGroup entity
+     */
+    private function getGroupsByTitle(): array
+    {
+        // Get all Title cell values from Excel
+        $titles = [];
+        for ($rowNumber = $this->startingRow; $rowNumber <= $this->worksheet->getNumRows(); $rowNumber++) {
+            // Read from row
+            $titleInCell = $this->worksheet->getCellValue($rowNumber, $this->columnMap['title']);
+
+            // Skip blank cells/rows
+            if (!$titleInCell) continue;
+
+            $titles[] = $titleInCell;
+        }
+
+        // Split into chunks so querying is efficient for huge data sets
+        $titlesChunked = array_chunk($titles, 200, true);
+
+        $byTitle = array_reduce($titlesChunked, function(array $carry, array $titlesToQuery) {
+            // Set title => null for each Title we are querying,
+            // so the array key exists
+            foreach ($titlesToQuery as $title) {
+                $carry[$title] = null;
+            }
+
+            // Find all Groups with these Titles
+            $groups = $this->em->getRepository(ParticipantGroup::class)->findBy([
+                'title' => $titlesToQuery,
+            ]);
+
+            // Accumulate results by Title
+            foreach ($groups as $group) {
+                $carry[$group->getTitle()] = $group;
+            }
+
+            return $carry;
+        }, []);
+
+        return $byTitle;
     }
 }
