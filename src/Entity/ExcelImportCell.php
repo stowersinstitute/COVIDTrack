@@ -155,13 +155,4 @@ class ExcelImportCell
     {
         $this->value = $value;
     }
-
-    /**
-     * @deprecated No longer maintains Worksheet relationship
-     */
-    public function getWorksheet(): ExcelImportWorksheet
-    {
-        throw new \RuntimeException('ExcelImportCell->getWorksheet() deprecated');
-//        return $this->worksheet;
-    }
 }
