@@ -331,7 +331,8 @@ class ParticipantGroupController extends AbstractController
         $importer = new ParticipantGroupImporter(
             $em,
             $importingWorkbook->getFirstWorksheet(),
-            $idGenerator
+            $idGenerator,
+            $importingWorkbook->getFilename()
         );
 
         $processedGroups = $importer->process();
@@ -367,7 +368,8 @@ class ParticipantGroupController extends AbstractController
         $importer = new ParticipantGroupImporter(
             $em,
             $importingWorkbook->getFirstWorksheet(),
-            $idGenerator
+            $idGenerator,
+            $importingWorkbook->getFilename()
         );
         $importer->process(true);
 

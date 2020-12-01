@@ -36,11 +36,11 @@ class TubeCheckinSalivaImporter extends BaseExcelImporter
      */
     private $platesCache = [];
 
-    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet, ?string $filename)
     {
         $this->setEntityManager($em);
 
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         $this->columnMap = [
             'tubeId' => 'A',

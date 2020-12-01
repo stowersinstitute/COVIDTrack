@@ -28,7 +28,7 @@ class SpecimenResultQPCRImporterTest extends BaseDatabaseTestCase
         // XLSX file contains both Specimen.accessionId and Tube.accessionId
         // to ensure import can locate Specimen by either
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/viral-results-with-ct-amp-score.xlsx');
-        $importer = new SpecimenResultQPCRImporter($this->em, $workbook->getFirstWorksheet());
+        $importer = new SpecimenResultQPCRImporter($this->em, $workbook->getFirstWorksheet(), $workbook->getFilename());
 
         $processedResults = $importer->process(true);
 

@@ -19,7 +19,7 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
         ]);
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/specimen-antibody-results.xlsx');
-        $importer = new SpecimenResultAntibodyImporter($this->em, $workbook->getFirstWorksheet());
+        $importer = new SpecimenResultAntibodyImporter($this->em, $workbook->getFirstWorksheet(), $workbook->getFilename());
 
         $processedResults = $importer->process(true);
 

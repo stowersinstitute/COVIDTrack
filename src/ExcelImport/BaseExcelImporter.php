@@ -28,6 +28,9 @@ abstract class BaseExcelImporter
     /** @var ExcelImportWorksheet */
     protected $worksheet;
 
+    /** @var null|string */
+    protected $filename;
+
     /**
      * @var int Row to start import on
      */
@@ -60,9 +63,10 @@ abstract class BaseExcelImporter
     abstract public function process($commit = false);
 
 
-    public function __construct(ExcelImportWorksheet $worksheet)
+    public function __construct(ExcelImportWorksheet $worksheet, ?string $filename)
     {
         $this->worksheet = $worksheet;
+        $this->filename = $filename;
     }
 
     public static function createSpreadsheetFromPath(string $filepath): Spreadsheet
@@ -140,11 +144,7 @@ abstract class BaseExcelImporter
      */
     public function getFilename(): ?string
     {
-        if (!$this->worksheet) {
-            return null;
-        }
-
-        return $this->worksheet->getWorkbook()->getFilename();
+        return $this->filename;
     }
 
     /**
@@ -232,7 +232,7 @@ abstract class BaseExcelImporter
 
     public function getSourceLabel() : string
     {
-        return $this->worksheet->getWorkbook()->getFilename();
+        return (string) $this->filename;
     }
 
     public function getWorksheetTitle() : string

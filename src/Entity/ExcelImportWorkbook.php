@@ -60,9 +60,7 @@ class ExcelImportWorkbook
     /**
      * Worksheets associated with this workbook
      * @var ArrayCollection|ExcelImportWorksheet[]
-     *
-     * @ORM\OneToMany(targetEntity="ExcelImportWorksheet", cascade={"persist", "remove"}, orphanRemoval=true, mappedBy="workbook")
-     * @ORM\JoinColumn(name="worksheets", referencedColumnName="workbook_id")
+     * @ORM\Column(name="worksheets", type="array", nullable=true)
      */
     protected $worksheets;
 
@@ -143,19 +141,7 @@ class ExcelImportWorkbook
 
     public function addWorksheet(ExcelImportWorksheet $worksheet)
     {
-        if ($this->hasWorksheet($worksheet)) return;
-
         $this->worksheets->add($worksheet);
-        $worksheet->setWorkbook($this);
-    }
-
-    public function hasWorksheet(ExcelImportWorksheet $worksheet) : bool
-    {
-        foreach ($this->worksheets as $currWorksheet) {
-            if (EntityUtils::isSameEntity($currWorksheet, $worksheet)) return true;
-        }
-
-        return false;
     }
 
     /**

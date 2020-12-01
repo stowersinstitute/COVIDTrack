@@ -93,7 +93,8 @@ class TubeCheckinBloodController extends AbstractController
 
         $importer = new TubeCheckinBloodImporter(
             $this->getDoctrine()->getManager(),
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process();
@@ -125,7 +126,8 @@ class TubeCheckinBloodController extends AbstractController
 
         $importer = new TubeCheckinBloodImporter(
             $em,
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
         $importer->process(true);
         $output = $importer->getOutput();

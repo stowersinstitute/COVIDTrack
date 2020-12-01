@@ -15,7 +15,7 @@ class TubeImporterTest extends BaseDatabaseTestCase
     public function testProcess()
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-importer.xlsx');
-        $importer = new TubeImporter($workbook->getFirstWorksheet());
+        $importer = new TubeImporter($workbook->getFirstWorksheet(), $workbook->getFilename());
         $importer->setEntityManager($this->em);
 
         // This list should match what's in tube-importer.xlsx
@@ -46,7 +46,7 @@ class TubeImporterTest extends BaseDatabaseTestCase
     public function testErrorConditions()
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-importer-with-errors.xlsx');
-        $importer = new TubeImporter($workbook->getFirstWorksheet());
+        $importer = new TubeImporter($workbook->getFirstWorksheet(), $workbook->getFilename());
         $importer->setEntityManager($this->em);
 
         // This list should match what's in tube-importer.xlsx

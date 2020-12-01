@@ -1,62 +1,37 @@
 <?php
 
-
 namespace App\Entity;
-
 
 use App\Util\EntityUtils;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Represents an excel worksheet associated with a workbook
- *
- * @ORM\Entity
- * @ORM\Table(name="excel_import_worksheets")
  */
 class ExcelImportWorksheet
 {
     /**
-     * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
-
-    /**
      * @var string Title of the worksheet tab in the workbook
-     *
-     * @ORM\Column(name="title", type="string", length=255)
      */
     protected $title;
 
     /**
-     * @var ExcelImportWorkbook The workbook this sheet belongs to
-     *
-     * @ORM\ManyToOne(targetEntity="ExcelImportWorkbook", inversedBy="worksheets")
-     * @ORM\JoinColumn(name="workbook_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
-     */
-    protected $workbook;
-
-    /**
      * @var ExcelImportCell[] A cell within the worksheet
-     *
-     * @ORM\OneToMany(targetEntity="ExcelImportCell", cascade={"persist", "remove"}, orphanRemoval=true, mappedBy="worksheet")
-     * @ORM\JoinColumn(name="cells", referencedColumnName="uid")
-     * @ORM\OrderBy({"rowIndex" = "ASC"})
      */
     protected $cells;
 
     public function __construct(ExcelImportWorkbook $workbook, $title)
     {
-        $this->workbook = $workbook;
-        $this->workbook->addWorksheet($this);
-
         $this->title = $title;
 
         $this->cells = new ArrayCollection();
+
+        $workbook->addWorksheet($this);
+    }
+
+    public function getId(): int
+    {
+        return spl_object_id($this);
     }
 
     public function getNumRows()
@@ -111,24 +86,7 @@ class ExcelImportWorksheet
 
     public function addCell(ExcelImportCell $cell)
     {
-        $cell->setWorksheet($this);
-        if (!$this->hasCell($cell)) {
-            $this->cells->add($cell);
-        }
-    }
-
-    public function hasCell(ExcelImportCell $cell) : bool
-    {
-        foreach ($this->cells as $currCell) {
-            if (EntityUtils::isSameEntity($currCell, $cell)) return true;
-        }
-
-        return false;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
+        $this->cells->add($cell);
     }
 
     public function getTitle(): string
@@ -139,15 +97,5 @@ class ExcelImportWorksheet
     public function setTitle(string $title): void
     {
         $this->title = $title;
-    }
-
-    public function getWorkbook(): ExcelImportWorkbook
-    {
-        return $this->workbook;
-    }
-
-    public function setWorkbook(ExcelImportWorkbook $workbook): void
-    {
-        $this->workbook = $workbook;
     }
 }

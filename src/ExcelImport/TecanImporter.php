@@ -49,12 +49,12 @@ class TecanImporter extends BaseExcelImporter
      */
     private $seenTubes = [];
 
-    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet)
+    public function __construct(EntityManager $em, ExcelImportWorksheet $worksheet, ?string $filename)
     {
         $this->setEntityManager($em);
         $this->tubeRepo = $em->getRepository(Tube::class);
 
-        parent::__construct($worksheet);
+        parent::__construct($worksheet, $filename);
 
         $this->startingRow = self::STARTING_ROW; // Tecan output has 2 rows of header info
 

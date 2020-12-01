@@ -68,7 +68,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
 
         $importer = new SpecimenResultQPCRImporter(
             $this->getDoctrine()->getManager(),
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
 
         $importer->process();
@@ -102,7 +103,8 @@ class SpecimenResultQPCRExcelController extends AbstractController
 
         $importer = new SpecimenResultQPCRImporter(
             $em,
-            $importingWorkbook->getFirstWorksheet()
+            $importingWorkbook->getFirstWorksheet(),
+            $importingWorkbook->getFilename()
         );
         $importer->process(true);
 

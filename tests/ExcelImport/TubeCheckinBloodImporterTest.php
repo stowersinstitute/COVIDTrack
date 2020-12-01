@@ -17,7 +17,7 @@ class TubeCheckinBloodImporterTest extends BaseDatabaseTestCase
         ]);
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/tube-checkin-blood.xlsx');
-        $importer = new TubeCheckinBloodImporter($this->em, $workbook->getFirstWorksheet());
+        $importer = new TubeCheckinBloodImporter($this->em, $workbook->getFirstWorksheet(), $workbook->getFilename());
 
         $checkedInTubes = $importer->process(true);
 

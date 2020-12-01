@@ -18,7 +18,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
     {
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/participant-group-importer-new.xlsx');
         $idGenerator = $this->buildMockParticipantGroupIdGen();
-        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
+        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator, $workbook->getFilename());
 
         $groups = $importer->process(true);
 
@@ -172,7 +172,7 @@ class ParticipantGroupImporterTest extends BaseDatabaseTestCase
 
         $workbook = ExcelImportWorkbook::createFromFilePath(__DIR__ . '/workbooks/participant-group-importer-updating.xlsx');
         $idGenerator = $this->buildMockParticipantGroupIdGen();
-        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator);
+        $importer = new ParticipantGroupImporter($this->em, $workbook->getFirstWorksheet(), $idGenerator, $workbook->getFilename());
 
         // This list should match what's in XLSX file above.
         // Order not important
