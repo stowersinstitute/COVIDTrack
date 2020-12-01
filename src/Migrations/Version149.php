@@ -22,7 +22,6 @@ final class Version149 extends AbstractMigration
         $this->addSql('DROP TABLE excel_import_cells');
         $this->addSql('DROP TABLE excel_import_worksheets');
         $this->addSql('ALTER TABLE excel_import_workbooks ADD worksheets LONGTEXT DEFAULT NULL COMMENT \'(DC2Type:array)\'');
-        $this->addSql('ALTER TABLE excel_import_workbooks CHANGE excel_data worksheets LONGTEXT DEFAULT NULL COMMENT \'(DC2Type:array)\'');
     }
 
     public function down(Schema $schema) : void
