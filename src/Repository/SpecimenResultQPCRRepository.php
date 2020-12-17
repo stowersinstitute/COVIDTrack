@@ -117,10 +117,14 @@ class SpecimenResultQPCRRepository extends EntityRepository
             $qb->setParameter('f_conclusion', $data['conclusion']);
         }
 
+        $qb->andWhere('r.createdAt BETWEEN :f_createdAtStart AND :f_createdAtEnd');
         if (isset($data['createdAtOn'])) {
-            $qb->andWhere('r.createdAt BETWEEN :f_createdAtStart AND :f_createdAtEnd');
             $qb->setParameter('f_createdAtStart', DateUtils::dayFloor($data['createdAtOn']));
             $qb->setParameter('f_createdAtEnd', DateUtils::dayCeil($data['createdAtOn']));
+        } else {
+            // Only look back "recently"
+            $qb->setParameter('f_createdAtStart', DateUtils::dayFloor(new \DateTime('-45 days')));
+            $qb->setParameter('f_createdAtEnd', DateUtils::dayCeil(new \DateTime()));
         }
 
         return $qb->getQuery()->getResult();
