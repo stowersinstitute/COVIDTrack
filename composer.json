@@ -10,6 +10,7 @@
         "loostro/cryptomute": "^1.0",
         "phpoffice/phpspreadsheet": "^1.12",
         "sensio/framework-extra-bundle": "^5.1",
+        "sensiolabs/ansi-to-html": "^1.2",
         "stof/doctrine-extensions-bundle": "^1.4",
         "stowers-lims/zpl": "dev-master",
         "symfony/asset": "4.4.*",

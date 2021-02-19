@@ -182,7 +182,13 @@ Renders a top-level navigation node in the tree navigation.
                     iconClass: 'fa-upload',
                     route: 'antibody_excel_import'
                 },
-            ], ['ROLE_RESULTS_VIEW', 'ROLE_RESULTS_EDIT'])
+                {
+                    text: 'Publish Queued Results',
+                    mustHaveOneRoleToView: ['ROLE_WEB_HOOKS'],
+                    iconClass: 'fa-bullhorn',
+                    route: 'results_publish'
+                },
+            ], ['ROLE_RESULTS_VIEW', 'ROLE_RESULTS_EDIT', 'ROLE_WEB_HOOKS'])
         }}
         {{
             _self.treenode('Reports', 'fa-chart-bar', [
