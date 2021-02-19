@@ -109,7 +109,7 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $rowOk = $rowOk && $this->validateSpecimenId($rawSpecimenId, $rowNumber);
 
             // Check if the specimen was rejected. If so, update the specimen status and skip creating this result.
-            if ($this->isRejected($rowNumber)) {
+            if ($rowOk && $this->isRejected($rowNumber)) {
                 $specimen = $this->findSpecimen($rawSpecimenId);
                 $specimen->setStatus(Specimen::STATUS_REJECTED);
                 continue;
