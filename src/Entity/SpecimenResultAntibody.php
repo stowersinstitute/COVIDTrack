@@ -13,6 +13,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
  */
 class SpecimenResultAntibody extends SpecimenResult
 {
+    // When the specimen is rejected during assay.
+    // This is only for import process. While importing, SpecimenResults with this status will not be created.
+    const CONCLUSION_REJECTED = "REJECTED";
+
     // When result did not find evidence of antibodies in Specimen
     const SIGNAL_NEGATIVE_TEXT = "NEGATIVE";
     const SIGNAL_NEGATIVE_NUMBER = "0";

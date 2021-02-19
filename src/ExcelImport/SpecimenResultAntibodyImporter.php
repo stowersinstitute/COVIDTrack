@@ -108,6 +108,13 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
             $rawSpecimenId = $this->worksheet->getCellValue($rowNumber, $this->columnMap['specimenId']);
             $rowOk = $rowOk && $this->validateSpecimenId($rawSpecimenId, $rowNumber);
 
+            // Check if the specimen was rejected. If so, update the specimen status and skip creating this result.
+            if ($this->isRejected($rowNumber)) {
+                $specimen = $this->findSpecimen($rawSpecimenId);
+                $specimen->setStatus(Specimen::STATUS_REJECTED);
+                continue;
+            }
+
             $rawWellIdentifier = $this->worksheet->getCellValue($rowNumber, $this->columnMap['wellIdentifier']);
             $rowOk = $rowOk && $this->validateWellIdentifier($rawWellIdentifier, $rowNumber);
 
@@ -381,5 +388,10 @@ class SpecimenResultAntibodyImporter extends BaseExcelImporter
         }
 
         return true;
+    }
+
+    private function isRejected(int $rowNumber): bool
+    {
+        return strtoupper($this->worksheet->getCellValue($rowNumber, $this->columnMap['conclusion'])) === SpecimenResultAntibody::CONCLUSION_REJECTED;
     }
 }
