@@ -127,6 +127,14 @@ class SpecimenResultAntibodyImporterTest extends BaseDatabaseTestCase
             $expected = $signalMap[$specimenId];
             $this->assertSame($expected, $result->getSignal(), $specimenId . ' has wrong Signal');
         }
+
+        // Verify Rejected has no result created and specimen status is updated
+        /** @var Specimen $rejectedSpecimen */
+        $rejectedSpecimen = $this->em->getRepository(Specimen::class)->findOneByAccessionId('SpecimenAntibodyResults10');
+        $this->assertSame(Specimen::STATUS_REJECTED, $rejectedSpecimen->getStatus(), 'A rejected result should set the specimen to rejected');
+        foreach ($processedResults as $result) {
+            $this->assertNotEquals('SpecimenAntibodyResults10', $result->getSpecimenAccessionId(), 'A rejected result should not create a result record');
+        }
     }
 
     private function findFirstSpecimenWellPlate($accessionId): WellPlate

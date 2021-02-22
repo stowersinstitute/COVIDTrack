@@ -2,16 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\Specimen;
 use App\Entity\SpecimenResult;
 use App\Entity\SpecimenResultQPCR;
-use App\Form\SpecimenResultQPCRFilterForm;
-use App\Form\QPCRResultsForm;
 use Doctrine\ORM\EntityManagerInterface;
+use SensioLabs\AnsiConverter\AnsiToHtmlConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -73,6 +77,52 @@ class SpecimenResultController extends AbstractController
 
         return new JsonResponse([
             'success' => true,
+        ]);
+    }
+
+    /**
+     * @Route(path="/publish", methods={"GET", "POST"}, name="results_publish")
+     * @throws \Exception
+     */
+    public function publish(Request $request, KernelInterface $kernel): Response
+    {
+
+        $this->denyAccessUnlessGranted('ROLE_WEB_HOOKS');
+
+        $form = $this->createFormBuilder()
+            ->add('send', SubmitType::class, [
+                'label' => 'Publish Results',
+                'attr' => ['class' => 'btn-primary center-block'],
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $commandOutput = null;
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
+
+            $input = new ArrayInput([
+                'command' => 'app:webhook:results',
+            ]);
+
+            $output = new BufferedOutput(
+                OutputInterface::VERBOSITY_NORMAL,
+                true // true for decorated
+            );
+
+            $application->run($input, $output);
+
+            $converter = new AnsiToHtmlConverter();
+            $content = $output->fetch();
+            $commandOutput = $converter->convert($content);
+        }
+
+        return $this->render('results/publish-results.twig', [
+            'form' => $form->createView(),
+            'command_output' => $commandOutput,
         ]);
     }
 
