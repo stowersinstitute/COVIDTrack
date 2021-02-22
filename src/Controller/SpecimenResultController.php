@@ -106,6 +106,7 @@ class SpecimenResultController extends AbstractController
 
             $input = new ArrayInput([
                 'command' => 'app:webhook:results',
+                '-v' => null,
             ]);
 
             $output = new BufferedOutput(
