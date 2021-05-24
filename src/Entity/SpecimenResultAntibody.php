@@ -205,7 +205,7 @@ class SpecimenResultAntibody extends SpecimenResult
     {
         // Mark this record as needing to be sent to Web Hooks when Conclusion has changed
         if ($this->signal !== $signal) {
-            $this->setWebHookQueued('Field published to web hooks changed');
+            $this->setWebHookQueued('Signal value changed. Queuing for webhooks.');
         }
 
         $this->signal = $signal;
