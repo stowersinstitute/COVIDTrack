@@ -92,6 +92,21 @@ class SpecimenResultAntibodyRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Returns all Antibody Results that have a signal value
+     *
+     * @return SpecimenResultAntibody[]
+     */
+    public function findAllWithSignal(): array
+    {
+        return $this->createDefaultQueryBuilder()
+            ->andWhere("r.signal IS NOT NULL")
+            ->andWhere("r.isFailure = FALSE")
+            ->orderBy('r.id', "asc")
+            ->getQuery()
+            ->execute();
+    }
+
     protected function createDefaultQueryBuilder($alias = 'r')
     {
         return $this->createQueryBuilder($alias)
