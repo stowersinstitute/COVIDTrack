@@ -81,7 +81,7 @@ class NewResultsWebHookRequest extends WebHookRequest
             // NOTE: Adding fields below will require code that also sets
             // SpecimenResult.webHookStatus = SpecimenResult::WEBHOOK_STATUS_PENDING
             // when that field on the entity changes. See SpecimenResult->setConclusion()
-            return [
+            $result = [
                 'id' => $r->getId(),
                 'type' => $type,
                 'result' => $r->getConclusion(),
@@ -96,6 +96,12 @@ class NewResultsWebHookRequest extends WebHookRequest
                     'accession_id' => $tubeAccessionId,
                 ],
             ];
+
+            if ($r instanceof SpecimenResultAntibody) {
+                $result['signal'] = $r->getSignal();
+            }
+
+            return $result;
         }, array_values($this->results));
     }
 }
