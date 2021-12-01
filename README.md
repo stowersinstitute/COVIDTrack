@@ -73,7 +73,7 @@ Such as configuring for LDAP or setup.php script. Edit `docker-compose.yml` in e
 Instead of using Docker, develop with tools installed directly on the host machine:
 
  * [PHP 7.1.3+](https://www.php.net/) configured with support for sqlite
- * [Composer](https://getcomposer.org/)
+ * [Composer](https://getcomposer.org/) v1
  * [Symfony CLI application](https://symfony.com/download)
  * [SQLite](https://www.sqlite.org/download.html)
  * [`yarn` command](https://yarnpkg.com/getting-started/install)

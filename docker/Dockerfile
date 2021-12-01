@@ -1,5 +1,5 @@
 # start with the official Composer image and name it
-FROM composer AS composer
+FROM composer:1 AS composer
 # continue with the official PHP image
 FROM php:7.4-fpm
 # copy the Composer PHAR from the Composer image into the PHP image
