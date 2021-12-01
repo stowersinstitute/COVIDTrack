@@ -49,11 +49,13 @@
         "dama/doctrine-test-bundle": "^6.3",
         "doctrine/doctrine-fixtures-bundle": "^3.3",
         "liip/test-fixtures-bundle": "^1.0.0",
-        "symfony/debug-pack": "*",
+        "symfony/debug-bundle": "4.4.*",
         "symfony/maker-bundle": "^1.15",
         "symfony/phpunit-bridge": "^5.0",
-        "symfony/profiler-pack": "*",
-        "symfony/test-pack": "*"
+        "symfony/stopwatch": "4.4.*",
+        "symfony/test-pack": "*",
+        "symfony/var-dumper": "4.4.*",
+        "symfony/web-profiler-bundle": "4.4.*"
     },
     "config": {
         "platform": {
